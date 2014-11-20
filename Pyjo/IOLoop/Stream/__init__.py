@@ -1,11 +1,11 @@
 from errno import EAGAIN, ECONNRESET, EINTR, EPIPE, EWOULDBLOCK
 import socket
 
-import Pyjo.EventEmmiter
+import Pyjo.EventEmitter
 import Pyjo.IOLoop
 
 
-class object(Pyjo.EventEmmiter.object):
+class object(Pyjo.EventEmitter.object):
     reactor = None
 
     _handle = None

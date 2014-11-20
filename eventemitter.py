@@ -1,7 +1,7 @@
-import Pyjo.EventEmmiter
+import Pyjo.EventEmitter
 
 
-class Cat(Pyjo.EventEmmiter.object):
+class Cat(Pyjo.EventEmitter.object):
     def poke(self):
         self.emit('roar', 3)
 

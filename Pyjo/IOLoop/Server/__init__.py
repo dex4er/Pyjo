@@ -1,10 +1,10 @@
 import socket
 
-import Pyjo.EventEmmiter
+import Pyjo.EventEmitter
 import Pyjo.IOLoop
 
 
-class object(Pyjo.EventEmmiter.object):
+class object(Pyjo.EventEmitter.object):
     multi_accept = 50
     reactor = None
     handle = None

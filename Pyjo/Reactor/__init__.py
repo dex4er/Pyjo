@@ -2,14 +2,14 @@ import os
 import select
 import socket
 
-import Pyjo.EventEmmiter
+import Pyjo.EventEmitter
 
 
 class Error(Exception):
     pass
 
 
-class object(Pyjo.EventEmmiter.object):
+class object(Pyjo.EventEmitter.object):
 
     def again(self):
         raise Error('Method "again" not implemented by subclass')

@@ -1,11 +1,11 @@
 from socket import AF_INET, IPPROTO_TCP, TCP_NODELAY, SOCK_STREAM
 import socket
 
-import Pyjo.EventEmmiter
+import Pyjo.EventEmitter
 import Pyjo.IOLoop
 
 
-class object(Pyjo.EventEmmiter.object):
+class object(Pyjo.EventEmitter.object):
     reactor = None
     handle = None
 

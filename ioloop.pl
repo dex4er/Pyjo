@@ -1,5 +1,4 @@
 use v5.14;
-use lib '/home/dexter/perl5/lib/perl5';
 
 use Mojo::IOLoop;
 
