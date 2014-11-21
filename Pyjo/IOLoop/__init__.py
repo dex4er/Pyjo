@@ -1,5 +1,10 @@
+"""
+Pyjo.IOLoop
+"""
+
 import importlib
 import os
+import weakref
 
 import Pyjo.Base
 import Pyjo.IOLoop.Client
@@ -30,7 +35,7 @@ class object(Pyjo.Base.object):
 
     _accept = None
     _accepts = None
-    _stop = None
+    __stop = None
     __accepting = False
 
     def __init__(self):
@@ -65,6 +70,7 @@ class object(Pyjo.Base.object):
 
         return cid
 
+    # TODO @classmethod
     def client(self, cb, **kwargs):
         # Make sure timers are running
         self._recurring()
@@ -72,14 +78,16 @@ class object(Pyjo.Base.object):
         cid = self._id()
         client = Pyjo.IOLoop.Client.object()
         self._connections[cid] = {'client': client}
-        # weaken client.reactor(self.reactor).reactor
+        client.reactor = weakref.proxy(self.reactor)
 
-        # weaken self
+        self = weakref.proxy(self)
+
         def connect_cb(client, handle):
-            del self._connections[cid]['client']
-            stream = Pyjo.IOLoop.Stream.object(handle)
-            self._stream(stream, cid)
-            cb(self, None, stream)
+            if dir(self):
+                del self._connections[cid]['client']
+                stream = Pyjo.IOLoop.Stream.object(handle)
+                self._stream(stream, cid)
+                cb(self, None, stream)
 
         client.on('connect', connect_cb)
 
@@ -89,7 +97,9 @@ class object(Pyjo.Base.object):
         return cid
 
     def recurring(self, after, cb):
-        self._timer('recurring', after, cb)
+        if DEBUG:
+            warn("Recurring after {0} cb {1}".format(after, cb))
+        return self._timer('recurring', after, cb)
 
     def remove(self, cid):
         c = self._connections[cid]
@@ -142,7 +152,7 @@ class object(Pyjo.Base.object):
         return self._stream(stream, self._id())
 
     def timer(self, after, cb):
-        self._timer('timer', after, cb)
+        return self._timer('timer', after, cb)
 
     def _accepting(self):
         # Check if we have acceptors
@@ -201,13 +211,18 @@ class object(Pyjo.Base.object):
 
     def _recurring(self):
         if not self._accept:
-            def cb(loop):
+
+            def cb_accepting(loop):
                 loop._accepting()
-            self._accept = self.recurring(self.accept_interval, cb)  # ._accepting())
-        if not self._stop:
-            def cb(loop):
-                warn(loop)
-            # self._stop = self.recurring(1, cb) #_stop)
+
+            self._accept = self.recurring(self.accept_interval, cb_accepting)
+
+        if not self.__stop:
+
+            def cb_stop(loop):
+                loop._stop()
+
+            self.__stop = self.recurring(1, cb_stop)
 
     def _remove(self, _id):
         # Timer
@@ -240,34 +255,34 @@ class object(Pyjo.Base.object):
             return
 
         if self._accept:
-            a = self._accept
+            self._remove(self._accept)
             self._accept = None
-            self._remove(a)
 
-        if self._stop:
-            a = self._stop
-            self._stop = None
-            self._remove(a)
+        if self.__stop:
+            self._remove(self.__stop)
+            self.__stop = None
 
     def _stream(self, stream, cid):
         # Make sure timers are running
         self._recurring()
 
-        def close_cb(stream):
-            if self:
-                self._remove(cid)
-
         # Connect stream with reactor
         self._connections[cid] = {'stream': stream}
-        # TODO weaken $stream->reactor($self->reactor)->{reactor};
-        # TODO weaken $self;
+        stream.reactor = weakref.proxy(self.reactor)
+        self = weakref.proxy(self)
+
+        def close_cb(stream):
+            if dir(self):
+                self._remove(cid)
+
         stream.on('close', close_cb)
         stream.start()
 
         return cid
 
     def _timer(self, method, after, cb):
-        getattr(self.reactor, method)(after, lambda: cb(self))
+        self = weakref.proxy(self)
+        return getattr(self.reactor, method)(after, lambda: cb(self))
 
 
 loop = object()

@@ -5,12 +5,13 @@ class C:
     _ref = None
 
     def __del__(self):
-        print "__del__ " + str(self)
+        print("__del__ " + str(self))
 
     def ref(self, value=None):
         if value is None:
             return self._ref
-        self._ref = weakref.proxy(value)
+        self._ref = value
+        self._ref = weakref.proxy(self._ref)
         return self
 
 def test():
@@ -20,8 +21,9 @@ def test():
     a.ref(b)
     b.ref(a)
 
-    print "{0}.ref = {1}".format(a, a.ref)
-    print "{0}.ref = {1}".format(b, b.ref)
+    print("{0}.ref = {1}".format(a, a.ref()))
+    print("{0}.ref = {1}".format(b, b.ref()))
 
 
 test()
+print("END")

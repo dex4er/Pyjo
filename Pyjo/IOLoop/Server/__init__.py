@@ -25,7 +25,9 @@ class object(Pyjo.EventEmitter.object):
         self.handle = s
 
     def start(self):
-        self.reactor.io(self.handle, lambda(loop): self._accept())
+        def ready_cb():
+            self._accept()
+        self.reactor.io(self.handle, ready_cb)
 
     def stop(self):
         self.reactor.remove(self.handle)
@@ -33,7 +35,6 @@ class object(Pyjo.EventEmitter.object):
     def _accept(self):
         # Greedy accept
         for _ in range(0, self.multi_accept):
-            print("before accept")
             try:
                 (handle, unused) = self.handle.accept()
             except:

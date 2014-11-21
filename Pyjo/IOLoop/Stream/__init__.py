@@ -1,5 +1,10 @@
+"""
+Pyjo.IOLoop.Stream
+"""
+
 from errno import EAGAIN, ECONNRESET, EINTR, EPIPE, EWOULDBLOCK
 import socket
+import weakref
 
 import Pyjo.EventEmitter
 import Pyjo.IOLoop
@@ -19,12 +24,17 @@ class object(Pyjo.EventEmitter.object):
         self.reactor = Pyjo.IOLoop.singleton().reactor
         self._handle = handle
 
+    def __del__(self):
+        self.close()
+
     def close(self):
         reactor = self.reactor
         if not reactor:
             return
 
-        handle = self.timeout(0)._handle
+        self.timeout(0)
+        handle = self._handle
+        self._handle = None
         if not handle:
             return
 
@@ -60,14 +70,16 @@ class object(Pyjo.EventEmitter.object):
             self._paused = False
             return reactor.watch(self.handle, 1, self.is_writting())
 
-        # TODO weaken $self
-        def cb(is_write):
-            if is_write:
-                self._write()
-            else:
-                self._read()
+        self = weakref.proxy(self)
 
-        reactor.io(self.timeout(self._timeout)._handle, cb)
+        def cb_read_write(is_write):
+            if dir(self):
+                if is_write:
+                    self._write()
+                else:
+                    self._read()
+
+        reactor.io(self.timeout(self._timeout)._handle, cb_read_write)
 
     def stop(self):
         if not self._paused:
@@ -82,8 +94,19 @@ class object(Pyjo.EventEmitter.object):
         if self._timer:
             reactor.remove(self._timer)
             self._timer = None
+
         self._timeout = timeout
-        self._timer = reactor.timer(timeout, lambda: self.emit('timeout').close())
+
+        if not timeout:
+            return
+
+        self = weakref.proxy(self)
+
+        def timeout_cb():
+            if bool(dir(self)):
+                self.emit('timeout').close()
+
+        self._timer = reactor.timer(timeout, timeout_cb)
 
         return self
 

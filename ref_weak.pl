@@ -20,11 +20,16 @@ use Scalar::Util 'weaken';
     }
 }
 
-my $a = C->new;
-my $b = C->new;
+sub test {
+    my $a = C->new;
+    my $b = C->new;
 
-$a->ref($b);
-$b->ref($a);
+    $a->ref($b);
+    $b->ref($a);
 
-warn $a->{ref};
-warn $b->{ref};
+    warn "$a\->ref = $a->{ref}";
+    warn "$b\->ref = $b->{ref}";
+}
+
+test();
+say "END";

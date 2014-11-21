@@ -4,7 +4,10 @@ import socket
 import time
 
 import Pyjo.Reactor
-from Pyjo.Util import md5_sum, rand, steady_time
+from Pyjo.Util import md5_sum, rand, steady_time, warn
+
+
+DEBUG = os.environ.get('PYJO_REACTOR_DEBUG', 1)
 
 
 class object(Pyjo.Reactor.object):
@@ -18,7 +21,10 @@ class object(Pyjo.Reactor.object):
         timer['time'] = steady_time() + timer['after']
 
     def io(self, handle, cb):
-        self._io[handle.fileno()] = {'cb': cb}
+        fd = handle.fileno()
+        self._io[fd] = {'cb': cb}
+        if DEBUG:
+            warn("Reactor adding io[{0}] = {1}".format(fd, self._io[fd]))
         return self.watch(handle, 1, 1)
 
     def is_running(self):
@@ -66,8 +72,10 @@ class object(Pyjo.Reactor.object):
 
             # Timers (time should not change in between timers)
             now = steady_time()
-            for (tid, t) in self._timers.items():
-                if t['time'] > now:
+            for tid in list(self._timers):
+                t = self._timers.get(tid)
+
+                if not t or t['time'] > now:
                     continue
 
                 # Recurring timer
@@ -80,6 +88,8 @@ class object(Pyjo.Reactor.object):
 
                 i += 1
                 if t['cb']:
+                    if DEBUG:
+                        warn("Timer {0} = {1}".format(tid, t))
                     self._sandbox("Timer {0}".format(tid), t['cb'])
 
         # Restore state if necessary
@@ -91,9 +101,11 @@ class object(Pyjo.Reactor.object):
 
     def remove(self, remove):
         if remove is None:
-            return
+            raise RuntimeWarning("Reactor remove None")
 
         if isinstance(remove, str):
+            if DEBUG:
+                warn("Reactor remove timer[{0}]".format(remove))
             if remove in self._timers:
                 timer = self._timers[remove]
                 del self._timers[remove]
@@ -101,16 +113,21 @@ class object(Pyjo.Reactor.object):
             return False
 
         if not isinstance(remove, socket._socketobject):
-            raise RuntimeError, remove
+            raise RuntimeError(remove)
 
         try:
-            self._poll().unregister(remove.fileno())
+            fd = remove.fileno()
+            if DEBUG:
+                warn("Reactor remove io[{0}]".format(fd))
+            self._poll().unregister(fd)
             if remove.fileno() in self._io:
-                io = self._io[remove.fileno()]
-                del self._io[remove.fileno()]
+                io = self._io[fd]
+                del self._io[fd]
                 return True
             remove.close()
         except socket.error:
+            if DEBUG:
+                warn("Reactor remove io {0} but is already closed".format(remove))
             pass
         return False
 
@@ -161,5 +178,8 @@ class object(Pyjo.Reactor.object):
         if recurring:
             timer['recurring'] = after
         self._timers[tid] = timer
+
+        if DEBUG:
+            warn("Reactor adding timer[{0}] = {1}".format(tid, self._timers[tid]))
 
         return tid

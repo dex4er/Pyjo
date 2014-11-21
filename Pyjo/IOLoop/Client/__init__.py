@@ -1,5 +1,6 @@
 from socket import AF_INET, IPPROTO_TCP, TCP_NODELAY, SOCK_STREAM
 import socket
+import weakref
 
 import Pyjo.EventEmitter
 import Pyjo.IOLoop
@@ -14,20 +15,24 @@ class object(Pyjo.EventEmitter.object):
     def __init__(self):
         self.reactor = Pyjo.IOLoop.singleton().reactor
 
+    def __del__(self):
+        self._cleanup()
+
     def connect(self, **kwargs):
         reactor = self.reactor
         timeout = kwargs.get('timeout', 10)
 
         # Timeout
-        # weaken self
+        self = weakref.proxy(self)
         def timeout_cb():
-            self.emit('error', 'Connect timeout')
+            if dir(self):
+                self.emit('error', 'Connect timeout')
 
         self._timer = reactor.timer(timeout, timeout_cb)
 
         # Blocking name resolution
         def resolved_cb():
-            if self:
+            if dir(self):
                 self._connect(**kwargs)
 
         return reactor.next_tick(resolved_cb)
@@ -35,7 +40,7 @@ class object(Pyjo.EventEmitter.object):
     def _cleanup(self):
         reactor = self.reactor
 
-        if not reactor:
+        if not dir(reactor):
             return
 
         if self._timer:
@@ -62,8 +67,13 @@ class object(Pyjo.EventEmitter.object):
         handle.setblocking(0)
 
         # Wait for handle to become writable
-        # weaken self
-        self.reactor.io(handle, lambda(loop): self._ready(**kwargs)).watch(handle, 0, 1)
+        self = weakref.proxy(self)
+
+        def ready_cb(loop):
+            if dir(self):
+                self._ready(**kwargs)
+
+        self.reactor.io(handle, ready_cb).watch(handle, 0, 1)
 
     def _ready(self, **kwargs):
         # Retry or handle exceptions
@@ -82,7 +92,9 @@ class object(Pyjo.EventEmitter.object):
         return port
 
     def start(self):
-        self.reactor.io(self.handle, lambda(loop): self._accept())
+        def ready_cb():
+            self._accept()
+        self.reactor.io(self.handle, ready_cb)
 
     def stop(self):
         self.reactor.remove(self.handle)

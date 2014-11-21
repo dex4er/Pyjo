@@ -2,7 +2,7 @@ class C:
     _ref = None
 
     def __del__(self):
-        print "__del__ " + str(self)
+        print("__del__ " + str(self))
 
     def ref(self, value=None):
         if value is None:
@@ -18,8 +18,9 @@ def test():
     a.ref(b)
     b.ref(a)
 
-    print "{0}.ref = {1}".format(a, a.ref)
-    print "{0}.ref = {1}".format(b, b.ref)
+    print("{0}.ref = {1}".format(a, a.ref()))
+    print("{0}.ref = {1}".format(b, b.ref()))
 
 
 test()
+print("END")

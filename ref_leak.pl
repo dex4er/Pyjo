@@ -29,3 +29,4 @@ sub test {
 }
 
 test();
+say "END";
