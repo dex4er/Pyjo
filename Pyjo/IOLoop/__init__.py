@@ -5,11 +5,12 @@ Pyjo.IOLoop
 import importlib
 import weakref
 
-import Pyjo.Base
 import Pyjo.IOLoop.Client
 import Pyjo.IOLoop.Server
 import Pyjo.IOLoop.Stream
 import Pyjo.Reactor
+
+from Pyjo.Base import class_object
 from Pyjo.Util import getenv, md5_sum, steady_time, rand, warn
 
 
@@ -20,7 +21,8 @@ class Error(Exception):
     pass
 
 
-class object(Pyjo.Base.object):
+@class_object
+class _(Pyjo.Base.object):
     accept_interval = 0.025
     lock = None
     unlock = None
@@ -39,8 +41,7 @@ class object(Pyjo.Base.object):
 
     def __init__(self):
         module = importlib.import_module(Pyjo.Reactor.detect())
-        reactor_class = getattr(module, 'object')
-        self.reactor = reactor_class()
+        self.reactor = module.object()
 
         if DEBUG:
             warn("-- Reactor initialized ({0})".format(self.reactor))

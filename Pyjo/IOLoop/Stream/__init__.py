@@ -2,15 +2,19 @@
 Pyjo.IOLoop.Stream
 """
 
-from errno import EAGAIN, ECONNRESET, EINTR, EPIPE, EWOULDBLOCK
 import socket
 import weakref
+
+from errno import EAGAIN, ECONNRESET, EINTR, EPIPE, EWOULDBLOCK
 
 import Pyjo.EventEmitter
 import Pyjo.IOLoop
 
+from Pyjo.Base import class_object
 
-class object(Pyjo.EventEmitter.object):
+
+@class_object
+class _(Pyjo.EventEmitter.object):
     reactor = None
 
     _handle = None

@@ -7,13 +7,16 @@ import socket
 import time
 
 import Pyjo.Reactor
+
+from Pyjo.Base import class_object
 from Pyjo.Util import getenv, md5_sum, rand, steady_time, warn
 
 
 DEBUG = getenv('PYJO_REACTOR_DEBUG', 0)
 
 
-class object(Pyjo.Reactor.object):
+@class_object
+class _(Pyjo.Reactor.object):
     _running = False
     __poll = None
     _timers = {}

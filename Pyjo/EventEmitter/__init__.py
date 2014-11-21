@@ -2,19 +2,21 @@
 Pyjo.EventEmitter
 """
 
-import os
+import Pyjo.Base
 
-from Pyjo.Util import warn
+from Pyjo.Base import class_object
+from Pyjo.Util import getenv, warn
 
 
-DEBUG = os.environ.get('PYJO_EVENTEMITTER_DEBUG', 0)
+DEBUG = getenv('PYJO_EVENTEMITTER_DEBUG', 0)
 
 
 class Error(Exception):
     pass
 
 
-class object:
+@class_object
+class _(Pyjo.Base.object):
     _events = {}
 
     def catch(self, *args):

@@ -1,17 +1,15 @@
 import Pyjo.IOLoop
 
 
-def a(loop):
+def print_cb(loop):
     print("A")
 
 
-def fail(loop):
-    print("OOPS!")
-    # loop.reactor.emit('error', 'BOOM!');
+def stop_cb(loop):
     loop.stop()
 
 
-Pyjo.IOLoop.recurring(0, a)
-Pyjo.IOLoop.timer(1, fail)
+Pyjo.IOLoop.recurring(0, print_cb)
+Pyjo.IOLoop.timer(1, stop_cb)
 
 Pyjo.IOLoop.start()

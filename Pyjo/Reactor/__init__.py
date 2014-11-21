@@ -6,6 +6,8 @@ import select
 import socket
 
 import Pyjo.EventEmitter
+
+from Pyjo.Base import class_object
 from Pyjo.Util import getenv
 
 
@@ -13,7 +15,8 @@ class Error(Exception):
     pass
 
 
-class object(Pyjo.EventEmitter.object):
+@class_object
+class _(Pyjo.EventEmitter.object):
 
     def again(self):
         raise Error('Method "again" not implemented by subclass')

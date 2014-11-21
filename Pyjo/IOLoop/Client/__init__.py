@@ -2,19 +2,23 @@
 Pyjo.IOLoop.Client
 """
 
-from socket import AF_INET, IPPROTO_TCP, TCP_NODELAY, SOCK_STREAM
 import socket
 import weakref
 
+from socket import AF_INET, IPPROTO_TCP, TCP_NODELAY, SOCK_STREAM
+
 import Pyjo.EventEmitter
 import Pyjo.IOLoop
+
+from Pyjo.Base import class_object
 from Pyjo.Util import getenv, warn
 
 
 DEBUG = getenv('PYJO_IOLOOP_CLIENT_DEBUG', 0)
 
 
-class object(Pyjo.EventEmitter.object):
+@class_object
+class _(Pyjo.EventEmitter.object):
     reactor = None
     handle = None
 

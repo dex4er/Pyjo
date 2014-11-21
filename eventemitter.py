@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import Pyjo.EventEmitter
 
 
@@ -8,7 +10,7 @@ class Cat(Pyjo.EventEmitter.object):
 
 def roar(name, times):
     for _ in range(0, times):
-        print 'RAWR!'
+        print('RAWR!')
 
 
 tiger = Cat()
