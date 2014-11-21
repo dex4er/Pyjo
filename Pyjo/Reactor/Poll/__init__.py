@@ -22,6 +22,8 @@ class object(Pyjo.Reactor.object):
 
     def io(self, handle, cb):
         fd = handle.fileno()
+        if not isinstance(fd, int):
+            fd = fd.channel
         self._io[fd] = {'cb': cb}
         if DEBUG:
             warn("Reactor adding io[{0}] = {1}".format(fd, self._io[fd]))
@@ -57,6 +59,8 @@ class object(Pyjo.Reactor.object):
             if self._io:
                 events = poll.poll(timeout)
                 for fd, flag in events:
+                    if not isinstance(fd, int):
+                        fd = fd.fileno().channel
                     if flag & (select.POLLIN | select.POLLPRI | select.POLLHUP | select.POLLERR):
                         io = self._io[fd]
                         i += 1
@@ -112,14 +116,13 @@ class object(Pyjo.Reactor.object):
                 return True
             return False
 
-        if not isinstance(remove, socket._socketobject):
-            raise RuntimeError(remove)
-
         try:
             fd = remove.fileno()
+            if not isinstance(fd, int):
+                fd = fd.channel
             if DEBUG:
                 warn("Reactor remove io[{0}]".format(fd))
-            self._poll().unregister(fd)
+            self._poll().unregister(remove)
             if remove.fileno() in self._io:
                 io = self._io[fd]
                 del self._io[fd]

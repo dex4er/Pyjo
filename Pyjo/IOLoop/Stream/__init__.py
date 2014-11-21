@@ -16,7 +16,7 @@ class object(Pyjo.EventEmitter.object):
     _handle = None
     _grafeful = False
     _timeout = 15
-    _buffer = ''
+    _buffer = b''
     _timer = None
     _paused = False
 
