@@ -1,8 +1,12 @@
-import os
+"""
+Pyjo.Reactor
+"""
+
 import select
 import socket
 
 import Pyjo.EventEmitter
+from Pyjo.Util import getenv
 
 
 class Error(Exception):
@@ -15,7 +19,7 @@ class object(Pyjo.EventEmitter.object):
         raise Error('Method "again" not implemented by subclass')
 
     def detect(self):
-        return os.environ.get('PYJO_REACTOR', 'Pyjo.Reactor.Poll')
+        return getenv('PYJO_REACTOR', 'Pyjo.Reactor.Poll')
 
     def io(self):
         raise Error('Method "io" not implemented by subclass')

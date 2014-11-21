@@ -1,13 +1,16 @@
-import os
+"""
+Pyjo.Reactor.Poll
+"""
+
 import select
 import socket
 import time
 
 import Pyjo.Reactor
-from Pyjo.Util import md5_sum, rand, steady_time, warn
+from Pyjo.Util import getenv, md5_sum, rand, steady_time, warn
 
 
-DEBUG = os.environ.get('PYJO_REACTOR_DEBUG', 1)
+DEBUG = getenv('PYJO_REACTOR_DEBUG', 0)
 
 
 class object(Pyjo.Reactor.object):
@@ -22,11 +25,9 @@ class object(Pyjo.Reactor.object):
 
     def io(self, handle, cb):
         fd = handle.fileno()
-        if not isinstance(fd, int):
-            fd = fd.channel
         self._io[fd] = {'cb': cb}
         if DEBUG:
-            warn("Reactor adding io[{0}] = {1}".format(fd, self._io[fd]))
+            warn("-- Reactor adding io[{0}] = {1}".format(fd, self._io[fd]))
         return self.watch(handle, 1, 1)
 
     def is_running(self):
@@ -59,8 +60,6 @@ class object(Pyjo.Reactor.object):
             if self._io:
                 events = poll.poll(timeout)
                 for fd, flag in events:
-                    if not isinstance(fd, int):
-                        fd = fd.fileno().channel
                     if flag & (select.POLLIN | select.POLLPRI | select.POLLHUP | select.POLLERR):
                         io = self._io[fd]
                         i += 1
@@ -93,7 +92,7 @@ class object(Pyjo.Reactor.object):
                 i += 1
                 if t['cb']:
                     if DEBUG:
-                        warn("Timer {0} = {1}".format(tid, t))
+                        warn("-- Alarm timer {0} = {1}".format(tid, t))
                     self._sandbox("Timer {0}".format(tid), t['cb'])
 
         # Restore state if necessary
@@ -105,11 +104,14 @@ class object(Pyjo.Reactor.object):
 
     def remove(self, remove):
         if remove is None:
-            raise RuntimeWarning("Reactor remove None")
+            raise RuntimeWarning("-- Reactor remove None")
 
         if isinstance(remove, str):
             if DEBUG:
-                warn("Reactor remove timer[{0}]".format(remove))
+                if remove in self._timers:
+                    warn("-- Reactor remove timer[{0}] = {1}".format(remove, self._timers[remove]))
+                else:
+                    warn("-- Reactor remove timer[{0}] = None".format(remove))
             if remove in self._timers:
                 timer = self._timers[remove]
                 del self._timers[remove]
@@ -118,19 +120,18 @@ class object(Pyjo.Reactor.object):
 
         try:
             fd = remove.fileno()
-            if not isinstance(fd, int):
-                fd = fd.channel
             if DEBUG:
-                warn("Reactor remove io[{0}]".format(fd))
+                if fd in self._io:
+                    warn("-- Reactor remove io[{0}]".format(fd))
             self._poll().unregister(remove)
-            if remove.fileno() in self._io:
+            if fd in self._io:
                 io = self._io[fd]
                 del self._io[fd]
                 return True
             remove.close()
         except socket.error:
             if DEBUG:
-                warn("Reactor remove io {0} but is already closed".format(remove))
+                warn("-- Reactor remove io {0} already closed".format(remove))
             pass
         return False
 
@@ -183,6 +184,6 @@ class object(Pyjo.Reactor.object):
         self._timers[tid] = timer
 
         if DEBUG:
-            warn("Reactor adding timer[{0}] = {1}".format(tid, self._timers[tid]))
+            warn("-- Reactor adding timer[{0}] = {1}".format(tid, self._timers[tid]))
 
         return tid

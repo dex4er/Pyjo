@@ -3,7 +3,6 @@ Pyjo.IOLoop
 """
 
 import importlib
-import os
 import weakref
 
 import Pyjo.Base
@@ -11,10 +10,10 @@ import Pyjo.IOLoop.Client
 import Pyjo.IOLoop.Server
 import Pyjo.IOLoop.Stream
 import Pyjo.Reactor
-from Pyjo.Util import md5_sum, steady_time, rand, warn
+from Pyjo.Util import getenv, md5_sum, steady_time, rand, warn
 
 
-DEBUG = os.environ.get('PYJO_IOLOOP_DEBUG', 1)
+DEBUG = getenv('PYJO_IOLOOP_DEBUG', 0)
 
 
 class Error(Exception):
@@ -98,7 +97,7 @@ class object(Pyjo.Base.object):
 
     def recurring(self, after, cb):
         if DEBUG:
-            warn("Recurring after {0} cb {1}".format(after, cb))
+            warn("-- Recurring after {0} cb {1}".format(after, cb))
         return self._timer('recurring', after, cb)
 
     def remove(self, cid):

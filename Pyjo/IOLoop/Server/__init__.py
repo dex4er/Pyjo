@@ -1,3 +1,7 @@
+"""
+Pyjo.IOLoop.Server
+"""
+
 import socket
 
 import Pyjo.EventEmitter

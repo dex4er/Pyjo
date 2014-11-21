@@ -1,9 +1,17 @@
+"""
+Pyjo.IOLoop.Client
+"""
+
 from socket import AF_INET, IPPROTO_TCP, TCP_NODELAY, SOCK_STREAM
 import socket
 import weakref
 
 import Pyjo.EventEmitter
 import Pyjo.IOLoop
+from Pyjo.Util import getenv, warn
+
+
+DEBUG = getenv('PYJO_IOLOOP_CLIENT_DEBUG', 0)
 
 
 class object(Pyjo.EventEmitter.object):
@@ -13,9 +21,13 @@ class object(Pyjo.EventEmitter.object):
     _timer = None
 
     def __init__(self):
+        if DEBUG:
+            warn("-- Method {0}.__init__".format(self))
         self.reactor = Pyjo.IOLoop.singleton().reactor
 
     def __del__(self):
+        if DEBUG:
+            warn("-- Method {0}.__del__".format(self))
         self._cleanup()
 
     def connect(self, **kwargs):
@@ -44,9 +56,11 @@ class object(Pyjo.EventEmitter.object):
             return
 
         if self._timer:
+            reactor.remove(self._timer)
             self._timer = None
 
         if self.handle:
+            reactor.remove(self.handle)
             self.handle = None
 
         return self

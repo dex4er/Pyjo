@@ -1,9 +1,13 @@
+"""
+Pyjo.EventEmitter
+"""
+
 import os
 
 from Pyjo.Util import warn
 
 
-DEBUG = os.environ.get('PYJO_EVENTEMITTER_DEBUG', 1)
+DEBUG = os.environ.get('PYJO_EVENTEMITTER_DEBUG', 0)
 
 
 class Error(Exception):

@@ -1,9 +1,18 @@
+"""
+Pyjo.Util
+"""
+
 from __future__ import print_function
 
 import hashlib
+import os
 import random
 import sys
 import time
+
+
+def getenv(name, default):
+    return os.environ.get(name, default)
 
 
 def md5_sum(string):

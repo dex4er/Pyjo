@@ -9,8 +9,7 @@ Mojo::IOLoop->recurring(0, sub {
 Mojo::IOLoop->timer(1, sub {
     my ($loop) = @_;
     say "OOPS!";
-    $loop->reactor->emit(error => 'BOOM!');
-    #$loop->stop();
+    $loop->stop();
 });
 
 Mojo::IOLoop->start();
