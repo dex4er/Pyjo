@@ -10,7 +10,7 @@ import Pyjo.IOLoop.Server
 import Pyjo.IOLoop.Stream
 import Pyjo.Reactor
 
-from Pyjo.Base import class_object
+from Pyjo.Base import modulemethod, moduleobject, moduleinstance
 from Pyjo.Util import getenv, md5_sum, steady_time, rand, warn
 
 
@@ -21,8 +21,9 @@ class Error(Exception):
     pass
 
 
-@class_object
-class _(Pyjo.Base.object):
+@moduleinstance
+@moduleobject
+class Pyjo_IOLoop(Pyjo.Base.object):
     accept_interval = 0.025
     lock = None
     unlock = None
@@ -54,6 +55,7 @@ class _(Pyjo.Base.object):
 
         return None
 
+    @modulemethod
     def acceptor(self, acceptor):
         # Find acceptor for id
         if isinstance(acceptor, str):
@@ -70,7 +72,7 @@ class _(Pyjo.Base.object):
 
         return cid
 
-    # TODO @classmethod
+    @modulemethod
     def client(self, cb, **kwargs):
         # Make sure timers are running
         self._recurring()
@@ -96,11 +98,25 @@ class _(Pyjo.Base.object):
         client.connect(**kwargs)
         return cid
 
+    @modulemethod
+    def is_running(self):
+        return self.reactor.is_running()
+
+    @modulemethod
+    def next_tick(self, cb):
+        return self.reactor.next_tick(cb)
+
+    @modulemethod
+    def one_tick(self):
+        return self.reactor.one_tick()
+
+    @modulemethod
     def recurring(self, after, cb):
         if DEBUG:
             warn("-- Recurring after {0} cb {1}".format(after, cb))
         return self._timer('recurring', after, cb)
 
+    @modulemethod
     def remove(self, cid):
         c = self._connections[cid]
         if c:
@@ -109,9 +125,7 @@ class _(Pyjo.Base.object):
                 return stream.close_gracefully()
         self._remove(cid)
 
-    def is_running(self):
-        return self.reactor.is_running()
-
+    @modulemethod
     def server(self, cb, **kwargs):
         server = Pyjo.IOLoop.Server.object()
 
@@ -124,17 +138,21 @@ class _(Pyjo.Base.object):
 
         return self.acceptor(server)
 
+    @modulemethod
     def singleton(self):
-        return loop
+        return instance
 
+    @modulemethod
     def start(self):
         if self.is_running():
             raise Error('Pyjo.IOLoop already running')
         self.reactor.start()
 
+    @modulemethod
     def stop(self):
         self.reactor.stop()
 
+    @modulemethod
     def stream(self, stream):
         # Find stream for id
         if isinstance(stream, str):
@@ -151,6 +169,7 @@ class _(Pyjo.Base.object):
 
         return self._stream(stream, self._id())
 
+    @modulemethod
     def timer(self, after, cb):
         return self._timer('timer', after, cb)
 
@@ -283,46 +302,3 @@ class _(Pyjo.Base.object):
     def _timer(self, method, after, cb):
         self = weakref.proxy(self)
         return getattr(self.reactor, method)(after, lambda: cb(self))
-
-
-loop = object()
-
-
-def client(cb, **kwargs):
-    return loop.client(cb, **kwargs)
-
-
-def is_running():
-    return loop.is_running()
-
-
-def remove(cid):
-    loop.remove(cid)
-
-
-def server(cb, *args, **kwargs):
-    return loop.server(cb, *args, **kwargs)
-
-
-def singleton():
-    return loop
-
-
-def start():
-    loop.start()
-
-
-def stop():
-    loop.stop()
-
-
-def stream(stream):
-    loop.stream(stream)
-
-
-def timer(*args):
-    loop.timer(*args)
-
-
-def recurring(*args):
-    loop.recurring(*args)

@@ -4,7 +4,7 @@ Pyjo.EventEmitter
 
 import Pyjo.Base
 
-from Pyjo.Base import class_object
+from Pyjo.Base import moduleobject
 from Pyjo.Util import getenv, warn
 
 
@@ -15,7 +15,7 @@ class Error(Exception):
     pass
 
 
-@class_object
+@moduleobject
 class _(Pyjo.Base.object):
     _events = {}
 

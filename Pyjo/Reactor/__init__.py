@@ -7,7 +7,7 @@ import socket
 
 import Pyjo.EventEmitter
 
-from Pyjo.Base import class_object
+from Pyjo.Base import moduleobject
 from Pyjo.Util import getenv
 
 
@@ -15,7 +15,7 @@ class Error(Exception):
     pass
 
 
-@class_object
+@moduleobject
 class _(Pyjo.EventEmitter.object):
 
     def again(self):

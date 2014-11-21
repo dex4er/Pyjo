@@ -10,10 +10,10 @@ from errno import EAGAIN, ECONNRESET, EINTR, EPIPE, EWOULDBLOCK
 import Pyjo.EventEmitter
 import Pyjo.IOLoop
 
-from Pyjo.Base import class_object
+from Pyjo.Base import moduleobject
 
 
-@class_object
+@moduleobject
 class _(Pyjo.EventEmitter.object):
     reactor = None
 

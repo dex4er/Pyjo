@@ -10,14 +10,14 @@ from socket import AF_INET, IPPROTO_TCP, TCP_NODELAY, SOCK_STREAM
 import Pyjo.EventEmitter
 import Pyjo.IOLoop
 
-from Pyjo.Base import class_object
+from Pyjo.Base import moduleobject
 from Pyjo.Util import getenv, warn
 
 
 DEBUG = getenv('PYJO_IOLOOP_CLIENT_DEBUG', 0)
 
 
-@class_object
+@moduleobject
 class _(Pyjo.EventEmitter.object):
     reactor = None
     handle = None
