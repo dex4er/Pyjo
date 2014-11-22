@@ -2,10 +2,11 @@
 Pyjo.EventEmitter
 """
 
-import Pyjo.Base
-
-from Pyjo.Base import moduleobject
+from Pyjo.Base import *
 from Pyjo.Util import getenv, warn
+
+
+__all__ = ['Pyjo_EventEmitter']
 
 
 DEBUG = getenv('PYJO_EVENTEMITTER_DEBUG', 0)
@@ -15,8 +16,7 @@ class Error(Exception):
     pass
 
 
-@moduleobject
-class Pyjo_EventEmitter(Pyjo.Base.object):
+class Pyjo_EventEmitter(Pyjo_Base):
     _events = {}
 
     def catch(self, *args):

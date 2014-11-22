@@ -5,29 +5,21 @@ Pyjo.Reactor
 import select
 import socket
 
-import Pyjo.EventEmitter
-
-from Pyjo.Base import moduleobject
-from Pyjo.Util import getenv
-
-
-class Error(Exception):
-    pass
+from Pyjo.Base import *
+from Pyjo.EventEmitter import *
+from Pyjo.Util import getenv, not_implemented
 
 
-def not_implemented(_method):
-    def stub(*args, **kwargs):
-        raise Error('Method "{0}" not implemented by subclass'.format(_method.__name__))
-    return stub
+__all__ = ['Pyjo_Reactor']
 
 
-@moduleobject
-class Pyjo_Reactor(Pyjo.EventEmitter.object):
+class Pyjo_Reactor(Pyjo_EventEmitter):
 
     @not_implemented
     def again(self):
         pass
 
+    @classmethod
     def detect(self):
         return getenv('PYJO_REACTOR', 'Pyjo.Reactor.Poll')
 
@@ -81,5 +73,5 @@ class Pyjo_Reactor(Pyjo.EventEmitter.object):
         pass
 
 
-def detect():
-    return object().detect()
+class Error(Exception):
+    pass

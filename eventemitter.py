@@ -1,9 +1,9 @@
 from __future__ import print_function
 
-import Pyjo.EventEmitter
+from Pyjo.EventEmitter import *
 
 
-class Cat(Pyjo.EventEmitter.object):
+class Cat(Pyjo_EventEmitter):
     def poke(self):
         self.emit('roar', 3)
 

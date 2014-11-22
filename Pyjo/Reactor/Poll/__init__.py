@@ -8,17 +8,18 @@ import time
 
 from select import POLLERR, POLLHUP, POLLIN, POLLOUT, POLLPRI
 
-import Pyjo.Reactor
+from Pyjo.Reactor import *
 
-from Pyjo.Base import moduleobject
 from Pyjo.Util import getenv, md5_sum, rand, steady_time, warn
+
+
+__all__ = ['Pyjo_Reactor_Poll']
 
 
 DEBUG = getenv('PYJO_REACTOR_DEBUG', 0)
 
 
-@moduleobject
-class Pyjo_Reactor_Poll(Pyjo.Reactor.object):
+class Pyjo_Reactor_Poll(Pyjo_Reactor):
     _running = False
     __poll = None
     _timers = {}

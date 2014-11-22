@@ -7,14 +7,15 @@ import weakref
 
 from errno import EAGAIN, ECONNRESET, EINTR, EPIPE, EWOULDBLOCK
 
-import Pyjo.EventEmitter
 import Pyjo.IOLoop
 
-from Pyjo.Base import moduleobject
+from Pyjo.EventEmitter import *
 
 
-@moduleobject
-class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
+__all__ = ['Pyjo_IOLoop_Stream']
+
+
+class Pyjo_IOLoop_Stream(Pyjo_EventEmitter):
     reactor = None
 
     _handle = None

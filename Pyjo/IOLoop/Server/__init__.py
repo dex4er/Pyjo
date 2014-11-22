@@ -4,14 +4,15 @@ Pyjo.IOLoop.Server
 
 import socket
 
-import Pyjo.EventEmitter
 import Pyjo.IOLoop
 
-from Pyjo.Base import moduleobject
+from Pyjo.EventEmitter import *
 
 
-@moduleobject
-class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
+__all__ = ['Pyjo_IOLoop_Server']
+
+
+class Pyjo_IOLoop_Server(Pyjo_EventEmitter):
     multi_accept = 50
     reactor = None
     handle = None
