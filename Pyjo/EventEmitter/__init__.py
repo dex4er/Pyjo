@@ -16,7 +16,7 @@ class Error(Exception):
 
 
 @moduleobject
-class _(Pyjo.Base.object):
+class Pyjo_EventEmitter(Pyjo.Base.object):
     _events = {}
 
     def catch(self, *args):

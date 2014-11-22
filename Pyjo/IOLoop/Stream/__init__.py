@@ -14,7 +14,7 @@ from Pyjo.Base import moduleobject
 
 
 @moduleobject
-class _(Pyjo.EventEmitter.object):
+class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
     reactor = None
 
     _handle = None
@@ -142,10 +142,10 @@ class _(Pyjo.EventEmitter.object):
         self.emit('error', e).close()
 
     def _read(self):
-        buffer = bytearray(131072)
-        view = memoryview(buffer)
+        readbuffer = bytearray(131072)
+        view = memoryview(readbuffer)
         try:
-            read = self._handle.recv_into(buffer, 131072)
+            read = self._handle.recv_into(readbuffer, 131072)
         except socket.error as e:
             self._error(e)
         if not read:

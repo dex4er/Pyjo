@@ -2,3 +2,5 @@
 Pyjo
 """
 
+class Pyjo:
+    pass

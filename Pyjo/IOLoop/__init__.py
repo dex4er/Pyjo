@@ -5,12 +5,13 @@ Pyjo.IOLoop
 import importlib
 import weakref
 
+import Pyjo.Base
 import Pyjo.IOLoop.Client
 import Pyjo.IOLoop.Server
 import Pyjo.IOLoop.Stream
 import Pyjo.Reactor
 
-from Pyjo.Base import modulemethod, moduleobject, moduleinstance
+from Pyjo.Base import modulemethod, moduleobject
 from Pyjo.Util import getenv, md5_sum, steady_time, rand, warn
 
 
@@ -21,7 +22,9 @@ class Error(Exception):
     pass
 
 
-@moduleinstance
+instance = None
+
+
 @moduleobject
 class Pyjo_IOLoop(Pyjo.Base.object):
     accept_interval = 0.025

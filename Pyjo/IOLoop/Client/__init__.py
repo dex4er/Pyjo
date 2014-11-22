@@ -18,7 +18,7 @@ DEBUG = getenv('PYJO_IOLOOP_CLIENT_DEBUG', 0)
 
 
 @moduleobject
-class _(Pyjo.EventEmitter.object):
+class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
     reactor = None
     handle = None
 

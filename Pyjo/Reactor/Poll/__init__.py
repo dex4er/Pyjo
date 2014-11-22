@@ -6,6 +6,8 @@ import select
 import socket
 import time
 
+from select import POLLERR, POLLHUP, POLLIN, POLLOUT, POLLPRI
+
 import Pyjo.Reactor
 
 from Pyjo.Base import moduleobject
@@ -16,7 +18,7 @@ DEBUG = getenv('PYJO_REACTOR_DEBUG', 0)
 
 
 @moduleobject
-class _(Pyjo.Reactor.object):
+class Pyjo_Reactor_Poll(Pyjo.Reactor.object):
     _running = False
     __poll = None
     _timers = {}
@@ -63,11 +65,11 @@ class _(Pyjo.Reactor.object):
             if self._io:
                 events = poll.poll(timeout)
                 for fd, flag in events:
-                    if flag & (select.POLLIN | select.POLLPRI | select.POLLHUP | select.POLLERR):
+                    if flag & (POLLIN | POLLPRI | POLLHUP | POLLERR):
                         io = self._io[fd]
                         i += 1
                         self._sandbox('Read', io['cb'], 0)
-                    elif flag & (select.POLLOUT):
+                    elif flag & (POLLOUT):
                         io = self._io[fd]
                         i += 1
                         self._sandbox('Write', io['cb'], 1)
@@ -102,8 +104,8 @@ class _(Pyjo.Reactor.object):
         if self._running:
             self._running = running
 
-    def recurring(self, *args, **kwargs):
-        return self._timer(True, *args, **kwargs)
+    def recurring(self, after, cb):
+        return self._timer(True, after, cb)
 
     def remove(self, remove):
         if remove is None:
@@ -116,7 +118,6 @@ class _(Pyjo.Reactor.object):
                 else:
                     warn("-- Reactor remove timer[{0}] = None".format(remove))
             if remove in self._timers:
-                timer = self._timers[remove]
                 del self._timers[remove]
                 return True
             return False
@@ -128,15 +129,19 @@ class _(Pyjo.Reactor.object):
                     warn("-- Reactor remove io[{0}]".format(fd))
             self._poll().unregister(remove)
             if fd in self._io:
-                io = self._io[fd]
                 del self._io[fd]
                 return True
-            remove.close()
+            # remove.close()  # TODO remove?
         except socket.error:
             if DEBUG:
                 warn("-- Reactor remove io {0} already closed".format(remove))
             pass
         return False
+
+    def reset(self):
+        self._io = {}
+        self.__poll = None
+        self._timers = {}
 
     def start(self):
         self._running = True
@@ -151,13 +156,13 @@ class _(Pyjo.Reactor.object):
 
     def watch(self, handle, read, write):
         poll = self._poll()
-        # TODO poll.unregister(handle)
+        # TODO poll.unregister(handle) ?
         if read and write:
-            poll.register(handle, select.POLLIN | select.POLLPRI | select.POLLOUT)
+            poll.register(handle, POLLIN | POLLPRI | POLLOUT)
         elif read:
-            poll.register(handle, select.POLLIN | select.POLLPRI)
+            poll.register(handle, POLLIN | POLLPRI)
         elif write:
-            poll.register(handle, select.POLLOUT)
+            poll.register(handle, POLLOUT)
         return self
 
     def _poll(self):

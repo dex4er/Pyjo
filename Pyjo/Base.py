@@ -5,14 +5,6 @@ Pyjo.Base
 import importlib
 
 
-def moduleinstance(_object):
-    _object.__name__ = 'object'
-    module_name = _object.__module__
-    module = importlib.import_module(module_name)
-    module.instance = None #_object()
-    return _object
-
-
 def modulemethod(_method):
     module_name = _method.__module__
     method_name = _method.__name__
@@ -34,5 +26,5 @@ def moduleobject(_object):
 
 
 @moduleobject
-class _:
+class Pyjo_Base:
     pass

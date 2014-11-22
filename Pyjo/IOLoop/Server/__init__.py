@@ -11,7 +11,7 @@ from Pyjo.Base import moduleobject
 
 
 @moduleobject
-class _(Pyjo.EventEmitter.object):
+class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
     multi_accept = 50
     reactor = None
     handle = None

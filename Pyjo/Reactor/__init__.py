@@ -15,17 +15,25 @@ class Error(Exception):
     pass
 
 
-@moduleobject
-class _(Pyjo.EventEmitter.object):
+def not_implemented(_method):
+    def stub(*args, **kwargs):
+        raise Error('Method "{0}" not implemented by subclass'.format(_method.__name__))
+    return stub
 
+
+@moduleobject
+class Pyjo_Reactor(Pyjo.EventEmitter.object):
+
+    @not_implemented
     def again(self):
-        raise Error('Method "again" not implemented by subclass')
+        pass
 
     def detect(self):
         return getenv('PYJO_REACTOR', 'Pyjo.Reactor.Poll')
 
+    @not_implemented
     def io(self):
-        raise Error('Method "io" not implemented by subclass')
+        pass
 
     # This may break at some point in the future, but is worth it for performance
     def is_readable(self, handle):
@@ -33,20 +41,44 @@ class _(Pyjo.EventEmitter.object):
         p.register(handle.fileno(), select.POLLIN | select.POLLPRI)
         return bool(p.poll(0))
 
+    @not_implemented
     def is_running(self):
-        raise Error('Method "is_running" not implemented by subclass')
+        pass
 
     def next_tick(self, cb):
         self.timer(0, cb)
 
+    @not_implemented
+    def one_tick(self):
+        pass
+
+    @not_implemented
+    def recurring(self, after, cb):
+        pass
+
+    @not_implemented
+    def remove(self, remove):
+        pass
+
+    @not_implemented
+    def reset(self):
+        pass
+
+    @not_implemented
     def start(self):
-        raise Error('Method "start" not implemented by subclass')
+        pass
 
+    @not_implemented
     def stop(self):
-        raise Error('Method "stop" not implemented by subclass')
+        pass
 
+    @not_implemented
     def timer(self, after, cb):
-        raise Error('Method "timer" not implemented by subclass')
+        pass
+
+    @not_implemented
+    def watch(self, handle, read, write):
+        pass
 
 
 def detect():
