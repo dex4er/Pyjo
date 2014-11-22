@@ -25,7 +25,7 @@ instance = None
 
 
 class Pyjo_IOLoop(Pyjo_Base):
-    accept_interval = 0.025
+    accept_interval = 0.025  # TODO parametrized
     lock = None
     unlock = None
     max_accepts = 0

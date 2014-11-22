@@ -148,9 +148,9 @@ class Pyjo_IOLoop_Stream(Pyjo_EventEmitter):
         try:
             read = self._handle.recv_into(readbuffer, 131072)
         except socket.error as e:
-            self._error(e)
+            return self._error(e)
         if not read:
-            self.close()
+            return self.close()
         view = view[:read]
         self.emit('read', view.tobytes())._again()
 
