@@ -1,6 +1,0 @@
-"""
-Pyjo
-"""
-
-class Pyjo:
-    pass
