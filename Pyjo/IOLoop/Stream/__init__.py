@@ -143,16 +143,14 @@ class Pyjo_IOLoop_Stream(Pyjo_EventEmitter):
         self.emit('error', e).close()
 
     def _read(self):
-        readbuffer = bytearray(131072)
-        view = memoryview(readbuffer)
+        readbuffer = b''
         try:
-            read = self._handle.recv_into(readbuffer, 131072)
+            readbuffer = self._handle.recv(131072)
         except socket.error as e:
             return self._error(e)
-        if not read:
+        if not readbuffer:
             return self.close()
-        view = view[:read]
-        self.emit('read', view.tobytes())._again()
+        self.emit('read', readbuffer)._again()
 
     def _write(self):
         handle = self._handle
