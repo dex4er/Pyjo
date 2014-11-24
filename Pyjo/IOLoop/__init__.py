@@ -203,7 +203,7 @@ class Pyjo_IOLoop(Pyjo_Base):
 
         # Check if multi-accept is desirable
         multi = self.multi_accept
-        for a in self._acceptors.itervalues():
+        for a in self._acceptors.values():
             a.multi_accept = 1 if max_conns < multi else multi
             a.start()
         self.__accepting = True

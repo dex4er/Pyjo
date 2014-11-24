@@ -63,8 +63,9 @@ def client_cb(loop, err, stream):
     # Write request
     stream.write("GET {0} HTTP/1.1\x0d\x0aHost: {1}:{2}\x0d\x0a\x0d\x0a".format(url.path, url.host, url.port or 80).encode('ascii'))
 
+
 for i in range(n):
-    cid = Pyjo.IOLoop.client(address=url.host, port=(url.port or 80), cb=client_cb)
+    Pyjo.IOLoop.client(address=url.host, port=(url.port or 80), cb=client_cb)
 
 while not Pyjo.IOLoop.is_running():
     Pyjo.IOLoop.start()

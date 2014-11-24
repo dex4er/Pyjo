@@ -22,7 +22,7 @@ def server_cb(loop, stream, cid):
         # Check if we got start line and headers (no body support)
         if buffers[cid].find(b"\x0d\x0a\x0d\x0a") >= 0:
 
-            if buffers[cid].find("\x0d\x0aConnection: Keep-Alive\x0d\x0a") >= 0:
+            if buffers[cid].find(b"\x0d\x0aConnection: Keep-Alive\x0d\x0a") >= 0:
                 keepalive = True
             else:
                 keepalive = False
@@ -32,7 +32,7 @@ def server_cb(loop, stream, cid):
             response = b"HTTP/1.1 200 OK\x0d\x0aContent-Length: 0\x0d\x0a"
             if keepalive:
                 response += b"Connection: keep-alive\x0d\x0a"
-            response += "\x0d\x0a"
+            response += b"\x0d\x0a"
 
             stream.write(response)
 

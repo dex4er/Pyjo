@@ -64,7 +64,7 @@ class Pyjo_Reactor_Poll(Pyjo_Reactor):
 
             # I/O
             if self._io:
-                events = poll.poll(timeout)
+                events = poll.poll(timeout * 1000)
                 for fd, flag in events:
                     if flag & (POLLIN | POLLPRI | POLLHUP | POLLERR):
                         io = self._io[fd]
@@ -98,7 +98,7 @@ class Pyjo_Reactor_Poll(Pyjo_Reactor):
                 i += 1
                 if t['cb']:
                     if DEBUG:
-                        warn("-- Alarm timer {0} = {1}".format(tid, t))
+                        warn("-- Alarm timer[{0}] = {1}".format(tid, t))
                     self._sandbox("Timer {0}".format(tid), t['cb'])
 
         # Restore state if necessary
@@ -156,14 +156,15 @@ class Pyjo_Reactor_Poll(Pyjo_Reactor):
         return self._timer(False, *args, **kwargs)
 
     def watch(self, handle, read, write):
+        mode = 0
+        if read:
+            mode |= POLLIN | POLLPRI
+        if write:
+            mode |= POLLOUT
+
         poll = self._poll()
-        # TODO poll.unregister(handle) ?
-        if read and write:
-            poll.register(handle, POLLIN | POLLPRI | POLLOUT)
-        elif read:
-            poll.register(handle, POLLIN | POLLPRI)
-        elif write:
-            poll.register(handle, POLLOUT)
+        poll.register(handle, mode)
+
         return self
 
     def _poll(self):
