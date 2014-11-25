@@ -11,17 +11,13 @@ from Pyjo.IOLoop.Server import *
 from Pyjo.IOLoop.Stream import *
 from Pyjo.Reactor.Poll import *
 
-from Pyjo.Util import (getenv, lazysingletonmethod, md5_sum, steady_time,
-                       rand, warn)
+from Pyjo.Util import getenv, md5_sum, steady_time, rand, warn
 
 
 __all__ = ['Pyjo_IOLoop']
 
 
 DEBUG = getenv('PYJO_IOLOOP_DEBUG', 0)
-
-
-instance = None
 
 
 class Pyjo_IOLoop(Pyjo_Base):
@@ -59,7 +55,6 @@ class Pyjo_IOLoop(Pyjo_Base):
 
         return None
 
-    @lazysingletonmethod
     def acceptor(self, acceptor):
         # Find acceptor for id
         if isinstance(acceptor, str):
@@ -76,7 +71,6 @@ class Pyjo_IOLoop(Pyjo_Base):
 
         return cid
 
-    @lazysingletonmethod
     def client(self, cb, **kwargs):
         # Make sure timers are running
         self._recurring()
@@ -102,25 +96,20 @@ class Pyjo_IOLoop(Pyjo_Base):
         client.connect(**kwargs)
         return cid
 
-    @lazysingletonmethod
     def is_running(self):
         return self.reactor.is_running()
 
-    @lazysingletonmethod
     def next_tick(self, cb):
         return self.reactor.next_tick(cb)
 
-    @lazysingletonmethod
     def one_tick(self):
         return self.reactor.one_tick()
 
-    @lazysingletonmethod
     def recurring(self, after, cb):
         if DEBUG:
             warn("-- Recurring after {0} cb {1}".format(after, cb))
         return self._timer('recurring', after, cb)
 
-    @lazysingletonmethod
     def remove(self, cid):
         c = self._connections[cid]
         if c:
@@ -129,7 +118,6 @@ class Pyjo_IOLoop(Pyjo_Base):
                 return stream.close_gracefully()
         self._remove(cid)
 
-    @lazysingletonmethod
     def server(self, cb, **kwargs):
         server = Pyjo_IOLoop_Server()
 
@@ -142,22 +130,17 @@ class Pyjo_IOLoop(Pyjo_Base):
 
         return self.acceptor(server)
 
-    @lazysingletonmethod
-    @staticmethod
-    def singleton():
+    def singleton(self):
         return instance
 
-    @lazysingletonmethod
     def start(self):
         if self.is_running():
             raise Error('Pyjo.IOLoop already running')
         self.reactor.start()
 
-    @lazysingletonmethod
     def stop(self):
         self.reactor.stop()
 
-    @lazysingletonmethod
     def stream(self, stream):
         # Find stream for id
         if isinstance(stream, str):
@@ -174,7 +157,6 @@ class Pyjo_IOLoop(Pyjo_Base):
 
         return self._stream(stream, self._id())
 
-    @lazysingletonmethod
     def timer(self, after, cb):
         if DEBUG:
             warn("-- Timer after {0} cb {1}".format(after, cb))
@@ -313,3 +295,65 @@ class Pyjo_IOLoop(Pyjo_Base):
 
 class Error(Exception):
     pass
+
+
+instance = None
+
+
+def _instance():
+    global instance
+    if instance is None:
+        instance = Pyjo_IOLoop()
+    return instance
+
+
+def acceptor(acceptor):
+    return _instance().acceptor(acceptor)
+
+
+def client(cb, **kwargs):
+    return _instance().client(cb, **kwargs)
+
+
+def is_running():
+    return _instance().is_running()
+
+
+def next_tick(cb):
+    return _instance().next_tick(cb)
+
+
+def one_tick():
+    return _instance().one_tick()
+
+
+def recurring(after, cb):
+    return _instance().recurring(after, cb)
+
+
+def remove(cid):
+    return _instance().remove(cid)
+
+
+def server(cb, **kwargs):
+    return _instance().server(cb, **kwargs)
+
+
+def singleton():
+    return _instance()
+
+
+def start():
+    return _instance().start()
+
+
+def stop():
+    return _instance().stop()
+
+
+def stream(stream):
+    return _instance().stream(stream)
+
+
+def timer(after, cb):
+    return _instance().timer(after, cb)
