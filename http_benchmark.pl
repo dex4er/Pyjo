@@ -42,7 +42,7 @@ for (1 .. $n) {
         });
 
         # Write request
-        $stream->write("GET @{[ $url->path ]} HTTP/1.1\x0d\x0aHost: @{[ $url->host ]}:@{[ $url->port || 80 ]}\x0d\x0a\x0d\x0a");
+        $stream->write("GET @{[ $url->path->to_string ]} HTTP/1.1\x0d\x0aHost: @{[ $url->host ]}:@{[ $url->port || 80 ]}\x0d\x0a\x0d\x0a");
     });
 
 }
