@@ -297,63 +297,56 @@ class Error(Exception):
     pass
 
 
-instance = None
-
-
-def _instance():
-    global instance
-    if instance is None:
-        instance = Pyjo_IOLoop()
-    return instance
+instance = Pyjo_IOLoop()
 
 
 def acceptor(acceptor):
-    return _instance().acceptor(acceptor)
+    return instance.acceptor(acceptor)
 
 
 def client(cb, **kwargs):
-    return _instance().client(cb, **kwargs)
+    return instance.client(cb, **kwargs)
 
 
 def is_running():
-    return _instance().is_running()
+    return instance.is_running()
 
 
 def next_tick(cb):
-    return _instance().next_tick(cb)
+    return instance.next_tick(cb)
 
 
 def one_tick():
-    return _instance().one_tick()
+    return instance.one_tick()
 
 
 def recurring(after, cb):
-    return _instance().recurring(after, cb)
+    return instance.recurring(after, cb)
 
 
 def remove(cid):
-    return _instance().remove(cid)
+    return instance.remove(cid)
 
 
 def server(cb, **kwargs):
-    return _instance().server(cb, **kwargs)
+    return instance.server(cb, **kwargs)
 
 
 def singleton():
-    return _instance()
+    return instance
 
 
 def start():
-    return _instance().start()
+    return instance.start()
 
 
 def stop():
-    return _instance().stop()
+    return instance.stop()
 
 
 def stream(stream):
-    return _instance().stream(stream)
+    return instance.stream(stream)
 
 
 def timer(after, cb):
-    return _instance().timer(after, cb)
+    return instance.timer(after, cb)

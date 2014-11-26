@@ -20,10 +20,16 @@ class Pyjo_IOLoop_Server(Pyjo_EventEmitter):
     def __init__(self):
         self.reactor = Pyjo.IOLoop.singleton().reactor
 
+    def __del__(self):
+        if dir(self.handle):
+            self.stop()
+
     def listen(self, **kwargs):
         address = kwargs.get('address', '127.0.0.1')
         port = kwargs.get('port', 0)
         backlog = kwargs.get('backlog', socket.SOMAXCONN)
+
+        # TODO MOJO_REUSE
 
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind((address, port))
