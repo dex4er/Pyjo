@@ -20,10 +20,13 @@ DEBUG = getenv('PYJO_REACTOR_DEBUG', 0)
 
 
 class Pyjo_Reactor_Poll(Pyjo_Reactor):
-    _running = False
-    __poll = None
-    _timers = {}
-    _io = {}
+    def __init__(self):
+        super(Pyjo_Reactor_Poll, self).__init__()
+
+        self._running = False
+        self.__poll = None
+        self._timers = {}
+        self._io = {}
 
     def again(self, tid):
         timer = self._timers[tid]
@@ -110,7 +113,9 @@ class Pyjo_Reactor_Poll(Pyjo_Reactor):
 
     def remove(self, remove):
         if remove is None:
-            raise RuntimeWarning("-- Reactor remove None")
+            if DEBUG:
+                warn("-- Reactor remove None")
+            return
 
         if isinstance(remove, str):
             if DEBUG:

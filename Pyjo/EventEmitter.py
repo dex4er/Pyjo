@@ -53,11 +53,11 @@ class Pyjo_EventEmitter(Pyjo_Base):
     def once(self, name, cb):
         self = weakref.proxy(self)
 
-        def wrapper_cb(name, cb, wrapper_lambda, *args):
+        def wrapper_cb(self, name, cb, wrapper_lambda, *args):
             self.unsubscribe(name, wrapper_lambda)
             cb(*args)
 
-        wrapper_lambda = lambda *args: wrapper_cb(name, cb, wrapper_lambda, *args)
+        wrapper_lambda = lambda *args: wrapper_cb(self, name, cb, wrapper_lambda, *args)
         self.on(name, wrapper_lambda)
 
         # TODO weakref.proxy(wrapper_lambda)

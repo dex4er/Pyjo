@@ -13,11 +13,13 @@ __all__ = ['Pyjo_IOLoop_Server']
 
 
 class Pyjo_IOLoop_Server(Pyjo_EventEmitter):
-    multi_accept = 50
-    reactor = None
-    handle = None
-
     def __init__(self):
+        super(Pyjo_IOLoop_Server, self).__init__()
+
+        self.multi_accept = 50
+        self.reactor = None
+        self.handle = None
+
         self.reactor = Pyjo.IOLoop.singleton().reactor
 
     def __del__(self):
@@ -39,9 +41,9 @@ class Pyjo_IOLoop_Server(Pyjo_EventEmitter):
         self.handle = s
 
     def start(self):
-        def ready_cb(unused):
+        def ready_cb(self, unused):
             self._accept()
-        self.reactor.io(self.handle, ready_cb)
+        self.reactor.io(self.handle, lambda unused: ready_cb(self, unused))
 
     def stop(self):
         self.reactor.remove(self.handle)

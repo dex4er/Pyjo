@@ -21,23 +21,24 @@ DEBUG = getenv('PYJO_IOLOOP_DEBUG', 0)
 
 
 class Pyjo_IOLoop(Pyjo_Base):
-    accept_interval = 0.025  # TODO parametrized
-    lock = None
-    unlock = None
-    max_accepts = 0
-    max_connections = 1000
-    multi_accept = 50
-    reactor = None
-
-    _acceptors = {}
-    _connections = {}
-
-    _accept = None
-    _accepts = None
-    __stop = None
-    __accepting = False
 
     def __init__(self):
+        self.accept_interval = 0.025  # TODO parametrized
+        self.lock = None
+        self.unlock = None
+        self.max_accepts = 0
+        self.max_connections = 1000
+        self.multi_accept = 50
+        self.reactor = None
+
+        self._acceptors = {}
+        self._connections = {}
+
+        self._accept = None
+        self._accepts = None
+        self.__stop = None
+        self.__accepting = False
+
         # TODO Pyjo.Loader
         module = importlib.import_module(Pyjo_Reactor_Poll.detect())
         module_class_name = module.__name__.replace('.', '_')
@@ -47,11 +48,11 @@ class Pyjo_IOLoop(Pyjo_Base):
         if DEBUG:
             warn("-- Reactor initialized ({0})".format(self.reactor))
 
-        def cb(reactor, *args):
+        def error_cb(reactor, *args):
             raise Error(args)  # TODO debug
             warn("{0}: {1}".format(reactor, ": ".join(args)))
 
-        # self.reactor.catch(cb)  # TODO
+        # self.reactor.catch(error_cb)  # TODO
 
         return None
 
@@ -82,14 +83,14 @@ class Pyjo_IOLoop(Pyjo_Base):
 
         self = weakref.proxy(self)
 
-        def connect_cb(client, handle):
+        def connect_cb(self, cid, client, handle):
             if dir(self):
                 del self._connections[cid]['client']
                 stream = Pyjo_IOLoop_Stream(handle)
                 self._stream(stream, cid)
                 cb(self, None, stream)
 
-        client.on('connect', connect_cb)
+        client.on('connect', lambda client, handle: connect_cb(self, cid, client, handle))
 
         # TODO client.on('error', error_cb)
 
@@ -121,11 +122,11 @@ class Pyjo_IOLoop(Pyjo_Base):
     def server(self, cb, **kwargs):
         server = Pyjo_IOLoop_Server()
 
-        def accept_cb(server, handle):
+        def accept_cb(self, server, handle):
             stream = Pyjo_IOLoop_Stream(handle)
             cb(self, stream, self.stream(stream))
 
-        server.on('accept', accept_cb)
+        server.on('accept', lambda server, handle: accept_cb(self, server, handle))
         server.listen(**kwargs)
 
         return self.acceptor(server)
@@ -279,11 +280,11 @@ class Pyjo_IOLoop(Pyjo_Base):
         stream.reactor = weakref.proxy(self.reactor)
         self = weakref.proxy(self)
 
-        def close_cb(stream):
+        def close_cb(self, stream):
             if dir(self):
                 self._remove(cid)
 
-        stream.on('close', close_cb)
+        stream.on('close', lambda stream: close_cb(self, stream))
         stream.start()
 
         return cid

@@ -16,16 +16,18 @@ __all__ = ['Pyjo_IOLoop_Stream']
 
 
 class Pyjo_IOLoop_Stream(Pyjo_EventEmitter):
-    reactor = None
-
-    _handle = None
-    _grafeful = False
-    _timeout = 15
-    _buffer = b''
-    _timer = None
-    _paused = False
-
     def __init__(self, handle):
+        super(Pyjo_IOLoop_Stream, self).__init__()
+
+        self.reactor = None
+
+        self._handle = None
+        self._graceful = False
+        self._timeout = 15
+        self._buffer = b''
+        self._timer = None
+        self._paused = False
+
         self.reactor = Pyjo.IOLoop.singleton().reactor
         self._handle = handle
 
@@ -46,13 +48,13 @@ class Pyjo_IOLoop_Stream(Pyjo_EventEmitter):
         reactor.remove(handle)
         handle.close()
 
-        self.emit('close')
+        return self.emit('close')
 
     def close_gracefully(self):
         if self.is_writing():
-            self.graceful = True
-            return self.graceful
-        self.close()
+            self._graceful = True
+            return self
+        return self.close()
 
     def handle(self):
         return self._handle
@@ -77,14 +79,14 @@ class Pyjo_IOLoop_Stream(Pyjo_EventEmitter):
 
         self = weakref.proxy(self)
 
-        def cb_read_write(is_write):
+        def cb_read_write(self, is_write):
             if dir(self):
                 if is_write:
                     self._write()
                 else:
                     self._read()
 
-        reactor.io(self.timeout(self._timeout)._handle, cb_read_write)
+        reactor.io(self.timeout(self._timeout)._handle, lambda is_write: cb_read_write(self, is_write))
 
     def stop(self):
         if not self._paused:
@@ -107,11 +109,11 @@ class Pyjo_IOLoop_Stream(Pyjo_EventEmitter):
 
         self = weakref.proxy(self)
 
-        def timeout_cb():
+        def timeout_cb(self):
             if bool(dir(self)):
                 self.emit('timeout').close()
 
-        self._timer = reactor.timer(timeout, timeout_cb)
+        self._timer = reactor.timer(timeout, lambda: timeout_cb(self))
 
         return self
 
@@ -161,11 +163,11 @@ class Pyjo_IOLoop_Stream(Pyjo_EventEmitter):
                 self._error(e)
             self.emit('write', self._buffer[:written])
             self._buffer = self._buffer[written:]
-            if not len(self._buffer):  # TODO once?
+            if not len(self._buffer):
                 self.emit('drain')
             self._again()
 
-        if self.is_writing:
+        if self.is_writing():
             return
         if self._graceful:
             return self.close()

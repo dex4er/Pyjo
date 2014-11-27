@@ -21,12 +21,14 @@ DEBUG = getenv('PYJO_IOLOOP_CLIENT_DEBUG', 0)
 
 
 class Pyjo_IOLoop_Client(Pyjo_EventEmitter):
-    reactor = None
-    handle = None
-
-    _timer = None
-
     def __init__(self):
+        super(Pyjo_IOLoop_Client, self).__init__()
+
+        self.reactor = None
+        self.handle = None
+
+        self._timer = None
+
         if DEBUG:
             warn("-- Method {0}.__init__".format(self))
         self.reactor = Pyjo.IOLoop.singleton().reactor
@@ -42,18 +44,18 @@ class Pyjo_IOLoop_Client(Pyjo_EventEmitter):
 
         # Timeout
         self = weakref.proxy(self)
-        def timeout_cb():
+        def timeout_cb(self):
             if dir(self):
                 self.emit('error', 'Connect timeout')
 
-        self._timer = reactor.timer(timeout, timeout_cb)
+        self._timer = reactor.timer(timeout, lambda: timeout_cb(self))
 
         # Blocking name resolution
-        def resolved_cb():
+        def resolved_cb(self):
             if dir(self):
                 self._connect(**kwargs)
 
-        return reactor.next_tick(resolved_cb)
+        return reactor.next_tick(lambda: resolved_cb(self))
 
     def _cleanup(self):
         reactor = self.reactor
@@ -89,11 +91,11 @@ class Pyjo_IOLoop_Client(Pyjo_EventEmitter):
         # Wait for handle to become writable
         self = weakref.proxy(self)
 
-        def ready_cb(loop):
+        def ready_cb(self, loop, **kwargs):
             if dir(self):
                 self._ready(**kwargs)
 
-        self.reactor.io(handle, ready_cb).watch(handle, 0, 1)
+        self.reactor.io(handle, lambda loop: ready_cb(self, loop, **kwargs)).watch(handle, 0, 1)
 
     def _ready(self, **kwargs):
         # Retry or handle exceptions
@@ -112,9 +114,9 @@ class Pyjo_IOLoop_Client(Pyjo_EventEmitter):
         return port
 
     def start(self):
-        def ready_cb():
+        def ready_cb(self):
             self._accept()
-        self.reactor.io(self.handle, ready_cb)
+        self.reactor.io(self.handle, lambda: ready_cb(self))
 
     def stop(self):
         self.reactor.remove(self.handle)
