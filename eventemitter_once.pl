@@ -14,7 +14,7 @@ package Cat {
 
 my $tiger = Cat->new();
 
-$tiger->on(roar => sub {
+$tiger->once(roar => sub {
     my ($self, $times) = @_;
     for (1 .. $times) {
         say 'RAWR!';

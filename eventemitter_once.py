@@ -15,7 +15,7 @@ def roar_cb(cat, times):
 
 tiger = Cat()
 
-tiger.on('roar', roar_cb)
+tiger.once('roar', roar_cb)
 
 tiger.poke(2)
 tiger.poke(2)
