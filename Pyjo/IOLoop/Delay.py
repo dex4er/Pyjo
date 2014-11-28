@@ -34,7 +34,7 @@ class Pyjo_IOLoop_Delay(Pyjo_EventEmitter):
 
     def data(self, *args, **kwargs):
         if len(args) == 1 and isinstance(args[0], dict):
-            self._data = args[0] 
+            self._data = args[0]
             return self._data
         if kwargs:
             self._data = kwargs
@@ -78,7 +78,7 @@ class Pyjo_IOLoop_Delay(Pyjo_EventEmitter):
         if sid >= len(self._args):
             self._args.append(args)
         else:
-            self._args[sid] = args 
+            self._args[sid] = args
 
         if self._fail:
             return self
@@ -100,6 +100,6 @@ class Pyjo_IOLoop_Delay(Pyjo_EventEmitter):
             # TODO catch e: self._fail += 1; self.remaining([]).emit('error', e)
         if not self._counter:
             return self.remaining([]).emit('finish', *args)
-        if not self._pending:   
+        if not self._pending:
             self.ioloop.next_tick(self.begin())
         return self

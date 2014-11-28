@@ -58,8 +58,8 @@ def client_cb(loop, err, stream, i):
 
 
 for i in range(n):
-    Pyjo.IOLoop.client(address=url.host, 
-                       port=(url.port or 80), 
+    Pyjo.IOLoop.client(address=url.host,
+                       port=(url.port or 80),
                        cb=lambda loop, err, stream: client_cb(loop, err, stream, i))
 
 while True:
