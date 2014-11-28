@@ -22,20 +22,19 @@ DEBUG = getenv('PYJO_IOLOOP_CLIENT_DEBUG', 0)
 
 class Pyjo_IOLoop_Client(Pyjo_EventEmitter):
     def __init__(self):
-        super(Pyjo_IOLoop_Client, self).__init__()
-
-        self.reactor = None
-        self.handle = None
-
-        self._timer = None
-
         if DEBUG:
             warn("-- Method {0}.__init__".format(self))
+
+        super(Pyjo_IOLoop_Client, self).__init__()
+
+        self.handle = None
+        self._timer = None
         self.reactor = Pyjo.IOLoop.singleton().reactor
 
     def __del__(self):
         if DEBUG:
             warn("-- Method {0}.__del__".format(self))
+
         self._cleanup()
 
     def connect(self, **kwargs):

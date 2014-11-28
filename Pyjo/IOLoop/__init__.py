@@ -7,6 +7,7 @@ import weakref
 
 from Pyjo.Base import *
 from Pyjo.IOLoop.Client import *
+from Pyjo.IOLoop.Delay import *
 from Pyjo.IOLoop.Server import *
 from Pyjo.IOLoop.Stream import *
 from Pyjo.Reactor.Poll import *
@@ -18,6 +19,10 @@ __all__ = ['Pyjo_IOLoop']
 
 
 DEBUG = getenv('PYJO_IOLOOP_DEBUG', 0)
+
+
+class Error(Exception):
+    pass
 
 
 class Pyjo_IOLoop(Pyjo_Base):
@@ -97,6 +102,14 @@ class Pyjo_IOLoop(Pyjo_Base):
         client.connect(**kwargs)
         return cid
 
+    def delay(self, *args):
+        delay = Pyjo_IOLoop_Delay()
+        delay.ioloop = weakref.proxy(self)
+        if args:
+            return delay.steps(*args)
+        else:
+            return delay
+
     def is_running(self):
         return self.reactor.is_running()
 
@@ -131,6 +144,7 @@ class Pyjo_IOLoop(Pyjo_Base):
 
         return self.acceptor(server)
 
+    @classmethod
     def singleton(self):
         return instance
 
@@ -294,10 +308,6 @@ class Pyjo_IOLoop(Pyjo_Base):
         return getattr(self.reactor, method)(after, lambda: cb(self))
 
 
-class Error(Exception):
-    pass
-
-
 instance = Pyjo_IOLoop()
 
 
@@ -307,6 +317,10 @@ def acceptor(acceptor):
 
 def client(cb, **kwargs):
     return instance.client(cb, **kwargs)
+
+
+def delay(*args):
+    return instance.delay(*args)
 
 
 def is_running():

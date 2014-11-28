@@ -13,6 +13,10 @@ from Pyjo.Util import getenv, not_implemented
 __all__ = ['Pyjo_Reactor']
 
 
+class Error(Exception):
+    pass
+
+
 class Pyjo_Reactor(Pyjo_EventEmitter):
 
     @not_implemented
@@ -71,7 +75,3 @@ class Pyjo_Reactor(Pyjo_EventEmitter):
     @not_implemented
     def watch(self, handle, read, write):
         pass
-
-
-class Error(Exception):
-    pass
