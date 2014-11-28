@@ -24,7 +24,7 @@ class Pyjo_Reactor_Poll(Pyjo_Reactor):
         super(Pyjo_Reactor_Poll, self).__init__()
 
         self._running = False
-        self.__poll = None
+        self._select_poll = None
         self._timers = {}
         self._io = {}
 
@@ -146,7 +146,7 @@ class Pyjo_Reactor_Poll(Pyjo_Reactor):
 
     def reset(self):
         self._io = {}
-        self.__poll = None
+        self._select_poll = None
         self._timers = {}
 
     def start(self):
@@ -173,9 +173,9 @@ class Pyjo_Reactor_Poll(Pyjo_Reactor):
         return self
 
     def _poll(self):
-        if not self.__poll:
-            self.__poll = select.poll()
-        return self.__poll
+        if not self._select_poll:
+            self._select_poll = select.poll()
+        return self._select_poll
 
     def _sandbox(self, event, cb, *args):
         cb(*args)

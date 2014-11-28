@@ -34,7 +34,7 @@ sizes = [0 for i in range(n)]
 
 t0 = steady_time()
 
-def client_cb(loop, err, stream):
+def client_cb(loop, err, stream, i):
 
     def on_read_cb(stream, chunk):
         sizes[i] += len(chunk)
@@ -51,13 +51,6 @@ def client_cb(loop, err, stream):
         if verbose:
             print(sizes[i])
 
-        speed = str(sum(speeds))
-        while True:
-            (speed, replaced) = re.subn(r'(?<=\d)(\d{3})(,|$)', r',\1', speed)
-            if not replaced:
-                break
-        print('{0} Mb/s'.format(speed))
-
     stream.on('close', on_close_cb)
 
     # Write request
@@ -65,7 +58,18 @@ def client_cb(loop, err, stream):
 
 
 for i in range(n):
-    Pyjo.IOLoop.client(address=url.host, port=(url.port or 80), cb=client_cb)
+    Pyjo.IOLoop.client(address=url.host, 
+                       port=(url.port or 80), 
+                       cb=lambda loop, err, stream: client_cb(loop, err, stream, i))
 
-while not Pyjo.IOLoop.is_running():
+while True:
     Pyjo.IOLoop.start()
+    if not Pyjo.IOLoop.is_running():
+        break
+
+speed = str(sum(speeds))
+while True:
+    (speed, replaced) = re.subn(r'(?<=\d)(\d{3})(,|$)', r',\1', speed)
+    if not replaced:
+        break
+print('{0} Mb/s'.format(speed))

@@ -39,10 +39,10 @@ class Pyjo_IOLoop(Pyjo_Base):
         self._acceptors = {}
         self._connections = {}
 
-        self._accept = None
-        self._accepts = None
-        self.__stop = None
-        self.__accepting = False
+        self._accepts = 0
+        self._accept_timer = None
+        self._stop_timer = None
+        self._accepting_timer = None
 
         # TODO Pyjo.Loader
         module = importlib.import_module(Pyjo_Reactor_Poll.detect())
@@ -180,8 +180,8 @@ class Pyjo_IOLoop(Pyjo_Base):
     def _accepting(self):
         # Check if we have acceptors
         if not self._acceptors:
-            a = self._accept
-            self._accept = None
+            a = self._accept_timer
+            self._accept_timer = None
             return self._remove(a)
 
         # Check connection limit
@@ -194,8 +194,8 @@ class Pyjo_IOLoop(Pyjo_Base):
         if self.lock:
             self.lock(not i)
 
-        a = self._accept
-        self._accept = None
+        a = self._accept_timer
+        self._accept_timer = None
         self._remove(a)
 
         # Check if multi-accept is desirable
@@ -203,7 +203,7 @@ class Pyjo_IOLoop(Pyjo_Base):
         for a in self._acceptors.values():
             a.multi_accept = 1 if max_conns < multi else multi
             a.start()
-        self.__accepting = True
+        self._accepting_timer = True
 
     def _id(self):
         cid = None
@@ -218,8 +218,8 @@ class Pyjo_IOLoop(Pyjo_Base):
         self._recurring()
 
         # Release accept mutex
-        if self.__accepting:
-            self.__accepting = False
+        if self._accepting_timer:
+            self._accepting_timer = False
         else:
             return
 
@@ -233,19 +233,19 @@ class Pyjo_IOLoop(Pyjo_Base):
             a.stop()
 
     def _recurring(self):
-        if not self._accept:
+        if not self._accept_timer:
 
-            def cb_accepting(loop):
+            def accept_timer_cb(loop):
                 loop._accepting()
 
-            self._accept = self.recurring(self.accept_interval, cb_accepting)
+            self._accept_timer = self.recurring(self.accept_interval, accept_timer_cb)
 
-        if not self.__stop:
+        if not self._stop_timer:
 
-            def cb_stop(loop):
+            def stop_timer_cb(loop):
                 loop._stop()
 
-            self.__stop = self.recurring(1, cb_stop)
+            self._stop_timer = self.recurring(1, stop_timer_cb)
 
     def _remove(self, _id):
         # Timer
@@ -277,13 +277,13 @@ class Pyjo_IOLoop(Pyjo_Base):
         if self._acceptors:
             return
 
-        if self._accept:
-            self._remove(self._accept)
-            self._accept = None
+        if self._accept_timer:
+            self._remove(self._accept_timer)
+            self._accept_timer = None
 
-        if self.__stop:
-            self._remove(self.__stop)
-            self.__stop = None
+        if self._stop_timer:
+            self._remove(self._stop_timer)
+            self._stop_timer = None
 
     def _stream(self, stream, cid):
         # Make sure timers are running
@@ -294,11 +294,11 @@ class Pyjo_IOLoop(Pyjo_Base):
         stream.reactor = weakref.proxy(self.reactor)
         self = weakref.proxy(self)
 
-        def close_cb(self, stream):
+        def on_close_cb(self, stream):
             if dir(self):
                 self._remove(cid)
 
-        stream.on('close', lambda stream: close_cb(self, stream))
+        stream.on('close', lambda stream: on_close_cb(self, stream))
         stream.start()
 
         return cid
