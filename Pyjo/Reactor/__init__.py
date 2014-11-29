@@ -7,7 +7,9 @@ import socket
 
 from Pyjo.Base import *
 from Pyjo.EventEmitter import *
-from Pyjo.Util import getenv, not_implemented
+
+from Pyjo.Base import not_implemented
+from Pyjo.Util import getenv
 
 
 __all__ = ['Pyjo_Reactor']
