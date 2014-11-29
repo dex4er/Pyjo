@@ -26,7 +26,7 @@ class Pyjo_Reactor_Poll(Pyjo_Reactor):
         self._running = False
         self._select_poll = None
         self._timers = {}
-        self._io = {}
+        self._ios = {}
 
     def again(self, tid):
         timer = self._timers[tid]
@@ -34,9 +34,9 @@ class Pyjo_Reactor_Poll(Pyjo_Reactor):
 
     def io(self, handle, cb):
         fd = handle.fileno()
-        self._io[fd] = {'cb': cb}
+        self._ios[fd] = {'cb': cb}
         if DEBUG:
-            warn("-- Reactor adding io[{0}] = {1}".format(fd, self._io[fd]))
+            warn("-- Reactor adding io[{0}] = {1}".format(fd, self._ios[fd]))
         return self.watch(handle, 1, 1)
 
     def is_running(self):
@@ -52,7 +52,7 @@ class Pyjo_Reactor_Poll(Pyjo_Reactor):
         poll = self._poll()
         while not i:
             # Stop automatically if there is nothing to watch
-            if not self._timers and not self._io:
+            if not self._timers and not self._ios:
                 return self.stop()
 
             # Calculate ideal timeout based on timers
@@ -66,15 +66,15 @@ class Pyjo_Reactor_Poll(Pyjo_Reactor):
                 timeout = 0
 
             # I/O
-            if self._io:
+            if self._ios:
                 events = poll.poll(timeout * 1000)
                 for fd, flag in events:
                     if flag & (POLLIN | POLLPRI | POLLHUP | POLLERR):
-                        io = self._io[fd]
+                        io = self._ios[fd]
                         i += 1
                         self._sandbox('Read', io['cb'], 0)
                     elif flag & (POLLOUT):
-                        io = self._io[fd]
+                        io = self._ios[fd]
                         i += 1
                         self._sandbox('Write', io['cb'], 1)
 
@@ -131,11 +131,13 @@ class Pyjo_Reactor_Poll(Pyjo_Reactor):
         try:
             fd = remove.fileno()
             if DEBUG:
-                if fd in self._io:
+                if fd in self._ios:
                     warn("-- Reactor remove io[{0}]".format(fd))
-            self._poll().unregister(remove)
-            if fd in self._io:
-                del self._io[fd]
+            poll = self._poll()
+            if poll:
+                poll.unregister(remove)
+            if fd in self._ios:
+                del self._ios[fd]
                 return True
             # remove.close()  # TODO remove?
         except socket.error:
@@ -145,7 +147,7 @@ class Pyjo_Reactor_Poll(Pyjo_Reactor):
         return False
 
     def reset(self):
-        self._io = {}
+        self._ios = {}
         self._select_poll = None
         self._timers = {}
 
