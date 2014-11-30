@@ -11,7 +11,6 @@ from Pyjo.EventEmitter import *
 
 __all__ = ['Pyjo_IOLoop_Server']
 
-
 class Pyjo_IOLoop_Server(Pyjo_EventEmitter):
     def __init__(self):
         super(Pyjo_IOLoop_Server, self).__init__()
@@ -63,4 +62,6 @@ class Pyjo_IOLoop_Server(Pyjo_EventEmitter):
             handle.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 
             self.emit('accept', handle)
+            #self.reactor.remove(self.handle)
             # TODO TLS
+

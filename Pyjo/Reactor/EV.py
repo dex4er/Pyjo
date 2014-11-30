@@ -7,7 +7,7 @@ import weakref
 
 from Pyjo.Reactor.Poll import *
 
-from Pyjo.Util import getenv
+from Pyjo.Util import getenv, warn
 
 
 __all__ = ['Pyjo_Reactor_EV']
@@ -22,9 +22,8 @@ class Pyjo_Reactor_EV(Pyjo_Reactor_Poll):
 
         self._loop = pyev.default_loop()
 
-    # TODO watcher has again?
-    #def again(self, tid):
-    #    self._timers[tid]['watcher'].again
+    def again(self, tid):
+        self._timers[tid]['watcher'].reset()
 
     def is_running(self):
         return self._loop.depth
@@ -79,15 +78,17 @@ class Pyjo_Reactor_EV(Pyjo_Reactor_Poll):
         else:
             if 'watcher' in io:
                 w = io['watcher']
-                # w.set(fd, mode)  # TODO Exception pyev.Error: 'cannot set a watcher while it is active'
+                w.stop()
+                w.set(fd, mode)  # TODO Exception pyev.Error: 'cannot set a watcher while it is active'
+                w.start()
             else:
-                #self = weakref.proxy(self)
-                watcher = self._loop.io(fd, mode, 
+                self = weakref.proxy(self)
+
+                watcher = self._loop.io(fd, mode,
                                         lambda watcher, revents: \
                                         self._io(fd, watcher, revents))
-                watcher.start() 
+                watcher.start()
                 io['watcher'] = watcher
-                pass
 
         return self
 
@@ -104,9 +105,9 @@ class Pyjo_Reactor_EV(Pyjo_Reactor_Poll):
     def _timer(self, recurring, after, cb):
         if recurring and not after:
             after = 0.0001
-        
+
         tid = super(Pyjo_Reactor_EV, self)._timer(0, 0, cb)
-        #self = weakref.proxy(self)
+        self = weakref.proxy(self)
 
         def timer_cb(self, tid, watcher, revents):
             timer = self._timers[tid]
@@ -116,7 +117,7 @@ class Pyjo_Reactor_EV(Pyjo_Reactor_Poll):
 
         watcher = self._loop.timer(after, after,
                                    lambda watcher, revents: \
-                                   timer_cb(self, tid, watcher, revents))                                                        
+                                   timer_cb(self, tid, watcher, revents))
         watcher.start()
         self._timers[tid]['watcher'] = watcher
 

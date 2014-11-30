@@ -34,9 +34,14 @@ class Pyjo_Reactor_Poll(Pyjo_Reactor):
 
     def io(self, handle, cb):
         fd = handle.fileno()
-        self._ios[fd] = {'cb': cb}
-        if DEBUG:
-            warn("-- Reactor adding io[{0}] = {1}".format(fd, self._ios[fd]))
+        if fd in self._ios:
+            self._ios[fd]['cb'] = cb
+            if DEBUG:
+                warn("-- Reactor found io[{0}] = {1}".format(fd, self._ios[fd]))
+        else:
+            self._ios[fd] = {'cb': cb}
+            if DEBUG:
+                warn("-- Reactor adding io[{0}] = {1}".format(fd, self._ios[fd]))
         return self.watch(handle, 1, 1)
 
     def is_running(self):
