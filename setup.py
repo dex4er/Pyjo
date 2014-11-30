@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='Pyjo',
-    version=__import__('clean').__version__,
+    version=__import__('Pyjo').__version__,
     description='Mojo clone in Python.',
     long_description=open('README.md').read(),
     author='Piotr Roszatycki',
