@@ -81,6 +81,6 @@ def timer_cb(loop):
 Pyjo.IOLoop.timer(3, timer_cb)
 
 
-# Start event loop if necessary
+# Start event loop
 Pyjo.IOLoop.start()
 ```
