@@ -23,5 +23,6 @@ setup(
         'Operating System :: POSIX',
         'Programming Language :: Python',
         'Framework :: Django',
-        ]
+        ],
+    test_suite='test.TestSuite',
 )
