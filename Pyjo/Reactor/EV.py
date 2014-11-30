@@ -7,13 +7,8 @@ import weakref
 
 from Pyjo.Reactor.Poll import *
 
-from Pyjo.Util import getenv, warn
-
 
 __all__ = ['Pyjo_Reactor_EV']
-
-
-DEBUG = getenv('PYJO_REACTOR_DEBUG', 0)
 
 
 class Pyjo_Reactor_EV(Pyjo_Reactor_Poll):

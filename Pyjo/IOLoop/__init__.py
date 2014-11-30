@@ -125,11 +125,13 @@ class Pyjo_IOLoop(Pyjo_Base):
         return self._timer('recurring', after, cb)
 
     def remove(self, cid):
-        c = self._connections[cid]
-        if c:
-            stream = c.stream
-            if stream:
-                return stream.close_gracefully()
+        if cid in self._connections:
+            c = self._connections[cid]
+            if c:
+                stream = c.stream
+                if stream:
+                    return stream.close_gracefully()
+
         self._remove(cid)
 
     def server(self, cb, **kwargs):
@@ -259,6 +261,7 @@ class Pyjo_IOLoop(Pyjo_Base):
 
         # Acceptor
         if _id in self._acceptors:
+            self._acceptors[_id].stop()
             del self._acceptors[_id]
             self._not_accepting()
 

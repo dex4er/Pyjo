@@ -22,7 +22,7 @@ class Pyjo_IOLoop_Server(Pyjo_EventEmitter):
         self.reactor = Pyjo.IOLoop.singleton().reactor
 
     def __del__(self):
-        if dir(self.handle):
+        if dir(self.handle) and self.handle:
             self.stop()
 
     def listen(self, **kwargs):
@@ -46,6 +46,7 @@ class Pyjo_IOLoop_Server(Pyjo_EventEmitter):
 
     def stop(self):
         self.reactor.remove(self.handle)
+        self.handle = None
 
     def _accept(self):
         # Greedy accept
@@ -64,4 +65,3 @@ class Pyjo_IOLoop_Server(Pyjo_EventEmitter):
             self.emit('accept', handle)
             #self.reactor.remove(self.handle)
             # TODO TLS
-
