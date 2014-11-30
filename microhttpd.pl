@@ -4,23 +4,16 @@ use Mojo::IOLoop;
 
 my $port = $ARGV[0] || 8080;
 
-my %buffers;
-
-Mojo::IOLoop->server(port => $port, sub {
+Mojo::IOLoop->server(address => '0.0.0.0', port => $port, sub {
     my ($loop, $stream, $id) = @_;
-
-    $buffers{$id} = '';
 
     $stream->on(read => sub {
         my ($stream, $chunk) = @_;
 
-        # Append chunk to buffer
-        $buffers{$id} .= $chunk;
-
         # Check if we got start line and headers (no body support)
-        if (index($buffers{$id}, "\x0d\x0a\x0d\x0a") >= 0) {
+        if (index($chunk, "\x0d\x0a\x0d\x0a") >= 0) {
 
-            my $keepalive = (index($buffers{$id}, "\x0d\x0aConnection: Keep-Alive\x0d\x0a") >= 0);
+            my $keepalive = (index($chunk, "\x0d\x0aConnection: Keep-Alive\x0d\x0a") >= 0);
 
             # Write a minimal HTTP response
             # (the "Hello World!" message has been optimized away!)
@@ -31,17 +24,9 @@ Mojo::IOLoop->server(port => $port, sub {
             if (not $keepalive) {
                 $stream->close_gracefully();
             }
-
-            # Clean buffer
-            $buffers{$id} = '';
         }
-    });
-    $stream->on(close => sub {
-        delete $buffers{$id};
     });
 });
 
 # Start event loop
 Mojo::IOLoop->start;
-
-1;

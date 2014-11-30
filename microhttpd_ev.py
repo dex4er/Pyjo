@@ -136,5 +136,5 @@ class Server(object):
 
 
 if __name__ == "__main__":
-    server = Server(("127.0.0.1", port))
+    server = Server(("0.0.0.0", port))
     server.start()
