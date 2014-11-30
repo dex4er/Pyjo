@@ -1,12 +1,13 @@
 import os
 import subprocess
+import sys
 import unittest
 
 
 class Test(unittest.TestCase):
     def test_pyjo_eventemitter(self):
         os.putenv('PYTHONPATH', '.')
-        subprocess.check_output(['python', __file__])
+        subprocess.check_output([sys.executable, __file__])
 
 
 if __name__ == '__main__':
@@ -29,11 +30,11 @@ if __name__ == '__main__':
     def cb(self):
         raise Exception('works!')
     e.on('die', cb)
-    err = ''
+    error = ''
     try:
         e.emit('die')
-    except Exception as err:
-        err = str(err)
-    is_ok(err, "works!", 'right error')
+    except Exception as ex:
+        error = str(ex)
+    is_ok(error, "works!", 'right error')
 
     done_testing()

@@ -9,7 +9,8 @@ from Pyjo.Parameters import *
 from Pyjo.Path import *
 
 from Pyjo.Base import accessor, Omitted
-from Pyjo.Util import url_escape
+from Pyjo.Util import (punycode_decode, punycode_encode, url_escape,
+                       url_unescape)
 
 
 __all__ = ['Pyjo_URL']
@@ -20,6 +21,7 @@ re_userinfo = re.compile(r'^([^\@]+)\@')
 re_port = re.compile(r':(\d+)$')
 re_ihost = re.compile(r'[^\x00-\x7f]')
 re_path = re.compile(r'^[/?]')
+re_punycode_decode = re.compile(r'^xn--(.+)$')
 
 
 class Pyjo_URL(Pyjo_Base):
@@ -37,6 +39,25 @@ class Pyjo_URL(Pyjo_Base):
 
         if url is not None:
             self.parse(url)
+
+    @accessor
+    def ihost(self, value=Omitted):
+        if value is not Omitted:
+            # Decode
+            self.host = '.'.join(map(lambda s: punycode_decode(s) if re_punycode_decode.match(s) else s, value.split('.')))
+            return self
+
+        else:
+            host = self.host
+
+            if host is None:
+                return
+
+            if not re_ihost.search(host):
+                return host.lower()
+
+            # Encode
+            return '.'.join(map(lambda s: ('xn--' + punycode_encode(s)) if re_ihost.search(s) else s, host.split('.'))).lower()
 
     def parse(self, url):
         m = re_url.match(url)
@@ -64,12 +85,17 @@ class Pyjo_URL(Pyjo_Base):
                 authority = re_port.sub('', authority)
 
             # Host
-            self.host = authority
+            host = url_unescape(authority)
+            if re_ihost.search(host):
+                self.ihost = host
+            else:
+                self.host = host
+
             return self
 
         else:
             # Build authority
-            authority = self.host_port()
+            authority = self.host_port
             if authority is None:
                 return
 
@@ -79,8 +105,9 @@ class Pyjo_URL(Pyjo_Base):
 
             return url_escape(info, '^A-Za-z0-9\-._~!$&\'()*+,;=:') + '@' + authority
 
+    @property
     def host_port(self):
-        host = self.host
+        host = self.ihost
         port = self.port
         if port is not None:
             return '{0}:{1}'.format(host, port)
@@ -106,6 +133,7 @@ class Pyjo_URL(Pyjo_Base):
             query = ''
         return self.path.to_string() + query;
 
+    @property
     def protocol(self):
         scheme = self.scheme
 
@@ -127,7 +155,7 @@ class Pyjo_URL(Pyjo_Base):
     def to_string(self):
         # Scheme
         url = ''
-        proto = self.protocol()
+        proto = self.protocol
 
         if proto:
             url += proto + ':'

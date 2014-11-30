@@ -4,6 +4,7 @@ Pyjo.Test
 
 from __future__ import print_function
 
+import os
 import sys
 import traceback
 
@@ -14,6 +15,7 @@ __all__ = ['done_testing', 'diag', 'fail', 'is_ok', 'ok', 'pass_ok']
 test = 0
 
 tests = 0
+failed = 0
 
 done = False
 
@@ -23,12 +25,13 @@ def diag(*args):
 
 
 def _ok(status, test_name=None):
-    global test
+    global failed, test
 
     test += 1
 
     if not status:
         message = 'not '
+        failed += 1
     else:
         message = ''
 
@@ -64,7 +67,7 @@ def is_ok(got, expected, test_name=None):
         diag("         got: '{0}'\n    expected: '{1}'".format(got, expected))
 
 def done_testing():
-    global done, test, tests
+    global done, failed, test, tests
 
     if done:
         fail('done_testing() was already called')
@@ -77,15 +80,23 @@ def done_testing():
 
     if not tests:
         diag('No tests run!')
+        failed = 255
+
+    if failed:
+        sys.exit(failed)
 
     done = True
 
 
 class Guard(object):
     def __del__(self):
-        global done, tests
+        global failed, done, tests
         if test and not tests and not done:
             diag('Tests were run but no plan was declared and done_testing() was not seen.')
 
+        if not done:
+            if not failed:
+                failed = 255 - test
+            os._exit(failed)
 
 _guard = Guard()

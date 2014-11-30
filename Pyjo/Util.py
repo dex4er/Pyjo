@@ -12,8 +12,8 @@ import sys
 import time
 
 
-__all__ = ['getenv', 'md5_sum', 'not_implemented', 'steady_time', 'rand',
-           'url_escape', 'warn']
+__all__ = ['getenv', 'md5_sum', 'punycode_decode', 'rand', 'steady_time',
+           'url_escape', 'url_unescape', 'warn']
 
 
 def getenv(name, default):
@@ -26,6 +26,14 @@ def md5_sum(string):
     return m.hexdigest()
 
 
+def punycode_decode(string):
+    return bytes(string, 'ascii').decode('punycode')
+
+
+def punycode_encode(string):
+    return string.encode('punycode').decode('ascii')
+
+
 def steady_time():
     return time.time()
 
@@ -35,7 +43,7 @@ def rand(value=1):
 
 
 re_url_escape_pattern = re.compile(r'([^A-Za-z0-9\-._~])')
-
+re_url_unescape_pattern = re.compile(r'%([0-9a-fA-F]{2})')
 
 def url_escape(string, pattern=None):
     if pattern is not None:
@@ -44,6 +52,10 @@ def url_escape(string, pattern=None):
         r = re_url_escape_pattern
 
     return r.sub(lambda m: '%' + format(ord(m.group(1)), 'X'), string)
+
+
+def url_unescape(string):
+    return re_url_unescape_pattern.sub(lambda m: chr(int(m.group(1), 16)), string)
 
 
 def warn(*args):

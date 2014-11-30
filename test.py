@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 import unittest
 
 
@@ -24,6 +25,6 @@ if __name__ == '__main__':
     try:
         prove = os.getenv('PROVE', 'prove')
         os.putenv('PYTHONPATH', '.')
-        subprocess.call([prove, '--ext=py', '--exec=python', '--recurse', 't/pyjo'])
+        subprocess.call([prove, '--ext=py', '--exec=' + sys.executable, '--recurse', 't/pyjo'])
     except OSError:
         TestSuite().run()
