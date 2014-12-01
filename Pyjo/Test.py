@@ -105,6 +105,11 @@ _guard = Guard()
 
 
 class TestCase(unittest.TestCase):
-    def test_run(self, file=__file__):
-        os.putenv('PYTHONPATH', '.')
-        subprocess.check_output([sys.executable, file])
+    def test_run(self, script=__file__):
+        python_path = os.getenv('PYTHONPATH', '')
+        if python_path:
+            python_path = '.:' + python_path
+        else:
+            python_path = '.'
+        os.putenv('PYTHONPATH', python_path)
+        subprocess.check_output([sys.executable, script])
