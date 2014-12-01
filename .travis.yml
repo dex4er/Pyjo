@@ -12,8 +12,9 @@ matrix:
 before_install:
   - sudo apt-get update -qq
 install:
+  - sudo apt-get install -qq libev-dev
   - # pip install -q flake8
   - # flake8 --config .flake8 .
-  - pip install -q $PACKAGES
+  - if [ -n "$PACKAGES" ]; then pip install $PACKAGES; fi
 script:
   - python test.py
