@@ -5,7 +5,7 @@
 #   python test.py
 #   PROVE= python test.py
 #   python setup.py
-#   PYTHONPATH=. nosetests -w t/pyjo/ -m . -a test_nose
+#   PYTHONPATH=. nosetests
 
 import os
 import subprocess
