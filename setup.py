@@ -14,7 +14,7 @@ setup(
     name='Pyjo',
     version=__import__('Pyjo').__version__,
     description='Mojo clone in Python.',
-    long_description=open('README.md').read(),
+    long_description=''.join(open('README.md').readlines()[2:]),
     author='Piotr Roszatycki',
     author_email='piotr.roszatycki@gmail.com',
     url='http://github.com/dex4er/Pyjo',

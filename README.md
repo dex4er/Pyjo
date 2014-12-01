@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/dex4er/Pyjo.png?branch=master)](https://travis-ci.org/dex4er/Pyjo)
 
 Pyjo
 ====

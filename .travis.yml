@@ -2,9 +2,9 @@ language: python
 matrix:
   include:
   - python: "2.7"
-    env: PACKAGES='pyev'
+    env: PACKAGES='svn+http://pyev.googlecode.com/svn/tags/pyev-0.8.1-4.04'
   - python: "3.4"
-    env: PACKAGES='pyev'
+    env: PACKAGES='svn+http://pyev.googlecode.com/svn/tags/pyev-0.8.1-4.04'
   - python: "pypy"
     env: PACKAGES=''
   - python: "pypy3"
