@@ -1,13 +1,8 @@
-import os
-import subprocess
-import sys
-import unittest
+import Pyjo.Test
 
-
-class Test(unittest.TestCase):
-    def test_pyjo_url(self):
-        os.putenv('PYTHONPATH', '.')
-        subprocess.check_output([sys.executable, __file__])
+class Test_Pyjo_URL(Pyjo.Test.TestCase):
+    def test_run(self):
+        super(Test_Pyjo_URL, self).test_run(__file__)
 
 
 if __name__ == '__main__':

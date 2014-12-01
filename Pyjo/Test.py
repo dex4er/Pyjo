@@ -5,8 +5,10 @@ Pyjo.Test
 from __future__ import print_function
 
 import os
+import subprocess
 import sys
 import traceback
+import unittest
 
 
 __all__ = ['done_testing', 'diag', 'fail', 'is_ok', 'ok', 'pass_ok']
@@ -100,3 +102,9 @@ class Guard(object):
             os._exit(failed)
 
 _guard = Guard()
+
+
+class TestCase(unittest.TestCase):
+    def test_run(self, file=__file__):
+        os.putenv('PYTHONPATH', '.')
+        subprocess.check_output([sys.executable, file])

@@ -24,7 +24,12 @@ class TestSuite(unittest.TestSuite):
 if __name__ == '__main__':
     try:
         prove = os.getenv('PROVE', 'prove')
+        if len(sys.argv) > 1 and sys.argv[1] != '':
+            prove_args = sys.argv[1:]
+        else:
+            prove_args = []
         os.putenv('PYTHONPATH', '.')
-        subprocess.call([prove, '--ext=py', '--exec=' + sys.executable, '--recurse', 't/pyjo'])
+        cmd = [prove, '--ext=py', '--exec=' + sys.executable, '--recurse', 't/pyjo'] + prove_args
+        subprocess.call(cmd)
     except OSError:
         TestSuite().run()
