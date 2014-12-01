@@ -26,17 +26,14 @@ def run():
     try:
         prove = os.getenv('PROVE', 'prove')
         args = sys.argv
-        if len(args) > 1 and args[0].endswith('setup.py'):
-            if len(args) > 2 and args[1] == 'test':
-                prove_args = args[2:]
-            else:
-                prove_args = []
-        elif len(args) > 1 and args[1] != '':
-            prove_args = args[1:]
+        if len(args) > 2 and args[0].endswith('setup.py') and args[1] == 'test':
+            args = args[2:]
         else:
-            prove_args = []
+            args = args[1:]
+        if not list(map(lambda a: True if a.startswith('t/') else False, args)).count(True):
+            args += ['t/pyjo']
         os.putenv('PYTHONPATH', '.')
-        cmd = [prove, '--ext=py', '--exec=' + sys.executable, 't/pyjo'] + prove_args
+        cmd = [prove, '--ext=py', '--exec=' + sys.executable] + args
         subprocess.call(cmd)
     except OSError:
         unittest.main(defaultTest='TestSuite')
