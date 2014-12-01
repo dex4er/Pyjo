@@ -1,7 +1,10 @@
+/build
+/dist
 .project
 .pydevproject
 __pycache__
 *.class
+*.egg
 *.egg-info
 *.exe
 *.pyc

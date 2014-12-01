@@ -12,7 +12,8 @@ import unittest
 from _codecs_cn import __file__
 
 
-__all__ = ['done_testing', 'diag', 'fail', 'is_ok', 'ok', 'pass_ok']
+__all__ = ['done_testing', 'diag', 'fail', 'is_ok', 'isa_ok', 'none_ok',
+           'ok', 'pass_ok']
 
 
 test = 0
@@ -48,6 +49,7 @@ def _ok(status, test_name=None):
     print(message)
 
     if not status:
+        diag("  Failed test '{0}'".format(test_name))
         diag(''.join(traceback.format_stack()[:-2]))
 
 
@@ -68,6 +70,26 @@ def is_ok(got, expected, test_name=None):
     _ok(status, test_name)
     if not status:
         diag("         got: '{0}'\n    expected: '{1}'".format(got, expected))
+
+
+def isa_ok(got, cls, test_name=None):
+    if test_name is None:
+        test_name = "An object {0}".format(type(got))
+    else:
+        test_name = "{0}".format(test_name)
+    test_name = "{0} is object {1}".format(test_name, cls)
+    status = isinstance(got, cls)
+    _ok(status, test_name)
+
+
+def none_ok(got, test_name=None):
+    if test_name is None:
+        test_name = "An object {0} is None".format(type(got))
+    else:
+        test_name = "{0} is None".format(test_name)
+    status = got is None
+    _ok(status, test_name)
+
 
 def done_testing():
     global done, failed, test, tests
