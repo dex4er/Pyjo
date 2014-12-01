@@ -143,13 +143,13 @@ class Pyjo_URL(Pyjo_Base):
         return scheme.lower()
 
     @accessor
-    def query(self, value=Omitted):
-        if value is Omitted:
+    def query(self, *args):
+        if not args:
             if self._query is None:
                 self._query = Pyjo_Parameters()
             return self._query
         else:
-            self._query = Pyjo_Parameters(value)
+            self._query = Pyjo_Parameters(*args)
             return self
 
     def to_string(self):
