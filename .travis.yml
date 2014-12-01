@@ -1,0 +1,19 @@
+language: python
+matrix:
+  include:
+  - python: "2.7"
+    env: PACKAGES='pyev'
+  - python: "3.4"
+    env: PACKAGES='pyev'
+  - python: "pypy"
+    env: PACKAGES=''
+  - python: "pypy3"
+    env: PACKAGES=''
+before_install:
+  - sudo apt-get update -qq
+install:
+  - # pip install -q flake8
+  - # flake8 --config .flake8 .
+  - pip install -q $PACKAGES
+script:
+  - python test.py
