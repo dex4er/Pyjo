@@ -1,13 +1,18 @@
 import Pyjo.Test
 
-class Test_Pyjo_URL(Pyjo.Test.TestCase):
-    def test_run(self):
-        super(Test_Pyjo_URL, self).test_run(__file__)
+
+class NoseTest(Pyjo.Test.NoseTest):
+    script = __file__
+    srcdir = '../..'
+
+
+class UnitTest(Pyjo.Test.UnitTest):
+    script = __file__
 
 
 if __name__ == '__main__':
 
-    from Pyjo.Test import *
+    from Pyjo.Test import *  # @UnusedWildImport
 
     from Pyjo.URL import *
 

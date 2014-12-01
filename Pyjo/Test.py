@@ -9,6 +9,7 @@ import subprocess
 import sys
 import traceback
 import unittest
+from _codecs_cn import __file__
 
 
 __all__ = ['done_testing', 'diag', 'fail', 'is_ok', 'ok', 'pass_ok']
@@ -104,12 +105,27 @@ class Guard(object):
 _guard = Guard()
 
 
-class TestCase(unittest.TestCase):
-    def test_run(self, script=__file__):
-        python_path = os.getenv('PYTHONPATH', '')
-        if python_path:
-            python_path = '.:' + python_path
-        else:
-            python_path = '.'
-        os.putenv('PYTHONPATH', python_path)
-        subprocess.check_output([sys.executable, script])
+def run(script=__file__, srcdir='.'):
+    python_path = os.getenv('PYTHONPATH', '')
+    if python_path and python_path != '.':
+        python_path = srcdir + ':' + python_path
+    else:
+        python_path = srcdir
+    os.putenv('PYTHONPATH', python_path)
+    subprocess.check_output([sys.executable, script])
+
+
+class NoseTest(object):
+    script = __file__
+    srcdir = '.'
+
+    def test_nose(self):
+        run(self.script, self.srcdir)
+
+
+class UnitTest(unittest.TestCase):
+    script = __file__
+    srcdir = '.'
+
+    def test_unit(self):
+        run(self.script, self.srcdir)

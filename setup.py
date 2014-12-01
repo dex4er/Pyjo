@@ -1,4 +1,13 @@
+#!/usr/bin/env python
+
 from setuptools import setup, find_packages
+from setuptools.command.test import test
+
+
+class custom_test(test):
+    def run(self):
+        import test
+        test.run()
 
 
 setup(
@@ -24,5 +33,6 @@ setup(
         'Programming Language :: Python',
         'Framework :: Django',
         ],
-    test_suite='test.TestSuite',
+    #cmdclass = {'test': custom_test},
+    test_suite = 'test.TestSuite'
 )

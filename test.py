@@ -1,3 +1,12 @@
+#!/usr/bin/env python
+
+# Usage:
+#
+#   python test.py
+#   PROVE= python test.py
+#   python setup.py
+#   PYTHONPATH=. nosetests -w t/pyjo/ -m . -a test_nose
+
 import os
 import subprocess
 import sys
@@ -5,31 +14,33 @@ import unittest
 
 
 class TestSuite(unittest.TestSuite):
-    def run(self, *args, **kwargs):
-
-        # use the default shared TestLoader instance
+    def __init__(self, *args, **kwargs):
+        super(TestSuite, self).__init__(*args, **kwargs)
         test_loader = unittest.defaultTestLoader
-
-        # use the basic test runner that outputs to sys.stderr
-        test_runner = unittest.TextTestRunner()
-
-        # automatically discover all tests in the current dir of the form test*.py
-        # NOTE: only works for python 2.7 and later
         test_suite = test_loader.discover('t/pyjo', pattern='*.py')
+        for t in test_suite:
+            self.addTest(t)
 
-        # run the test suite
-        test_runner.run(test_suite)
 
-
-if __name__ == '__main__':
+def run():
     try:
         prove = os.getenv('PROVE', 'prove')
-        if len(sys.argv) > 1 and sys.argv[1] != '':
-            prove_args = sys.argv[1:]
+        args = sys.argv
+        if len(args) > 1 and args[0].endswith('setup.py'):
+            if len(args) > 2 and args[1] == 'test':
+                prove_args = args[2:]
+            else:
+                prove_args = []
+        elif len(args) > 1 and args[1] != '':
+            prove_args = args[1:]
         else:
             prove_args = []
         os.putenv('PYTHONPATH', '.')
-        cmd = [prove, '--ext=py', '--exec=' + sys.executable, '--recurse', 't/pyjo'] + prove_args
+        cmd = [prove, '--ext=py', '--exec=' + sys.executable, 't/pyjo'] + prove_args
         subprocess.call(cmd)
     except OSError:
-        TestSuite().run()
+        unittest.main(defaultTest='TestSuite')
+
+
+if __name__ == '__main__':
+    run()
