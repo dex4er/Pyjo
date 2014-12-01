@@ -26,7 +26,7 @@ re_punycode_decode = re.compile(r'^xn--(.+)$')
 
 class Pyjo_URL(Pyjo_Base):
 
-    def __init__(self, url=None):
+    def __init__(self, *args, **kwargs):
         self.base = None
         self.fragment = None
         self.host = None
@@ -37,8 +37,12 @@ class Pyjo_URL(Pyjo_Base):
         self._path = None
         self._query = None
 
-        if url is not None:
-            self.parse(url)
+        if len(args) == 1 and not isinstance(args[0], (list, tuple, dict)):
+            self.parse(args[0])
+        elif args:
+            self.set(*args)
+        elif kwargs:
+            self.set(**kwargs)
 
     @accessor
     def ihost(self, value=Omitted):

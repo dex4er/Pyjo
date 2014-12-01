@@ -33,7 +33,9 @@ class Pyjo_Parameters(Pyjo_Base):
     def to_string(self):
         if self._string:
             return self._string
-        else:
+        elif self._params:
             return '&'.join([url_escape(str(p[0])) + '=' + url_escape(str(p[1])) for p in list(zip(self._params[::2], self._params[1::2]))])
+        else:
+            return ''
 
     __str__ = to_string
