@@ -24,8 +24,22 @@ Early developement stage. Implemented already:
   * URL parser
 
 
-Example
-=======
+Examples
+========
+
+URL manipulation
+----------------
+
+```python
+from __future__ import print_function
+
+from Pyjo.URL import *
+
+url = Pyjo_URL('https://github.com/dex4er/Pyjo')
+print(str(url.set(scheme='ssh+git', userinfo='git', path=str(url.path)+'.git')))
+# 'ssh+git://git@github.com/dex4er/Pyjo.git'
+```
+
 
 Non-blocking TCP client/server
 ------------------------------
