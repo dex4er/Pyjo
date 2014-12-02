@@ -42,7 +42,7 @@ def _ok(status, test_name=None):
     message += 'ok {0}'.format(test)
 
     if test_name is not None:
-        if isinstance(test_name, int) or test_name.isdigit():
+        if isinstance(test_name, int) or str(test_name).isdigit():
             diag("    You named your test '{0}'.  You shouldn't use numbers for your test names.\n    Very confusing.".format(test_name))
         message += ' - {0}'.format(test_name)
 

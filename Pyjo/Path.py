@@ -3,13 +3,14 @@ Pyjo.Path
 """
 
 from Pyjo.Base import *
+from Pyjo.Overload.Str import *
 
 
 __all__ = ['Pyjo_Path']
 
 
 # TODO stub
-class Pyjo_Path(Pyjo_Base):
+class Pyjo_Path(Pyjo_Base, Pyjo_Overload_Str):
 
     def __init__(self, string=None):
         if string is None:
@@ -19,5 +20,3 @@ class Pyjo_Path(Pyjo_Base):
 
     def to_string(self):
         return self.string
-
-    __str__ = to_string

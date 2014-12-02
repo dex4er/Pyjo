@@ -3,6 +3,7 @@ Pyjo.Parameters
 """
 
 from Pyjo.Base import *
+from Pyjo.Overload.Str import *
 
 from Pyjo.Util import url_escape
 
@@ -11,7 +12,7 @@ __all__ = ['Pyjo_Parameters']
 
 
 # TODO stub
-class Pyjo_Parameters(Pyjo_Base):
+class Pyjo_Parameters(Pyjo_Base, Pyjo_Overload_Str):
 
     def __init__(self, *args, **kwargs):
         self._params = None
@@ -37,5 +38,3 @@ class Pyjo_Parameters(Pyjo_Base):
             return '&'.join([url_escape(str(p[0])) + '=' + url_escape(str(p[1])) for p in list(zip(self._params[::2], self._params[1::2]))])
         else:
             return ''
-
-    __str__ = to_string

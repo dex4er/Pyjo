@@ -5,6 +5,7 @@ Pyjo.URL
 import re
 
 from Pyjo.Base import *
+from Pyjo.Overload.Str import *
 from Pyjo.Parameters import *
 from Pyjo.Path import *
 
@@ -24,7 +25,7 @@ re_path = re.compile(r'^[/?]')
 re_punycode_decode = re.compile(r'^xn--(.+)$')
 
 
-class Pyjo_URL(Pyjo_Base):
+class Pyjo_URL(Pyjo_Base, Pyjo_Overload_Str):
 
     def __init__(self, *args, **kwargs):
         self.base = None
@@ -37,7 +38,7 @@ class Pyjo_URL(Pyjo_Base):
         self._path = None
         self._query = None
 
-        if len(args) == 1 and not isinstance(args[0], (list, tuple, dict)):
+        if len(args) == 1:
             self.parse(args[0])
         elif args:
             self.set(*args)
@@ -62,6 +63,9 @@ class Pyjo_URL(Pyjo_Base):
 
             # Encode
             return '.'.join(map(lambda s: ('xn--' + punycode_encode(s)) if re_ihost.search(s) else s, host.split('.'))).lower()
+
+    def is_abs(self):
+        return bool(self.scheme)
 
     def parse(self, url):
         m = re_url.match(url)
@@ -129,6 +133,7 @@ class Pyjo_URL(Pyjo_Base):
             self._path = Pyjo_Path(value)
             return self
 
+    @property
     def path_query(self):
         query = self.query.to_string()
         if len(query):
@@ -171,7 +176,7 @@ class Pyjo_URL(Pyjo_Base):
             url += '//' + authority
 
         # Path and query
-        path = self.path_query()
+        path = self.path_query
 
         if not authority or path == '' or re_path.search(path):
             url += path
@@ -185,5 +190,3 @@ class Pyjo_URL(Pyjo_Base):
             return url
 
         return url + '#' + url_escape(fragment, r'^A-Za-z0-9\-._~!$&\'()*+,;=%:@/?')
-
-    __str__ = to_string
