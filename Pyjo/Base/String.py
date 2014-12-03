@@ -1,15 +1,17 @@
 """
-Pyjo.Overload.Str
+Pyjo.Base.String
 """
 
+
+from Pyjo.Base import *
 
 from Pyjo.Base import not_implemented
 
 
-__all__ = ['Pyjo_Overload_Str']
+__all__ = ['Pyjo_Base_String']
 
 
-class Pyjo_Overload_Str(object):
+class Pyjo_Base_String(Pyjo_Base):
 
     @not_implemented
     def to_string(self):

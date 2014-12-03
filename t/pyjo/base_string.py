@@ -18,10 +18,9 @@ if __name__ == '__main__':
 
     import sys
 
-    from Pyjo.Base import *
-    from Pyjo.Overload.Str import *
+    from Pyjo.Base.String import *
 
-    class C(Pyjo_Base, Pyjo_Overload_Str):
+    class C(Pyjo_Base_String):
         def __init__(self, value):
             self.value = value
 

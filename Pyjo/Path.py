@@ -2,15 +2,14 @@
 Pyjo.Path
 """
 
-from Pyjo.Base import *
-from Pyjo.Overload.Str import *
+from Pyjo.Base.String import *
 
 
 __all__ = ['Pyjo_Path']
 
 
 # TODO stub
-class Pyjo_Path(Pyjo_Base, Pyjo_Overload_Str):
+class Pyjo_Path(Pyjo_Base_String):
 
     def __init__(self, string=None):
         if string is None:

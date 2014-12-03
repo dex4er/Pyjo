@@ -4,8 +4,7 @@ Pyjo.URL
 
 import re
 
-from Pyjo.Base import *
-from Pyjo.Overload.Str import *
+from Pyjo.Base.String import *
 from Pyjo.Parameters import *
 from Pyjo.Path import *
 
@@ -25,7 +24,7 @@ re_path = re.compile(r'^[/?]')
 re_punycode_decode = re.compile(r'^xn--(.+)$')
 
 
-class Pyjo_URL(Pyjo_Base, Pyjo_Overload_Str):
+class Pyjo_URL(Pyjo_Base_String):
 
     def __init__(self, *args, **kwargs):
         self.base = None
