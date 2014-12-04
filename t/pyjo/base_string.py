@@ -22,6 +22,9 @@ if __name__ == '__main__':
 
     class C(Pyjo_Base_String):
         def __init__(self, value):
+            self.parse(value)
+
+        def parse(self, value):
             self.value = value
 
         def to_string(self):
@@ -91,5 +94,28 @@ if __name__ == '__main__':
     else:
         is_ok(unicode(string), u'string', "unicode(string) == u'string'")
         is_ok(unicode(string), unicode(string2), "unicode(string) == unicode(string2)")
+
+    is_ok(repr(string), "C('string')", "repr(string) == \"C('string')\"")
+
+    is_ok(string + 'literal', 'stringliteral', "string + 'literal'")
+    is_ok(string + other, 'stringother', "string + other")
+
+    string2 += 'two'
+    isa_ok(string2, C, 'string2')
+    is_ok(str(string2), 'stringtwo', "string2 += 'two'")
+
+    string2 += other
+    isa_ok(string2, C, 'string2')
+    is_ok(str(string2), 'stringtwoother', "string2 += other")
+
+    is_ok(string * 2, 'stringstring', "string * 2")
+
+    string2 *= 2
+    isa_ok(string2, C, 'string2')
+    is_ok(str(string2), 'stringtwootherstringtwoother', "string2 *= 2")
+
+    ok('s' in string, "'s' in string")
+    ok('g' in string, "'g' in string")
+    ok(not 'c' in string, "not 'c' in string")
 
     done_testing()
