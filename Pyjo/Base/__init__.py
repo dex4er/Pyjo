@@ -22,6 +22,10 @@ class Pyjo_Base(object):
         return self
 
 
+def new(*args, **kwargs):
+    return Pyjo_Base(*args, **kwargs)
+
+
 def accessor(method):
     return property(method, method)
 

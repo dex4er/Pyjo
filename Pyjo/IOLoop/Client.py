@@ -136,3 +136,7 @@ class Pyjo_IOLoop_Client(Pyjo_EventEmitter):
 
             self.emit('accept', handle)
             # TODO TLS
+
+
+def new(*args, **kwargs):
+    return Pyjo_IOLooop_Client(*args, **kwargs)

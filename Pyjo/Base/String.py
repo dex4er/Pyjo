@@ -76,3 +76,7 @@ class Pyjo_Base_String(Pyjo_Base):
 
     def __contains__(self, other):
         return other in str(self)
+
+
+def new(*args, **kwargs):
+    return Pyjo_Base_Stream(*args, **kwargs)

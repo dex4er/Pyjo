@@ -77,3 +77,7 @@ class Pyjo_Reactor(Pyjo_EventEmitter):
     @not_implemented
     def watch(self, handle, read, write):
         pass
+
+
+def new(*args, **kwargs):
+    return Pyjo_Reactor(*args, **kwargs)

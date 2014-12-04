@@ -117,3 +117,7 @@ class Pyjo_Reactor_EV(Pyjo_Reactor_Poll):
         self._timers[tid]['watcher'] = watcher
 
         return tid
+
+
+def new(*args, **kwargs):
+    return Pyjo_Reactor_EV(*args, **kwargs)

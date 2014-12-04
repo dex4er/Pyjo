@@ -311,6 +311,10 @@ class Pyjo_IOLoop(Pyjo_Base):
         return getattr(self.reactor, method)(after, lambda: cb(self))
 
 
+def new(*args, **kwargs):
+    return Pyjo_IOLooop(*args, **kwargs)
+
+
 instance = Pyjo_IOLoop()
 
 

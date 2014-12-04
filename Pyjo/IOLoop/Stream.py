@@ -173,3 +173,6 @@ class Pyjo_IOLoop_Stream(Pyjo_EventEmitter):
             return self.close()
         if self._handle:
             self.reactor.watch(handle, not self._paused, 0)
+
+def new(*args, **kwargs):
+    return Pyjo_IOLooop_Stream(*args, **kwargs)

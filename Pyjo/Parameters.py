@@ -37,3 +37,7 @@ class Pyjo_Parameters(Pyjo_Base_String):
             return '&'.join([url_escape(str(p[0])) + '=' + url_escape(str(p[1])) for p in list(zip(self._params[::2], self._params[1::2]))])
         else:
             return ''
+
+
+def new(*args, **kwargs):
+    return Pyjo_Parameters(*args, **kwargs)

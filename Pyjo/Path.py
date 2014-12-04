@@ -19,3 +19,7 @@ class Pyjo_Path(Pyjo_Base_String):
 
     def to_string(self):
         return self.string
+
+
+def new(*args, **kwargs):
+    return Pyjo_Path(*args, **kwargs)

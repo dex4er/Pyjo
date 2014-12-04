@@ -103,3 +103,6 @@ class Pyjo_IOLoop_Delay(Pyjo_EventEmitter):
         if not self._pending:
             self.ioloop.next_tick(self.begin())
         return self
+
+def new(*args, **kwargs):
+    return Pyjo_IOLooop_Delay(*args, **kwargs)

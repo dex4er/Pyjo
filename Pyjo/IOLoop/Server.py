@@ -65,3 +65,6 @@ class Pyjo_IOLoop_Server(Pyjo_EventEmitter):
             self.emit('accept', handle)
             #self.reactor.remove(self.handle)
             # TODO TLS
+
+def new(*args, **kwargs):
+    return Pyjo_IOLooop_Server(*args, **kwargs)

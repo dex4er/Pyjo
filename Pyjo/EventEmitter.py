@@ -79,3 +79,7 @@ class Pyjo_EventEmitter(Pyjo_Base):
             del self._events[name]
 
         return self
+
+
+def new(*args, **kwargs):
+    return Pyjo_EventEmitter(*args, **kwargs)

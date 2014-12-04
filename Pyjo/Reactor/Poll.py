@@ -209,3 +209,7 @@ class Pyjo_Reactor_Poll(Pyjo_Reactor):
             warn("-- Reactor adding timer[{0}] = {1}".format(tid, self._timers[tid]))
 
         return tid
+
+
+def new(*args, **kwargs):
+    return Pyjo_Reactor_Poll(*args, **kwargs)
