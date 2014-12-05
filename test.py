@@ -34,7 +34,7 @@ def run():
             args += ['t/pyjo']
         os.putenv('PYTHONPATH', '.')
         cmd = [prove, '--ext=py', '--exec=' + sys.executable] + args
-        subprocess.call(cmd)
+        sys.exit(subprocess.call(cmd))
     except OSError:
         unittest.main(defaultTest='TestSuite')
 
