@@ -50,7 +50,10 @@ def _ok(check, test_name=None):
     print(message)
 
     if not check:
-        diag("  Failed test '{0}'".format(test_name))
+        if test_name is not None:
+            diag("  Failed test '{0}'".format(test_name))
+        else:
+            diag("  Failed test")
         diag(''.join(traceback.format_stack()[:-2]))
 
 
