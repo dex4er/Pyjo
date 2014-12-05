@@ -3,15 +3,12 @@ Pyjo.Base.String
 """
 
 
-from Pyjo.Base import *
+import Pyjo.Base
 
-from Pyjo.Base import not_implemented
-
-
-__all__ = ['Pyjo_Base_String']
+from Pyjo.Util import not_implemented
 
 
-class Pyjo_Base_String(Pyjo_Base):
+class Pyjo_Base_String(Pyjo.Base.object):
 
     @not_implemented
     def to_string(self):
@@ -79,4 +76,6 @@ class Pyjo_Base_String(Pyjo_Base):
 
 
 def new(*args, **kwargs):
-    return Pyjo_Base_Stream(*args, **kwargs)
+    return Pyjo_Base_String(*args, **kwargs)
+
+object = Pyjo_Base_String  # @ReservedAssignment

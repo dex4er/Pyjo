@@ -5,17 +5,14 @@ Pyjo.IOLoop
 import importlib
 import weakref
 
-from Pyjo.Base import *
-from Pyjo.IOLoop.Client import *
-from Pyjo.IOLoop.Delay import *
-from Pyjo.IOLoop.Server import *
-from Pyjo.IOLoop.Stream import *
-from Pyjo.Reactor.Poll import *
+import Pyjo.Base
+import Pyjo.IOLoop.Client
+import Pyjo.IOLoop.Delay
+import Pyjo.IOLoop.Server
+import Pyjo.IOLoop.Stream
+import Pyjo.Reactor.Poll
 
 from Pyjo.Util import getenv, md5_sum, steady_time, rand, warn
-
-
-__all__ = ['Pyjo_IOLoop']
 
 
 DEBUG = getenv('PYJO_IOLOOP_DEBUG', 0)
@@ -25,7 +22,7 @@ class Error(Exception):
     pass
 
 
-class Pyjo_IOLoop(Pyjo_Base):
+class Pyjo_IOLoop(Pyjo.Base.object):
 
     def __init__(self):
         self.accept_interval = 0.025  # TODO parametrized
@@ -45,7 +42,7 @@ class Pyjo_IOLoop(Pyjo_Base):
         self._accepting_timer = None
 
         # TODO Pyjo.Loader
-        module = importlib.import_module(Pyjo_Reactor_Poll.detect())
+        module = importlib.import_module(Pyjo.Reactor.Poll.object.detect())
         module_class_name = module.__name__.replace('.', '_')
         module_class = getattr(module, module_class_name)
         self.reactor = module_class()
@@ -82,7 +79,7 @@ class Pyjo_IOLoop(Pyjo_Base):
         self._recurring()
 
         cid = self._id()
-        client = Pyjo_IOLoop_Client()
+        client = Pyjo.IOLoop.Client.new()
         self._connections[cid] = {'client': client}
         client.reactor = weakref.proxy(self.reactor)
 
@@ -91,7 +88,7 @@ class Pyjo_IOLoop(Pyjo_Base):
         def connect_cb(self, cid, client, handle):
             if dir(self):
                 del self._connections[cid]['client']
-                stream = Pyjo_IOLoop_Stream(handle)
+                stream = Pyjo.IOLoop.Stream.new(handle)
                 self._stream(stream, cid)
                 cb(self, None, stream)
 
@@ -103,7 +100,7 @@ class Pyjo_IOLoop(Pyjo_Base):
         return cid
 
     def delay(self, *args):
-        delay = Pyjo_IOLoop_Delay()
+        delay = Pyjo.IOLoop.Delay.new()
         delay.ioloop = weakref.proxy(self)
         if args:
             return delay.steps(*args)
@@ -135,10 +132,10 @@ class Pyjo_IOLoop(Pyjo_Base):
         self._remove(cid)
 
     def server(self, cb, **kwargs):
-        server = Pyjo_IOLoop_Server()
+        server = Pyjo.IOLoop.Server.new()
 
         def accept_cb(self, server, handle):
-            stream = Pyjo_IOLoop_Stream(handle)
+            stream = Pyjo.IOLoop.Stream.new(handle)
             cb(self, stream, self.stream(stream))
 
         server.on('accept', lambda server, handle: accept_cb(self, server, handle))
@@ -312,7 +309,7 @@ class Pyjo_IOLoop(Pyjo_Base):
 
 
 def new(*args, **kwargs):
-    return Pyjo_IOLooop(*args, **kwargs)
+    return Pyjo_IOLoop(*args, **kwargs)
 
 
 instance = Pyjo_IOLoop()
@@ -372,3 +369,6 @@ def stream(stream):
 
 def timer(after, cb):
     return instance.timer(after, cb)
+
+
+object = Pyjo_IOLoop  # @ReservedAssignment

@@ -16,7 +16,7 @@ def step2(delay):
     def step2_1(delay2):
         print("Step 2.1")
         end = delay2.begin()
-        Pyjo.IOLoop.timer(1, lambda loop: end('','OK'))
+        Pyjo.IOLoop.timer(1, lambda loop: end('', 'OK'))
         print('Wait 1 second for step 2.2.')
 
     def step2_2(delay2, *args):

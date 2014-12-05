@@ -2,21 +2,15 @@
 Pyjo.IOLoop.Delay
 """
 
+import Pyjo.EventEmitter
 import Pyjo.IOLoop
-
-from Pyjo.EventEmitter import *
-
-
-__all__ = ['Pyjo_IOLoop_Delay']
 
 
 REMAINING = {}
 
 
-class Pyjo_IOLoop_Delay(Pyjo_EventEmitter):
+class Pyjo_IOLoop_Delay(Pyjo.EventEmitter.object):
     def __init__(self):
-        super(Pyjo_IOLoop_Delay, self).__init__()
-
         self.ioloop = Pyjo.IOLoop.singleton()
         self._data = {}
 
@@ -25,6 +19,8 @@ class Pyjo_IOLoop_Delay(Pyjo_EventEmitter):
         self._lock = False
         self._fail = False
         self._args = []
+
+        super(Pyjo_IOLoop_Delay, self).__init__()
 
     def begin(self, offset=1, length=0, *args):
         self._pending += 1
@@ -58,8 +54,8 @@ class Pyjo_IOLoop_Delay(Pyjo_EventEmitter):
         return self
 
     def steps(self, *args):
-        self = self.remaining(*args);
-        self.ioloop.next_tick(self.begin());
+        self = self.remaining(*args)
+        self.ioloop.next_tick(self.begin())
         return self
 
     def wait(self):
@@ -72,7 +68,7 @@ class Pyjo_IOLoop_Delay(Pyjo_EventEmitter):
     def _step(self, sid, offset=1, length=0, *args):
         if args:
             if length:
-                args = args[offset:offset+length]
+                args = args[offset: offset + length]
             else:
                 args = args[offset:]
         if sid >= len(self._args):
@@ -104,5 +100,9 @@ class Pyjo_IOLoop_Delay(Pyjo_EventEmitter):
             self.ioloop.next_tick(self.begin())
         return self
 
+
 def new(*args, **kwargs):
-    return Pyjo_IOLooop_Delay(*args, **kwargs)
+    return Pyjo_IOLoop_Delay(*args, **kwargs)
+
+
+object = Pyjo_IOLoop_Delay  # @ReservedAssignment

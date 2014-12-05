@@ -2,14 +2,11 @@
 Pyjo.Path
 """
 
-from Pyjo.Base.String import *
-
-
-__all__ = ['Pyjo_Path']
+import Pyjo.Base.String
 
 
 # TODO stub
-class Pyjo_Path(Pyjo_Base_String):
+class Pyjo_Path(Pyjo.Base.String.object):
 
     def __init__(self, string=None):
         if string is None:
@@ -23,3 +20,5 @@ class Pyjo_Path(Pyjo_Base_String):
 
 def new(*args, **kwargs):
     return Pyjo_Path(*args, **kwargs)
+
+object = Pyjo_Path  # @ReservedAssignment

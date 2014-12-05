@@ -7,15 +7,11 @@ import weakref
 
 from errno import EAGAIN, ECONNRESET, EINTR, EPIPE, EWOULDBLOCK
 
+import Pyjo.EventEmitter
 import Pyjo.IOLoop
 
-from Pyjo.EventEmitter import *
 
-
-__all__ = ['Pyjo_IOLoop_Stream']
-
-
-class Pyjo_IOLoop_Stream(Pyjo_EventEmitter):
+class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
     def __init__(self, handle):
         super(Pyjo_IOLoop_Stream, self).__init__()
 
@@ -174,5 +170,8 @@ class Pyjo_IOLoop_Stream(Pyjo_EventEmitter):
         if self._handle:
             self.reactor.watch(handle, not self._paused, 0)
 
+
 def new(*args, **kwargs):
-    return Pyjo_IOLooop_Stream(*args, **kwargs)
+    return Pyjo_IOLoop_Stream(*args, **kwargs)
+
+object = Pyjo_IOLoop_Stream  # @ReservedAssignment

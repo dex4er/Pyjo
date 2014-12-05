@@ -18,9 +18,9 @@ if __name__ == '__main__':
 
     import sys
 
-    from Pyjo.Base.String import *
+    import Pyjo.Base.String
 
-    class C(Pyjo_Base_String):
+    class C(Pyjo.Base.String.object):
         def __init__(self, value):
             self.parse(value)
 
@@ -116,6 +116,6 @@ if __name__ == '__main__':
 
     ok('s' in string, "'s' in string")
     ok('g' in string, "'g' in string")
-    ok(not 'c' in string, "not 'c' in string")
+    ok('c' not in string, "'c' not in string")
 
     done_testing()

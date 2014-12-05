@@ -148,7 +148,7 @@ def _eq_array(stack, t, a1, a2):
         else:
             e2 = DoesNotExist
 
-        stack.append({'type':t, 'idx':i, 'vals': [e1, e2]})
+        stack.append({'type': t, 'idx': i, 'vals': [e1, e2]})
         check = _deep_check(stack, e1, e2)
         if check:
             stack.pop()
@@ -179,7 +179,7 @@ def _eq_hash(stack, t, h1, h2):
         else:
             e2 = DoesNotExist
 
-        stack.append({'type':t, 'idx':k, 'vals': [e1, e2]})
+        stack.append({'type': t, 'idx': k, 'vals': [e1, e2]})
         check = _deep_check(stack, e1, e2)
         if check:
             stack.pop()
@@ -222,6 +222,7 @@ def _deep_check(stack, e1, e2):
 re_foo = re.compile(r'\$FOO')
 re_indent = re.compile(r'^', re.M)
 
+
 def _format_stack(stack):
     vname = '$FOO'
 
@@ -235,9 +236,9 @@ def _format_stack(stack):
 
     vals = stack[-1]['vals']
     vnames = ['     ' + re_foo.sub('got', vname),
-            re_foo.sub('expected', vname)]
+              re_foo.sub('expected', vname)]
 
-    out = "Structures begin differing at:\n";
+    out = "Structures begin differing at:\n"
     for idx in range(len(vals)):
         val = vals[idx]
         if val is None:
@@ -253,7 +254,7 @@ def _format_stack(stack):
 
     out = '    ' + "\n    ".join(out.split("\n"))
 
-    return out;
+    return out
 
 
 class Guard(object):

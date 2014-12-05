@@ -5,21 +5,17 @@ Pyjo.Reactor
 import select
 import socket
 
-from Pyjo.Base import *
-from Pyjo.EventEmitter import *
+import Pyjo.Base
+import Pyjo.EventEmitter
 
-from Pyjo.Base import not_implemented
-from Pyjo.Util import getenv
-
-
-__all__ = ['Pyjo_Reactor']
+from Pyjo.Util import getenv, not_implemented
 
 
 class Error(Exception):
     pass
 
 
-class Pyjo_Reactor(Pyjo_EventEmitter):
+class Pyjo_Reactor(Pyjo.EventEmitter.object):
 
     @not_implemented
     def again(self):
@@ -81,3 +77,5 @@ class Pyjo_Reactor(Pyjo_EventEmitter):
 
 def new(*args, **kwargs):
     return Pyjo_Reactor(*args, **kwargs)
+
+object = Pyjo_Reactor  # @ReservedAssignment

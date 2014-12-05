@@ -2,16 +2,13 @@
 Pyjo.Parameters
 """
 
-from Pyjo.Base.String import *
+import Pyjo.Base.String
 
 from Pyjo.Util import url_escape
 
 
-__all__ = ['Pyjo_Parameters']
-
-
 # TODO stub
-class Pyjo_Parameters(Pyjo_Base_String):
+class Pyjo_Parameters(Pyjo.Base.String.object):
 
     def __init__(self, *args, **kwargs):
         self._params = None
@@ -41,3 +38,5 @@ class Pyjo_Parameters(Pyjo_Base_String):
 
 def new(*args, **kwargs):
     return Pyjo_Parameters(*args, **kwargs)
+
+object = Pyjo_Parameters  # @ReservedAssignment

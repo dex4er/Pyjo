@@ -4,22 +4,19 @@ Pyjo.IOLoop.Server
 
 import socket
 
+import Pyjo.EventEmitter
 import Pyjo.IOLoop
 
-from Pyjo.EventEmitter import *
 
-
-__all__ = ['Pyjo_IOLoop_Server']
-
-class Pyjo_IOLoop_Server(Pyjo_EventEmitter):
+class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
     def __init__(self):
-        super(Pyjo_IOLoop_Server, self).__init__()
-
         self.multi_accept = 50
         self.reactor = None
         self.handle = None
 
         self.reactor = Pyjo.IOLoop.singleton().reactor
+
+        super(Pyjo_IOLoop_Server, self).__init__()
 
     def __del__(self):
         if dir(self.handle) and self.handle:
@@ -63,8 +60,11 @@ class Pyjo_IOLoop_Server(Pyjo_EventEmitter):
             handle.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 
             self.emit('accept', handle)
-            #self.reactor.remove(self.handle)
+            # self.reactor.remove(self.handle)
             # TODO TLS
 
+
 def new(*args, **kwargs):
-    return Pyjo_IOLooop_Server(*args, **kwargs)
+    return Pyjo_IOLoop_Server(*args, **kwargs)
+
+object = Pyjo_IOLoop_Server  # @ReservedAssignment

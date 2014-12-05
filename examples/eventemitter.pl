@@ -9,6 +9,10 @@ package Cat {
         my ($self, $times) = @_;
         $self->emit(roar => $times);
     }
+    sub kill {
+        my ($self, $times) = @_;
+        $self->emit('dead');
+    }
 }
 
 
@@ -21,5 +25,11 @@ $tiger->on(roar => sub {
     }
 });
 
+$tiger->once(dead => sub {
+    say '(x.x)';
+});
+
 $tiger->poke(2);
 $tiger->poke(2);
+$tiger->kill();
+$tiger->kill();

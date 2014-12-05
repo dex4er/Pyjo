@@ -13,14 +13,16 @@ class UnitTest(Pyjo.Test.UnitTest):
 if __name__ == '__main__':
     from Pyjo.Test import *  # @UnusedWildImport
 
-    from Pyjo.EventEmitter import *
+    import Pyjo.EventEmitter
 
     # Normal event
-    e = Pyjo_EventEmitter()
+    e = Pyjo.EventEmitter.object()
     called = 0
+
     def cb(self):
         global called
         called += 1
+
     e.on('test1', cb)
     e.emit('test1')
     is_ok(called, 1, 'event was emitted once')

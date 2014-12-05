@@ -4,11 +4,9 @@ Pyjo.EventEmitter
 
 import weakref
 
-from Pyjo.Base import *
+import Pyjo.Base
+
 from Pyjo.Util import getenv, warn
-
-
-__all__ = ['Pyjo_EventEmitter']
 
 
 DEBUG = getenv('PYJO_EVENTEMITTER_DEBUG', 0)
@@ -18,7 +16,7 @@ class Error(Exception):
     pass
 
 
-class Pyjo_EventEmitter(Pyjo_Base):
+class _object(Pyjo.Base.object):
     def __init__(self):
         self._events = {}
 
@@ -82,4 +80,6 @@ class Pyjo_EventEmitter(Pyjo_Base):
 
 
 def new(*args, **kwargs):
-    return Pyjo_EventEmitter(*args, **kwargs)
+    return _object(*args, **kwargs)
+
+object = _object  # @ReservedAssignment

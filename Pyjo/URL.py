@@ -4,16 +4,12 @@ Pyjo.URL
 
 import re
 
-from Pyjo.Base.String import *
-from Pyjo.Parameters import *
-from Pyjo.Path import *
+import Pyjo.Base.String
+import Pyjo.Parameters
+import Pyjo.Path
 
-from Pyjo.Base import accessor, Omitted
-from Pyjo.Util import (punycode_decode, punycode_encode, url_escape,
-                       url_unescape)
-
-
-__all__ = ['Pyjo_URL']
+from Pyjo.Util import \
+    accessor, punycode_decode, punycode_encode, url_escape, url_unescape
 
 
 re_url = re.compile(r'^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?')
@@ -24,7 +20,11 @@ re_path = re.compile(r'^[/?]')
 re_punycode_decode = re.compile(r'^xn--(.+)$')
 
 
-class Pyjo_URL(Pyjo_Base_String):
+class Omitted:
+    pass
+
+
+class Pyjo_URL(Pyjo.Base.String.object):
 
     def __init__(self, *args, **kwargs):
         self.base = None
@@ -125,11 +125,11 @@ class Pyjo_URL(Pyjo_Base_String):
     def path(self, value=Omitted):
         if value is Omitted:
             if self._path is None:
-                self._path = Pyjo_Path()
+                self._path = Pyjo.Path.new()
             return self._path
         else:
             # TODO old path / new path
-            self._path = Pyjo_Path(value)
+            self._path = Pyjo.Path.new(value)
             return self
 
     @property
@@ -139,7 +139,7 @@ class Pyjo_URL(Pyjo_Base_String):
             query = '?' + query
         else:
             query = ''
-        return self.path.to_string() + query;
+        return self.path.to_string() + query
 
     @property
     def protocol(self):
@@ -154,10 +154,10 @@ class Pyjo_URL(Pyjo_Base_String):
     def query(self, *args):
         if not args:
             if self._query is None:
-                self._query = Pyjo_Parameters()
+                self._query = Pyjo.Parameters.new()
             return self._query
         else:
-            self._query = Pyjo_Parameters(*args)
+            self._query = Pyjo.Parameters.new(*args)
             return self
 
     def to_string(self):
@@ -193,3 +193,5 @@ class Pyjo_URL(Pyjo_Base_String):
 
 def new(*args, **kwargs):
     return Pyjo_URL(*args, **kwargs)
+
+object = Pyjo_URL  # @ReservedAssignment

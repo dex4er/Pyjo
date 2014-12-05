@@ -14,6 +14,7 @@ class C:
         self._ref = weakref.proxy(self._ref)
         return self
 
+
 def test():
     a = C()
     b = C()

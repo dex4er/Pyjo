@@ -1,11 +1,14 @@
 from __future__ import print_function
 
-from Pyjo.EventEmitter import *
+import Pyjo.EventEmitter
 
 
-class Cat(Pyjo_EventEmitter):
+class Cat(Pyjo.EventEmitter.object):
     def poke(self, times):
         self.emit('roar', times)
+
+    def kill(self):
+        self.emit('dead')
 
 
 def roar_cb(cat, times):
@@ -13,9 +16,16 @@ def roar_cb(cat, times):
         print('RAWR!')
 
 
+def dead_cb(cat):
+    print('(x.x)')
+
+
 tiger = Cat()
 
 tiger.on('roar', roar_cb)
+tiger.once('dead', dead_cb)
 
 tiger.poke(2)
 tiger.poke(2)
+tiger.kill()
+tiger.kill()

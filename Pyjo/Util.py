@@ -15,12 +15,21 @@ import time
 __all__ = ['getenv', 'has', 'lazy', 'md5_sum', 'punycode_decode', 'rand',
            'steady_time', 'url_escape', 'url_unescape', 'warn']
 
-def has(attrs, default=None, *args):
-    return lambda cls: cls.attr(attrs, default)
+
+class Error(Exception):
+    pass
+
+
+def accessor(method):
+    return property(method, method)
 
 
 def getenv(name, default):
     return os.environ.get(name, default)
+
+
+def has(attrs, default=None, *args):
+    return lambda cls: cls.attr(attrs, default)
 
 
 class lazy(object):
@@ -47,6 +56,12 @@ def md5_sum(string):
     return m.hexdigest()
 
 
+def not_implemented(method):
+    def stub(*args, **kwargs):
+        raise Error('Method "{0}" not implemented by subclass'.format(method.__name__))
+    return stub
+
+
 def punycode_decode(string):
     return bytes(string, 'ascii').decode('punycode')
 
@@ -65,6 +80,7 @@ def rand(value=1):
 
 re_url_escape_pattern = re.compile(r'([^A-Za-z0-9\-._~])')
 re_url_unescape_pattern = re.compile(r'%([0-9a-fA-F]{2})')
+
 
 def url_escape(string, pattern=None):
     if pattern is not None:

@@ -5,13 +5,10 @@ Pyjo.Reactor.EV
 import pyev
 import weakref
 
-from Pyjo.Reactor.Poll import *
+import Pyjo.Reactor.Poll
 
 
-__all__ = ['Pyjo_Reactor_EV']
-
-
-class Pyjo_Reactor_EV(Pyjo_Reactor_Poll):
+class Pyjo_Reactor_EV(Pyjo.Reactor.Poll.object):
     def __init__(self):
         super(Pyjo_Reactor_EV, self).__init__()
 
@@ -80,7 +77,7 @@ class Pyjo_Reactor_EV(Pyjo_Reactor_Poll):
                 self = weakref.proxy(self)
 
                 watcher = self._loop.io(fd, mode,
-                                        lambda watcher, revents: \
+                                        lambda watcher, revents:
                                         self._io(fd, watcher, revents))
                 watcher.start()
                 io['watcher'] = watcher
@@ -111,7 +108,7 @@ class Pyjo_Reactor_EV(Pyjo_Reactor_Poll):
             self._sandbox('Timer {0}'.format(tid), timer['cb'])
 
         watcher = self._loop.timer(after, after,
-                                   lambda watcher, revents: \
+                                   lambda watcher, revents:
                                    timer_cb(self, tid, watcher, revents))
         watcher.start()
         self._timers[tid]['watcher'] = watcher
@@ -121,3 +118,5 @@ class Pyjo_Reactor_EV(Pyjo_Reactor_Poll):
 
 def new(*args, **kwargs):
     return Pyjo_Reactor_EV(*args, **kwargs)
+
+object = Pyjo_Reactor_EV  # @ReservedAssignment
