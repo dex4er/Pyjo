@@ -2,14 +2,12 @@
 Pyjo.Base
 """
 
-__all__ = ['Pyjo_Base']
+
+class _object(object):
+    def __init__(self, *args, **kwargs):
+        self.set(*args, **kwargs)
 
 
-class Omitted(object):
-    pass
-
-
-class Pyjo_Base(object):
     def set(self, *args, **kwargs):
         if args:
             for k, v in zip(args[::2], args[1::2]):
@@ -23,18 +21,7 @@ class Pyjo_Base(object):
 
 
 def new(*args, **kwargs):
-    return Pyjo_Base(*args, **kwargs)
+    return _object(*args, **kwargs)
 
 
-def accessor(method):
-    return property(method, method)
-
-
-def not_implemented(method):
-    def stub(*args, **kwargs):
-        raise Error('Method "{0}" not implemented by subclass'.format(method.__name__))
-    return stub
-
-
-class Error(Exception):
-    pass
+object = _object  # @ReservedAssignment
