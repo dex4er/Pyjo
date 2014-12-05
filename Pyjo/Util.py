@@ -12,12 +12,31 @@ import sys
 import time
 
 
-__all__ = ['getenv', 'md5_sum', 'punycode_decode', 'rand', 'steady_time',
-           'url_escape', 'url_unescape', 'warn']
+__all__ = ['getenv', 'has', 'lazy', 'md5_sum', 'punycode_decode', 'rand',
+           'steady_time', 'url_escape', 'url_unescape', 'warn']
+
+def has(attrs, default=None, *args):
+    return lambda cls: cls.attr(attrs, default)
 
 
 def getenv(name, default):
     return os.environ.get(name, default)
+
+
+class lazy(object):
+    def __init__(self, name, default=None):
+        self.name = name
+        self.default = default
+
+    def __get__(self, obj, objtype):
+        if obj is None:
+            return self
+        if callable(self.default):
+            default = self.default()
+        else:
+            default = self.default
+        setattr(obj, self.name, default)
+        return getattr(obj, self.name)
 
 
 def md5_sum(string):

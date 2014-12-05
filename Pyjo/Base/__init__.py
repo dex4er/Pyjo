@@ -3,10 +3,22 @@ Pyjo.Base
 """
 
 
-class _object(object):
+from Pyjo.Util import lazy
+
+
+class Pyjo_Base(object):
     def __init__(self, *args, **kwargs):
         self.set(*args, **kwargs)
 
+    @classmethod
+    def attr(cls, attrs, default=None):
+        if not isinstance(attrs, (list, tuple)):
+            attrs = [attrs]
+
+        for attr in attrs:
+            setattr(cls, attr, lazy(attr, default))
+
+        return cls
 
     def set(self, *args, **kwargs):
         if args:
@@ -20,8 +32,9 @@ class _object(object):
         return self
 
 
+
 def new(*args, **kwargs):
-    return _object(*args, **kwargs)
+    return Pyjo_Base(*args, **kwargs)
 
 
-object = _object  # @ReservedAssignment
+object = Pyjo_Base  # @ReservedAssignment
