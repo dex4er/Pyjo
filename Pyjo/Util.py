@@ -24,9 +24,9 @@ def getenv(name, default):
 
 
 class lazy(object):
-    def __init__(self, name, default=None):
-        self.name = name
+    def __init__(self, default=None, name=None):
         self.default = default
+        self.name = name
 
     def __get__(self, obj, objtype):
         if obj is None:
@@ -35,6 +35,8 @@ class lazy(object):
             default = self.default()
         else:
             default = self.default
+        if self.name is None:
+            return default
         setattr(obj, self.name, default)
         return getattr(obj, self.name)
 

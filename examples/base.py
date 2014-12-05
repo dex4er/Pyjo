@@ -2,17 +2,17 @@ from __future__ import print_function
 
 import Pyjo.Base
 
-from Pyjo.Util import has
+from Pyjo.Util import lazy
 
 
-@has(['x', 'y'], 0)
 class Point(Pyjo.Base.object):
-    pass
+    x = 0
+    y = 0
 
 
-@has(['p1', 'p2'], lambda: Point())
 class Line(Pyjo.Base.object):
-    pass
+    p1 = lazy(lambda: Point())
+    p2 = lazy(lambda: Point())
 
 
 p = Point(x=1, y=2)

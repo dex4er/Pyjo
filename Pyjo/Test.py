@@ -70,6 +70,9 @@ def fail(test_name=None):
 
 
 def is_ok(got, expected, test_name=None):
+    if test_name is None:
+        test_name = 'An object {0}'.format(type(got))
+    test_name = "{0} is {1}".format(test_name, repr(expected))
     check = got == expected
     _ok(check, test_name)
     if not check:
@@ -79,8 +82,6 @@ def is_ok(got, expected, test_name=None):
 def isa_ok(got, cls, test_name=None):
     if test_name is None:
         test_name = "An object {0}".format(type(got))
-    else:
-        test_name = "{0}".format(test_name)
     test_name = "{0} is object {1}".format(test_name, cls)
     check = isinstance(got, cls)
     _ok(check, test_name)

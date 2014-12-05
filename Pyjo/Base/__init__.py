@@ -7,6 +7,14 @@ from Pyjo.Util import lazy
 
 
 class Pyjo_Base(object):
+    def __new__(cls, *args, **kwargs):
+        obj = super(Pyjo_Base, cls).__new__(cls)
+        for name in dir(obj):
+            attr = getattr(cls, name)
+            if attr.__class__.__name__ == 'lazy':
+                setattr(cls, name, lazy(attr.default, name))
+        return obj
+
     def __init__(self, *args, **kwargs):
         self.set(*args, **kwargs)
 
@@ -16,21 +24,14 @@ class Pyjo_Base(object):
             attrs = [attrs]
 
         for attr in attrs:
-            setattr(cls, attr, lazy(attr, default))
+            setattr(cls, attr, lazy(default, attr))
 
         return cls
 
-    def set(self, *args, **kwargs):
-        if args:
-            for k, v in zip(args[::2], args[1::2]):
-                setattr(self, k, v)
-            if len(args) % 2:
-                setattr(self, args[-1], None)
-        elif kwargs:
-            for k, v in kwargs.items():
-                setattr(self, k, v)
+    def set(self, **kwargs):
+        for k, v in kwargs.items():
+            setattr(self, k, v)
         return self
-
 
 
 def new(*args, **kwargs):
