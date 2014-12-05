@@ -64,7 +64,5 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
             # TODO TLS
 
 
-def new(*args, **kwargs):
-    return Pyjo_IOLoop_Server(*args, **kwargs)
-
+new = Pyjo_IOLoop_Server.new
 object = Pyjo_IOLoop_Server  # @ReservedAssignment

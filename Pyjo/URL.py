@@ -191,7 +191,5 @@ class Pyjo_URL(Pyjo.Base.String.object):
         return url + '#' + url_escape(fragment, r'^A-Za-z0-9\-._~!$&\'()*+,;=%:@/?')
 
 
-def new(*args, **kwargs):
-    return Pyjo_URL(*args, **kwargs)
-
+new = Pyjo_URL.new
 object = Pyjo_URL  # @ReservedAssignment

@@ -116,7 +116,5 @@ class Pyjo_Reactor_EV(Pyjo.Reactor.Poll.object):
         return tid
 
 
-def new(*args, **kwargs):
-    return Pyjo_Reactor_EV(*args, **kwargs)
-
+new = Pyjo_Reactor_EV.new
 object = Pyjo_Reactor_EV  # @ReservedAssignment

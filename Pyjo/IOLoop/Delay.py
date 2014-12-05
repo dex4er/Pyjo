@@ -101,8 +101,5 @@ class Pyjo_IOLoop_Delay(Pyjo.EventEmitter.object):
         return self
 
 
-def new(*args, **kwargs):
-    return Pyjo_IOLoop_Delay(*args, **kwargs)
-
-
+new = Pyjo_IOLoop_Delay.new
 object = Pyjo_IOLoop_Delay  # @ReservedAssignment

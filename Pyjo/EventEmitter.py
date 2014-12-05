@@ -16,7 +16,7 @@ class Error(Exception):
     pass
 
 
-class _object(Pyjo.Base.object):
+class Pyjo_EventEmitter(Pyjo.Base.object):
     def __init__(self):
         self._events = {}
 
@@ -79,7 +79,5 @@ class _object(Pyjo.Base.object):
         return self
 
 
-def new(*args, **kwargs):
-    return _object(*args, **kwargs)
-
-object = _object  # @ReservedAssignment
+new = Pyjo_EventEmitter.new
+object = Pyjo_EventEmitter  # @ReservedAssignment

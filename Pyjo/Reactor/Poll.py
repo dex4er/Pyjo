@@ -208,7 +208,5 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.object):
         return tid
 
 
-def new(*args, **kwargs):
-    return Pyjo_Reactor_Poll(*args, **kwargs)
-
+new = Pyjo_Reactor_Poll.new
 object = Pyjo_Reactor_Poll  # @ReservedAssignment

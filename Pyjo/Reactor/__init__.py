@@ -75,7 +75,5 @@ class Pyjo_Reactor(Pyjo.EventEmitter.object):
         pass
 
 
-def new(*args, **kwargs):
-    return Pyjo_Reactor(*args, **kwargs)
-
+new = Pyjo_Reactor.new
 object = Pyjo_Reactor  # @ReservedAssignment

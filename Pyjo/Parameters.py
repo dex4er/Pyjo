@@ -36,7 +36,5 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
             return ''
 
 
-def new(*args, **kwargs):
-    return Pyjo_Parameters(*args, **kwargs)
-
+new = Pyjo_Parameters.new
 object = Pyjo_Parameters  # @ReservedAssignment

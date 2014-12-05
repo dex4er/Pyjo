@@ -75,7 +75,5 @@ class Pyjo_Base_String(Pyjo.Base.object):
         return other in str(self)
 
 
-def new(*args, **kwargs):
-    return Pyjo_Base_String(*args, **kwargs)
-
+new = Pyjo_Base_String.new
 object = Pyjo_Base_String  # @ReservedAssignment

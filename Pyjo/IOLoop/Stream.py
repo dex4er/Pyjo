@@ -171,7 +171,5 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
             self.reactor.watch(handle, not self._paused, 0)
 
 
-def new(*args, **kwargs):
-    return Pyjo_IOLoop_Stream(*args, **kwargs)
-
+new = Pyjo_IOLoop_Stream.new
 object = Pyjo_IOLoop_Stream  # @ReservedAssignment

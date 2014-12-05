@@ -18,7 +18,5 @@ class Pyjo_Path(Pyjo.Base.String.object):
         return self.string
 
 
-def new(*args, **kwargs):
-    return Pyjo_Path(*args, **kwargs)
-
+new = Pyjo_Path.new
 object = Pyjo_Path  # @ReservedAssignment

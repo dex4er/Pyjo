@@ -19,6 +19,10 @@ class Pyjo_Base(object):
         self.set(*args, **kwargs)
 
     @classmethod
+    def new(cls, *args, **kwargs):
+        return cls(*args, **kwargs)
+
+    @classmethod
     def attr(cls, attrs, default=None):
         if not isinstance(attrs, (list, tuple)):
             attrs = [attrs]
@@ -34,8 +38,5 @@ class Pyjo_Base(object):
         return self
 
 
-def new(*args, **kwargs):
-    return Pyjo_Base(*args, **kwargs)
-
-
+new = Pyjo_Base.new
 object = Pyjo_Base  # @ReservedAssignment

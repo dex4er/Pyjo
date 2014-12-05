@@ -371,4 +371,5 @@ def timer(after, cb):
     return instance.timer(after, cb)
 
 
+new = Pyjo_IOLoop.new
 object = Pyjo_IOLoop  # @ReservedAssignment
