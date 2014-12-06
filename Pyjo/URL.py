@@ -8,8 +8,9 @@ import Pyjo.Base.String
 import Pyjo.Parameters
 import Pyjo.Path
 
-from Pyjo.Util import \
-    accessor, punycode_decode, punycode_encode, url_escape, url_unescape
+from Pyjo.Util import (
+    punycode_decode, punycode_encode, url_escape, url_unescape
+)
 
 
 re_url = re.compile(r'^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?')
@@ -18,10 +19,6 @@ re_port = re.compile(r':(\d+)$')
 re_ihost = re.compile(r'[^\x00-\x7f]')
 re_path = re.compile(r'^[/?]')
 re_punycode_decode = re.compile(r'^xn--(.+)$')
-
-
-class Omitted:
-    pass
 
 
 class Pyjo_URL(Pyjo.Base.String.object):
@@ -44,24 +41,24 @@ class Pyjo_URL(Pyjo.Base.String.object):
         elif kwargs:
             self.set(**kwargs)
 
-    @accessor
-    def ihost(self, value=Omitted):
-        if value is not Omitted:
-            # Decode
-            self.host = '.'.join(map(lambda s: punycode_decode(s) if re_punycode_decode.match(s) else s, value.split('.')))
-            return self
+    @property
+    def ihost(self):
+        host = self.host
 
-        else:
-            host = self.host
+        if host is None:
+            return
 
-            if host is None:
-                return
+        if not re_ihost.search(host):
+            return host.lower()
 
-            if not re_ihost.search(host):
-                return host.lower()
+        # Encode
+        return '.'.join(map(lambda s: ('xn--' + punycode_encode(s)) if re_ihost.search(s) else s, host.split('.'))).lower()
 
-            # Encode
-            return '.'.join(map(lambda s: ('xn--' + punycode_encode(s)) if re_ihost.search(s) else s, host.split('.'))).lower()
+    @ihost.setter
+    def ihost(self, value):
+        # Decode
+        self.host = '.'.join(map(lambda s: punycode_decode(s) if re_punycode_decode.match(s) else s, value.split('.')))
+        return self
 
     def is_abs(self):
         return bool(self.scheme)
@@ -72,45 +69,45 @@ class Pyjo_URL(Pyjo.Base.String.object):
                  query=m.group(7), fragment=m.group(9))
         return self
 
-    @accessor
-    def authority(self, authority=Omitted):
-        if authority is not Omitted:
-            if authority is None:
-                return self
+    @property
+    def authority(self):
+        # Build authority
+        authority = self.host_port
+        if authority is None:
+            return
 
-            # Userinfo
-            m = re_userinfo.search(authority)
-            if m:
-                self.userinfo = m.group(1)
-                # TODO url_unescape
-                authority = re_userinfo.sub('', authority)
+        info = self.userinfo
+        if info is None:
+            return authority
 
-            # Port
-            m = re_port.search(authority)
-            if m:
-                self.port = m.group(1)
-                authority = re_port.sub('', authority)
+        return url_escape(info, '^A-Za-z0-9\-._~!$&\'()*+,;=:') + '@' + authority
 
-            # Host
-            host = url_unescape(authority)
-            if re_ihost.search(host):
-                self.ihost = host
-            else:
-                self.host = host
-
+    @authority.setter
+    def authority(self, authority):
+        if authority is None:
             return self
 
+        # Userinfo
+        m = re_userinfo.search(authority)
+        if m:
+            self.userinfo = m.group(1)
+            # TODO url_unescape
+            authority = re_userinfo.sub('', authority)
+
+        # Port
+        m = re_port.search(authority)
+        if m:
+            self.port = m.group(1)
+            authority = re_port.sub('', authority)
+
+        # Host
+        host = url_unescape(authority)
+        if re_ihost.search(host):
+            self.ihost = host
         else:
-            # Build authority
-            authority = self.host_port
-            if authority is None:
-                return
+            self.host = host
 
-            info = self.userinfo
-            if info is None:
-                return authority
-
-            return url_escape(info, '^A-Za-z0-9\-._~!$&\'()*+,;=:') + '@' + authority
+        return self
 
     @property
     def host_port(self):
@@ -121,16 +118,17 @@ class Pyjo_URL(Pyjo.Base.String.object):
         else:
             return host
 
-    @accessor
-    def path(self, value=Omitted):
-        if value is Omitted:
-            if self._path is None:
-                self._path = Pyjo.Path.new()
-            return self._path
-        else:
-            # TODO old path / new path
-            self._path = Pyjo.Path.new(value)
-            return self
+    @property
+    def path(self):
+        if self._path is None:
+            self._path = Pyjo.Path.new()
+        return self._path
+
+    @path.setter
+    def path(self, value):
+        # TODO old path / new path
+        self._path = Pyjo.Path.new(value)
+        return self
 
     @property
     def path_query(self):
@@ -150,15 +148,16 @@ class Pyjo_URL(Pyjo.Base.String.object):
 
         return scheme.lower()
 
-    @accessor
+    @property
+    def query(self):
+        if self._query is None:
+            self._query = Pyjo.Parameters.new()
+        return self._query
+
+    @query.setter
     def query(self, *args):
-        if not args:
-            if self._query is None:
-                self._query = Pyjo.Parameters.new()
-            return self._query
-        else:
-            self._query = Pyjo.Parameters.new(*args)
-            return self
+        self._query = Pyjo.Parameters.new(*args)
+        return self
 
     def to_string(self):
         # Scheme

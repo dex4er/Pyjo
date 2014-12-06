@@ -12,16 +12,8 @@ import sys
 import time
 
 
-__all__ = ['getenv', 'has', 'lazy', 'md5_sum', 'punycode_decode', 'rand',
-           'steady_time', 'url_escape', 'url_unescape', 'warn']
-
-
 class Error(Exception):
     pass
-
-
-def accessor(method):
-    return property(method, method)
 
 
 def getenv(name, default):
