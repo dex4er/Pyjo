@@ -75,5 +75,7 @@ class Pyjo_Reactor(Pyjo.EventEmitter.object):
         pass
 
 
+detect = Pyjo_Reactor.detect
+
 new = Pyjo_Reactor.new
 object = Pyjo_Reactor  # @ReservedAssignment

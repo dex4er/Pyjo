@@ -20,4 +20,5 @@ def client_cb(loop, err, stream):
 
     stream.write(b"GET / HTTP/1.0\x0d\x0a\x0d\x0a")
 
+
 Pyjo.IOLoop.start()

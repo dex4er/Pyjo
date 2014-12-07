@@ -63,10 +63,9 @@ for i in range(n):
                        port=(url.port or 80),
                        cb=client_cb)
 
-while True:
-    Pyjo.IOLoop.start()
-    if not Pyjo.IOLoop.is_running():
-        break
+
+Pyjo.IOLoop.start()
+
 
 speed = str(sum(speeds))
 while True:

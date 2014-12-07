@@ -10,6 +10,7 @@ import Pyjo.IOLoop.Client
 import Pyjo.IOLoop.Delay
 import Pyjo.IOLoop.Server
 import Pyjo.IOLoop.Stream
+import Pyjo.Reactor
 import Pyjo.Reactor.Poll
 
 from Pyjo.Util import getenv, md5_sum, steady_time, rand, warn
@@ -42,7 +43,7 @@ class Pyjo_IOLoop(Pyjo.Base.object):
         self._accepting_timer = None
 
         # TODO Pyjo.Loader
-        module = importlib.import_module(Pyjo.Reactor.Poll.object.detect())
+        module = importlib.import_module(Pyjo.Reactor.detect())
         module_class_name = module.__name__.replace('.', '_')
         module_class = getattr(module, module_class_name)
         self.reactor = module_class()
@@ -74,7 +75,12 @@ class Pyjo_IOLoop(Pyjo.Base.object):
 
         return cid
 
-    def client(self, cb, **kwargs):
+    def client(self, cb=None, **kwargs):
+        if cb is None:
+            def wrap(func):
+                return self.client(func, **kwargs)
+            return wrap
+
         # Make sure timers are running
         self._recurring()
 
@@ -110,13 +116,23 @@ class Pyjo_IOLoop(Pyjo.Base.object):
     def is_running(self):
         return self.reactor.is_running()
 
-    def next_tick(self, cb):
+    def next_tick(self, cb=None):
+        if cb is None:
+            def wrap(func):
+                return self.next_tick(func)
+            return wrap
+
         return self.reactor.next_tick(cb)
 
     def one_tick(self):
         return self.reactor.one_tick()
 
-    def recurring(self, after, cb):
+    def recurring(self, after, cb=None):
+        if cb is None:
+            def wrap(func):
+                return self.recurring(after, func)
+            return wrap
+
         if DEBUG:
             warn("-- Recurring after {0} cb {1}".format(after, cb))
         return self._timer('recurring', after, cb)
@@ -131,7 +147,12 @@ class Pyjo_IOLoop(Pyjo.Base.object):
 
         self._remove(cid)
 
-    def server(self, cb, **kwargs):
+    def server(self, cb=None, **kwargs):
+        if cb is None:
+            def wrap(func):
+                return self.server(func, **kwargs)
+            return wrap
+
         server = Pyjo.IOLoop.Server.new()
 
         def accept_cb(self, server, handle):
@@ -171,7 +192,12 @@ class Pyjo_IOLoop(Pyjo.Base.object):
 
         return self._stream(stream, self._id())
 
-    def timer(self, after, cb):
+    def timer(self, after, cb=None):
+        if cb is None:
+            def wrap(func):
+                return self.timer(after, func)
+            return wrap
+
         if DEBUG:
             warn("-- Timer after {0} cb {1}".format(after, cb))
         return self._timer('timer', after, cb)
@@ -323,10 +349,9 @@ def client(cb=None, **kwargs):
     if cb is None:
         def wrap(func):
             return instance.client(func, **kwargs)
-
         return wrap
-    else:
-        return instance.client(cb, **kwargs)
+
+    return instance.client(cb, **kwargs)
 
 
 def delay(*args):
@@ -337,7 +362,12 @@ def is_running():
     return instance.is_running()
 
 
-def next_tick(cb):
+def next_tick(cb=None):
+    if cb is None:
+        def wrap(func):
+            return instance.next_tick(func)
+        return wrap
+
     return instance.next_tick(cb)
 
 
@@ -345,7 +375,12 @@ def one_tick():
     return instance.one_tick()
 
 
-def recurring(after, cb):
+def recurring(after, cb=None):
+    if cb is None:
+        def wrap(func):
+            return instance.recurring(after, func)
+        return wrap
+
     return instance.recurring(after, cb)
 
 
@@ -357,10 +392,9 @@ def server(cb=None, **kwargs):
     if cb is None:
         def wrap(func):
             return instance.server(func, **kwargs)
-
         return wrap
-    else:
-        return instance.server(cb, **kwargs)
+
+    return instance.server(cb, **kwargs)
 
 
 def singleton():
@@ -379,7 +413,12 @@ def stream(stream):
     return instance.stream(stream)
 
 
-def timer(after, cb):
+def timer(after, cb=None):
+    if cb is None:
+        def wrap(func):
+            return instance.timer(after, func)
+        return wrap
+
     return instance.timer(after, cb)
 
 

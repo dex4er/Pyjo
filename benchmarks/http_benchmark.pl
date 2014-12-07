@@ -47,7 +47,8 @@ for (1 .. $n) {
 
 }
 
-Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
+Mojo::IOLoop->start;
+
 
 my $speed = sum @speeds;
 while ($speed =~ s/(?<=\d)(\d{3})(,|$)/,$1/) { }

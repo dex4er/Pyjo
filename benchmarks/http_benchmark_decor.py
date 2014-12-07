@@ -62,6 +62,7 @@ for i in range(n):
 
 Pyjo.IOLoop.start()
 
+
 speed = str(sum(speeds))
 while True:
     (speed, replaced) = re.subn(r'(?<=\d)(\d{3})(,|$)', r',\1', speed)
