@@ -33,33 +33,38 @@ sizes = [0 for i in range(n)]
 
 t0 = steady_time()
 
-def client_cb(loop, err, stream, i):
 
-    def on_read_cb(stream, chunk):
-        sizes[i] += len(chunk)
-        if verbose:
-            print("{0}\r".format(sizes[i]), end='')
+def wrap_client_cb(i):
 
-    stream.on('read', on_read_cb)
+    def client_cb(loop, err, stream):
 
-    def on_close_cb(stream):
-        t1 = steady_time()
-        delta = t1 - t0
-        speeds.append(int(sizes[i] * 8 / 1024 / delta / 1000))
+        def on_read_cb(stream, chunk):
+            sizes[i] += len(chunk)
+            if verbose:
+                print("{0}\r".format(sizes[i]), end='')
 
-        if verbose:
-            print(sizes[i])
+        stream.on('read', on_read_cb)
 
-    stream.on('close', on_close_cb)
+        def on_close_cb(stream):
+            t1 = steady_time()
+            delta = t1 - t0
+            speeds.append(int(sizes[i] * 8 / 1024 / delta / 1000))
 
-    # Write request
-    stream.write("GET {0} HTTP/1.1\x0d\x0aHost: {1}:{2}\x0d\x0a\x0d\x0a".format(url.path, url.host, url.port or 80).encode('ascii'))
+            if verbose:
+                print(sizes[i])
+
+        stream.on('close', on_close_cb)
+
+        # Write request
+        stream.write("GET {0} HTTP/1.1\x0d\x0aHost: {1}:{2}\x0d\x0a\x0d\x0a".format(url.path, url.host, url.port or 80).encode('ascii'))
+
+    return client_cb
 
 
 for i in range(n):
     Pyjo.IOLoop.client(address=url.host,
                        port=(url.port or 80),
-                       cb=(lambda i: lambda loop, err, stream: client_cb(loop, err, stream, i))(i))
+                       cb=wrap_client_cb(i))
 
 while True:
     Pyjo.IOLoop.start()
