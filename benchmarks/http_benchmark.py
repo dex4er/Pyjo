@@ -4,8 +4,7 @@ import re
 import sys
 
 import Pyjo.IOLoop
-
-from Pyjo.URL import *
+import Pyjo.URL
 
 from Pyjo.Util import steady_time
 
@@ -21,7 +20,7 @@ if len(argv) > 0:
     url = argv[0]
 else:
     url = 'http://localhost/bigfile.bin'
-url = Pyjo_URL(url)
+url = Pyjo.URL.new(url)
 
 if len(argv) > 1:
     n = int(argv[1])

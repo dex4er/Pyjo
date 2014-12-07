@@ -319,8 +319,14 @@ def acceptor(acceptor):
     return instance.acceptor(acceptor)
 
 
-def client(cb, **kwargs):
-    return instance.client(cb, **kwargs)
+def client(cb=None, **kwargs):
+    if cb is None:
+        def wrap(func):
+            return instance.client(func, **kwargs)
+
+        return wrap
+    else:
+        return instance.client(cb, **kwargs)
 
 
 def delay(*args):
@@ -347,8 +353,14 @@ def remove(cid):
     return instance.remove(cid)
 
 
-def server(cb, **kwargs):
-    return instance.server(cb, **kwargs)
+def server(cb=None, **kwargs):
+    if cb is None:
+        def wrap(func):
+            return instance.server(func, **kwargs)
+
+        return wrap
+    else:
+        return instance.server(cb, **kwargs)
 
 
 def singleton():
@@ -369,6 +381,10 @@ def stream(stream):
 
 def timer(after, cb):
     return instance.timer(after, cb)
+
+
+on = Pyjo.EventEmitter.on
+once = Pyjo.EventEmitter.once
 
 
 new = Pyjo_IOLoop.new

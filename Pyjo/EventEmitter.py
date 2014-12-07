@@ -80,15 +80,15 @@ class Pyjo_EventEmitter(Pyjo.Base.object):
 
 
 def on(obj, name):
-    def decorator(func):
+    def wrap(func):
         return obj.on(name, func)
-    return decorator
+    return wrap
 
 
 def once(obj, name):
-    def decorator(func):
+    def wrap(func):
         return obj.once(name, func)
-    return decorator
+    return wrap
 
 
 new = Pyjo_EventEmitter.new
