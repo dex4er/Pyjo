@@ -79,5 +79,17 @@ class Pyjo_EventEmitter(Pyjo.Base.object):
         return self
 
 
+def on(obj, name):
+    def decorator(func):
+        return obj.on(name, func)
+    return decorator
+
+
+def once(obj, name):
+    def decorator(func):
+        return obj.once(name, func)
+    return decorator
+
+
 new = Pyjo_EventEmitter.new
 object = Pyjo_EventEmitter  # @ReservedAssignment
