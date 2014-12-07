@@ -3,7 +3,9 @@ from __future__ import print_function
 import Pyjo.IOLoop
 
 
-# Server
+# Listen on port 3000
+@Pyjo.IOLoop.register('server')
+@Pyjo.IOLoop.server(port=3000)
 def server_cb(loop, stream, cid):
 
     @Pyjo.IOLoop.on(stream, 'read')
@@ -16,9 +18,6 @@ def server_cb(loop, stream, cid):
 
         # Disconnect client
         stream.close_gracefully()
-
-# Listen on port 3000
-server = Pyjo.IOLoop.server(port=3000, cb=server_cb)
 
 
 # Connect to port 3000
@@ -39,7 +38,7 @@ def client_cb(loop, err, stream):
 def timer_cb(loop):
     print("Timeout")
     # Shutdown server
-    loop.remove(server)
+    loop.remove('server')
 
 
 # Start event loop

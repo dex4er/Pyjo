@@ -9,6 +9,7 @@ def print_cb(loop):
     print("A")
 
 
+@loop.register('timeout')
 @loop.timer(1)
 def stop_cb(loop):
     loop.stop()

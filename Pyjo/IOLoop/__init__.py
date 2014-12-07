@@ -34,6 +34,8 @@ class Pyjo_IOLoop(Pyjo.Base.object):
         self.multi_accept = 50
         self.reactor = None
 
+        self._register = {}
+
         self._acceptors = {}
         self._connections = {}
 
@@ -137,15 +139,18 @@ class Pyjo_IOLoop(Pyjo.Base.object):
             warn("-- Recurring after {0} cb {1}".format(after, cb))
         return self._timer('recurring', after, cb)
 
-    def remove(self, cid):
-        if cid in self._connections:
-            c = self._connections[cid]
+    def remove(self, taskid):
+        if taskid in self._register:
+            taskid = self._register.pop(taskid)
+
+        if taskid in self._connections:
+            c = self._connections[taskid]
             if c:
                 stream = c.stream
                 if stream:
                     return stream.close_gracefully()
 
-        self._remove(cid)
+        self._remove(taskid)
 
     def server(self, cb=None, **kwargs):
         if cb is None:
@@ -202,6 +207,11 @@ class Pyjo_IOLoop(Pyjo.Base.object):
             warn("-- Timer after {0} cb {1}".format(after, cb))
         return self._timer('timer', after, cb)
 
+    def register(self, name):
+        def wrap(taskid):
+            self._register[name] = taskid
+        return wrap
+
     def _accepting(self):
         # Check if we have acceptors
         if not self._acceptors:
@@ -231,12 +241,12 @@ class Pyjo_IOLoop(Pyjo.Base.object):
         self._accepting_timer = True
 
     def _id(self):
-        cid = None
+        taskid = None
         while True:
-            cid = md5_sum('c{0}{1}'.format(steady_time(), rand()))
-            if cid not in self._connections and cid not in self._acceptors:
+            taskid = md5_sum('c{0}{1}'.format(steady_time(), rand()))
+            if taskid not in self._connections and taskid not in self._acceptors:
                 break
-        return cid
+        return taskid
 
     def _not_accepting(self):
         # Make sure timers are running
@@ -272,26 +282,26 @@ class Pyjo_IOLoop(Pyjo.Base.object):
 
             self._stop_timer = self.recurring(1, stop_timer_cb)
 
-    def _remove(self, _id):
+    def _remove(self, taskid):
         # Timer
         reactor = self.reactor
 
         if not reactor:
             return
 
-        if reactor.remove(_id):
+        if reactor.remove(taskid):
             return
 
         # Acceptor
-        if _id in self._acceptors:
-            self._acceptors[_id].stop()
-            del self._acceptors[_id]
+        if taskid in self._acceptors:
+            self._acceptors[taskid].stop()
+            del self._acceptors[taskid]
             self._not_accepting()
 
         # Connections
         else:
-            if _id in self._connections:
-                del self._connections[_id]
+            if taskid in self._connections:
+                del self._connections[taskid]
 
     def _stop(self):
         if self._connections:
@@ -384,8 +394,12 @@ def recurring(after, cb=None):
     return instance.recurring(after, cb)
 
 
-def remove(cid):
-    return instance.remove(cid)
+def register(name):
+    return instance.register(name)
+
+
+def remove(taskid):
+    return instance.remove(taskid)
 
 
 def server(cb=None, **kwargs):
