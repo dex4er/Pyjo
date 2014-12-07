@@ -48,6 +48,11 @@ def md5_sum(string):
     return m.hexdigest()
 
 
+class nonlocals(object):
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+
 def not_implemented(method):
     def stub(*args, **kwargs):
         raise Error('Method "{0}" not implemented by subclass'.format(method.__name__))
