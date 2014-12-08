@@ -15,6 +15,8 @@ my $n   = $ARGV[1] || 1;
 
 my @speeds;
 
+say $url;
+
 for (1 .. $n) {
 
     my $t0 = steady_time;

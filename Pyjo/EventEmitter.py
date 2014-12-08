@@ -41,14 +41,30 @@ class Pyjo_EventEmitter(Pyjo.Base.object):
     def has_subscribers(self, name):
         return name in self._events
 
-    def on(self, name, cb):
+    def on(self, name, cb=None):
+        if callable(name):
+            return self.on(name.__name__, name)
+
+        if cb is None:
+            def wrap(func):
+                return self.on(name, func)
+            return wrap
+
         if name in self._events:
             self._events[name].append(cb)
         else:
             self._events[name] = [cb]
         return cb
 
-    def once(self, name, cb):
+    def once(self, name, cb=None):
+        if callable(name):
+            return self.once(name.__name__, name)
+
+        if cb is None:
+            def wrap(func):
+                return self.once(name, func)
+            return wrap
+
         self = weakref.proxy(self)
 
         def wrapper_cb(self, name, cb, wrapper_lambda, *args):
@@ -79,15 +95,23 @@ class Pyjo_EventEmitter(Pyjo.Base.object):
         return self
 
 
-def on(obj, name):
+def on(obj, name=None):
     def wrap(func):
-        return obj.on(name, func)
+        if name is None:
+            eventname = func.__name__
+        else:
+            eventname = name
+        return obj.on(eventname, func)
     return wrap
 
 
-def once(obj, name):
+def once(obj, name=None):
     def wrap(func):
-        return obj.once(name, func)
+        if name is None:
+            eventname = func.__name__
+        else:
+            eventname = name
+        return obj.once(eventname, func)
     return wrap
 
 

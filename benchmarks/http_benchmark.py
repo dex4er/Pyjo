@@ -8,6 +8,7 @@ import Pyjo.URL
 
 from Pyjo.Util import nonlocals, steady_time
 
+
 argv = sys.argv[1:]
 
 if len(argv) > 0 and (argv[0] == '-v' or argv[0] == '--verbose'):
@@ -33,35 +34,32 @@ speeds = []
 t0 = steady_time()
 
 
+print(url)
+
 for i in range(n):
 
-    def client_cb(loop, err, stream):
-        client_cb = nonlocals()
-        client_cb.size = 0
+    @Pyjo.IOLoop.client(address=url.host, port=(url.port or 80))
+    def client(loop, err, stream):
+        connect = nonlocals()
+        connect.size = 0
 
-        def on_read_cb(stream, chunk):
-            client_cb.size += len(chunk)
+        @stream.on
+        def read(stream, chunk):
+            connect.size += len(chunk)
             if verbose:
-                print("{0}\r".format(client_cb.size), end='')
+                print("{0}\r".format(connect.size), end='')
 
-        stream.on('read', on_read_cb)
-
-        def on_close_cb(stream):
+        @stream.on
+        def close(stream):
             t1 = steady_time()
             delta = t1 - t0
-            speeds.append(int(client_cb.size * 8 / 1024 / delta / 1000))
+            speeds.append(int(connect.size * 8 / 1024 / delta / 1000))
 
             if verbose:
-                print(client_cb.size)
-
-        stream.on('close', on_close_cb)
+                print(connect.size)
 
         # Write request
         stream.write("GET {0} HTTP/1.1\x0d\x0aHost: {1}:{2}\x0d\x0a\x0d\x0a".format(url.path, url.host, url.port or 80).encode('ascii'))
-
-    Pyjo.IOLoop.client(address=url.host,
-                       port=(url.port or 80),
-                       cb=client_cb)
 
 
 Pyjo.IOLoop.start()

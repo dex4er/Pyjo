@@ -5,14 +5,13 @@ loop = Pyjo.IOLoop.singleton()
 
 
 @loop.recurring(0)
-def print_cb(loop):
+def writer(loop):
     print("A")
 
 
-@loop.register('timeout')
 @loop.timer(1)
-def stop_cb(loop):
-    loop.stop()
+def timeouter(loop):
+    loop.remove(writer)
 
 
 loop.start()

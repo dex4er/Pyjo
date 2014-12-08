@@ -34,8 +34,6 @@ class Pyjo_IOLoop(Pyjo.Base.object):
         self.multi_accept = 50
         self.reactor = None
 
-        self._register = {}
-
         self._acceptors = {}
         self._connections = {}
 
@@ -140,9 +138,6 @@ class Pyjo_IOLoop(Pyjo.Base.object):
         return self._timer('recurring', after, cb)
 
     def remove(self, taskid):
-        if taskid in self._register:
-            taskid = self._register.pop(taskid)
-
         if taskid in self._connections:
             c = self._connections[taskid]
             if c:
@@ -206,11 +201,6 @@ class Pyjo_IOLoop(Pyjo.Base.object):
         if DEBUG:
             warn("-- Timer after {0} cb {1}".format(after, cb))
         return self._timer('timer', after, cb)
-
-    def register(self, name):
-        def wrap(taskid):
-            self._register[name] = taskid
-        return wrap
 
     def _accepting(self):
         # Check if we have acceptors

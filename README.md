@@ -60,12 +60,11 @@ import Pyjo.IOLoop
 
 
 # Listen on port 3000
-@Pyjo.IOLoop.register('server')
 @Pyjo.IOLoop.server(port=3000)
-def server_cb(loop, stream, cid):
+def server(loop, stream, cid):
 
-    @Pyjo.IOLoop.on(stream, 'read')
-    def on_read_cb(stream, chunk):
+    @stream.on
+    def read(stream, chunk):
         # Process input chunk
         print("Server: {0}".format(chunk.decode('utf-8')))
 
@@ -78,10 +77,10 @@ def server_cb(loop, stream, cid):
 
 # Connect to port 3000
 @Pyjo.IOLoop.client(port=3000)
-def client_cb(loop, err, stream):
+def client(loop, err, stream):
 
-    @Pyjo.IOLoop.on(stream, 'read')
-    def on_read_cb(stream, chunk):
+    @stream.on
+    def read(stream, chunk):
         # Process input
         print("Client: {0}".format(chunk.decode('utf-8')))
 
@@ -91,10 +90,10 @@ def client_cb(loop, err, stream):
 
 # Add a timer
 @Pyjo.IOLoop.timer(3)
-def timer_cb(loop):
+def timeouter(loop):
     print("Timeout")
     # Shutdown server
-    loop.remove('server')
+    loop.remove(server)
 
 
 # Start event loop

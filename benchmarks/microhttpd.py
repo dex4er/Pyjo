@@ -7,10 +7,10 @@ port = int(sys.argv[1]) if len(sys.argv) > 1 else 8080
 
 
 @Pyjo.IOLoop.server(address='0.0.0.0', port=port)
-def server_cb(loop, stream, cid):
+def server(loop, stream, cid):
 
-    @Pyjo.IOLoop.on(stream, 'read')
-    def on_read_cb(stream, chunk):
+    @stream.on
+    def read(stream, chunk):
         # Check if we got start line and headers (no body support)
         if chunk.find(b"\x0d\x0a\x0d\x0a") >= 0:
 

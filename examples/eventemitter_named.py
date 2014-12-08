@@ -2,8 +2,6 @@ from __future__ import print_function
 
 import Pyjo.EventEmitter
 
-from Pyjo.EventEmitter import on, once
-
 
 class Cat(Pyjo.EventEmitter.object):
     def poke(self, times):
@@ -16,14 +14,14 @@ class Cat(Pyjo.EventEmitter.object):
 tiger = Cat()
 
 
-@on(tiger, 'roar')
-def roar_cb(cat, times):
+@tiger.on('roar')
+def cb(cat, times):
     for _ in range(0, times):
         print('RAWR!')
 
 
-@once(tiger, 'dead')
-def dead_cb(cat):
+@tiger.once('dead')
+def cb(cat):
     print('(x.x)')
 
 

@@ -11,19 +11,19 @@ class Cat(Pyjo.EventEmitter.object):
         self.emit('dead')
 
 
-tiger = Cat()
-
-
-@tiger.on
-def roar(cat, times):
+def roar_cb(cat, times):
     for _ in range(0, times):
         print('RAWR!')
 
 
-@tiger.once
-def dead(cat):
+def dead_cb(cat):
     print('(x.x)')
 
+
+tiger = Cat()
+
+tiger.on('roar', roar_cb)
+tiger.once('dead', dead_cb)
 
 tiger.poke(2)
 tiger.poke(2)
