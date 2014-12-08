@@ -15,8 +15,7 @@ from Pyjo.Util import lazy
 
 class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
 
-    reactor = lazy(lambda: Pyjo.IOLoop.singleton().reactor)
-
+    reactor = None
     handle = None
 
     _graceful = False
@@ -27,6 +26,8 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
 
     def __init__(self, handle, **kwargs):
         super(Pyjo_IOLoop_Stream, self).__init__(handle=handle, **kwargs)
+        if self.reactor is None:
+            self.reactor = Pyjo.IOLoop.singleton().reactor
 
     def __del__(self):
         self.close()

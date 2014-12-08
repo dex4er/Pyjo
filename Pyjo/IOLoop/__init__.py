@@ -41,8 +41,8 @@ class Pyjo_IOLoop(Pyjo.Base.object):
     _stop_timer = None
     _accepting_timer = None
 
-    def __init__(self, *args):
-        super(Pyjo_IOLoop, self).__init__(*args)
+    def __init__(self, **kwargs):
+        super(Pyjo_IOLoop, self).__init__(**kwargs)
 
         # TODO Pyjo.Loader
         module = importlib.import_module(Pyjo.Reactor.detect())

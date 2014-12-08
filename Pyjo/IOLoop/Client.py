@@ -18,15 +18,17 @@ DEBUG = getenv('PYJO_IOLOOP_CLIENT_DEBUG', 0)
 
 class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
 
+    reactor = None
     handle = None
+
     _timer = None
-    reactor = lazy(lambda: Pyjo.IOLoop.singleton().reactor)
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         if DEBUG:
-            warn("-- Method {0}.__init__".format(self))
-
-        super(Pyjo_IOLoop_Client, self).__init__()
+            warn("-- Method {0}.__init__".format(self, kwargs))
+        super(Pyjo_IOLoop_Client, self).__init__(**kwargs)
+        if self.reactor is None:
+            self.reactor = Pyjo.IOLoop.singleton().reactor
 
     def __del__(self):
         if DEBUG:

@@ -12,11 +12,15 @@ from Pyjo.Util import lazy
 
 class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
 
+    reactor = None
     multi_accept = 50
     reactor = None
     handle = None
 
-    reactor = lazy(lambda: Pyjo.IOLoop.singleton().reactor)
+    def __init__(self, **kwargs):
+        super(Pyjo_IOLoop_Server, self).__init__(**kwargs)
+        if self.reactor is None:
+            self.reactor = Pyjo.IOLoop.singleton().reactor
 
     def __del__(self):
         if dir(self.handle) and self.handle:

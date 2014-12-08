@@ -15,8 +15,8 @@ class Pyjo_Base(object):
                 setattr(cls, name, lazy(attr.default, name))
         return obj
 
-    def __init__(self, *args, **kwargs):
-        self.set(*args, **kwargs)
+    def __init__(self, **kwargs):
+        self.set(**kwargs)
 
     @classmethod
     def new(cls, *args, **kwargs):

@@ -23,17 +23,17 @@ re_punycode_decode = re.compile(r'^xn--(.+)$')
 
 class Pyjo_URL(Pyjo.Base.String.object):
 
+    base = None
+    fragment = None
+    host = None
+    port = None
+    scheme = None
+    userinfo = None
+
+    _path = None
+    _query = None
+
     def __init__(self, *args, **kwargs):
-        self.base = None
-        self.fragment = None
-        self.host = None
-        self.port = None
-        self.scheme = None
-        self.userinfo = None
-
-        self._path = None
-        self._query = None
-
         if len(args) == 1:
             self.parse(args[0])
         elif args:

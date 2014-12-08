@@ -10,10 +10,10 @@ from Pyjo.Util import url_escape
 # TODO stub
 class Pyjo_Parameters(Pyjo.Base.String.object):
 
-    def __init__(self, *args, **kwargs):
-        self._params = None
-        self._string = None
+    _params = None
+    _string = None
 
+    def __init__(self, *args, **kwargs):
         if len(args) == 1 and isinstance(args[0], (list, tuple)):
             self._string = list(args[0])
         elif len(args) == 1 and isinstance(args[0], dict):

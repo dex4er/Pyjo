@@ -13,7 +13,8 @@ REMAINING = {}
 
 class Pyjo_IOLoop_Delay(Pyjo.EventEmitter.object):
 
-    ioloop = lazy(lambda: Pyjo.IOLoop.singleton())
+    ioloop = None
+
     _data = {}
 
     _counter = 0
@@ -21,6 +22,11 @@ class Pyjo_IOLoop_Delay(Pyjo.EventEmitter.object):
     _lock = False
     _fail = False
     _args = []
+
+    def __init__(self, **kwargs):
+        super(Pyjo_IOLoop_Delay, self).__init__(**kwargs)
+        if self.ioloop is None:
+            self.ioloop = Pyjo.IOLoop.singleton()
 
     def begin(self, offset=1, length=0, *args):
         self._pending += 1
