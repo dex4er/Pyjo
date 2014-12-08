@@ -17,13 +17,11 @@ DEBUG = getenv('PYJO_REACTOR_DEBUG', 0)
 
 
 class Pyjo_Reactor_Poll(Pyjo.Reactor.object):
-    def __init__(self):
-        super(Pyjo_Reactor_Poll, self).__init__()
 
-        self._running = False
-        self._select_poll = None
-        self._timers = {}
-        self._ios = {}
+    _running = False
+    _select_poll = None
+    _timers = {}
+    _ios = {}
 
     def again(self, tid):
         timer = self._timers[tid]

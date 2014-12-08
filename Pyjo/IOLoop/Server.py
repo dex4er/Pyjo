@@ -7,16 +7,16 @@ import socket
 import Pyjo.EventEmitter
 import Pyjo.IOLoop
 
+from Pyjo.Util import lazy
+
 
 class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
-    def __init__(self):
-        self.multi_accept = 50
-        self.reactor = None
-        self.handle = None
 
-        self.reactor = Pyjo.IOLoop.singleton().reactor
+    multi_accept = 50
+    reactor = None
+    handle = None
 
-        super(Pyjo_IOLoop_Server, self).__init__()
+    reactor = lazy(lambda: Pyjo.IOLoop.singleton().reactor)
 
     def __del__(self):
         if dir(self.handle) and self.handle:

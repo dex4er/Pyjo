@@ -10,20 +10,21 @@ from socket import AF_INET, IPPROTO_TCP, TCP_NODELAY, SOCK_STREAM
 import Pyjo.EventEmitter
 import Pyjo.IOLoop
 
-from Pyjo.Util import getenv, warn
+from Pyjo.Util import getenv, lazy, warn
 
 
 DEBUG = getenv('PYJO_IOLOOP_CLIENT_DEBUG', 0)
 
 
 class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
+
+    handle = None
+    _timer = None
+    reactor = lazy(lambda: Pyjo.IOLoop.singleton().reactor)
+
     def __init__(self):
         if DEBUG:
             warn("-- Method {0}.__init__".format(self))
-
-        self.handle = None
-        self._timer = None
-        self.reactor = Pyjo.IOLoop.singleton().reactor
 
         super(Pyjo_IOLoop_Client, self).__init__()
 

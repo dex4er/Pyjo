@@ -25,22 +25,24 @@ class Error(Exception):
 
 class Pyjo_IOLoop(Pyjo.Base.object):
 
-    def __init__(self):
-        self.accept_interval = 0.025  # TODO parametrized
-        self.lock = None
-        self.unlock = None
-        self.max_accepts = 0
-        self.max_connections = 1000
-        self.multi_accept = 50
-        self.reactor = None
+    accept_interval = 0.025
+    lock = None
+    unlock = None
+    max_accepts = 0
+    max_connections = 1000
+    multi_accept = 50
+    reactor = None
 
-        self._acceptors = {}
-        self._connections = {}
+    _acceptors = {}
+    _connections = {}
 
-        self._accepts = 0
-        self._accept_timer = None
-        self._stop_timer = None
-        self._accepting_timer = None
+    _accepts = 0
+    _accept_timer = None
+    _stop_timer = None
+    _accepting_timer = None
+
+    def __init__(self, *args):
+        super(Pyjo_IOLoop, self).__init__(*args)
 
         # TODO Pyjo.Loader
         module = importlib.import_module(Pyjo.Reactor.detect())

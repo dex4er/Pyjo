@@ -5,22 +5,22 @@ Pyjo.IOLoop.Delay
 import Pyjo.EventEmitter
 import Pyjo.IOLoop
 
+from Pyjo.Util import lazy
+
 
 REMAINING = {}
 
 
 class Pyjo_IOLoop_Delay(Pyjo.EventEmitter.object):
-    def __init__(self):
-        self.ioloop = Pyjo.IOLoop.singleton()
-        self._data = {}
 
-        self._counter = 0
-        self._pending = 0
-        self._lock = False
-        self._fail = False
-        self._args = []
+    ioloop = lazy(lambda: Pyjo.IOLoop.singleton())
+    _data = {}
 
-        super(Pyjo_IOLoop_Delay, self).__init__()
+    _counter = 0
+    _pending = 0
+    _lock = False
+    _fail = False
+    _args = []
 
     def begin(self, offset=1, length=0, *args):
         self._pending += 1
