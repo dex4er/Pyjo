@@ -39,13 +39,13 @@ URL manipulation
 ```python
 from __future__ import print_function
 
-from Pyjo.URL import *
+import Pyjo.URL
 
-url = Pyjo_URL(scheme='https', host='github.com', path='/dex4er/Pyjo')
+url = Pyjo.URL.new(scheme='https', host='github.com', path='/dex4er/Pyjo')
 print(url)
 # 'https://github.com/dex4er/Pyjo'
 
-print(url.set(scheme='ssh+git', userinfo='git', path=str(url.path)+'.git'))
+print(url.set(scheme='ssh+git', userinfo='git', path=url.path+'.git'))
 # 'ssh+git://git@github.com/dex4er/Pyjo.git'
 ```
 
