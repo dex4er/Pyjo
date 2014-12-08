@@ -17,8 +17,8 @@ class Error(Exception):
 
 
 class Pyjo_EventEmitter(Pyjo.Base.object):
-    def __init__(self):
-        self._events = {}
+
+    _events = {}
 
     def catch(self, *args):
         self.on('error', *args)

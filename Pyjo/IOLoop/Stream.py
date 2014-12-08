@@ -10,22 +10,23 @@ from errno import EAGAIN, ECONNRESET, EINTR, EPIPE, EWOULDBLOCK
 import Pyjo.EventEmitter
 import Pyjo.IOLoop
 
+from Pyjo.Util import lazy
+
 
 class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
-    def __init__(self, handle):
-        super(Pyjo_IOLoop_Stream, self).__init__()
 
-        self.reactor = None
+    reactor = lazy(lambda: Pyjo.IOLoop.singleton().reactor)
 
-        self._handle = None
-        self._graceful = False
-        self._timeout = 15
-        self._buffer = b''
-        self._timer = None
-        self._paused = False
+    handle = None
 
-        self.reactor = Pyjo.IOLoop.singleton().reactor
-        self._handle = handle
+    _graceful = False
+    _timeout = 15
+    _buffer = b''
+    _timer = None
+    _paused = False
+
+    def __init__(self, handle, **kwargs):
+        super(Pyjo_IOLoop_Stream, self).__init__(handle=handle, **kwargs)
 
     def __del__(self):
         self.close()
@@ -36,8 +37,8 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
             return
 
         self.timeout(0)
-        handle = self._handle
-        self._handle = None
+        handle = self.handle
+        self.handle = None
         if not handle:
             return
 
@@ -52,17 +53,14 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
             return self
         return self.close()
 
-    def handle(self):
-        return self._handle
-
     def is_readable(self):
         self._again()
-        if not self._handle:
+        if not self.handle:
             return None
-        return self._handle and self.reactor.is_readable(self._handle)
+        return self.handle and self.reactor.is_readable(self.handle)
 
     def is_writing(self):
-        if not self._handle:
+        if not self.handle:
             return None
         return len(self._buffer) or self.has_subscribers('drain')
 
@@ -82,11 +80,11 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
                 else:
                     self._read()
 
-        reactor.io(self.timeout(self._timeout)._handle, lambda is_write: cb_read_write(self, is_write))
+        reactor.io(self.timeout(self._timeout).handle, lambda is_write: cb_read_write(self, is_write))
 
     def stop(self):
         if not self._paused:
-            self.reactor.watch(self._handle, 0, self.is_writing())
+            self.reactor.watch(self.handle, 0, self.is_writing())
         self._paused = True
 
     def timeout(self, timeout=None):
@@ -119,8 +117,8 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
             self.once('drain', cb)
         elif not len(self._buffer):
             return self
-        if self._handle:
-            self.reactor.watch(self._handle, not self._paused, 1)
+        if self.handle:
+            self.reactor.watch(self.handle, not self._paused, 1)
 
         return self
 
@@ -143,7 +141,7 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
     def _read(self):
         readbuffer = b''
         try:
-            readbuffer = self._handle.recv(131072)
+            readbuffer = self.handle.recv(131072)
         except socket.error as e:
             return self._error(e)
         if not readbuffer:
@@ -151,7 +149,7 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
         self.emit('read', readbuffer)._again()
 
     def _write(self):
-        handle = self._handle
+        handle = self.handle
         if len(self._buffer):
             try:
                 written = handle.send(self._buffer)
@@ -167,7 +165,7 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
             return
         if self._graceful:
             return self.close()
-        if self._handle:
+        if self.handle:
             self.reactor.watch(handle, not self._paused, 0)
 
 
