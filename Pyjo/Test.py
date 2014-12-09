@@ -14,7 +14,7 @@ from _codecs_cn import __file__
 
 
 __all__ = ['done_testing', 'diag', 'fail', 'is_ok', 'isa_ok', 'is_deeply_ok',
-           'none_ok', 'ok', 'pass_ok']
+           'none_ok', 'ok', 'pass_ok', 'plan']
 
 
 test = 0
@@ -25,8 +25,14 @@ failed = 0
 done = False
 
 
+def _print(*args, **kwargs):
+    output = kwargs.get('file', sys.stdout)
+    print(*args, file=output)
+    output.flush()
+
+
 def diag(*args):
-    print('# ' + "\n# ".join(''.join(args).split("\n")), file=sys.stderr)
+    _print('# ' + "\n# ".join(''.join(args).split("\n")), file=sys.stderr)
 
 
 def _ok(check, test_name=None):
@@ -47,7 +53,7 @@ def _ok(check, test_name=None):
             diag("    You named your test '{0}'.  You shouldn't use numbers for your test names.\n    Very confusing.".format(test_name))
         message += ' - {0}'.format(test_name)
 
-    print(message)
+    _print(message)
 
     if not check:
         if test_name is not None:
@@ -110,6 +116,13 @@ def is_deeply_ok(got, expected, test_name=None):
             diag("         got: {0}\n    expected: {1}".format(repr(got), repr(expected)))
 
 
+def plan(**kwargs):
+    global tests
+    if 'tests' in kwargs:
+        tests = kwargs['tests']
+        _print('1..{0}'.format(tests))
+
+
 def done_testing():
     global done, failed, test, tests
 
@@ -119,8 +132,7 @@ def done_testing():
 
     if not tests:
         tests = test
-
-    print('1..{0}'.format(tests))
+        _print('1..{0}'.format(tests))
 
     if not tests:
         diag('No tests run!')
