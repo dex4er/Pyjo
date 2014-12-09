@@ -26,7 +26,7 @@ class Pyjo_Reactor(Pyjo.EventEmitter.object):
         return getenv('PYJO_REACTOR', 'Pyjo.Reactor.Poll')
 
     @not_implemented
-    def io(self):
+    def io(self, cb, handle):
         pass
 
     # This may break at some point in the future, but is worth it for performance
@@ -40,14 +40,14 @@ class Pyjo_Reactor(Pyjo.EventEmitter.object):
         pass
 
     def next_tick(self, cb):
-        self.timer(0, cb)
+        self.timer(cb, 0)
 
     @not_implemented
     def one_tick(self):
         pass
 
     @not_implemented
-    def recurring(self, after, cb):
+    def recurring(self, cb, after):
         pass
 
     @not_implemented
@@ -67,7 +67,7 @@ class Pyjo_Reactor(Pyjo.EventEmitter.object):
         pass
 
     @not_implemented
-    def timer(self, after, cb):
+    def timer(self, cb, after):
         pass
 
     @not_implemented

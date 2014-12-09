@@ -132,7 +132,7 @@ class Pyjo_IOLoop(Pyjo.Base.object):
     def recurring(self, cb, after):
         if DEBUG:
             warn("-- Recurring after {0} cb {1}".format(after, cb))
-        return self._timer('recurring', after, cb)
+        return self._timer(cb, 'recurring', after)
 
     def remove(self, taskid):
         if taskid in self._connections:
@@ -193,7 +193,7 @@ class Pyjo_IOLoop(Pyjo.Base.object):
     def timer(self, cb, after):
         if DEBUG:
             warn("-- Timer after {0} cb {1}".format(after, cb))
-        return self._timer('timer', after, cb)
+        return self._timer(cb, 'timer', after)
 
     def _accepting(self):
         # Check if we have acceptors
@@ -322,9 +322,9 @@ class Pyjo_IOLoop(Pyjo.Base.object):
 
         return cid
 
-    def _timer(self, method, after, cb):
+    def _timer(self, cb, method, after):
         self = weakref.proxy(self)
-        return getattr(self.reactor, method)(after, lambda: cb(self))
+        return getattr(self.reactor, method)(lambda: cb(self), after)
 
 
 def new(*args, **kwargs):

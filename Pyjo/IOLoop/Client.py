@@ -47,7 +47,7 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
             if dir(self):
                 self.emit('error', 'Connect timeout')
 
-        self._timer = reactor.timer(timeout, lambda: timeout_cb(self))
+        self._timer = reactor.timer(lambda: timeout_cb(self), timeout)
 
         # Blocking name resolution
         def resolved_cb(self):
@@ -94,7 +94,7 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
             if dir(self):
                 self._ready(**kwargs)
 
-        self.reactor.io(handle, lambda loop: ready_cb(self, loop, **kwargs)).watch(handle, 0, 1)
+        self.reactor.io(lambda loop: ready_cb(self, loop, **kwargs), handle).watch(handle, 0, 1)
 
     def _ready(self, **kwargs):
         # Retry or handle exceptions
@@ -115,7 +115,7 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
     def start(self):
         def ready_cb(self):
             self._accept()
-        self.reactor.io(self.handle, lambda: ready_cb(self))
+        self.reactor.io(lambda: ready_cb(self), self.handle)
 
     def stop(self):
         self.reactor.remove(self.handle)

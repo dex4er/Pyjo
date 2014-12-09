@@ -27,7 +27,7 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.object):
         timer = self._timers[tid]
         timer['time'] = steady_time() + timer['after']
 
-    def io(self, handle, cb):
+    def io(self, cb, handle):
         fd = handle.fileno()
         if fd in self._ios:
             self._ios[fd]['cb'] = cb
@@ -72,11 +72,11 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.object):
                     if flag & (POLLIN | POLLPRI | POLLHUP | POLLERR):
                         io = self._ios[fd]
                         i += 1
-                        self._sandbox('Read', io['cb'], 0)
+                        self._sandbox(io['cb'], 'Read', 0)
                     elif flag & (POLLOUT):
                         io = self._ios[fd]
                         i += 1
-                        self._sandbox('Write', io['cb'], 1)
+                        self._sandbox(io['cb'], 'Write', 1)
 
             # Wait for timeout if poll can't be used
             elif timeout:
@@ -102,14 +102,14 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.object):
                 if t['cb']:
                     if DEBUG:
                         warn("-- Alarm timer[{0}] = {1}".format(tid, t))
-                    self._sandbox("Timer {0}".format(tid), t['cb'])
+                    self._sandbox(t['cb'], "Timer {0}".format(tid))
 
         # Restore state if necessary
         if self._running:
             self._running = running
 
-    def recurring(self, after, cb):
-        return self._timer(True, after, cb)
+    def recurring(self, cb, after):
+        return self._timer(cb, True, after)
 
     def remove(self, remove):
         if remove is None:
@@ -159,8 +159,8 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.object):
     def stop(self):
         self._running = False
 
-    def timer(self, *args, **kwargs):
-        return self._timer(False, *args, **kwargs)
+    def timer(self, cb, after):
+        return self._timer(cb, False, after)
 
     def watch(self, handle, read, write):
         mode = 0
@@ -179,7 +179,7 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.object):
             self._select_poll = select.poll()
         return self._select_poll
 
-    def _sandbox(self, event, cb, *args):
+    def _sandbox(self, cb, event, *args):
         cb(*args)
         """
         try:
@@ -188,7 +188,7 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.object):
             self.emit('error', "{0} failed: {1}".format(event, e))
         """
 
-    def _timer(self, recurring, after, cb):
+    def _timer(self, cb, recurring, after):
         tid = None
         while True:
             tid = md5_sum('t{0}{1}'.format(steady_time(), rand()))

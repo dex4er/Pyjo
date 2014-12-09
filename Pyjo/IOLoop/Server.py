@@ -43,7 +43,7 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
     def start(self):
         def ready_cb(self, unused):
             self._accept()
-        self.reactor.io(self.handle, lambda unused: ready_cb(self, unused))
+        self.reactor.io(lambda unused: ready_cb(self, unused), self.handle)
 
     def stop(self):
         self.reactor.remove(self.handle)

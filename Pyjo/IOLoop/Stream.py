@@ -81,7 +81,7 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
                 else:
                     self._read()
 
-        reactor.io(self.timeout(self._timeout).handle, lambda is_write: cb_read_write(self, is_write))
+        reactor.io(lambda is_write: cb_read_write(self, is_write), self.timeout(self._timeout).handle)
 
     def stop(self):
         if not self._paused:
@@ -108,7 +108,7 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
             if bool(dir(self)):
                 self.emit('timeout').close()
 
-        self._timer = reactor.timer(timeout, lambda: timeout_cb(self))
+        self._timer = reactor.timer(lambda: timeout_cb(self), timeout)
 
         return self
 
