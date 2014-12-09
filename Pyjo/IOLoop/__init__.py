@@ -13,7 +13,7 @@ import Pyjo.IOLoop.Stream
 import Pyjo.Reactor
 import Pyjo.Reactor.Poll
 
-from Pyjo.Util import getenv, md5_sum, steady_time, rand, warn
+from Pyjo.Util import getenv, lazy, md5_sum, steady_time, rand, warn
 
 
 DEBUG = getenv('PYJO_IOLOOP_DEBUG', 0)
@@ -33,8 +33,8 @@ class Pyjo_IOLoop(Pyjo.Base.object):
     multi_accept = 50
     reactor = None
 
-    _acceptors = {}
-    _connections = {}
+    _acceptors = lazy(lambda: {})
+    _connections = lazy(lambda: {})
 
     _accepts = 0
     _accept_timer = None

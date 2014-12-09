@@ -10,7 +10,7 @@ from select import POLLERR, POLLHUP, POLLIN, POLLOUT, POLLPRI
 
 import Pyjo.Reactor
 
-from Pyjo.Util import getenv, md5_sum, rand, steady_time, warn
+from Pyjo.Util import getenv, lazy, md5_sum, rand, steady_time, warn
 
 
 DEBUG = getenv('PYJO_REACTOR_DEBUG', 0)
@@ -20,8 +20,8 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.object):
 
     _running = False
     _select_poll = None
-    _timers = {}
-    _ios = {}
+    _timers = lazy(lambda: {})
+    _ios = lazy(lambda: {})
 
     def again(self, tid):
         timer = self._timers[tid]

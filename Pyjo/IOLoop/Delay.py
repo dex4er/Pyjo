@@ -15,13 +15,13 @@ class Pyjo_IOLoop_Delay(Pyjo.EventEmitter.object):
 
     ioloop = None
 
-    _data = {}
-
     _counter = 0
     _pending = 0
     _lock = False
     _fail = False
-    _args = []
+
+    _data = lazy(lambda: {})
+    _args = lazy(lambda: [])
 
     def __init__(self, **kwargs):
         super(Pyjo_IOLoop_Delay, self).__init__(**kwargs)

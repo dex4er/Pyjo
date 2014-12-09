@@ -6,7 +6,7 @@ import weakref
 
 import Pyjo.Base
 
-from Pyjo.Util import getenv, warn
+from Pyjo.Util import getenv, lazy, warn
 
 
 DEBUG = getenv('PYJO_EVENTEMITTER_DEBUG', 0)
@@ -18,7 +18,7 @@ class Error(Exception):
 
 class Pyjo_EventEmitter(Pyjo.Base.object):
 
-    _events = {}
+    _events = lazy(lambda: {})
 
     def catch(self, *args):
         self.on('error', *args)
@@ -96,22 +96,20 @@ class Pyjo_EventEmitter(Pyjo.Base.object):
 
 
 def on(obj, name=None):
+    if callable(name):
+        return obj.on(name.__name__, name)
+
     def wrap(func):
-        if name is None:
-            eventname = func.__name__
-        else:
-            eventname = name
-        return obj.on(eventname, func)
+        return obj.on(name, func)
     return wrap
 
 
 def once(obj, name=None):
+    if callable(name):
+        return obj.once(name.__name__, name)
+
     def wrap(func):
-        if name is None:
-            eventname = func.__name__
-        else:
-            eventname = name
-        return obj.once(eventname, func)
+        return obj.once(name, func)
     return wrap
 
 
