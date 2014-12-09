@@ -13,7 +13,10 @@ import Pyjo.IOLoop.Stream
 import Pyjo.Reactor
 import Pyjo.Reactor.Poll
 
-from Pyjo.Util import getenv, lazy, md5_sum, steady_time, rand, warn
+from Pyjo.Util import (
+    decorator, decoratormethod, getenv, lazy, md5_sum, steady_time, rand,
+    warn
+)
 
 
 DEBUG = getenv('PYJO_IOLOOP_DEBUG', 0)
@@ -118,23 +121,15 @@ class Pyjo_IOLoop(Pyjo.Base.object):
     def is_running(self):
         return self.reactor.is_running()
 
-    def next_tick(self, cb=None):
-        if cb is None:
-            def wrap(func):
-                return self.next_tick(func)
-            return wrap
-
+    @decoratormethod
+    def next_tick(self, cb):
         return self.reactor.next_tick(cb)
 
     def one_tick(self):
         return self.reactor.one_tick()
 
-    def recurring(self, after, cb=None):
-        if cb is None:
-            def wrap(func):
-                return self.recurring(after, func)
-            return wrap
-
+    @decoratormethod
+    def recurring(self, cb, after):
         if DEBUG:
             warn("-- Recurring after {0} cb {1}".format(after, cb))
         return self._timer('recurring', after, cb)
@@ -194,12 +189,8 @@ class Pyjo_IOLoop(Pyjo.Base.object):
 
         return self._stream(stream, self._id())
 
-    def timer(self, after, cb=None):
-        if cb is None:
-            def wrap(func):
-                return self.timer(after, func)
-            return wrap
-
+    @decoratormethod
+    def timer(self, cb, after):
         if DEBUG:
             warn("-- Timer after {0} cb {1}".format(after, cb))
         return self._timer('timer', after, cb)
@@ -265,14 +256,14 @@ class Pyjo_IOLoop(Pyjo.Base.object):
             def accept_timer_cb(loop):
                 loop._accepting()
 
-            self._accept_timer = self.recurring(self.accept_interval, accept_timer_cb)
+            self._accept_timer = self.recurring(accept_timer_cb, self.accept_interval)
 
         if not self._stop_timer:
 
             def stop_timer_cb(loop):
                 loop._stop()
 
-            self._stop_timer = self.recurring(1, stop_timer_cb)
+            self._stop_timer = self.recurring(stop_timer_cb, 1)
 
     def _remove(self, taskid):
         # Timer
@@ -364,12 +355,8 @@ def is_running():
     return instance.is_running()
 
 
-def next_tick(cb=None):
-    if cb is None:
-        def wrap(func):
-            return instance.next_tick(func)
-        return wrap
-
+@decorator
+def next_tick(cb):
     return instance.next_tick(cb)
 
 
@@ -377,17 +364,9 @@ def one_tick():
     return instance.one_tick()
 
 
-def recurring(after, cb=None):
-    if cb is None:
-        def wrap(func):
-            return instance.recurring(after, func)
-        return wrap
-
-    return instance.recurring(after, cb)
-
-
-def register(name):
-    return instance.register(name)
+@decorator
+def recurring(cb, after):
+    return instance.recurring(cb, after)
 
 
 def remove(taskid):
@@ -419,13 +398,9 @@ def stream(stream):
     return instance.stream(stream)
 
 
-def timer(after, cb=None):
-    if cb is None:
-        def wrap(func):
-            return instance.timer(after, func)
-        return wrap
-
-    return instance.timer(after, cb)
+@decorator
+def timer(cb, after=None):
+    return instance.timer(cb, after)
 
 
 new = Pyjo_IOLoop.new

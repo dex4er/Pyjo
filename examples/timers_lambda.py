@@ -3,7 +3,7 @@ from __future__ import print_function
 import Pyjo.IOLoop
 
 
-writer = Pyjo.IOLoop.recurring(0, lambda loop: print("A"))
-Pyjo.IOLoop.timer(1, lambda loop: loop.remove(writer))
+writer_id = Pyjo.IOLoop.recurring(lambda loop: print("A"), 0)
+Pyjo.IOLoop.timer(lambda loop: loop.remove(writer_id), 1)
 
 Pyjo.IOLoop.start()

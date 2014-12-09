@@ -16,6 +16,26 @@ class Error(Exception):
     pass
 
 
+def decorator(func):
+    def wrap(*args):
+        if not callable(args[0]):
+            def wrap2(func2):
+                return func(func2, *args)
+            return wrap2
+        return func(*args)
+    return wrap
+
+
+def decoratormethod(func):
+    def wrap(self, *args):
+        if not callable(args[0]):
+            def wrap2(func2):
+                return func(self, func2, *args)
+            return wrap2
+        return func(self, *args)
+    return wrap
+
+
 def getenv(name, default):
     return os.environ.get(name, default)
 
