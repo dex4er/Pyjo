@@ -5,7 +5,7 @@
 #   python test.py
 #   PROVE= python test.py
 #   python setup.py
-#   PYTHONPATH=. nosetests
+#   PYTHONPATH=`pwd` nosetests
 
 import os
 import subprocess
@@ -13,13 +13,19 @@ import sys
 import unittest
 
 
+dirs = ['t/pyjo', 't/pyjo_examples']
+
+
 class TestSuite(unittest.TestSuite):
     def __init__(self, *args, **kwargs):
         super(TestSuite, self).__init__(*args, **kwargs)
         test_loader = unittest.defaultTestLoader
-        test_suite = test_loader.discover('t/pyjo', pattern='*.py')
-        for t in test_suite:
-            self.addTest(t)
+        for d in dirs:
+            test_suite = test_loader.discover(d, pattern='*.py', top_level_dir='.')
+            for t in test_suite:
+                self.addTest(t)
+    def __iter__(self):
+        return iter(self._tests)
 
 
 def run():
@@ -31,7 +37,7 @@ def run():
         else:
             args = args[1:]
         if not list(map(lambda a: True if a.startswith('t/') else False, args)).count(True):
-            args += ['t/pyjo']
+            args += ['t/pyjo', 't/pyjo_examples']
         os.putenv('PYTHONPATH', '.')
         cmd = [prove, '--ext=py', '--exec=' + sys.executable] + args
         sys.exit(subprocess.call(cmd))

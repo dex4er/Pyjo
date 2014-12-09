@@ -1,0 +1,57 @@
+import Pyjo.Test
+
+
+class NoseTest(Pyjo.Test.NoseTest):
+    script = __file__
+    srcdir = '../..'
+
+
+class UnitTest(Pyjo.Test.UnitTest):
+    script = __file__
+
+
+if __name__ == '__main__':
+
+    from Pyjo.Test import *  # @UnusedWildImport
+
+    import Pyjo.IOLoop
+
+    plan(tests=9)
+
+    def step1(delay):
+        pass_ok("Step 1")
+        Pyjo.IOLoop.timer(2, delay.begin())
+        Pyjo.IOLoop.timer(1, delay.begin())
+        pass_ok('Wait 2 seconds for step 2.')
+
+    def step2(delay):
+        pass_ok("Step 2")
+
+        def step2_1(delay2):
+            pass_ok("Step 2.1")
+            end = delay2.begin()
+            Pyjo.IOLoop.timer(1, lambda loop: end('', 'OK'))
+            pass_ok('Wait 1 second for step 2.2.')
+
+        def step2_2(delay2, *args):
+            pass_ok("Step 2.2 got {0}".format(args))
+            Pyjo.IOLoop.timer(3, delay2.begin())
+            pass_ok('Wait 3 seconds for step 3.')
+
+        Pyjo.IOLoop.delay().steps(
+            step2_1,
+            step2_2,
+            delay.begin()
+        )
+
+    def step3(delay):
+        pass_ok("Step 3")
+        pass_ok('And done.')
+
+    Pyjo.IOLoop.delay().steps(
+        step1,
+        step2,
+        step3
+    ).wait()
+
+    done_testing()
