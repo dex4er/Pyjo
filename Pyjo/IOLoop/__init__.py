@@ -100,9 +100,9 @@ class Pyjo_IOLoop(Pyjo.Base.object):
                 self._stream(stream, cid)
                 cb(self, None, stream)
 
-        client.on('connect', lambda client, handle: connect_cb(self, cid, client, handle))
+        client.on(lambda client, handle: connect_cb(self, cid, client, handle), 'connect')
 
-        # TODO client.on('error', error_cb)
+        # TODO client.on(error_cb, 'error')
 
         client.connect(**kwargs)
         return cid
@@ -161,7 +161,7 @@ class Pyjo_IOLoop(Pyjo.Base.object):
             stream = Pyjo.IOLoop.Stream.new(handle)
             cb(self, stream, self.stream(stream))
 
-        server.on('accept', lambda server, handle: accept_cb(self, server, handle))
+        server.on(lambda server, handle: accept_cb(self, server, handle), 'accept')
         server.listen(**kwargs)
 
         return self.acceptor(server)
@@ -326,7 +326,7 @@ class Pyjo_IOLoop(Pyjo.Base.object):
             if dir(self):
                 self._remove(cid)
 
-        stream.on('close', lambda stream: on_close_cb(self, stream))
+        stream.on(lambda stream: on_close_cb(self, stream), 'close')
         stream.start()
 
         return cid
@@ -426,10 +426,6 @@ def timer(after, cb=None):
         return wrap
 
     return instance.timer(after, cb)
-
-
-on = Pyjo.EventEmitter.on
-once = Pyjo.EventEmitter.once
 
 
 new = Pyjo_IOLoop.new

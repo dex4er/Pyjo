@@ -16,7 +16,7 @@ def server_cb(loop, stream, cid):
         # Disconnect client
         stream.close_gracefully()
 
-    stream.on('read', on_read_cb)
+    stream.on(on_read_cb, 'read')
 
 server = Pyjo.IOLoop.server(port=3000, cb=server_cb)
 
@@ -28,7 +28,7 @@ def client_cb(loop, err, stream):
         # Process input
         print("Client: {0}".format(chunk.decode('utf-8')))
 
-    stream.on('read', on_read_cb)
+    stream.on(on_read_cb, 'read')
 
     # Write request
     stream.write(b"GET / HTTP/1.1\x0d\x0a\x0d\x0a")

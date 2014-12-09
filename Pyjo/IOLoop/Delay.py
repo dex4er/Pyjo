@@ -68,7 +68,7 @@ class Pyjo_IOLoop_Delay(Pyjo.EventEmitter.object):
         if self.ioloop.is_running():
             return
         # TODO once error
-        self.once('finish', lambda e, *args: self.ioloop.stop())
+        self.once(lambda e, *args: self.ioloop.stop(), 'finish')
         self.ioloop.start()
 
     def _step(self, sid, offset=1, length=0, *args):

@@ -115,7 +115,7 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
     def write(self, chunk, cb=None):
         self._buffer += chunk
         if cb:
-            self.once('drain', cb)
+            self.once(cb, 'drain')
         elif not len(self._buffer):
             return self
         if self.handle:

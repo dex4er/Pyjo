@@ -22,8 +22,8 @@ def dead_cb(cat):
 
 tiger = Cat()
 
-tiger.on('roar', roar_cb)
-tiger.once('dead', dead_cb)
+tiger.on(roar_cb, 'roar')
+tiger.once(dead_cb, 'dead')
 
 tiger.poke(2)
 tiger.poke(2)

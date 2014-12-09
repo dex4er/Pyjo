@@ -17,20 +17,31 @@ if __name__ == '__main__':
 
     # Normal event
     e = Pyjo.EventEmitter.object()
-    called = 0
+    called1 = 0
+
+    @e.on
+    def test1(self):
+        global called1
+        called1 += 1
+
+    e.emit('test1')
+    is_ok(called1, 1, 'event test1 was emitted, called1')
+
+    # Imperative syntax
+    called2 = 0
 
     def cb(self):
-        global called
-        called += 1
+        global called2
+        called2 += 1
 
-    e.on('test1', cb)
-    e.emit('test1')
-    is_ok(called, 1, 'event was emitted once')
+    e.on(cb, 'test2')
+    e.emit('test2')
+    is_ok(called2, 1, 'event test2 was emitted, called2')
 
     # Error
-    def cb(self):
+    @e.on
+    def die(self):
         raise Exception('works!')
-    e.on('die', cb)
     error = ''
     try:
         e.emit('die')
