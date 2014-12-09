@@ -13,7 +13,7 @@ import sys
 import unittest
 
 
-dirs = ['t/pyjo', 't/pyjo_examples']
+dirs = ['t/pyjo', 't/examples']
 
 
 class TestSuite(unittest.TestSuite):
@@ -37,7 +37,7 @@ def run():
         else:
             args = args[1:]
         if not list(map(lambda a: True if a.startswith('t/') else False, args)).count(True):
-            args += ['t/pyjo', 't/pyjo_examples']
+            args += dirs
         os.putenv('PYTHONPATH', '.')
         cmd = [prove, '--ext=py', '--exec=' + sys.executable] + args
         sys.exit(subprocess.call(cmd))
