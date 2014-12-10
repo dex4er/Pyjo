@@ -25,8 +25,6 @@ if __name__ == '__main__':
     @Pyjo.IOLoop.server
     def server(loop, stream, cid):
 
-        port = stream.handle.getsockname()[1]
-
         @stream.on
         def read(stream, chunk):
             # Process input chunk
@@ -39,7 +37,7 @@ if __name__ == '__main__':
             # Disconnect client
             stream.close_gracefully()
 
-    port = Pyjo.IOLoop.acceptor(server).handle.getsockname()[1]
+    port = Pyjo.IOLoop.acceptor(server).port
 
     url = Pyjo.URL.new('http://localhost/').set(port=port)
     n = 4

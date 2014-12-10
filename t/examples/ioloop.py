@@ -33,7 +33,7 @@ if __name__ == '__main__':
             # Disconnect client
             stream.close_gracefully()
 
-    port = Pyjo.IOLoop.acceptor(server).handle.getsockname()[1]
+    port = Pyjo.IOLoop.acceptor(server).port
 
     # Connect to server
     @Pyjo.IOLoop.client(port=port)

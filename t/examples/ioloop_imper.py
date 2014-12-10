@@ -35,7 +35,7 @@ if __name__ == '__main__':
 
     server_id = Pyjo.IOLoop.server(server_cb)
 
-    port = Pyjo.IOLoop.acceptor(server_id).handle.getsockname()[1]
+    port = Pyjo.IOLoop.acceptor(server_id).port
 
     # Connect to server
     def client_cb(loop, err, stream):

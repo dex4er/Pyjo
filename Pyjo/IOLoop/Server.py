@@ -7,8 +7,6 @@ import socket
 import Pyjo.EventEmitter
 import Pyjo.IOLoop
 
-from Pyjo.Util import lazy
-
 
 class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
 
@@ -39,6 +37,10 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
         s.setblocking(0)
         s.listen(backlog)
         self.handle = s
+
+    @property
+    def port(self):
+        return self.handle.getsockname()[1]
 
     def start(self):
         def ready_cb(self, unused):
