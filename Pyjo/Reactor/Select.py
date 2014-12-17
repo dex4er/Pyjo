@@ -42,7 +42,7 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.object):
 
     def is_readable(self, handle):
         fd = handle.fileno()
-        readable, writable, exceptional = select.select([fd], [], [], 0)
+        readable, _, _ = select.select([fd], [], [], 0)
         return fd in readable
 
     def is_running(self):
@@ -138,10 +138,10 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.object):
             if DEBUG:
                 if fd in self._ios:
                     warn("-- Reactor remove io[{0}]".format(fd))
-            #if fd in self._inputs:
-            self._inputs.remove(fd)
-            #if fd in self._outputs:
-            self._outputs.remove(fd)
+            if fd in self._inputs:
+                self._inputs.remove(fd)
+            if fd in self._outputs:
+                self._outputs.remove(fd)
             if fd in self._ios:
                 del self._ios[fd]
                 return True
@@ -170,7 +170,6 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.object):
         return self._timer(cb, False, after)
 
     def watch(self, handle, read, write):
-        mode = 0
         fd = handle.fileno()
         if read and fd not in self._inputs:
             self._inputs.append(fd)
