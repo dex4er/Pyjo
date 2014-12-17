@@ -10,7 +10,6 @@ import subprocess
 import sys
 import traceback
 import unittest
-from _codecs_cn import __file__
 
 
 __all__ = ['done_testing', 'diag', 'fail', 'is_ok', 'isa_ok', 'is_deeply_ok',
