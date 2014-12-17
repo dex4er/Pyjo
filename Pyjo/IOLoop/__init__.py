@@ -11,7 +11,6 @@ import Pyjo.IOLoop.Delay
 import Pyjo.IOLoop.Server
 import Pyjo.IOLoop.Stream
 import Pyjo.Reactor
-import Pyjo.Reactor.Poll
 
 from Pyjo.Util import (
     decorator, decoratormethod, getenv, lazy, md5_sum, steady_time, rand,

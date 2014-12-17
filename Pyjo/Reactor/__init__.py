@@ -2,6 +2,7 @@
 Pyjo.Reactor
 """
 
+import os
 import select
 import socket
 
@@ -23,17 +24,19 @@ class Pyjo_Reactor(Pyjo.EventEmitter.object):
 
     @classmethod
     def detect(self):
-        return getenv('PYJO_REACTOR', 'Pyjo.Reactor.Poll')
+        if os.name == "nt":
+            default = 'Pyjo.Reactor.Select'
+        else:
+            default = 'Pyjo.Reactor.Poll'
+        return getenv('PYJO_REACTOR', default)
 
     @not_implemented
     def io(self, cb, handle):
         pass
 
-    # This may break at some point in the future, but is worth it for performance
+    @not_implemented
     def is_readable(self, handle):
-        p = select.poll()
-        p.register(handle.fileno(), select.POLLIN | select.POLLPRI)
-        return bool(p.poll(0))
+        pass
 
     @not_implemented
     def is_running(self):

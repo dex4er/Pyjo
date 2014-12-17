@@ -1,12 +1,10 @@
 """
-Pyjo.Reactor.Poll
+Pyjo.Reactor.Select
 """
 
 import select
 import socket
 import time
-
-from select import POLLERR, POLLHUP, POLLIN, POLLOUT, POLLPRI
 
 import Pyjo.Reactor
 
@@ -16,12 +14,15 @@ from Pyjo.Util import getenv, lazy, md5_sum, rand, steady_time, warn
 DEBUG = getenv('PYJO_REACTOR_DEBUG', 0)
 
 
-class Pyjo_Reactor_Poll(Pyjo.Reactor.object):
+class Pyjo_Reactor_Select(Pyjo.Reactor.object):
 
     _running = False
-    _select_poll = None
+    _select_select = None
     _timers = lazy(lambda: {})
     _ios = lazy(lambda: {})
+
+    _inputs = lazy(lambda: [])
+    _outputs = lazy(lambda: [])
 
     def again(self, tid):
         timer = self._timers[tid]
@@ -40,9 +41,9 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.object):
         return self.watch(handle, 1, 1)
 
     def is_readable(self, handle):
-        p = select.poll()
-        p.register(handle.fileno(), select.POLLIN | select.POLLPRI)
-        return bool(p.poll(0))
+        fd = handle.fileno()
+        readable, writable, exceptional = select.select([fd], [], [], 0)
+        return fd in readable
 
     def is_running(self):
         return self._running
@@ -54,7 +55,6 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.object):
 
         # Wait for one event
         i = 0
-        poll = self._poll()
         while not i:
             # Stop automatically if there is nothing to watch
             if not self._timers and not self._ios:
@@ -72,13 +72,13 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.object):
 
             # I/O
             if self._ios:
-                events = poll.poll(timeout * 1000)
-                for fd, flag in events:
-                    if flag & (POLLIN | POLLPRI | POLLHUP | POLLERR):
+                readable, writable, exceptional = select.select(self._inputs, self._outputs, self._inputs, timeout)
+                for fd in list(set([item for sublist in (exceptional, readable, writable) for item in sublist])):
+                    if fd in readable or fd in exceptional:
                         io = self._ios[fd]
                         i += 1
                         self._sandbox(io['cb'], 'Read', 0)
-                    elif flag & (POLLOUT):
+                    elif fd in writable:
                         io = self._ios[fd]
                         i += 1
                         self._sandbox(io['cb'], 'Write', 1)
@@ -138,9 +138,10 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.object):
             if DEBUG:
                 if fd in self._ios:
                     warn("-- Reactor remove io[{0}]".format(fd))
-            poll = self._poll()
-            if poll:
-                poll.unregister(remove)
+            #if fd in self._inputs:
+            self._inputs.remove(fd)
+            #if fd in self._outputs:
+            self._outputs.remove(fd)
             if fd in self._ios:
                 del self._ios[fd]
                 return True
@@ -153,7 +154,8 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.object):
 
     def reset(self):
         self._ios = {}
-        self._select_poll = None
+        self._inputs = []
+        self._outputs = []
         self._timers = {}
 
     def start(self):
@@ -169,20 +171,13 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.object):
 
     def watch(self, handle, read, write):
         mode = 0
-        if read:
-            mode |= POLLIN | POLLPRI
-        if write:
-            mode |= POLLOUT
-
-        poll = self._poll()
-        poll.register(handle, mode)
+        fd = handle.fileno()
+        if read and fd not in self._inputs:
+            self._inputs.append(fd)
+        if write and fd not in self._outputs:
+            self._outputs.append(fd)
 
         return self
-
-    def _poll(self):
-        if not self._select_poll:
-            self._select_poll = select.poll()
-        return self._select_poll
 
     def _sandbox(self, cb, event, *args):
         cb(*args)
@@ -211,5 +206,5 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.object):
         return tid
 
 
-new = Pyjo_Reactor_Poll.new
-object = Pyjo_Reactor_Poll  # @ReservedAssignment
+new = Pyjo_Reactor_Select.new
+object = Pyjo_Reactor_Select  # @ReservedAssignment

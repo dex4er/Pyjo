@@ -30,7 +30,11 @@ class TestSuite(unittest.TestSuite):
 
 def run():
     try:
-        prove = os.getenv('PROVE', 'prove')
+        if os.name == 'nt':
+            default_prove = 'prove.bat'
+        else:
+            default_prove = 'prove'
+        prove = os.getenv('PROVE', default_prove)
         args = sys.argv
         if len(args) > 2 and args[0].endswith('setup.py') and args[1] == 'test':
             args = args[2:]
