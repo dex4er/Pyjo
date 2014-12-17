@@ -5,12 +5,12 @@ Pyjo.Reactor.EV
 import pyev
 import weakref
 
-import Pyjo.Reactor.Poll
+import Pyjo.Reactor.Select
 
 from Pyjo.Util import lazy
 
 
-class Pyjo_Reactor_EV(Pyjo.Reactor.Poll.object):
+class Pyjo_Reactor_EV(Pyjo.Reactor.Select.object):
 
     _loop = lazy(lambda: pyev.default_loop())
 
@@ -83,9 +83,6 @@ class Pyjo_Reactor_EV(Pyjo.Reactor.Poll.object):
                 io['watcher'] = watcher
 
         return self
-
-    def _poll(self):
-        return
 
     def _io(self, fd, w, revents):
         io = self._ios[fd]

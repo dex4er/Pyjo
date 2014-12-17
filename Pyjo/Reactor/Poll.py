@@ -8,7 +8,7 @@ import time
 
 from select import POLLERR, POLLHUP, POLLIN, POLLOUT, POLLPRI
 
-import Pyjo.Reactor
+import Pyjo.Reactor.Select
 
 from Pyjo.Util import getenv, lazy, md5_sum, rand, steady_time, warn
 
@@ -16,36 +16,17 @@ from Pyjo.Util import getenv, lazy, md5_sum, rand, steady_time, warn
 DEBUG = getenv('PYJO_REACTOR_DEBUG', 0)
 
 
-class Pyjo_Reactor_Poll(Pyjo.Reactor.object):
+class Pyjo_Reactor_Poll(Pyjo.Reactor.Select.object):
 
     _running = False
     _select_poll = None
     _timers = lazy(lambda: {})
     _ios = lazy(lambda: {})
 
-    def again(self, tid):
-        timer = self._timers[tid]
-        timer['time'] = steady_time() + timer['after']
-
-    def io(self, cb, handle):
-        fd = handle.fileno()
-        if fd in self._ios:
-            self._ios[fd]['cb'] = cb
-            if DEBUG:
-                warn("-- Reactor found io[{0}] = {1}".format(fd, self._ios[fd]))
-        else:
-            self._ios[fd] = {'cb': cb}
-            if DEBUG:
-                warn("-- Reactor adding io[{0}] = {1}".format(fd, self._ios[fd]))
-        return self.watch(handle, 1, 1)
-
     def is_readable(self, handle):
         p = select.poll()
         p.register(handle.fileno(), select.POLLIN | select.POLLPRI)
         return bool(p.poll(0))
-
-    def is_running(self):
-        return self._running
 
     def one_tick(self):
         # Remember state for later
@@ -113,9 +94,6 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.object):
         if self._running:
             self._running = running
 
-    def recurring(self, cb, after):
-        return self._timer(cb, True, after)
-
     def remove(self, remove):
         if remove is None:
             if DEBUG:
@@ -156,17 +134,6 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.object):
         self._select_poll = None
         self._timers = {}
 
-    def start(self):
-        self._running = True
-        while self._running:
-            self.one_tick()
-
-    def stop(self):
-        self._running = False
-
-    def timer(self, cb, after):
-        return self._timer(cb, False, after)
-
     def watch(self, handle, read, write):
         mode = 0
         if read:
@@ -183,33 +150,6 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.object):
         if not self._select_poll:
             self._select_poll = select.poll()
         return self._select_poll
-
-    def _sandbox(self, cb, event, *args):
-        cb(*args)
-        """
-        try:
-            cb(*args)
-        except Exception as e:
-            self.emit('error', "{0} failed: {1}".format(event, e))
-        """
-
-    def _timer(self, cb, recurring, after):
-        tid = None
-        while True:
-            tid = md5_sum('t{0}{1}'.format(steady_time(), rand()))
-            if tid not in self._timers:
-                break
-
-        timer = {'cb': cb, 'after': after, 'time': steady_time() + after}
-        if recurring:
-            timer['recurring'] = after
-        self._timers[tid] = timer
-
-        if DEBUG:
-            warn("-- Reactor adding timer[{0}] = {1}".format(tid, self._timers[tid]))
-
-        return tid
-
 
 new = Pyjo_Reactor_Poll.new
 object = Pyjo_Reactor_Poll  # @ReservedAssignment
