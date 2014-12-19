@@ -187,7 +187,7 @@ class Pyjo_URL(Pyjo.Base.String.object):
         if fragment is None:
             return url
 
-        return url + '#' + url_escape(fragment, r'^A-Za-z0-9\-._~!$&\'()*+,;=%:@/?')
+        return url + '#' + url_escape(fragment, r'^A-Za-z0-9\-._~!$&\'()*+,;=%:@\/?')
 
 
 new = Pyjo_URL.new

@@ -38,21 +38,78 @@ class Pyjo_Regexp(object):
     def new(cls, regexp):
         if regexp in CACHE:
             return CACHE[regexp]
-        params = regexp.split('/')
-        if params[0] == 's':
-            (pattern, replacement, flags) = params[1:4]
-            r = cls('s', pattern, replacement=replacement, flags=flags)
-            if 'o' not in flags:
-                CACHE[regexp] = r
-            return r
-        elif params[0] in 'm/':
-            (pattern, flags) = params[1:3]
-            r = cls('m', pattern, flags=flags)
-            if 'o' not in flags:
-                CACHE[regexp] = r
-            return r
+
+        if regexp[0] in 'ms':
+            action = regexp[0]
+            i = 1
+        elif regexp[0] == '/':
+            action = 'm'
+            i = 0
         else:
-            raise ValueError('Bad action: {0}'.format(regexp[0]))
+            raise ValueError('Bad regexp action: {0}'.format(regexp[0]))
+
+        rseps = {'(': ')',
+                 '[': ']',
+                 '{': '}',
+                 '<': '>'}
+
+        lsep = regexp[i]
+        if lsep in rseps:
+            rsep = rseps[lsep]
+        else:
+            rsep = lsep
+
+        i += 1
+        j = i
+
+        while True:
+            j2 = regexp.index(rsep, j + 1)
+            if j2 == j:
+                j += 1
+            else:
+                j = j2
+                if regexp[j - 1] != '\\':
+                    break
+
+        pattern = regexp[i:j]
+
+        i = j + 1
+
+        if action == 'm':
+            flags = regexp[i:]
+            obj = cls(action, pattern, flags=flags)
+            if 'o' not in flags:
+                CACHE[regexp] = obj
+            return obj
+
+        if lsep in rseps:
+            if regexp[i] != lsep:
+                raise ValueError('Missing regexp separator: {0}'.format(lsep))
+            i += 1
+
+        j = i
+
+        while True:
+            j2 = regexp.index(rsep, j + 1)
+            if j2 == j:
+                j += 1
+            else:
+                j = j2
+                if regexp[j - 1] != '\\':
+                    break
+
+        replacement = regexp[i:j]
+
+        i = j + 1
+
+        if action == 's':
+            flags = regexp[i:]
+            obj = cls(action, pattern, replacement=replacement, flags=flags)
+            if 'o' not in flags:
+                CACHE[regexp] = obj
+            return obj
+
+        raise ValueError('Bad regexp: {0}'.format(regexp))
 
     def _re_flags(self, str_flags=''):
         flags = 0
@@ -75,23 +132,31 @@ class Pyjo_Regexp(object):
                 result.update(match.groupdict())
             return result
         elif self.action == 's':
-            return self.re.sub(self.replacement, string, self.re_flags)
+            if 'g' in self.flags:
+                count = 0
+            else:
+                count = 1
+            return self.re.sub(self.replacement, string, count=count)
 
     def __eq__(self, other):
         return self.match(other)
-
-    def __isub__(self, other):
-        print('__isub__',other)
-        return self.match(string)
 
     def __rsub__(self, other):
         return self.match(other)
 
     def __call__(self, string):
-        return self.match(other)
+        return self.match(string)
+
+    def sub(self, repl, string):
+        if 'g' in self.flags:
+            count = 0
+        else:
+            count = 1
+        return self.re.sub(repl, string, count=count)
 
 
 regexp = Pyjo_Regexp.new
+r = regexp
 
 new = Pyjo_Regexp.new
-object = Pyjo_Regexp
+object = Pyjo_Regexp  # @ReservedAssignment

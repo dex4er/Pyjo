@@ -11,6 +11,8 @@ import re
 import sys
 import time
 
+from Pyjo.Regexp import r
+
 
 class Error(Exception):
     pass
@@ -87,29 +89,25 @@ def punycode_encode(string):
     return string.encode('punycode').decode('ascii')
 
 
-def steady_time():
-    return time.time()
-
-
 def rand(value=1):
     return random.random() * value
 
 
-re_url_escape_pattern = re.compile(r'([^A-Za-z0-9\-._~])')
-re_url_unescape_pattern = re.compile(r'%([0-9a-fA-F]{2})')
+def steady_time():
+    return time.time()
 
 
 def url_escape(string, pattern=None):
     if pattern is not None:
-        r = re.compile(r'([' + pattern + '])')
+        re = r('/([{0}])/g'.format(pattern))
     else:
-        r = re_url_escape_pattern
+        re = r('/([^A-Za-z0-9\-._~])/g')
 
-    return r.sub(lambda m: '%' + format(ord(m.group(1)), 'X'), string)
+    return re.sub(lambda m: '%' + format(ord(m.group(1)), 'X'), string)
 
 
 def url_unescape(string):
-    return re_url_unescape_pattern.sub(lambda m: chr(int(m.group(1), 16)), string)
+    return r('/%([0-9a-fA-F]{2})/g').sub(lambda m: chr(int(m.group(1), 16)), string)
 
 
 def warn(*args):
