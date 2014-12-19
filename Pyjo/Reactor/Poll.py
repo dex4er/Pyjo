@@ -10,7 +10,7 @@ from select import POLLERR, POLLHUP, POLLIN, POLLOUT, POLLPRI
 
 import Pyjo.Reactor.Select
 
-from Pyjo.Util import getenv, lazy, md5_sum, rand, steady_time, warn
+from Pyjo.Util import getenv, lazy, steady_time, warn
 
 
 DEBUG = getenv('PYJO_REACTOR_DEBUG', 0)
