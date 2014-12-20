@@ -103,11 +103,11 @@ def url_escape(string, pattern=None):
     else:
         m = r('/([^A-Za-z0-9\-._~])/g')
 
-    return string == m.s(lambda m: '%' + format(ord(m.group(1)), 'X'))
+    return string == m.s(lambda m: '%' + format(ord(m[1]), 'X'))
 
 
 def url_unescape(string):
-    return string == r('/%([0-9a-fA-F]{2})/g').s(lambda m: chr(int(m.group(1), 16)))
+    return string == r('/%([0-9a-fA-F]{2})/g').s(lambda m: chr(int(m[1], 16)))
 
 
 def warn(*args):

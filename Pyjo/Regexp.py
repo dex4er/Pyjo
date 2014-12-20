@@ -126,23 +126,37 @@ class Pyjo_Regexp(object):
                 raise ValueError('Bad flag: {0}'.format(f))
         return flags
 
+    def _match_result(self, match):
+        result = {}
+        if match is not None:
+            result[0] = match.group()
+            result.update(enumerate(match.groups(), start=1))
+            result.update(match.groupdict())
+        return result
+
     def match(self, string):
         if self.action == 'm':
             if 'g' in self.flags:
                 return self.re.findall(string)
-            result = {}
             match = self.re.search(string)
-            if match is not None:
-                result[0] = match.group()
-                result.update(enumerate(match.groups(), start=1))
-                result.update(match.groupdict())
-            return result
+            return self._match_result(match)
+
         elif self.action == 's':
             if 'g' in self.flags:
                 count = 0
             else:
                 count = 1
-            return self.re.sub(self.replacement, string, count=count)
+            if callable(self.replacement):
+                replacement = lambda m: self.replacement(self._match_result(m))
+            else:
+                replacement = self.replacement
+            return self.re.sub(replacement, string, count=count)
+
+    def s(self, replacement):
+        new_obj = self.clone()
+        new_obj.action = 's'
+        new_obj.replacement = replacement
+        return new_obj
 
     def __eq__(self, other):
         return self.match(other)
@@ -153,18 +167,12 @@ class Pyjo_Regexp(object):
     def __call__(self, string):
         return self.match(string)
 
-    def s(self, replacement):
-        new_obj = self.clone()
-        new_obj.action = 's'
-        new_obj.replacement = replacement
-        return new_obj
-
     def __str__(self):
         string = self.action + self.lsep + self.pattern + self.rsep
         if self.action == 's':
             if self.lsep in rseps:
                 string += self.lsep
-            string += self.replacement + self.rsep
+            string += str(self.replacement) + self.rsep
         string += self.flags
         return string
 
