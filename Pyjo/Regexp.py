@@ -23,14 +23,21 @@ FLAGS = {
 
 CACHE = {}
 
+rseps = {'(': ')',
+         '[': ']',
+         '{': '}',
+         '<': '>'}
+
 
 class Pyjo_Regexp(object):
 
-    def __init__(self, action, pattern, replacement='', flags=''):
+    def __init__(self, action, pattern, replacement='', flags='', lsep='/', rsep='/'):
         self.action = action
         self.pattern = pattern
         self.replacement = replacement
         self.flags = flags
+        self.lsep = lsep
+        self.rsep = rsep
         self.re_flags = self._re_flags(self.flags)
         self.re = re.compile(self.pattern, self.re_flags)
 
@@ -47,11 +54,6 @@ class Pyjo_Regexp(object):
             i = 0
         else:
             raise ValueError('Bad regexp action: {0}'.format(regexp[0]))
-
-        rseps = {'(': ')',
-                 '[': ']',
-                 '{': '}',
-                 '<': '>'}
 
         lsep = regexp[i]
         if lsep in rseps:
@@ -77,7 +79,7 @@ class Pyjo_Regexp(object):
 
         if action == 'm':
             flags = regexp[i:]
-            obj = cls(action, pattern, flags=flags)
+            obj = cls(action, pattern, flags=flags, lsep=lsep, rsep=rsep)
             if 'o' not in flags:
                 CACHE[regexp] = obj
             return obj
@@ -104,12 +106,16 @@ class Pyjo_Regexp(object):
 
         if action == 's':
             flags = regexp[i:]
-            obj = cls(action, pattern, replacement=replacement, flags=flags)
+            obj = cls(action, pattern, replacement=replacement, flags=flags, lsep=lsep, rsep=rsep)
             if 'o' not in flags:
                 CACHE[regexp] = obj
             return obj
 
         raise ValueError('Bad regexp: {0}'.format(regexp))
+
+    def clone(self):
+        new_obj = type(self)(self.action, self.pattern, replacement=self.replacement, flags=self.flags)
+        return new_obj
 
     def _re_flags(self, str_flags=''):
         flags = 0
@@ -147,12 +153,23 @@ class Pyjo_Regexp(object):
     def __call__(self, string):
         return self.match(string)
 
-    def sub(self, repl, string):
-        if 'g' in self.flags:
-            count = 0
-        else:
-            count = 1
-        return self.re.sub(repl, string, count=count)
+    def s(self, replacement):
+        new_obj = self.clone()
+        new_obj.action = 's'
+        new_obj.replacement = replacement
+        return new_obj
+
+    def __str__(self):
+        string = self.action + self.lsep + self.pattern + self.rsep
+        if self.action == 's':
+            if self.lsep in rseps:
+                string += self.lsep
+            string += self.replacement + self.rsep
+        string += self.flags
+        return string
+
+    def __repr__(self):
+        return "regexp('{0}')".format(self)
 
 
 regexp = Pyjo_Regexp.new
