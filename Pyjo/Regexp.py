@@ -110,6 +110,13 @@ class Pyjo_Regexp(object):
     def __rsub__(self, other):
         return self.match(other, _flag_r=True)
 
+    def __rmul__(self, other):
+        while True:
+            (other, replaced) = self.match(other, _flag_g=False, _flag_r=False)
+            if not replaced:
+                break
+        return other
+
     def __call__(self, string):
         return self.match(string)
 

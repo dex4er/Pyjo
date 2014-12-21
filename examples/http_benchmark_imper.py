@@ -71,8 +71,5 @@ Pyjo.IOLoop.start()
 
 
 speed = str(sum(speeds))
-while True:
-    (speed, replaced) = speed == s(r'(?<=\d)(\d{3})(,|$)', r',\1')
-    if not replaced:
-        break
+speed *= s(r'(?<=\d)(\d{3})(,|$)', r',\1')
 print('{0} Mb/s'.format(speed))
