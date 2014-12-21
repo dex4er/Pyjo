@@ -10,7 +10,7 @@ import random
 import sys
 import time
 
-from Pyjo.Regexp import m, s
+from Pyjo.Regexp import s
 
 
 class Error(Exception):

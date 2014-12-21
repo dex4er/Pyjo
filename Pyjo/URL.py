@@ -98,6 +98,8 @@ class Pyjo_URL(Pyjo.Base.String.object):
         m = re_port.search(authority)
         if m:
             self.port = m.group(1)
+            if self.port != '':
+                self.port = int(self.port)
             authority = re_port.sub('', authority)
 
         # Host

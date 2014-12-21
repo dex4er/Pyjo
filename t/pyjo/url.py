@@ -34,7 +34,7 @@ if __name__ == '__main__':
     is_ok(url.protocol, 'https', 'right protocol')
     is_ok(url.userinfo, 'sri:foobar', 'right userinfo')
     is_ok(url.host, 'example.com', 'right host')
-    is_ok(url.port, '8080', 'right port')
+    is_ok(url.port, 8080, 'right port')
     is_ok(url.authority, 'sri:foobar@example.com:8080', 'right authority')
     is_ok(url.path, '/x/index.html', 'right path')
     is_ok(url.query, 'monkey=biz&foo=1', 'right query')

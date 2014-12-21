@@ -1,12 +1,13 @@
 from __future__ import print_function
 
-import re
 import sys
 
 import Pyjo.IOLoop
 import Pyjo.URL
 
+from Pyjo.Regexp import s
 from Pyjo.Util import nonlocals, steady_time
+
 
 argv = sys.argv[1:]
 
@@ -71,7 +72,7 @@ Pyjo.IOLoop.start()
 
 speed = str(sum(speeds))
 while True:
-    (speed, replaced) = re.subn(r'(?<=\d)(\d{3})(,|$)', r',\1', speed)
+    (speed, replaced) = speed == s(r'(?<=\d)(\d{3})(,|$)', r',\1')
     if not replaced:
         break
 print('{0} Mb/s'.format(speed))
