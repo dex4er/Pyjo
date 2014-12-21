@@ -15,6 +15,7 @@ FLAGS = {
     'l': re.LOCALE,
     'm': re.MULTILINE,
     'o': re_EXTRA,
+    'r': re_EXTRA,
     's': re.DOTALL,
     'u': re.UNICODE,
     'x': re.VERBOSE,
@@ -23,98 +24,38 @@ FLAGS = {
 
 CACHE = {}
 
-rseps = {'(': ')',
-         '[': ']',
-         '{': '}',
-         '<': '>'}
-
 
 class Pyjo_Regexp(object):
 
-    def __init__(self, action, pattern, replacement='', flags='', lsep='/', rsep='/'):
-        self.action = action
-        self.pattern = pattern
-        self.replacement = replacement
-        self.flags = flags
-        self.lsep = lsep
-        self.rsep = rsep
-        self.re_flags = self._re_flags(self.flags)
-        self.re = re.compile(self.pattern, self.re_flags)
+    def __init__(self, action, pattern, replacement=None, flags=''):
+        self._action = action
+        self._pattern = pattern
+        self._replacement = replacement
+        self._flags = flags
+        self._re = re.compile(pattern, self._re_flags(flags))
 
     @classmethod
-    def new(cls, regexp):
-        if regexp in CACHE:
-            return CACHE[regexp]
+    def m(cls, pattern, flags=''):
+        idx = '\0'.join((pattern, flags,))
+        if idx in CACHE:
+            return CACHE[idx]
+        new_obj = cls('m', pattern, flags=flags)
+        if 'o' not in flags:
+            CACHE[idx] = new_obj
+        return new_obj
 
-        if regexp[0] in 'ms':
-            action = regexp[0]
-            i = 1
-        elif regexp[0] == '/':
-            action = 'm'
-            i = 0
-        else:
-            raise ValueError('Bad regexp action: {0}'.format(regexp[0]))
-
-        lsep = regexp[i]
-        if lsep in rseps:
-            rsep = rseps[lsep]
-        else:
-            rsep = lsep
-
-        i += 1
-        j = i
-
-        while True:
-            j2 = regexp.index(rsep, j + 1)
-            if j2 == j:
-                j += 1
-            else:
-                j = j2
-                if regexp[j - 1] != '\\':
-                    break
-
-        pattern = regexp[i:j]
-
-        i = j + 1
-
-        if action == 'm':
-            flags = regexp[i:]
-            obj = cls(action, pattern, flags=flags, lsep=lsep, rsep=rsep)
-            if 'o' not in flags:
-                CACHE[regexp] = obj
-            return obj
-
-        if lsep in rseps:
-            if regexp[i] != lsep:
-                raise ValueError('Missing regexp separator: {0}'.format(lsep))
-            i += 1
-
-        j = i
-
-        while True:
-            j2 = regexp.index(rsep, j + 1)
-            if j2 == j:
-                j += 1
-            else:
-                j = j2
-                if regexp[j - 1] != '\\':
-                    break
-
-        replacement = regexp[i:j]
-
-        i = j + 1
-
-        if action == 's':
-            flags = regexp[i:]
-            obj = cls(action, pattern, replacement=replacement, flags=flags, lsep=lsep, rsep=rsep)
-            if 'o' not in flags:
-                CACHE[regexp] = obj
-            return obj
-
-        raise ValueError('Bad regexp: {0}'.format(regexp))
+    @classmethod
+    def s(cls, pattern, replacement, flags=''):
+        idx = '\0'.join((pattern, str(replacement), flags,))
+        if idx in CACHE:
+            return CACHE[idx]
+        new_obj = cls('s', pattern, replacement, flags=flags)
+        if 'o' not in flags:
+            CACHE[idx] = new_obj
+        return new_obj
 
     def clone(self):
-        new_obj = type(self)(self.action, self.pattern, replacement=self.replacement, flags=self.flags)
+        new_obj = type(self)(self._action, self._pattern, replacement=self._replacement, flags=self._flags)
         return new_obj
 
     def _re_flags(self, str_flags=''):
@@ -134,54 +75,55 @@ class Pyjo_Regexp(object):
             result.update(match.groupdict())
         return result
 
-    def match(self, string):
-        if self.action == 'm':
-            if 'g' in self.flags:
-                return self.re.findall(string)
-            match = self.re.search(string)
+    def match(self, string, _flag_g=None, _flag_r=None):
+        if _flag_g is None:
+            _flag_g = 'g' in self._flags
+
+        if self._action == 'm':
+            if _flag_g:
+                return self._re.findall(string)
+            match = self._re.search(string)
             return self._match_result(match)
 
-        elif self.action == 's':
-            if 'g' in self.flags:
+        elif self._action == 's':
+            if _flag_g:
                 count = 0
             else:
                 count = 1
-            if callable(self.replacement):
-                replacement = lambda m: self.replacement(self._match_result(m))
-            else:
-                replacement = self.replacement
-            return self.re.sub(replacement, string, count=count)
 
-    def s(self, replacement):
-        new_obj = self.clone()
-        new_obj.action = 's'
-        new_obj.replacement = replacement
-        return new_obj
+            if callable(self._replacement):
+                replacement = lambda m: self._replacement(self._match_result(m))
+            else:
+                replacement = self._replacement
+
+            if _flag_r is None:
+                _flag_r = 'r' in self._flags
+
+            if _flag_r:
+                return self._re.sub(replacement, string, count=count)
+            else:
+                return self._re.subn(replacement, string, count=count)
 
     def __eq__(self, other):
         return self.match(other)
 
     def __rsub__(self, other):
-        return self.match(other)
+        return self.match(other, _flag_r=True)
 
     def __call__(self, string):
         return self.match(string)
 
-    def __str__(self):
-        string = self.action + self.lsep + self.pattern + self.rsep
-        if self.action == 's':
-            if self.lsep in rseps:
-                string += self.lsep
-            string += str(self.replacement) + self.rsep
-        string += self.flags
-        return string
-
     def __repr__(self):
-        return "regexp('{0}')".format(self)
+        if self._action == 'm':
+            return "regexp.m({0}, {1})".format(repr(self._pattern), repr(self._flags))
+        elif self._action == 's':
+            return "regexp.s({0}, {1}, {2})".format(repr(self._pattern), repr(self._replacement), repr(self._flags))
+        else:
+            return super(Pyjo_Regexp, self).__repr__()
 
 
-regexp = Pyjo_Regexp.new
-r = regexp
+regexp = Pyjo_Regexp
+m = regexp.m
+s = regexp.s
 
-new = Pyjo_Regexp.new
 object = Pyjo_Regexp  # @ReservedAssignment

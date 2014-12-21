@@ -7,11 +7,10 @@ from __future__ import print_function
 import hashlib
 import os
 import random
-import re
 import sys
 import time
 
-from Pyjo.Regexp import r
+from Pyjo.Regexp import m, s
 
 
 class Error(Exception):
@@ -99,15 +98,15 @@ def steady_time():
 
 def url_escape(string, pattern=None):
     if pattern is not None:
-        m = r('/([{0}])/g'.format(pattern))
+        pattern = '([{0}])'.format(pattern)
     else:
-        m = r('/([^A-Za-z0-9\-._~])/g')
+        pattern = '([^A-Za-z0-9\-._~])'
 
-    return string == m.s(lambda m: '%' + format(ord(m[1]), 'X'))
+    return string == s(pattern, lambda m: '%' + format(ord(m[1]), 'X'), 'gr')
 
 
 def url_unescape(string):
-    return string == r('/%([0-9a-fA-F]{2})/g').s(lambda m: chr(int(m[1], 16)))
+    return string == s('%([0-9a-fA-F]{2})', lambda m: chr(int(m[1], 16)), 'gr')
 
 
 def warn(*args):
