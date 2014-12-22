@@ -230,10 +230,6 @@ def _deep_check(stack, e1, e2):
         return False
 
 
-re_foo = re.compile(r'\$FOO')
-re_indent = re.compile(r'^', re.M)
-
-
 def _format_stack(stack):
     vname = '$FOO'
 
@@ -246,8 +242,8 @@ def _format_stack(stack):
             vname = 'sorted({0})[{1}]'.format(vname, idx)
 
     vals = stack[-1]['vals']
-    vnames = ['     ' + re_foo.sub('got', vname),
-              re_foo.sub('expected', vname)]
+    vnames = ['     ' + re.sub(r'\$FOO', 'got', vname),
+              re.sub(r'\$FOO', 'expected', vname)]
 
     out = "Structures begin differing at:\n"
     for idx in range(len(vals)):
