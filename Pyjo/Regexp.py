@@ -102,10 +102,16 @@ class Pyjo_Regexp(object):
             if _flag_r:
                 return self._re.sub(replacement, string, count=count)
             else:
-                return self._re.subn(replacement, string, count=count)
+                match = self._re.search(string)
+                result = self._match_result(match)
+                (new_string, count) = self._re.subn(replacement, string, count=count)
+                return (new_string, count, result)
 
     def __eq__(self, other):
         return self.match(other)
+
+    def __ne__(self, other):
+        return not self.match(other)
 
     def __rsub__(self, other):
         return self.match(other, _flag_r=True)

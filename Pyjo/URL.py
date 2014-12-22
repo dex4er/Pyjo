@@ -2,23 +2,14 @@
 Pyjo.URL
 """
 
-import re
-
 import Pyjo.Base.String
 import Pyjo.Parameters
 import Pyjo.Path
 
+from Pyjo.Regexp import m, s
 from Pyjo.Util import (
     punycode_decode, punycode_encode, url_escape, url_unescape
 )
-
-
-re_url = re.compile(r'^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?')
-re_userinfo = re.compile(r'^([^\@]+)\@')
-re_port = re.compile(r':(\d+)$')
-re_ihost = re.compile(r'[^\x00-\x7f]')
-re_path = re.compile(r'^[/?]')
-re_punycode_decode = re.compile(r'^xn--(.+)$')
 
 
 class Pyjo_URL(Pyjo.Base.String.object):
@@ -48,25 +39,25 @@ class Pyjo_URL(Pyjo.Base.String.object):
         if host is None:
             return
 
-        if not re_ihost.search(host):
+        if host != m(r'[^\x00-\x7f]'):
             return host.lower()
 
         # Encode
-        return '.'.join(map(lambda s: ('xn--' + punycode_encode(s)) if re_ihost.search(s) else s, host.split('.'))).lower()
+        return '.'.join(map(lambda s: ('xn--' + punycode_encode(s)) if s == m(r'[^\x00-\x7f]') else s, host.split('.'))).lower()
 
     @ihost.setter
     def ihost(self, value):
         # Decode
-        self.host = '.'.join(map(lambda s: punycode_decode(s) if re_punycode_decode.match(s) else s, value.split('.')))
+        self.host = '.'.join(map(lambda s: punycode_decode(s) if s == m(r'^xn--(.+)$') else s, value.split('.')))
         return self
 
     def is_abs(self):
         return bool(self.scheme)
 
     def parse(self, url):
-        m = re_url.match(url)
-        self.set(scheme=m.group(2), authority=m.group(4), path=m.group(5),
-                 query=m.group(7), fragment=m.group(9))
+        g = url == m(r'^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?')
+        self.set(scheme=g[2], authority=g[4], path=g[5],
+                 query=g[7], fragment=g[9])
         return self
 
     @property
@@ -80,7 +71,7 @@ class Pyjo_URL(Pyjo.Base.String.object):
         if info is None:
             return authority
 
-        return url_escape(info, '^A-Za-z0-9\-._~!$&\'()*+,;=:') + '@' + authority
+        return url_escape(info, r'^A-Za-z0-9\-._~!$&\'()*+,;=:') + '@' + authority
 
     @authority.setter
     def authority(self, authority):
@@ -88,23 +79,18 @@ class Pyjo_URL(Pyjo.Base.String.object):
             return self
 
         # Userinfo
-        m = re_userinfo.search(authority)
-        if m:
-            self.userinfo = m.group(1)
-            # TODO url_unescape
-            authority = re_userinfo.sub('', authority)
+        (authority, found, g) = authority == s(r'^([^\@]+)\@', '')
+        if found:
+            self.userinfo = url_unescape(g[1])
 
         # Port
-        m = re_port.search(authority)
-        if m:
-            self.port = m.group(1)
-            if self.port != '':
-                self.port = int(self.port)
-            authority = re_port.sub('', authority)
+        (authority, found, g) = authority == s(r':(\d+)$', '')
+        if found:
+            self.port = int(g[1])
 
         # Host
         host = url_unescape(authority)
-        if re_ihost.search(host):
+        if host == m(r'[^\x00-\x7f]'):
             self.ihost = host
         else:
             self.host = host
@@ -178,7 +164,7 @@ class Pyjo_URL(Pyjo.Base.String.object):
         # Path and query
         path = self.path_query
 
-        if not authority or path == '' or re_path.search(path):
+        if not authority or path == '' or path == m(r'^[/?]'):
             url += path
         else:
             url += '/' + path
