@@ -4,31 +4,37 @@ Pyjo.Parameters
 
 import Pyjo.Base.String
 
-from Pyjo.Util import url_escape
+from Pyjo.Util import isiterable, lazy, url_escape
 
 
 # TODO stub
 class Pyjo_Parameters(Pyjo.Base.String.object):
 
-    _params = None
+    charset = 'UTF-8'
+
+    _params = lazy(lambda self: [])
     _string = None
 
+    def append(self, *args, **kwargs):
+        params = self._params
+        for p in list(zip(args[::2], args[1::2])) + sorted(kwargs.items()):
+            (k, v) = p
+            if isiterable(v):
+                for vv in v:
+                    params.append(k)
+                    params.append(vv)
+            else:
+                params.append(k)
+                params.append(v)
+        return self
+
     def __init__(self, *args, **kwargs):
-        if len(args) == 1 and isinstance(args[0], (list, tuple)):
-            self._string = list(args[0])
-        elif len(args) == 1 and isinstance(args[0], dict):
-            self._params = [a for sublist in sorted(args[0].items()) for a in sublist]
-        elif len(args) > 1:
-            self._params = list(args)
-        elif args:
-            self._string = args[0]
-        elif kwargs:
-            self._params = [a for sublist in sorted(kwargs.items()) for a in sublist]
-        else:
-            self._string = ''
+        super(Pyjo_Parameters, self).__init__()
+        if args or kwargs:
+            self.append(*args, **kwargs)
 
     def to_string(self):
-        if self._string:
+        if self._string is not None:
             return self._string
         elif self._params:
             return '&'.join([url_escape(str(p[0])) + '=' + url_escape(str(p[1])) for p in list(zip(self._params[::2], self._params[1::2]))])

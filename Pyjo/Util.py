@@ -45,6 +45,10 @@ def has(attrs, default=None, *args):
     return lambda cls: cls.attr(attrs, default)
 
 
+def isiterable(obj):
+    return hasattr(obj, '__iter__')
+
+
 class lazy(object):
     def __init__(self, default=None, name=None):
         self.default = default
