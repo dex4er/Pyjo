@@ -5,6 +5,7 @@ import Pyjo.IOLoop
 def writer(loop):
     print("A")
 
+
 @Pyjo.IOLoop.timer(1)
 def timeouter(loop):
     loop.remove(writer)

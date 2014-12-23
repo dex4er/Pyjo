@@ -18,16 +18,13 @@ if __name__ == '__main__':
 
     from Pyjo.Util import lazy
 
-
     class Point(Pyjo.Base.object):
         x = 0
         y = 0
 
-
     class Line(Pyjo.Base.object):
         p1 = lazy(lambda self: Point())
         p2 = lazy(lambda self: Point())
-
 
     p = Point(x=1, y=2)
 

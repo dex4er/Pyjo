@@ -24,6 +24,7 @@ class TestSuite(unittest.TestSuite):
             test_suite = test_loader.discover(d, pattern='*.py', top_level_dir='.')
             for t in test_suite:
                 self.addTest(t)
+
     def __iter__(self):
         return iter(self._tests)
 
