@@ -51,7 +51,6 @@ class lazy(object):
         self.name = name
 
     def __get__(self, obj, objtype):
-        print('get', self, obj, objtype)
         if obj is None:
             return self
         if callable(self.default):
