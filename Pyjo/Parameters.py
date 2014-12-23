@@ -11,7 +11,7 @@ from Pyjo.Util import isiterable_not_str, lazy, u, url_escape, url_unescape
 # TODO stub
 class Pyjo_Parameters(Pyjo.Base.String.object):
 
-    _charset = 'UTF-8'
+    _charset = 'utf8'
     _params = lazy(lambda self: [])
     _string = None
 
@@ -68,8 +68,8 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
                 value = url_unescape(value)
 
                 if charset:
-                    name = u(name).encode('iso-8859-1').decode('utf8')
-                    value = u(value).encode('iso-8859-1').decode('utf8')
+                    name = u(name).decode(charset)
+                    value = u(value).decode(charset)
 
                 self._params.append(name)
                 self._params.append(value)

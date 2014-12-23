@@ -126,10 +126,11 @@ def url_unescape(string):
 
 
 if sys.version_info >= (3, 0):
-    u = str
+    def u(string):
+        return string.encode('iso-8859-1')
 else:
     def u(string):
-        return string.decode('iso-8859-1')
+        return string.decode('iso-8859-1').encode('iso-8859-1')
 
 
 def warn(*args):
