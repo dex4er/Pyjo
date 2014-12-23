@@ -37,9 +37,40 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
             new_obj._params = list(self._params)
         return new_obj
 
+    def every_param(self, name):
+        return self._param(name)
+
+    def merge(self, *args):
+        for p in args:
+            self.params += p.params
+
     def __init__(self, *args, **kwargs):
         super(Pyjo_Parameters, self).__init__()
         self.parse(*args, **kwargs)
+
+    def param(self, name=None, value=None, **kwargs):
+        # List names
+        if not name and not kwargs:
+            return sorted(self.to_dict().keys())
+
+        # Multiple names
+        if name is not None and isinstance(name, (list, tuple,)):
+            return [self.param(n) for n in name]
+
+        # Last value
+        if value is None and not kwargs:
+            param = self._param(name)
+            if param:
+                return self._param(name)[-1]
+            else:
+                return
+
+        # Replace values
+        self.remove(name)
+        if not kwargs:
+            return self.append(name, value)
+        else:
+            return self.append(**kwargs)
 
     @property
     def params(self):
@@ -93,6 +124,30 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
                 self._string = args[0]
             return self
 
+    def remove(self, name):
+        params = self.params
+        i = 0
+        while i < len(params):
+            if params[i] == name:
+                params.pop(i)
+                params.pop(i)
+            else:
+                i += 2
+        return self
+
+    def to_dict(self):
+        d = {}
+        params = self.params
+        for k, v in list(zip(params[::2], params[1::2])):
+            if k in d:
+                if not isinstance(d[k], list):
+                    d[k] = [d[k]]
+                else:
+                    d[k].append(v)
+            else:
+                d[k] = v
+        return d
+
     def to_string(self):
         if self._string is not None:
             return self._string
@@ -100,6 +155,15 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
             return '&'.join([url_escape(str(p[0])) + '=' + url_escape(str(p[1])) for p in list(zip(self._params[::2], self._params[1::2]))])
         else:
             return ''
+
+    def _param(self, name):
+        values = []
+        params = self._params
+        for k, v in list(zip(params[::2], params[1::2])):
+            if k == name:
+                values.append(v)
+
+        return values
 
 
 new = Pyjo_Parameters.new
