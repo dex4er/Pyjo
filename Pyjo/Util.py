@@ -37,6 +37,10 @@ def decoratormethod(func):
     return wrap
 
 
+def dictget(d, *k):
+    return [d[i] for i in k]
+
+
 def getenv(name, default):
     return os.environ.get(name, default)
 
@@ -119,6 +123,13 @@ def url_escape(string, pattern=None):
 
 def url_unescape(string):
     return string == s('%([0-9a-fA-F]{2})', lambda m: chr(int(m[1], 16)), 'gr')
+
+
+if sys.version_info >= (3, 0):
+    u = str
+else:
+    def u(string):
+        return string.decode('iso-8859-1')
 
 
 def warn(*args):

@@ -4,14 +4,14 @@ Pyjo.Parameters
 
 import Pyjo.Base.String
 
-from Pyjo.Util import isiterable_not_str, lazy, url_escape
+from Pyjo.Regexp import m, s
+from Pyjo.Util import isiterable_not_str, lazy, u, url_escape, url_unescape
 
 
 # TODO stub
 class Pyjo_Parameters(Pyjo.Base.String.object):
 
-    charset = 'UTF-8'
-
+    _charset = 'UTF-8'
     _params = lazy(lambda self: [])
     _string = None
 
@@ -28,9 +28,60 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
                 params.append(v)
         return self
 
+    def clone(self):
+        new_obj = type(self)()
+        new_obj._charset = self._charset
+        if self._string is not None:
+            new_obj._string = self._string
+        else:
+            new_obj._params = list(self._params)
+        return new_obj
+
     def __init__(self, *args, **kwargs):
         super(Pyjo_Parameters, self).__init__()
         self.parse(*args, **kwargs)
+
+    @property
+    def params(self):
+        # Parse string
+        if self._string is not None:
+            string = self._string
+            self._string = None
+            self._params = []
+
+            if not len(string):
+                return self._params
+
+            charset = self._charset
+
+            for pair in string.split('&'):
+                g = pair == m(r'^([^=]+)(?:=(.*))?$')
+                if not g:
+                    continue
+                name, value = g[1], g[2] if g[2] is not None else ''
+
+                # Replace "+" with whitespace, unescape and decode
+                name -= s(r'\+', ' ', 'g')
+                value -= s(r'\+', ' ', 'g')
+
+                name = url_unescape(name)
+                value = url_unescape(value)
+
+                if charset:
+                    name = u(name).encode('iso-8859-1').decode('utf8')
+                    value = u(value).encode('iso-8859-1').decode('utf8')
+
+                self._params.append(name)
+                self._params.append(value)
+
+        return self._params
+
+    @params.setter
+    def params(self, value=None):
+        # Replace parameters
+        self._params = value
+        self._string = None
+        return self
 
     def parse(self, *args, **kwargs):
         if len(args) > 1 or kwargs:
