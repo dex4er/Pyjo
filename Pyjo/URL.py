@@ -8,7 +8,7 @@ import Pyjo.Path
 
 from Pyjo.Regexp import m, s
 from Pyjo.Util import (
-    punycode_decode, punycode_encode, url_escape, url_unescape
+    isiterable, punycode_decode, punycode_encode, url_escape, url_unescape
 )
 
 
@@ -143,8 +143,16 @@ class Pyjo_URL(Pyjo.Base.String.object):
         return self._query
 
     @query.setter
-    def query(self, *args):
-        self._query = Pyjo.Parameters.new(*args)
+    def query(self, value):
+        args = []
+        kwargs = {}
+        if hasattr(value, 'items'):
+            kwargs = value
+        elif isiterable(value):
+            args = value
+        else:
+            args = [value]
+        self._query = Pyjo.Parameters.new(*args, **kwargs)
         return self
 
     def to_string(self):

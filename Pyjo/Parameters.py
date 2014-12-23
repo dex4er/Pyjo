@@ -37,14 +37,15 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
             # Pairs
             return self.append(*args, **kwargs)
         else:
-            # String
-            self._string = args[0]
+            if args:
+                # String
+                self._string = args[0]
             return self
 
     def to_string(self):
         if self._string is not None:
             return self._string
-        elif self._params:
+        elif self._params and len(self._params):
             return '&'.join([url_escape(str(p[0])) + '=' + url_escape(str(p[1])) for p in list(zip(self._params[::2], self._params[1::2]))])
         else:
             return ''
