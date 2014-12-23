@@ -30,8 +30,16 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
 
     def __init__(self, *args, **kwargs):
         super(Pyjo_Parameters, self).__init__()
-        if args or kwargs:
-            self.append(*args, **kwargs)
+        self.parse(*args, **kwargs)
+
+    def parse(self, *args, **kwargs):
+        if len(args) > 1 or kwargs:
+            # Pairs
+            return self.append(*args, **kwargs)
+        else:
+            # String
+            self._string = args[0]
+            return self
 
     def to_string(self):
         if self._string is not None:
