@@ -18,7 +18,7 @@ class Error(Exception):
 
 class Pyjo_EventEmitter(Pyjo.Base.object):
 
-    _events = lazy(lambda: {})
+    _events = lazy(lambda self: {})
 
     def catch(self, cb):
         self.on(cb, 'error')

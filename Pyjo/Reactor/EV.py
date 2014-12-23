@@ -12,7 +12,7 @@ from Pyjo.Util import lazy
 
 class Pyjo_Reactor_EV(Pyjo.Reactor.Select.object):
 
-    _loop = lazy(lambda: pyev.default_loop())
+    _loop = lazy(lambda self: pyev.default_loop())
 
     def again(self, tid):
         self._timers[tid]['watcher'].reset()

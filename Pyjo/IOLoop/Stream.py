@@ -10,8 +10,6 @@ from errno import EAGAIN, ECONNRESET, EINTR, EPIPE, EWOULDBLOCK
 import Pyjo.EventEmitter
 import Pyjo.IOLoop
 
-from Pyjo.Util import lazy
-
 
 class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
 

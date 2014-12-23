@@ -20,8 +20,8 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.Select.object):
 
     _running = False
     _select_poll = None
-    _timers = lazy(lambda: {})
-    _ios = lazy(lambda: {})
+    _timers = lazy(lambda self: {})
+    _ios = lazy(lambda self: {})
 
     def is_readable(self, handle):
         p = select.poll()

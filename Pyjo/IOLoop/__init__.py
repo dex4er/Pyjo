@@ -35,8 +35,8 @@ class Pyjo_IOLoop(Pyjo.Base.object):
     multi_accept = 50
     reactor = None
 
-    _acceptors = lazy(lambda: {})
-    _connections = lazy(lambda: {})
+    _acceptors = lazy(lambda self: {})
+    _connections = lazy(lambda self: {})
 
     _accepts = 0
     _accept_timer = None

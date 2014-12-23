@@ -18,11 +18,11 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.object):
 
     _running = False
     _select_select = None
-    _timers = lazy(lambda: {})
-    _ios = lazy(lambda: {})
+    _timers = lazy(lambda self: {})
+    _ios = lazy(lambda self: {})
 
-    _inputs = lazy(lambda: [])
-    _outputs = lazy(lambda: [])
+    _inputs = lazy(lambda self: [])
+    _outputs = lazy(lambda self: [])
 
     def again(self, tid):
         timer = self._timers[tid]

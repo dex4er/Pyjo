@@ -20,8 +20,8 @@ class Pyjo_IOLoop_Delay(Pyjo.EventEmitter.object):
     _lock = False
     _fail = False
 
-    _data = lazy(lambda: {})
-    _args = lazy(lambda: [])
+    _data = lazy(lambda self: {})
+    _args = lazy(lambda self: [])
 
     def __init__(self, **kwargs):
         super(Pyjo_IOLoop_Delay, self).__init__(**kwargs)

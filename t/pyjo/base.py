@@ -35,7 +35,7 @@ if __name__ == '__main__':
 
     @has('a')
     @has('b', 2)
-    @has('c', lambda: 3)
+    @has('c', lambda self: 3)
     @has(['d', 'e'], 45)
     class B(Pyjo.Base.object):
         pass
@@ -101,7 +101,7 @@ if __name__ == '__main__':
         a = None
         b = 2
         c = lazy(3)
-        d = lazy(lambda: 4)
+        d = lazy(lambda self: 4)
 
     obj = D()
 
