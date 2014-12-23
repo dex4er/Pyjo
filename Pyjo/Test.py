@@ -285,10 +285,17 @@ def run(script=__file__, srcdir='.'):
     else:
         python_path = srcdir
     os.putenv('PYTHONPATH', python_path)
-    subprocess.check_output([sys.executable, script])
+    p = subprocess.Popen([sys.executable, script], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    _, stderr = p.communicate()
+    if p.returncode:
+        raise Error(stderr)
 
 
 class DoesNotExist(object):
+    pass
+
+
+class Error(Exception):
     pass
 
 
