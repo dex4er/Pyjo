@@ -28,6 +28,8 @@ Early developement stage. Implemented already:
   * Non-blocking TCP client and server
   * Lazy properties for objects
   * URL parser
+  * Test units with API based on Perl's Test::More and TAP protocol
+  * Regexp objects with overloaded operators
 
 
 Examples
