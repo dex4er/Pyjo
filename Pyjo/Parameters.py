@@ -4,7 +4,7 @@ Pyjo.Parameters
 
 import Pyjo.Base.String
 
-from Pyjo.Util import isiterable, lazy, url_escape
+from Pyjo.Util import isiterable_not_str, lazy, url_escape
 
 
 # TODO stub
@@ -19,7 +19,7 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
         params = self._params
         for p in list(zip(args[::2], args[1::2])) + sorted(kwargs.items()):
             (k, v) = p
-            if isiterable(v):
+            if isiterable_not_str(v):
                 for vv in v:
                     params.append(k)
                     params.append(vv)

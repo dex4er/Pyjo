@@ -8,7 +8,7 @@ import Pyjo.Path
 
 from Pyjo.Regexp import m, s
 from Pyjo.Util import (
-    isiterable, punycode_decode, punycode_encode, url_escape, url_unescape
+    isiterable_not_str, punycode_decode, punycode_encode, url_escape, url_unescape
 )
 
 
@@ -148,7 +148,7 @@ class Pyjo_URL(Pyjo.Base.String.object):
         kwargs = {}
         if hasattr(value, 'items'):
             kwargs = value
-        elif isiterable(value):
+        elif isinstance(value, (list, tuple,)):
             args = value
         else:
             args = [value]

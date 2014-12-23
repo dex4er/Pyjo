@@ -49,6 +49,14 @@ def isiterable(obj):
     return hasattr(obj, '__iter__')
 
 
+def isstr(obj):
+    return isinstance(obj, str)
+
+
+def isiterable_not_str(obj):
+    return not isstr(obj) and isiterable(obj)
+
+
 class lazy(object):
     def __init__(self, default=None, name=None):
         self.default = default
