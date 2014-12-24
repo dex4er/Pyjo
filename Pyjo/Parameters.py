@@ -8,14 +8,56 @@ from Pyjo.Regexp import m, s
 from Pyjo.Util import isiterable_not_str, lazy, u, url_escape, url_unescape
 
 
-# TODO stub
 class Pyjo_Parameters(Pyjo.Base.String.object):
+    """
+    .. code-block:: python
+
+        import Pyjo.Parameters
+
+        # Parse
+        params = Pyjo.Parameters.new('foo=bar&baz=23')
+        print(params.param('baz'))
+
+        # Build
+        params = Pyjo.Parameters.new(foo='bar', baz=23)
+        params.append(i='♥ Pyjo')
+        print(params)
+
+    :class:`Pyjo.Parameters.object` is a container for form parameters used by :class:`Pyjo.URL.object`
+    and based on `RFC 3986 <http://tools.ietf.org/html/rfc3986>`_ as well as `the
+    HTML Living Standard <https://html.spec.whatwg.org>`_.
+    """
 
     _charset = 'utf8'
     _params = lazy(lambda self: [])
     _string = None
 
     def append(self, *args, **kwargs):
+        """
+        .. code-block:: python
+
+           params = params.append(foo='ba&r')
+           params = params.append(foo=['ba&r', 'baz'])
+           params = params.append(foo=['bar', 'baz'], bar => 23)
+
+        Append parameters. Note that this method will normalize the parameters.
+
+        .. code-block:: python
+
+           # "foo=bar&foo=baz"
+           Pyjo.Parameters.new('foo=bar').append(foo='baz')
+
+           # "foo=bar&foo=baz&foo=yada"
+           Pyjo.Parameters.new('foo=bar').append(foo=['baz', 'yada'])
+
+           # "foo=bar&foo=baz&foo=yada&bar=23"
+           Pyjo.Parameters.new('foo=bar').append(foo=['baz', 'yada'], bar=23)
+
+        :param args: one parameters as key/value pair of args
+        :param kwargs: one parameter as kwargs
+        :rtype: self
+        """
+
         params = self._params
         for p in list(zip(args[::2], args[1::2])) + sorted(kwargs.items()):
             (k, v) = p
