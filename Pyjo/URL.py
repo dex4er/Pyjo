@@ -8,13 +8,13 @@ import Pyjo.Path
 
 from Pyjo.Regexp import m, s
 from Pyjo.Util import (
-    isiterable_not_str, punycode_decode, punycode_encode, url_escape, url_unescape
+    isiterable_not_str, lazy, punycode_decode, punycode_encode, url_escape, url_unescape
 )
 
 
 class Pyjo_URL(Pyjo.Base.String.object):
 
-    base = None
+    base = lazy(lambda self: Pyjo_URL())
     fragment = None
     host = None
     port = None
@@ -23,42 +23,6 @@ class Pyjo_URL(Pyjo.Base.String.object):
 
     _path = None
     _query = None
-
-    def __init__(self, *args, **kwargs):
-        if len(args) == 1:
-            self.parse(args[0])
-        elif args:
-            self.set(*args)
-        elif kwargs:
-            self.set(**kwargs)
-
-    @property
-    def ihost(self):
-        host = self.host
-
-        if host is None:
-            return
-
-        if host != m(r'[^\x00-\x7f]'):
-            return host.lower()
-
-        # Encode
-        return '.'.join(map(lambda s: ('xn--' + punycode_encode(s)) if s == m(r'[^\x00-\x7f]') else s, host.split('.'))).lower()
-
-    @ihost.setter
-    def ihost(self, value):
-        # Decode
-        self.host = '.'.join(map(lambda s: punycode_decode(s) if s == m(r'^xn--(.+)$') else s, value.split('.')))
-        return self
-
-    def is_abs(self):
-        return bool(self.scheme)
-
-    def parse(self, url):
-        g = url == m(r'^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?')
-        self.set(scheme=g[2], authority=g[4], path=g[5],
-                 query=g[7], fragment=g[9])
-        return self
 
     @property
     def authority(self):
@@ -105,6 +69,42 @@ class Pyjo_URL(Pyjo.Base.String.object):
             return '{0}:{1}'.format(host, port)
         else:
             return host
+
+    @property
+    def ihost(self):
+        host = self.host
+
+        if host is None:
+            return
+
+        if host != m(r'[^\x00-\x7f]'):
+            return host.lower()
+
+        # Encode
+        return '.'.join(map(lambda s: ('xn--' + punycode_encode(s)) if s == m(r'[^\x00-\x7f]') else s, host.split('.'))).lower()
+
+    @ihost.setter
+    def ihost(self, value):
+        # Decode
+        self.host = '.'.join(map(lambda s: punycode_decode(s) if s == m(r'^xn--(.+)$') else s, value.split('.')))
+        return self
+
+    def is_abs(self):
+        return bool(self.scheme)
+
+    def __init__(self, *args, **kwargs):
+        if len(args) == 1:
+            self.parse(args[0])
+        elif args:
+            self.set(*args)
+        elif kwargs:
+            self.set(**kwargs)
+
+    def parse(self, url):
+        g = url == m(r'^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?')
+        self.set(scheme=g[2], authority=g[4], path=g[5],
+                 query=g[7], fragment=g[9])
+        return self
 
     @property
     def path(self):
