@@ -17,6 +17,20 @@ class Error(Exception):
     pass
 
 
+if sys.version_info >= (3, 0):
+    def b(string, charset='utf-8'):
+        if isinstance(string, bytes):
+            return string
+        else:
+            return bytes(string, charset)
+else:
+    def b(string, charset='utf-8'):
+        if isinstance(string, unicode):
+            return string.encode(charset)
+        else:
+            return string
+
+
 def decorator(func):
     def wrap(*args):
         if not callable(args[0]):
@@ -122,15 +136,18 @@ def url_escape(string, pattern=None):
 
 
 def url_unescape(string):
-    return string == s('%([0-9a-fA-F]{2})', lambda m: chr(int(m[1], 16)), 'gr')
+    return b(string == s('%([0-9a-fA-F]{2})', lambda m: chr(int(m[1], 16)), 'gr'), 'iso-8859-1')
 
 
 if sys.version_info >= (3, 0):
     def u(string):
-        return string.encode('iso-8859-1')
+        return string
 else:
     def u(string):
-        return string.decode('iso-8859-1').encode('iso-8859-1')
+        if isinstance(string, unicode):
+            return string
+        else:
+            return string.decode('utf-8')
 
 
 def warn(*args):

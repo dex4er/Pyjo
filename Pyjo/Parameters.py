@@ -7,7 +7,7 @@ Pyjo.Parameters
 import Pyjo.Base.String
 
 from Pyjo.Regexp import m, s
-from Pyjo.Util import isiterable_not_str, lazy, u, url_escape, url_unescape
+from Pyjo.Util import b, isiterable_not_str, lazy, u, url_escape, url_unescape
 
 
 class Pyjo_Parameters(Pyjo.Base.String.object):
@@ -30,7 +30,7 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
     HTML Living Standard <https://html.spec.whatwg.org>`_.
     """
 
-    _charset = 'utf8'
+    _charset = 'utf-8'
     _params = lazy(lambda self: [])
     _string = None
 
@@ -131,9 +131,12 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
 
             for pair in string.split('&'):
                 g = pair == m(r'^([^=]+)(?:=(.*))?$')
+
                 if not g:
                     continue
-                name, value = g[1], g[2] if g[2] is not None else ''
+
+                name = g[1]
+                value = g[2] if g[2] is not None else ''
 
                 # Replace "+" with whitespace, unescape and decode
                 name -= s(r'\+', ' ', 'g')
@@ -143,8 +146,8 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
                 value = url_unescape(value)
 
                 if charset:
-                    name = u(name).decode(charset)
-                    value = u(value).decode(charset)
+                    name = b(name).decode(charset)
+                    value = b(value).decode(charset)
 
                 self._params.append(name)
                 self._params.append(value)
@@ -193,16 +196,44 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
         return d
 
     def to_string(self):
+
+        # String
+        charset = self._charset
         if self._string is not None:
-            return self._string
-        elif self._params and len(self._params):
-            return '&'.join([url_escape(str(p[0])) + '=' + url_escape(str(p[1])) for p in list(zip(self._params[::2], self._params[1::2]))])
-        else:
+            if charset:
+                string = self._string.encode(charset).decode('iso-8859-1')
+            else:
+                string = self._string
+            print(type(string))
+            return url_escape(string, r'^A-Za-z0-9\-._~!$&\'()*+,;=%:@/?')
+
+        # Build pairs
+        params = self.params
+        if not params:
             return ''
+
+        pairs = []
+        for name, value in list(zip(params[::2], params[1::2])):
+            name = u(name)
+            value = u(value)
+
+            if charset:
+                name = name.encode(charset).decode('iso-8859-1')
+                value = value.encode(charset).decode('iso-8859-1')
+
+            name = url_escape(name, r'^A-Za-z0-9\-._~!$\'()*,:@/?')
+            value = url_escape(value, r'^A-Za-z0-9\-._~!$\'()*,:@/?')
+
+            name -= s(r'%20', '+', 'g')
+            value -= s(r'%20', '+', 'g')
+
+            pairs.append(name + '=' + value)
+
+        return '&'.join(pairs)
 
     def _param(self, name):
         values = []
-        params = self._params
+        params = self.params
         for k, v in list(zip(params[::2], params[1::2])):
             if k == name:
                 values.append(v)
