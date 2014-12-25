@@ -28,7 +28,7 @@ else:
         if isinstance(string, unicode):
             return string.encode(charset)
         else:
-            return string
+            return str(string)
 
 
 def decorator(func):
@@ -141,13 +141,13 @@ def url_unescape(string):
 
 if sys.version_info >= (3, 0):
     def u(string):
-        return string
+        return str(string)
 else:
     def u(string):
         if isinstance(string, unicode):
             return string
         else:
-            return string.decode('utf-8')
+            return str(string).decode('utf-8')
 
 
 def warn(*args):

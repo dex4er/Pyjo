@@ -23,7 +23,7 @@ if __name__ == '__main__':
     is_ok(params.param('baz'), '23', "params.param('baz')")
 
     # Build
-    params = Pyjo.Parameters.new('foo', 'bar', 'baz', '23')
+    params = Pyjo.Parameters.new('foo', 'bar', 'baz', 23)
     params.append(i='♥ Pyjo')
     is_ok(params.to_string(), 'foo=bar&baz=23&i=%E2%99%A5+Pyjo', 'params')
 
