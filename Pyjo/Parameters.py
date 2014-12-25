@@ -30,7 +30,7 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
     HTML Living Standard <https://html.spec.whatwg.org>`_.
     """
 
-    _charset = 'utf-8'
+    charset = 'utf-8'
     _params = lazy(lambda self: [])
     _string = None
 
@@ -74,7 +74,7 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
 
     def clone(self):
         new_obj = type(self)()
-        new_obj._charset = self._charset
+        new_obj.charset = self.charset
         if self._string is not None:
             new_obj._string = self._string
         else:
@@ -127,7 +127,7 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
             if not len(string):
                 return self._params
 
-            charset = self._charset
+            charset = self.charset
 
             for pair in string.split('&'):
                 g = pair == m(r'^([^=]+)(?:=(.*))?$')
@@ -198,7 +198,7 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
     def to_string(self):
 
         # String
-        charset = self._charset
+        charset = self.charset
         if self._string is not None:
             if charset:
                 string = self._string.encode(charset).decode('iso-8859-1')
