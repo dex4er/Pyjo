@@ -268,7 +268,7 @@ class Guard(object):
     def __del__(self):
         global failed, done, tests
         if test and not tests and not done:
-            diag('Tests were run but no plan was declared and done_testing() was not seen.')
+            print('# Tests were run but no plan was declared and done_testing() was not seen.', file=sys.stderr)
 
         if not done:
             if not failed:
