@@ -1,7 +1,21 @@
 # -*- coding: utf-8 -*-
 
 """
-Pyjo.Parameters
+Pyjo.Parameters - Parameters ::
+
+    import Pyjo.Parameters
+
+    # Parse
+    params = Pyjo.Parameters.new('foo=bar&baz=23')
+    print(params.param('baz'))
+
+    # Build
+    params = Pyjo.Parameters.new(foo='bar', baz=23)
+    params.append(i='♥ Pyjo')
+    print(params)
+
+:class:`Pyjo.Parameters` is a container for form parameters used by :class:`Pyjo.URL`
+and based on :rfc:`3986` as well as `the HTML Living Standard <https://html.spec.whatwg.org>`_.
 """
 
 import Pyjo.Base.String
@@ -12,48 +26,42 @@ from Pyjo.Util import isiterable_not_str, lazy, u, url_escape, url_unescape
 
 class Pyjo_Parameters(Pyjo.Base.String.object):
     """
-    .. code-block:: python
-
-        import Pyjo.Parameters
-
-        # Parse
-        params = Pyjo.Parameters.new('foo=bar&baz=23')
-        print(params.param('baz'))
-
-        # Build
-        params = Pyjo.Parameters.new(foo='bar', baz=23)
-        params.append(i='♥ Pyjo')
-        print(params)
-
-    :class:`Pyjo.Parameters.object` is a container for form parameters used by :class:`Pyjo.URL.object`
-    and based on `RFC 3986 <http://tools.ietf.org/html/rfc3986>`_ as well as `the
-    HTML Living Standard <https://html.spec.whatwg.org>`_.
     """
 
     charset = 'utf-8'
+    """::
+
+        charset = params.charset
+        params.charset = 'utf-8'
+
+    Charset used for encoding and decoding parameters, defaults to ``utf-8``. ::
+
+        # Disable encoding and decoding
+        params.charset = None
+    """
+
     _params = lazy(lambda self: [])
     _string = None
 
     def append(self, *args, **kwargs):
-        """
-        .. code-block:: python
+        """::
 
-           params = params.append(foo='ba&r')
-           params = params.append(foo=['ba&r', 'baz'])
-           params = params.append(foo=['bar', 'baz'], bar => 23)
+            params = params.append(foo='ba&r')
+            params = params.append(foo=['ba&r', 'baz'])
+            params = params.append(foo=['bar', 'baz'], bar => 23)
 
         Append parameters. Note that this method will normalize the parameters.
 
-        .. code-block:: python
+        ::
 
-           # "foo=bar&foo=baz"
-           Pyjo.Parameters.new('foo=bar').append(foo='baz')
+            # "foo=bar&foo=baz"
+            Pyjo.Parameters.new('foo=bar').append(foo='baz')
 
-           # "foo=bar&foo=baz&foo=yada"
-           Pyjo.Parameters.new('foo=bar').append(foo=['baz', 'yada'])
+            # "foo=bar&foo=baz&foo=yada"
+            Pyjo.Parameters.new('foo=bar').append(foo=['baz', 'yada'])
 
-           # "foo=bar&foo=baz&foo=yada&bar=23"
-           Pyjo.Parameters.new('foo=bar').append(foo=['baz', 'yada'], bar=23)
+            # "foo=bar&foo=baz&foo=yada&bar=23"
+            Pyjo.Parameters.new('foo=bar').append(foo=['baz', 'yada'], bar=23)
 
         :param args: one parameters as key/value pair of args
         :param kwargs: one parameter as kwargs
@@ -248,5 +256,5 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
         return True
 
 
-new = Pyjo_Parameters.new
+new = Pyjo_Parameters.new  #: creates :class:`Pyjo.Parameters.object`
 object = Pyjo_Parameters  # @ReservedAssignment

@@ -10,7 +10,5 @@ Pyjo API
 Pyjo.Parameters
 ===============
 
-.. autoclass:: Pyjo.Parameters.object
-
-.. autoclass:: Pyjo.Parameters.Pyjo_Parameters
+.. automodule:: Pyjo.Parameters
     :members:
