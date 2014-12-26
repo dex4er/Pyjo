@@ -245,6 +245,9 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
         for p in params:
             yield p
 
+    def __bool__(self):
+        return True
+
 
 new = Pyjo_Parameters.new
 object = Pyjo_Parameters  # @ReservedAssignment
