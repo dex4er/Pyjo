@@ -81,7 +81,7 @@ def is_ok(got, expected, test_name=None):
     check = got == expected
     _ok(check, test_name)
     if not check:
-        diag("         got: {0}\n    expected: {1}".format(repr(got), repr(expected)))
+        diag("         got: {0}\n    expected: {1}\n".format(repr(got), repr(expected)))
 
 
 def isa_ok(got, cls, test_name=None):
