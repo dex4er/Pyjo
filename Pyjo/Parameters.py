@@ -25,7 +25,16 @@ from Pyjo.Util import isiterable_not_str, lazy, u, url_escape, url_unescape
 
 
 class Pyjo_Parameters(Pyjo.Base.String.object):
-    """
+    """::
+
+        params = Pyjo.Parameters.new()
+        params = Pyjo.Parameters.new('foo=b%3Bar&baz=23')
+        params = Pyjo.Parameters.new(foo='b&ar')
+        params = Pyjo.Parameters.new(foo=['ba&r', 'baz'])
+        params = Pyjo.Parameters.new(foo=['bar', 'baz'], bar=23)
+
+    Construct a new :class:`Pyjo.Parameters` object and :meth:`parse` parameters if
+    necessary.
     """
 
     charset = 'utf-8'
@@ -42,6 +51,10 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
 
     _params = lazy(lambda self: [])
     _string = None
+
+    def __init__(self, *args, **kwargs):
+        super(Pyjo_Parameters, self).__init__()
+        self.parse(*args, **kwargs)
 
     def append(self, *args, **kwargs):
         """::
@@ -67,7 +80,6 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
         :param kwargs: one parameter as kwargs
         :rtype: self
         """
-
         params = self._params
         for p in list(zip(args[::2], args[1::2])) + sorted(kwargs.items()):
             (k, v) = p
@@ -95,10 +107,6 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
     def merge(self, *args):
         for p in args:
             self.params += p.params
-
-    def __init__(self, *args, **kwargs):
-        super(Pyjo_Parameters, self).__init__()
-        self.parse(*args, **kwargs)
 
     def param(self, name=None, value=None, **kwargs):
         # List names
@@ -170,6 +178,16 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
         return self
 
     def parse(self, *args, **kwargs):
+        """::
+
+            params = params.parse('foo=b%3Bar&baz=23')
+
+        Parse parameters.
+
+        :param args: one parameters as key/value pair of args
+        :param kwargs: one parameter as kwargs
+        :rtype: self
+        """
         if len(args) > 1 or kwargs:
             # Pairs
             return self.append(*args, **kwargs)
