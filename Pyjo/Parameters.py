@@ -240,6 +240,11 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
 
         return values
 
+    def __iter__(self):
+        params = self.params
+        for p in params:
+            yield p
+
 
 new = Pyjo_Parameters.new
 object = Pyjo_Parameters  # @ReservedAssignment
