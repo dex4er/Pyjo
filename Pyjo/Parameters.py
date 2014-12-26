@@ -56,6 +56,25 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
         super(Pyjo_Parameters, self).__init__()
         self.parse(*args, **kwargs)
 
+    def __iter__(self):
+        """::
+            for p in params:
+                print(p)
+
+            Iterator based on :meth:`params`. Note that this will normalize the parameters.
+        """
+        params = self.params
+        for p in params:
+            yield p
+
+    def __bool__(self):
+        """::
+            b = bool(params)
+
+            Always true.
+        """
+        return True
+
     def append(self, *args, **kwargs):
         """::
 
@@ -320,15 +339,6 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
                 values.append(v)
 
         return values
-
-    def __iter__(self):
-        params = self.params
-        for p in params:
-            yield p
-
-    def __bool__(self):
-        return True
-
 
 new = Pyjo_Parameters.new
 object = Pyjo_Parameters  # @ReservedAssignment

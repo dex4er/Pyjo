@@ -43,6 +43,14 @@ if __name__ == '__main__':
     params = Pyjo.Parameters.new(foo=['bar', 'baz'], bar=23)
     is_ok(params.to_str(), 'bar=23&foo=bar&foo=baz', 'params')
 
+    pass_ok('__iter__')
+    params = Pyjo.Parameters.new('foo=bar&baz=23')
+    l = [v for v in params]
+    is_deeply_ok(l, ['foo', 'bar', 'baz', '23'], "[v for v in params]")
+
+    pass_ok('__bool__')
+    ok(Pyjo.Parameters.new(), "Pyjo.Parameters.new()")
+
     pass_ok('append')
     params = Pyjo.Parameters.new('foo=bar').append(foo='baz')
     is_ok(params.to_str(), 'foo=bar&foo=baz', 'params')
