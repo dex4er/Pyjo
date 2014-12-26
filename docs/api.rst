@@ -12,3 +12,4 @@ Pyjo.Parameters
 
 .. automodule:: Pyjo.Parameters
     :members:
+    :special-members:

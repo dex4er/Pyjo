@@ -58,10 +58,11 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
 
     def __iter__(self):
         """::
+
             for p in params:
                 print(p)
 
-            Iterator based on :meth:`params`. Note that this will normalize the parameters.
+        Iterator based on :meth:`params`. Note that this will normalize the parameters.
         """
         params = self.params
         for p in params:
@@ -69,11 +70,14 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
 
     def __bool__(self):
         """::
+
             b = bool(params)
 
-            Always true.
+        Always true.
         """
         return True
+
+    __nonzero__ = __bool__
 
     def append(self, *args, **kwargs):
         """::
@@ -272,6 +276,7 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
 
     def to_dict(self):
         """::
+
             d = params.to_dict()
 
         Turn parameters into a :class:`dict`. Note that this method will normalize
