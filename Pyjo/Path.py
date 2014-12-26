@@ -27,7 +27,7 @@ class Pyjo_Path(Pyjo.Base.String.object):
         self.trailing_slash = None
         return self
 
-    def to_string(self):
+    def to_str(self):
         # Path
         charset = self.charset
         if self._path is not None:

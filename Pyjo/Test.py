@@ -102,6 +102,7 @@ def none_ok(got, test_name=None):
 
 
 def is_deeply_ok(got, expected, test_name=None):
+    test_name = "{0} is {1}".format(test_name, repr(expected))
     if isinstance(got, (list, tuple, set, dict)) and isinstance(expected, (list, tuple, set, dict)):
         stack = []
         check = _deep_check(stack, got, expected)

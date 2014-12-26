@@ -27,7 +27,7 @@ if __name__ == '__main__':
         def parse(self, value):
             self.value = value
 
-        def to_string(self):
+        def to_str(self):
             return self.value
 
     string = C('string')
@@ -42,13 +42,13 @@ if __name__ == '__main__':
     isa_ok(zero, C, 'zero')
     isa_ok(empty, C, 'empty')
 
-    isa_ok(string.to_string(), str, "string.to_string()")
-    is_ok(string.to_string(), 'string', "string.to_string() == 'string'")
+    isa_ok(string.to_str(), str, "string.to_str()")
+    is_ok(string.to_str(), 'string', "string.to_str() == 'string'")
 
-    is_ok(string2.to_string(), 'string', "string2.to_string() == 'string'")
-    is_ok(other.to_string(), 'other', "other.to_string() == 'other'")
+    is_ok(string2.to_str(), 'string', "string2.to_str() == 'string'")
+    is_ok(other.to_str(), 'other', "other.to_str() == 'other'")
 
-    isa_ok(str(string), str, "string.to_string()")
+    isa_ok(str(string), str, "string.to_str()")
     is_ok(str(string), 'string', "str(string) == 'string'")
 
     ok(string == 'string', "string == 'string'")

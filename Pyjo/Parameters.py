@@ -275,7 +275,7 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
     def to_str(self):
         """::
 
-            string = params.to_str();
+            string = params.to_str()
 
         Turn parameters into a string.
         """

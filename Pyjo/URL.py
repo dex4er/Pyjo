@@ -120,12 +120,12 @@ class Pyjo_URL(Pyjo.Base.String.object):
 
     @property
     def path_query(self):
-        query = self.query.to_string()
+        query = self.query.to_str()
         if len(query):
             query = '?' + query
         else:
             query = ''
-        return self.path.to_string() + query
+        return self.path.to_str() + query
 
     @property
     def protocol(self):
@@ -155,7 +155,7 @@ class Pyjo_URL(Pyjo.Base.String.object):
         self._query = Pyjo.Parameters.new(*args, **kwargs)
         return self
 
-    def to_string(self):
+    def to_str(self):
         # Scheme
         url = ''
         proto = self.protocol
