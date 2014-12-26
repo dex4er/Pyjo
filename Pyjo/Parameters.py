@@ -61,7 +61,7 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
 
             params = params.append(foo='ba&r')
             params = params.append(foo=['ba&r', 'baz'])
-            params = params.append(foo=['bar', 'baz'], bar => 23)
+            params = params.append('foo', ['bar', 'baz'], 'bar', 23)
 
         Append parameters. Note that this method will normalize the parameters.
 
@@ -74,13 +74,9 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
             Pyjo.Parameters.new('foo=bar').append(foo=['baz', 'yada'])
 
             # "foo=bar&foo=baz&foo=yada&bar=23"
-            Pyjo.Parameters.new('foo=bar').append(foo=['baz', 'yada'], bar=23)
-
-        :param args: one parameters as key/value pair of args
-        :param kwargs: one parameter as kwargs
-        :rtype: self
+            Pyjo.Parameters.new('foo=bar').append('foo', ['baz', 'yada'], 'bar', 23)
         """
-        params = self._params
+        params = self.params
         for p in list(zip(args[::2], args[1::2])) + sorted(kwargs.items()):
             (k, v) = p
             if isiterable_not_str(v):
@@ -93,6 +89,12 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
         return self
 
     def clone(self):
+        """::
+
+            params2 = params.clone()
+
+        Clone parameters.
+        """
         new_obj = type(self)()
         new_obj.charset = self.charset
         if self._string is not None:
@@ -102,15 +104,47 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
         return new_obj
 
     def every_param(self, name):
+        """::
+
+            values = params.every_param('foo')
+
+        Similar to :meth:`param`, but returns all values sharing the same name as a
+        list. Note that this method will normalize the parameters. ::
+
+            # Get first value
+            print(params.every_param('foo')[0])
+        """
         return self._param(name)
 
     def merge(self, *args):
+        """::
+
+            params = params.merge(Pyjo.Parameters.new('foo', 'b&ar', 'baz', 23))
+
+        Merge :class:`Pyjo.Parameters` objects. Note that this method will normalize the
+        parameters. ::
+
+            # "foo=bar&foo=baz"
+            Pyjo.Parameters.new('foo=bar').merge(Pyjo.Parameters.new('foo=baz'))
+        """
         for p in args:
             self.params += p.params
 
-    def param(self, name=None, value=None, **kwargs):
+    def param(self, name=None, value=None):
+        """::
+
+            names = params.param()
+            value = params.param('foo')
+            foo, baz = params.param(['foo', 'baz'])
+            params = params.param('foo', 'ba&r')
+            params = params.param('foo', ['ba;r', 'baz'])
+
+        Access parameter values. If there are multiple values sharing the same name,
+        and you want to access more than just the last one, you can use
+        :meth:`every_param`. Note that this method will normalize the parameters.
+        """
         # List names
-        if not name and not kwargs:
+        if not name:
             return sorted(self.to_dict().keys())
 
         # Multiple names
@@ -118,7 +152,7 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
             return [self.param(n) for n in name]
 
         # Last value
-        if value is None and not kwargs:
+        if value is None:
             param = self._param(name)
             if param:
                 return self._param(name)[-1]
@@ -127,13 +161,17 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
 
         # Replace values
         self.remove(name)
-        if not kwargs:
-            return self.append(name, value)
-        else:
-            return self.append(**kwargs)
+        return self.append(name, value)
 
     @property
     def params(self):
+        """::
+
+            array = params.params
+            params.params = ['foo', 'b&ar', 'baz', 23]
+
+        Parsed parameters. Note that setting this property will normalize the parameters.
+        """
         # Parse string
         if self._string is not None:
             string = self._string
@@ -183,10 +221,6 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
             params = params.parse('foo=b%3Bar&baz=23')
 
         Parse parameters.
-
-        :param args: one parameters as key/value pair of args
-        :param kwargs: one parameter as kwargs
-        :rtype: self
         """
         if len(args) > 1 or kwargs:
             # Pairs
@@ -198,6 +232,15 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
             return self
 
     def remove(self, name):
+        """::
+
+            params = params.remove('foo')
+
+        Remove parameters. Note that this method will normalize the parameters. ::
+
+            # "bar=yada"
+            Pyjo.Parameters.new('foo=bar&foo=baz&bar=yada').remove('foo')
+        """
         params = self.params
         i = 0
         while i < len(params):
@@ -209,20 +252,33 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
         return self
 
     def to_dict(self):
+        """::
+            d = params.to_dict()
+
+        Turn parameters into a :class:`dict`. Note that this method will normalize
+        the parameters. ::
+
+            # "baz"
+            Pyjo.Parameters.new('foo=bar&foo=baz').to_dict()['foo'][1]
+        """
         d = {}
         params = self.params
         for k, v in list(zip(params[::2], params[1::2])):
             if k in d:
                 if not isinstance(d[k], list):
                     d[k] = [d[k]]
-                else:
-                    d[k].append(v)
+                d[k].append(v)
             else:
                 d[k] = v
         return d
 
-    def to_string(self):
+    def to_str(self):
+        """::
 
+            string = params.to_str();
+
+        Turn parameters into a string.
+        """
         # String
         charset = self.charset
         if self._string is not None:
@@ -274,5 +330,5 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
         return True
 
 
-new = Pyjo_Parameters.new  #: creates :class:`Pyjo.Parameters.object`
+new = Pyjo_Parameters.new
 object = Pyjo_Parameters  # @ReservedAssignment
