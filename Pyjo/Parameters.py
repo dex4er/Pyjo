@@ -204,7 +204,6 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
                 string = self._string.encode(charset).decode('iso-8859-1')
             else:
                 string = self._string
-            print(type(string))
             return url_escape(string, r'^A-Za-z0-9\-._~!$&\'()*+,;=%:@/?')
 
         # Build pairs
