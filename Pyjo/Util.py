@@ -111,11 +111,11 @@ def not_implemented(method):
 
 
 def punycode_decode(string):
-    return bytes(string, 'ascii').decode('punycode')
+    return b(string, 'ascii').decode('punycode')
 
 
 def punycode_encode(string):
-    return string.encode('punycode').decode('ascii')
+    return u(string).encode('punycode').decode('ascii')
 
 
 def rand(value=1):

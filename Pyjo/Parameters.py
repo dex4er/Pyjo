@@ -7,7 +7,7 @@ Pyjo.Parameters
 import Pyjo.Base.String
 
 from Pyjo.Regexp import m, s
-from Pyjo.Util import b, isiterable_not_str, lazy, u, url_escape, url_unescape
+from Pyjo.Util import isiterable_not_str, lazy, u, url_escape, url_unescape
 
 
 class Pyjo_Parameters(Pyjo.Base.String.object):
@@ -146,8 +146,8 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
                 value = url_unescape(value)
 
                 if charset:
-                    name = b(name).decode(charset)
-                    value = b(value).decode(charset)
+                    name = name.decode(charset)
+                    value = value.decode(charset)
 
                 self._params.append(name)
                 self._params.append(value)

@@ -8,7 +8,7 @@ import Pyjo.Path
 
 from Pyjo.Regexp import m, s
 from Pyjo.Util import (
-    isiterable_not_str, lazy, punycode_decode, punycode_encode, url_escape, url_unescape
+    b, lazy, punycode_decode, punycode_encode, url_escape, url_unescape
 )
 
 
@@ -45,7 +45,7 @@ class Pyjo_URL(Pyjo.Base.String.object):
         # Userinfo
         (authority, found, g) = authority == s(r'^([^\@]+)\@', '')
         if found:
-            self.userinfo = url_unescape(g[1])
+            self.userinfo = url_unescape(g[1]).decode('ascii')
 
         # Port
         (authority, found, g) = authority == s(r':(\d+)$', '')
@@ -53,11 +53,11 @@ class Pyjo_URL(Pyjo.Base.String.object):
             self.port = int(g[1])
 
         # Host
-        host = url_unescape(authority)
+        host = url_unescape(authority.encode('utf-8'))
         if host == m(r'[^\x00-\x7f]'):
             self.ihost = host
         else:
-            self.host = host
+            self.host = host.decode('ascii')
 
         return self
 
@@ -78,7 +78,7 @@ class Pyjo_URL(Pyjo.Base.String.object):
             return
 
         if host != m(r'[^\x00-\x7f]'):
-            return host.lower()
+            return b(host).decode('ascii').lower()
 
         # Encode
         return '.'.join(map(lambda s: ('xn--' + punycode_encode(s)) if s == m(r'[^\x00-\x7f]') else s, host.split('.'))).lower()
@@ -86,7 +86,7 @@ class Pyjo_URL(Pyjo.Base.String.object):
     @ihost.setter
     def ihost(self, value):
         # Decode
-        self.host = '.'.join(map(lambda s: punycode_decode(s) if s == m(r'^xn--(.+)$') else s, value.split('.')))
+        self.host = '.'.join(map(lambda s: punycode_decode(s) if s == m(r'^xn--(.+)$') else s, value.decode('utf-8').split('.')))
         return self
 
     def is_abs(self):

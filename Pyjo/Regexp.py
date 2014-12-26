@@ -79,6 +79,9 @@ class Pyjo_Regexp(object):
         if _flag_g is None:
             _flag_g = 'g' in self._flags
 
+        if isinstance(string, bytes):
+            string = string.decode('iso-8859-1')
+
         if self._action == 'm':
             if _flag_g:
                 return self._re.findall(string)
@@ -100,11 +103,16 @@ class Pyjo_Regexp(object):
                 _flag_r = 'r' in self._flags
 
             if _flag_r:
-                return self._re.sub(replacement, string, count=count)
+                new_string = self._re.sub(replacement, string, count=count)
+                if isinstance(string, bytes):
+                    new_string = new_string.encode('iso-8859-1')
+                return new_string
             else:
                 match = self._re.search(string)
                 result = self._match_result(match)
                 (new_string, count) = self._re.subn(replacement, string, count=count)
+                if isinstance(string, bytes):
+                    new_string = new_string.encode('iso-8859-1')
                 return (new_string, count, result)
 
     def __eq__(self, other):
