@@ -36,7 +36,7 @@ class Pyjo_Regexp(object):
 
     @classmethod
     def m(cls, pattern, flags=''):
-        idx = '\0'.join((pattern, flags,))
+        idx = '\0'.join((str(pattern), str(flags),))
         if idx in CACHE:
             return CACHE[idx]
         new_obj = cls('m', pattern, flags=flags)
@@ -46,7 +46,7 @@ class Pyjo_Regexp(object):
 
     @classmethod
     def s(cls, pattern, replacement, flags=''):
-        idx = '\0'.join((pattern, str(replacement), flags,))
+        idx = '\0'.join((str(pattern), str(replacement), str(flags),))
         if idx in CACHE:
             return CACHE[idx]
         new_obj = cls('s', pattern, replacement, flags=flags)
@@ -79,9 +79,6 @@ class Pyjo_Regexp(object):
         if _flag_g is None:
             _flag_g = 'g' in self._flags
 
-        if isinstance(string, bytes):
-            string = string.decode('iso-8859-1')
-
         if self._action == 'm':
             if _flag_g:
                 return self._re.findall(string)
@@ -104,14 +101,12 @@ class Pyjo_Regexp(object):
 
             if _flag_r:
                 new_string = self._re.sub(replacement, string, count=count)
-                if isinstance(string, bytes):
-                    new_string = new_string.encode('iso-8859-1')
                 return new_string
             else:
                 match = self._re.search(string)
                 result = self._match_result(match)
                 (new_string, count) = self._re.subn(replacement, string, count=count)
-                if isinstance(string, bytes):
+                if isinstance(string, bytes) and not isinstance(string, str):
                     new_string = new_string.encode('iso-8859-1')
                 return (new_string, count, result)
 

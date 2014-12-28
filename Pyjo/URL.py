@@ -34,8 +34,9 @@ class Pyjo_URL(Pyjo.Base.String.object):
         info = self.userinfo
         if info is None:
             return authority
+        info = url_escape(info, r'^A-Za-z0-9\-._~!$&\'()*+,;=:')
 
-        return url_escape(info, r'^A-Za-z0-9\-._~!$&\'()*+,;=:') + '@' + authority
+        return info + '@' + authority
 
     @authority.setter
     def authority(self, authority):
@@ -54,7 +55,7 @@ class Pyjo_URL(Pyjo.Base.String.object):
 
         # Host
         host = url_unescape(authority.encode('utf-8'))
-        if host == m(r'[^\x00-\x7f]'):
+        if host == m(br'[^\x00-\x7f]'):
             self.ihost = host
         else:
             self.host = host.decode('ascii')
