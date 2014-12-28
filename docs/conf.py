@@ -225,6 +225,11 @@ latex_documents = [
 # If false, no module index is generated.
 #latex_domain_indices = True
 
+# Additional preamble content, default empty.
+latex_elements['preamble'] = """\usepackage{arev}
+\DeclareUnicodeCharacter{2665}{$\\varheart$}
+"""
+
 
 # -- Options for manual page output ---------------------------------------
 
@@ -331,6 +336,9 @@ epub_exclude_files = ['search.html']
 
 # If false, no index is generated.
 #epub_use_index = True
+
+
+# -- Options for Autodoc ----------------------------------------------
 
 # This value selects if automatically documented members are sorted
 # alphabetical (value 'alphabetical'), by member type (value 'groupwise')
