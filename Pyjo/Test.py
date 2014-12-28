@@ -13,7 +13,7 @@ import unittest
 
 
 __all__ = ['done_testing', 'diag', 'fail', 'is_ok', 'isa_ok', 'is_deeply_ok',
-           'none_ok', 'ok', 'pass_ok', 'plan']
+           'isnt_ok', 'none_ok', 'ok', 'pass_ok', 'plan']
 
 
 test = 0
@@ -82,6 +82,16 @@ def is_ok(got, expected, test_name=None):
     _ok(check, test_name)
     if not check:
         diag("         got: {0}\n    expected: {1}\n".format(repr(got), repr(expected)))
+
+
+def isnt_ok(got, expected, test_name=None):
+    if test_name is None:
+        test_name = 'An object {0}'.format(type(got))
+    test_name = "{0} is {1}".format(test_name, repr(expected))
+    check = got != expected
+    _ok(check, test_name)
+    if not check:
+        diag("         got: {0}\n    expected: anything else\n".format(repr(got)))
 
 
 def isa_ok(got, cls, test_name=None):
