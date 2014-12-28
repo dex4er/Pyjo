@@ -128,15 +128,24 @@ def steady_time():
 
 def url_escape(string, pattern=None):
     if pattern is not None:
-        pattern = '([{0}])'.format(pattern)
+        if isinstance(pattern, bytes):
+            pattern = b'([' + b(pattern, 'iso-8859-1') + b'])'
+        else:
+            pattern = '([{0}])'.format(pattern)
     else:
         pattern = '([^A-Za-z0-9\-._~])'
 
-    return string == s(pattern, lambda m: '%' + format(ord(m[1]), 'X'), 'gr')
+    if isinstance(string, bytes):
+        pattern = b(pattern, 'iso-8859-1')
+        replacement = lambda m: b('%' + format(ord(m[1]), 'X'), 'iso-8859-1')
+    else:
+        replacement = lambda m: '%' + format(ord(m[1]), 'X')
+
+    return b(string == s(pattern, replacement, 'gr'), 'iso-8859-1').decode('iso-8859-1')
 
 
 def url_unescape(string):
-    return b(string == s('%([0-9a-fA-F]{2})', lambda m: chr(int(m[1], 16)), 'gr'), 'iso-8859-1')
+    return b(string) == s(br'%([0-9a-fA-F]{2})', lambda m: b(chr(int(m[1], 16)), 'iso-8859-1'), 'gr')
 
 
 if sys.version_info >= (3, 0):
