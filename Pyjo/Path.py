@@ -128,6 +128,31 @@ class Pyjo_Path(Pyjo.Base.String.object):
             new_obj._path = self._path
         return new_obj
 
+    def contains(self, prefix):
+        """::
+
+            boolean = path.contains(u'/i/♥/pyjo')
+
+        Check if path contains given prefix. ::
+
+            # True
+            Pyjo.Path.new('/foo/bar').contains('/')
+            Pyjo.Path.new('/foo/bar').contains('/foo')
+            Pyjo.Path.new('/foo/bar').contains('/foo/bar')
+
+            # False
+            Pyjo.Path.new('/foo/bar').contains('/f')
+            Pyjo.Path.new('/foo/bar').contains('/bar')
+            Pyjo.Path.new('/foo/bar').contains('/whatever')
+        """
+        if prefix == '/':
+            return True
+        else:
+            path = self.to_route()
+            return len(path) >= len(prefix) \
+                and path.startswith(prefix) \
+                and (len(path) == len(prefix) or path[len(prefix)] == '/')
+
     @property
     def leading_slash(self):
         """::
@@ -143,6 +168,40 @@ class Pyjo_Path(Pyjo.Base.String.object):
     @leading_slash.setter
     def leading_slash(self, value):
         self._parse('leading_slash', value)
+
+    def merge(self, path):
+        """::
+
+            path = path.merge('/foo/bar')
+            path = path.merge('foo/bar')
+            path = path.merge(Pyjo.Path.new('foo/bar'))
+
+        Merge paths. Note that this method will normalize both paths if necessary and
+        that ``%2F`` will be treated as ``/`` for security reasons. ::
+
+            # "/baz/yada"
+            Pyjo.Path.new('/foo/bar').merge('/baz/yada')
+
+            # "/foo/baz/yada"
+            Pyjo.Path.new('/foo/bar').merge('baz/yada')
+
+            # "/foo/bar/baz/yada"
+            Pyjo.Path.new('/foo/bar/').merge('baz/yada')
+        """
+        # Replace
+        if path.startswith('/'):
+            return self.parse(path)
+
+        # Merge
+        if not self.trailing_slash:
+            self.parts.pop()
+
+        path = self.new(path)
+        self.parts += path.parts
+
+        self._trailing_slash = path._trailing_slash
+
+        return self
 
     def parse(self, path):
         """::
@@ -185,12 +244,12 @@ class Pyjo_Path(Pyjo.Base.String.object):
 
         Turn path into an absolute string. ::
 
-            # "/i/%E2%99%A5/mojolicious"
-            Pyjo.Path.new('/i/%E2%99%A5/mojolicious').to_abs_str()
-            Pyjo.Path.new('i/%E2%99%A5/mojolicious').to_abs_str()
+            # "/i/%E2%99%A5/pyjo"
+            Pyjo.Path.new('/i/%E2%99%A5/pyjo').to_abs_str()
+            Pyjo.Path.new('i/%E2%99%A5/pyjo').to_abs_str()
         """
         path = self.to_str()
-        if path != m('^/'):
+        if not path.startswith('/'):
             path = '/' + path
         return path
 
@@ -199,17 +258,17 @@ class Pyjo_Path(Pyjo.Base.String.object):
 
             dir = route.to_dir()
 
-        Clone path and remove everything after the right-most slash.
+        Clone path and remove everything after the right-most slash. ::
 
             # "/i/%E2%99%A5/"
-            Pyjo.Path.new('/i/%E2%99%A5/mojolicious').to_dir()
+            Pyjo.Path.new('/i/%E2%99%A5/pyjo').to_dir()
 
             # "i/%E2%99%A5/"
-            Pyjo.Path.new('i/%E2%99%A5/mojolicious').to_dir()
+            Pyjo.Path.new('i/%E2%99%A5/pyjo').to_dir()
         """
         clone = self.clone()
         if not clone._trailing_slash:
-            clone.parts.pop(-1)
+            clone.parts.pop()
         clone._trailing_slash = bool(clone.parts)
         return clone
 
@@ -220,9 +279,9 @@ class Pyjo_Path(Pyjo.Base.String.object):
 
         Turn path into a route. ::
 
-            # "/i/♥/mojolicious"
-            Pyjo.Path.new('/i/%E2%99%A5/mojolicious').to_route()
-            Pyjo.Path.new('i/%E2%99%A5/mojolicious').to_route()
+            # "/i/♥/pyjo"
+            Pyjo.Path.new('/i/%E2%99%A5/pyjo').to_route()
+            Pyjo.Path.new('i/%E2%99%A5/pyjo').to_route()
         """
         clone = self.clone()
         route = '/' + '/'.join(clone.parts)

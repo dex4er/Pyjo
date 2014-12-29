@@ -53,6 +53,21 @@ if __name__ == '__main__':
     is_ok(path2.to_str(), '/foo%2Fbar%3B/baz.html', 'path2')
     isnt_ok(id(path), id(path2), 'path')
 
+    # contains
+    boolean = Pyjo.Path.new('/foo/bar').contains('/')
+    is_ok(boolean, True, "boolean")
+    boolean = Pyjo.Path.new('/foo/bar').contains('/foo')
+    is_ok(boolean, True, "boolean")
+    boolean = Pyjo.Path.new('/foo/bar').contains('/foo/bar')
+    is_ok(boolean, True, "boolean")
+
+    boolean = Pyjo.Path.new('/foo/bar').contains('/f')
+    is_ok(boolean, False, "boolean")
+    boolean = Pyjo.Path.new('/foo/bar').contains('/bar')
+    is_ok(boolean, False, "boolean")
+    boolean = Pyjo.Path.new('/foo/bar').contains('/whatever')
+    is_ok(boolean, False, "boolean")
+
     # leading_slash
     path = Pyjo.Path.new('/foo%2Fbar%3B/baz.html')
     leading_slash = path.leading_slash
@@ -60,6 +75,16 @@ if __name__ == '__main__':
     path.leading_slash = False
     leading_slash = path.leading_slash
     is_ok(leading_slash, False, "leading_slash")
+
+    # merge
+    path = Pyjo.Path.new('/foo/bar').merge('/baz/yada')
+    is_ok(path, "/baz/yada", "path")
+
+    path = Pyjo.Path.new('/foo/bar').merge('baz/yada')
+    is_ok(path, "/foo/baz/yada", "path")
+
+    path = Pyjo.Path.new('/foo/bar/').merge('baz/yada')
+    is_ok(path, "/foo/bar/baz/yada", "path")
 
     # parse
     path = Pyjo.Path.new()
@@ -75,25 +100,25 @@ if __name__ == '__main__':
     is_ok(path.to_str(), 'foo/bar/baz/foo%2Fbar', 'path')
 
     # to_abs_str
-    path = Pyjo.Path.new('/i/%E2%99%A5/mojolicious').to_abs_str()
-    is_ok(path, "/i/%E2%99%A5/mojolicious", "path")
+    path = Pyjo.Path.new('/i/%E2%99%A5/pyjo').to_abs_str()
+    is_ok(path, "/i/%E2%99%A5/pyjo", "path")
 
-    path = Pyjo.Path.new('i/%E2%99%A5/mojolicious').to_abs_str()
-    is_ok(path, "/i/%E2%99%A5/mojolicious", "path")
+    path = Pyjo.Path.new('i/%E2%99%A5/pyjo').to_abs_str()
+    is_ok(path, "/i/%E2%99%A5/pyjo", "path")
 
     # to_dir
-    path = Pyjo.Path.new('/i/%E2%99%A5/mojolicious').to_dir()
+    path = Pyjo.Path.new('/i/%E2%99%A5/pyjo').to_dir()
     is_ok(path, "/i/%E2%99%A5/", "path")
 
-    path = Pyjo.Path.new('i/%E2%99%A5/mojolicious').to_dir()
+    path = Pyjo.Path.new('i/%E2%99%A5/pyjo').to_dir()
     is_ok(path, "i/%E2%99%A5/", "path")
 
     # to_route
-    path = Pyjo.Path.new('/i/%E2%99%A5/mojolicious').to_route()
-    is_ok(path, u"/i/♥/mojolicious", "path")
+    path = Pyjo.Path.new('/i/%E2%99%A5/pyjo').to_route()
+    is_ok(path, u"/i/♥/pyjo", "path")
 
-    path = Pyjo.Path.new('i/%E2%99%A5/mojolicious').to_route()
-    is_ok(path, u"/i/♥/mojolicious", "path")
+    path = Pyjo.Path.new('i/%E2%99%A5/pyjo').to_route()
+    is_ok(path, u"/i/♥/pyjo", "path")
 
     # to_str
     path = Pyjo.Path.new('/i/%E2%99%A5/pyjo').to_str()
