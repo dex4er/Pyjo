@@ -319,12 +319,15 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
 
         pairs = []
         for name, value in list(zip(params[::2], params[1::2])):
-            name = u(name)
-            value = u(value)
+            if not isinstance(name, (bytes, str,)):
+                name = u(name)
+
+            if not isinstance(value, (bytes, str,)):
+                value = u(value)
 
             if charset:
-                name = name.encode(charset).decode('iso-8859-1')
-                value = value.encode(charset).decode('iso-8859-1')
+                name = u(name).encode(charset).decode('iso-8859-1')
+                value = u(value).encode(charset).decode('iso-8859-1')
 
             name = url_escape(name, r'^A-Za-z0-9\-._~!$\'()*,:@/?')
             value = url_escape(value, r'^A-Za-z0-9\-._~!$\'()*,:@/?')
