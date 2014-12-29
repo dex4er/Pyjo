@@ -106,8 +106,6 @@ class Pyjo_Regexp(object):
                 match = self._re.search(string)
                 result = self._match_result(match)
                 (new_string, count) = self._re.subn(replacement, string, count=count)
-                if isinstance(string, bytes) and not isinstance(string, str):
-                    new_string = new_string.encode('iso-8859-1')
                 return (new_string, count, result)
 
     def __eq__(self, other):
