@@ -22,7 +22,6 @@ Pyjo.Path - Path
 
 import Pyjo.Base.String
 
-from Pyjo.Regexp import s
 from Pyjo.Util import url_escape, url_unescape
 
 
@@ -284,9 +283,13 @@ class Pyjo_Path(Pyjo.Base.String.object):
             Pyjo.Path.new('i/%E2%99%A5/pyjo').to_route()
         """
         clone = self.clone()
-        route = '/' + '/'.join(clone.parts)
+        if clone.charset is None:
+            slash = b'/'
+        else:
+            slash = '/'
+        route = slash + slash.join(clone.parts)
         if clone._trailing_slash:
-            route += '/'
+            route += slash
         return route
 
     def to_str(self):
@@ -337,17 +340,22 @@ class Pyjo_Path(Pyjo.Base.String.object):
 
             if charset:
                 path = path.decode(charset)
+                slash = '/'
+            else:
+                slash = b'/'
 
-            path, count, _ = path == s(r'^/', '')
-            self._leading_slash = bool(count)
+            if path.startswith(slash):
+                path = path[1:]
+                self._leading_slash = True
 
-            path, count, _ = path == s(r'/$', '')
-            self._trailing_slash = bool(count)
+            if path.endswith(slash):
+                path = path[:-1]
+                self._trailing_slash = True
 
             if path == '':
                 self._parts = []
             else:
-                self._parts = path.split('/')
+                self._parts = path.split(slash)
 
         if not args:
             return getattr(self, '_' + name)
