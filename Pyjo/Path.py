@@ -1,5 +1,23 @@
+# -*- coding: utf-8 -*-
+
 """
-Pyjo.Path
+Pyjo.Path - Path
+================
+::
+
+    import Pyjo.Path
+
+    # Parse
+    path = Pyjo.Path.new('/foo%2Fbar%3B/baz.html')
+    print(path[0])
+
+    # Build
+    path = Pyjo.Path.new('/i/♥')
+    path.append('Pyjo')
+    print(path)
+
+:class:`Pyjo.Path` is a container for paths used by :class:`Pyjo.URL` and based on
+:rfc:`3986`.
 """
 
 import Pyjo.Base.String
@@ -8,6 +26,13 @@ from Pyjo.Util import url_escape
 
 
 class Pyjo_Path(Pyjo.Base.String.object):
+    """::
+
+        path = Pyjo.Path.new()
+        path = Pyjo.Path.new('/foo%2Fbar%3B/baz.html')
+
+    Construct a new :class`Pyjo.Path` object and :meth:`parse` path if necessary.
+    """
 
     charset = 'utf-8'
     leading_slash = None

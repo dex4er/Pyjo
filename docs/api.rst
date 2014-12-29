@@ -6,10 +6,10 @@ Pyjo API
     :glob:
     :maxdepth: 1
 
-
-Pyjo.Parameters
-===============
-
 .. automodule:: Pyjo.Parameters
+    :members:
+    :special-members:
+
+.. automodule:: Pyjo.Path
     :members:
     :special-members:

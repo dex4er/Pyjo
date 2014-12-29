@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 """
-Pyjo.Parameters - Parameters ::
+Pyjo.Parameters - Parameters
+============================
+::
 
     import Pyjo.Parameters
 
