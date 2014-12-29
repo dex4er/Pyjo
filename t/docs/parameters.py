@@ -43,6 +43,14 @@ if __name__ == '__main__':
     params = Pyjo.Parameters.new(foo=['bar', 'baz'], bar=23)
     is_ok(params.to_str(), 'bar=23&foo=bar&foo=baz', 'params')
 
+    # charset
+    params = Pyjo.Parameters.new('foo=bar&baz=23')
+    charset = params.charset
+    is_ok(charset, 'utf-8', "charset")
+    params.charset = 'utf-8'
+    charset = params.charset
+    is_ok(charset, 'utf-8', "charset")
+
     # __iter__
     params = Pyjo.Parameters.new('foo=bar&baz=23')
     l = [v for v in params]
@@ -65,6 +73,7 @@ if __name__ == '__main__':
     params = Pyjo.Parameters.new('foo=b%3Bar&baz=23')
     params2 = params.clone()
     is_ok(params2.to_str(), 'foo=b%3Bar&baz=23', 'params2')
+    isnt_ok(id(params), id(params2), 'params')
 
     # every_param
     params = Pyjo.Parameters.new('bar=23&foo=bar&foo=baz')

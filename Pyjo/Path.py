@@ -84,18 +84,18 @@ class Pyjo_Path(Pyjo.Base.String.object):
     def clone(self):
         """::
 
-            clone = path.clone
+            clone = path.clone()
 
         Clone path.
         """
         new_obj = type(self)()
         new_obj.charset = self.charset
-        if self._parts is not None:
-            new_obj._parts = self._parts
+        if self._parts:
+            new_obj._parts = list(self._parts)
             new_obj._leading_slash = self._leading_slash
             new_obj._trailing_slash = self._trailing_slash
         else:
-            new_obj._path = list(self._path)
+            new_obj._path = self._path
         return new_obj
 
     @property
@@ -151,7 +151,7 @@ class Pyjo_Path(Pyjo.Base.String.object):
     def to_str(self):
         """::
 
-            str = path.to_str()
+            string = path.to_str()
 
         Turn path into a string. ::
 
