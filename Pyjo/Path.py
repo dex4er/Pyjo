@@ -49,7 +49,7 @@ class Pyjo_Path(Pyjo.Base.String.object):
 
     _leading_slash = False
     _path = None
-    _parts = []
+    _parts = None
     _trailing_slash = False
 
     def __init__(self, path=None):
@@ -212,7 +212,7 @@ class Pyjo_Path(Pyjo.Base.String.object):
         """
         self._path = path
 
-        self._parts = []
+        self._parts = None
         self._leading_slash = False
         self._trailing_slash = False
 
@@ -267,9 +267,9 @@ class Pyjo_Path(Pyjo.Base.String.object):
             Pyjo.Path.new('i/%E2%99%A5/pyjo').to_dir()
         """
         clone = self.clone()
-        if not clone._trailing_slash:
+        if not clone.trailing_slash:
             clone.parts.pop()
-        clone._trailing_slash = bool(clone.parts)
+        clone.trailing_slash = bool(clone.parts)
         return clone
 
     def to_route(self):
@@ -312,12 +312,13 @@ class Pyjo_Path(Pyjo.Base.String.object):
                 path = self._path
             return url_escape(path, r'^A-Za-z0-9\-._~!$&\'()*+,;=%:@/')
 
-        parts = self._parts
-
-        if charset:
-            parts = map(lambda p: p.encode(charset).decode('iso-8859-1'), parts)
-
-        path = '/'.join(map(lambda p: url_escape(p, r'^A-Za-z0-9\-._~!$&\'()*+,;=:@'), parts))
+        if self._parts:
+            parts = self._parts
+            if charset:
+                parts = map(lambda p: p.encode(charset).decode('iso-8859-1'), parts)
+            path = '/'.join(map(lambda p: url_escape(p, r'^A-Za-z0-9\-._~!$&\'()*+,;=:@'), parts))
+        else:
+            path = ''
 
         if self._leading_slash:
             path = '/' + path
@@ -328,7 +329,7 @@ class Pyjo_Path(Pyjo.Base.String.object):
         return path
 
     def _parse(self, name, *args):
-        if not self._parts:
+        if self._parts is None:
             path = url_unescape(self._path if self._path is not None else '')
             self._path = None
 
@@ -343,7 +344,10 @@ class Pyjo_Path(Pyjo.Base.String.object):
             path, count, _ = path == s(r'/$', '')
             self._trailing_slash = bool(count)
 
-            self._parts = path.split('/')
+            if path == '':
+                self._parts = []
+            else:
+                self._parts = path.split('/')
 
         if not args:
             return getattr(self, '_' + name)
