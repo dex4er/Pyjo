@@ -22,7 +22,7 @@ Pyjo.Path - Path
 
 import Pyjo.Base.String
 
-from Pyjo.Regexp import s
+from Pyjo.Regexp import m, s
 from Pyjo.Util import url_escape, url_unescape
 
 
@@ -80,6 +80,36 @@ class Pyjo_Path(Pyjo.Base.String.object):
         return True
 
     __nonzero__ = __bool__
+
+    def canonicalize(self):
+        """::
+
+            path = path.canonicalize()
+
+        Canonicalize path. ::
+
+            # "/foo/baz"
+            Pyjo.Path.new('/foo/./bar/../baz').canonicalize()
+
+            # "/../baz"
+            Pyjo.Path.new('/foo/../bar/../../baz').canonicalize()
+        """
+        parts = self.parts
+        i = 0
+        while i < len(parts):
+            if parts[i] == '.' or parts[i] == '':
+                parts.pop(i)
+            elif i < 1 or parts[i] != '..' or parts[i - 1] == '..':
+                i += 1
+            else:
+                i -= 1
+                parts.pop(i)
+                parts.pop(i)
+
+        if not parts:
+            self.trailing_slash = False
+
+        return self
 
     def clone(self):
         """::
@@ -147,6 +177,58 @@ class Pyjo_Path(Pyjo.Base.String.object):
     @parts.setter
     def parts(self, value):
         self._parse('parts', value)
+
+    def to_abs_str(self):
+        """::
+
+            str = path.to_abs_str()
+
+        Turn path into an absolute string. ::
+
+            # "/i/%E2%99%A5/mojolicious"
+            Pyjo.Path.new('/i/%E2%99%A5/mojolicious').to_abs_str()
+            Pyjo.Path.new('i/%E2%99%A5/mojolicious').to_abs_str()
+        """
+        path = self.to_str()
+        if path != m('^/'):
+            path = '/' + path
+        return path
+
+    def to_dir(self):
+        """::
+
+            dir = route.to_dir()
+
+        Clone path and remove everything after the right-most slash.
+
+            # "/i/%E2%99%A5/"
+            Pyjo.Path.new('/i/%E2%99%A5/mojolicious').to_dir()
+
+            # "i/%E2%99%A5/"
+            Pyjo.Path.new('i/%E2%99%A5/mojolicious').to_dir()
+        """
+        clone = self.clone()
+        if not clone._trailing_slash:
+            clone.parts.pop(-1)
+        clone._trailing_slash = bool(clone.parts)
+        return clone
+
+    def to_route(self):
+        """::
+
+            route = path.to_route()
+
+        Turn path into a route. ::
+
+            # "/i/♥/mojolicious"
+            Pyjo.Path.new('/i/%E2%99%A5/mojolicious').to_route()
+            Pyjo.Path.new('i/%E2%99%A5/mojolicious').to_route()
+        """
+        clone = self.clone()
+        route = '/' + '/'.join(clone.parts)
+        if clone._trailing_slash:
+            route += '/'
+        return route
 
     def to_str(self):
         """::

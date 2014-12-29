@@ -40,6 +40,13 @@ if __name__ == '__main__':
     # __bool__
     ok(Pyjo.Path.new(), "Pyjo.Path.new()")
 
+    # canonicalize
+    path = Pyjo.Path.new('/foo/./bar/../baz').canonicalize()
+    is_ok(path.to_str(), "/foo/baz", "path")
+
+    path = Pyjo.Path.new('/foo/../bar/../../baz').canonicalize()
+    is_ok(path.to_str(), "/../baz", "path")
+
     # clone
     path = Pyjo.Path.new('/foo%2Fbar%3B/baz.html')
     path2 = path.clone()
@@ -66,6 +73,27 @@ if __name__ == '__main__':
 
     path.parts.append('foo/bar')
     is_ok(path.to_str(), 'foo/bar/baz/foo%2Fbar', 'path')
+
+    # to_abs_str
+    path = Pyjo.Path.new('/i/%E2%99%A5/mojolicious').to_abs_str()
+    is_ok(path, "/i/%E2%99%A5/mojolicious", "path")
+
+    path = Pyjo.Path.new('i/%E2%99%A5/mojolicious').to_abs_str()
+    is_ok(path, "/i/%E2%99%A5/mojolicious", "path")
+
+    # to_dir
+    path = Pyjo.Path.new('/i/%E2%99%A5/mojolicious').to_dir()
+    is_ok(path, "/i/%E2%99%A5/", "path")
+
+    path = Pyjo.Path.new('i/%E2%99%A5/mojolicious').to_dir()
+    is_ok(path, "i/%E2%99%A5/", "path")
+
+    # to_route
+    path = Pyjo.Path.new('/i/%E2%99%A5/mojolicious').to_route()
+    is_ok(path, u"/i/♥/mojolicious", "path")
+
+    path = Pyjo.Path.new('i/%E2%99%A5/mojolicious').to_route()
+    is_ok(path, u"/i/♥/mojolicious", "path")
 
     # to_str
     path = Pyjo.Path.new('/i/%E2%99%A5/pyjo').to_str()
