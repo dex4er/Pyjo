@@ -19,7 +19,10 @@ class Pyjo_Base_String(Pyjo.Base.object):
         pass
 
     def __str__(self):
-        return self.to_str()
+        string = self.to_str()
+        if string is None:
+            string = 'None'
+        return string
 
     def __repr__(self):
         if self.__module__ == '__main__':
