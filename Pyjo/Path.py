@@ -22,7 +22,7 @@ Pyjo.Path - Path
 
 import Pyjo.Base.String
 
-from Pyjo.Regexp import m, s
+from Pyjo.Regexp import s
 from Pyjo.Util import url_escape, url_unescape
 
 
