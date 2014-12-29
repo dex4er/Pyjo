@@ -24,8 +24,8 @@ if __name__ == '__main__':
 
     # Build
     params = Pyjo.Parameters.new('foo', 'bar', 'baz', 23)
-    params.append(i='♥ Pyjo')
-    is_ok(params.to_str(), 'foo=bar&baz=23&i=%E2%99%A5+Pyjo', 'params')
+    params.append(i='♥ pyjo')
+    is_ok(params.to_str(), 'foo=bar&baz=23&i=%E2%99%A5+pyjo', 'params')
 
     # __init__
     params = Pyjo.Parameters.new()

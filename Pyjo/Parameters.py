@@ -13,10 +13,10 @@ Pyjo.Parameters - Parameters
 
     # Build
     params = Pyjo.Parameters.new(foo='bar', baz=23)
-    params.append(i='♥ Pyjo')
+    params.append(i='♥ pyjo')
     print(params)
 
-:class:`Pyjo.Parameters` is a container for form parameters used by :class:`Pyjo.URL`
+:mod:`Pyjo.Parameters` is a container for form parameters used by :mod:`Pyjo.URL`
 and based on :rfc:`3986` as well as `the HTML Living Standard <https://html.spec.whatwg.org>`_.
 """
 
@@ -35,7 +35,7 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
         params = Pyjo.Parameters.new(foo=['ba&r', 'baz'])
         params = Pyjo.Parameters.new(foo=['bar', 'baz'], bar=23)
 
-    Construct a new :class:`Pyjo.Parameters` object and :meth:`parse` parameters if
+    Construct a new :mod:`Pyjo.Parameters` object and :meth:`parse` parameters if
     necessary.
     """
 
@@ -64,7 +64,7 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
             for p in params:
                 print(p)
 
-        Iterator based on :meth:`params`. Note that this will normalize the parameters.
+        Iterator based on :attr:`params`. Note that this will normalize the parameters.
         """
         params = self.params
         for p in params:
@@ -73,7 +73,7 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
     def __bool__(self):
         """::
 
-            b = bool(params)
+            boolean = bool(params)
 
         Always true.
         """
@@ -146,7 +146,7 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
 
             params = params.merge(Pyjo.Parameters.new('foo', 'b&ar', 'baz', 23))
 
-        Merge :class:`Pyjo.Parameters` objects. Note that this method will normalize the
+        Merge :mod:`Pyjo.Parameters` objects. Note that this method will normalize the
         parameters. ::
 
             # "foo=bar&foo=baz"
