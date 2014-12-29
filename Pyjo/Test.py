@@ -26,7 +26,8 @@ done = False
 
 def _print(*args, **kwargs):
     output = kwargs.get('file', sys.stdout)
-    print(*args, file=output)
+    string = ' '.join(args) + "\n"
+    output.write(string)
     output.flush()
 
 
