@@ -226,10 +226,16 @@ latex_show_urls = True
 #latex_domain_indices = True
 
 # Additional preamble content, default empty.
-latex_elements['preamble'] = """\usepackage{arev}
-\DeclareUnicodeCharacter{2665}{$\\varheart$}
-"""
-
+latex_elements = {
+    'inputenc': '',
+    'utf8extra': '',
+    'preamble': """
+\usepackage{fontspec}
+\setsansfont{Liberation Sans}
+\setromanfont{Liberation Serif}
+\setmonofont{FreeMono}
+""",
+}
 
 # -- Options for manual page output ---------------------------------------
 
