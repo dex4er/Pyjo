@@ -13,3 +13,7 @@ Pyjo API
 .. automodule:: Pyjo.Path
     :members:
     :special-members:
+
+.. automodule:: Pyjo.URL
+    :members:
+    :special-members:
