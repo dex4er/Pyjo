@@ -103,8 +103,17 @@ class Pyjo_URL(Pyjo.Base.String.object):
 
     def parse(self, url):
         g = url == m(r'^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?')
-        self.set(scheme=g[2], authority=g[4], path=g[5],
-                 query=g[7], fragment=g[9])
+        if g:
+            if g[2] is not None:
+                self.scheme = g[2]
+            if g[4] is not None:
+                self.authority = g[4]
+            if g[5] is not None:
+                self.path = g[5]
+            if g[7] is not None:
+                self.query = g[7]
+            if g[9] is not None:
+                self.fragment = url_unescape(g[9]).decode('utf-8')
         return self
 
     @property
