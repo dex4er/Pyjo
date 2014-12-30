@@ -1,38 +1,5 @@
-# -*- coding: utf-8 -*-
-
 """
-Pyjo.URL- Uniform Resource Locator
-==================================
-::
-
-    import Pyjo.URL
-
-    # Parse
-    url = Pyjo.URL.new('http://sri:foobar@example.com:3000/foo/bar?foo=bar#23')
-    print(url.scheme)
-    print(url.userinfo)
-    print(url.host)
-    print(url.port)
-    print(url.path)
-    print(url.query)
-    print(url.fragment)
-
-    # Build
-    url = Pyjo.URL.new()
-    url.scheme = 'http'
-    url.userinfo = 'sri:foobar'
-    url.host = 'example.com'
-    url.port = 3000
-    url.path = '/foo/bar'
-    url.query.param('foo', 'bar')
-    url.fragment = 23
-    print(url)
-
-:mod:`Pyjo.URL` implements a subset of
-:rfc:`3986`,
-:rfc:`3987` and the
-`URL Living Standard <https://url.spec.whatwg.org>`_ for Uniform Resource
-Locators with support for IDNA and IRIs.
+Pyjo.URL
 """
 
 import Pyjo.Base.String
@@ -67,7 +34,7 @@ class Pyjo_URL(Pyjo.Base.String.object):
         info = self.userinfo
         if info is None:
             return authority
-        info = url_escape(info, r'^A-Za-z0-9\-._~!$&\'()*+,;=:')
+        info = url_escape(info.encode('utf-8'), r'^A-Za-z0-9\-._~!$&\'()*+,;=:')
 
         return info + '@' + authority
 
@@ -79,7 +46,7 @@ class Pyjo_URL(Pyjo.Base.String.object):
         # Userinfo
         (authority, found, g) = authority == s(r'^([^\@]+)\@', '')
         if found:
-            self.userinfo = url_unescape(g[1]).decode('ascii')
+            self.userinfo = url_unescape(g[1]).decode('utf-8')
 
         # Port
         (authority, found, g) = authority == s(r':(\d+)$', '')

@@ -40,5 +40,4 @@ if __name__ == '__main__':
     url.fragment = '23'
     is_ok(url.to_str(), 'http://sri:foobar@example.com:3000/foo/bar?foo=bar#23', "url")
 
-    
     done_testing()

@@ -13,5 +13,5 @@ print(url2)
 url3 = Pyjo.URL.new(u'http://żółwie.pl')
 print(url3)
 
-url4 = Pyjo.URL.new(u'http://localhost').set(userinfo=u'gęślą:jaźń'.encode('utf-8'))
+url4 = Pyjo.URL.new(u'http://localhost').set(userinfo=u'gęślą:jaźń')
 print(url4)

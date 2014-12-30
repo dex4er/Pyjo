@@ -13,5 +13,5 @@ say $url2;
 my $url3 = Mojo::URL->new('http://żółwie.pl');
 say $url3;
 
-my $url4 = Mojo::URL->new('http://localhost')->userinfo(encode_utf8('gęślą:jaźń'));
+my $url4 = Mojo::URL->new('http://localhost')->userinfo('gęślą:jaźń');
 say $url4;

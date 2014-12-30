@@ -27,7 +27,7 @@ if __name__ == '__main__':
     url3 = Pyjo.URL.new(u'http://żółwie.pl')
     is_ok(url3, 'http://xn--wie-fna90bfl.pl', 'url3')
 
-    url4 = Pyjo.URL.new(u'http://localhost').set(userinfo=u'gęślą:jaźń'.encode('utf-8'))
+    url4 = Pyjo.URL.new(u'http://localhost').set(userinfo=u'gęślą:jaźń')
     is_ok(url4, 'http://g%C4%99%C5%9Bl%C4%85:ja%C5%BA%C5%84@localhost', 'url4')
 
     done_testing()
