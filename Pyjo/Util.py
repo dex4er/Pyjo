@@ -63,6 +63,10 @@ def has(attrs, default=None, *args):
     return lambda cls: cls.attr(attrs, default)
 
 
+def isbytes(obj):
+    return isinstance(obj, bytes) and not isinstance(obj, str)
+
+
 def isiterable(obj):
     return hasattr(obj, '__iter__')
 
@@ -111,11 +115,11 @@ def not_implemented(method):
 
 
 def punycode_decode(string):
-    return b(string, 'ascii').decode('punycode')
+    return b(string, 'iso-8859-1').decode('punycode')
 
 
 def punycode_encode(string):
-    return u(string).encode('punycode').decode('ascii')
+    return u(string).encode('punycode')
 
 
 def rand(value=1):
