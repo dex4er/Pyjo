@@ -266,6 +266,21 @@ class Pyjo_URL(Pyjo.Base.String.object):
         return self
 
     def is_abs(self):
+        """::
+
+            boolean = url.is_abs()
+
+        Check if URL is absolute. ::
+
+            # True
+            Pyjo.URL.new('http://example.com').is_abs()
+            Pyjo.URL.new('http://example.com/test/index.html').is_abs()
+
+            # False
+            Pyjo.URL.new('test/index.html').is_abs()
+            Pyjo.URL.new('/test/index.html').is_abs()
+            Pyjo.URL.new('//example.com/test/index.html').is_abs()
+        """
         return bool(self.scheme)
 
     def parse(self, url):

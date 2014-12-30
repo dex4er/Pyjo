@@ -108,6 +108,7 @@ if __name__ == '__main__':
     is_ok(host_port, 'example.com', "host_port")
 
     # ihost
+    url = Pyjo.URL.new()
     ihost = url.ihost
     is_ok(ihost, None, "ihost")
     url.ihost = 'xn--bcher-kva.ch'
@@ -116,7 +117,24 @@ if __name__ == '__main__':
     ihost = Pyjo.URL.new(u'http://☃.net').ihost
     is_ok(ihost, "xn--n3h.net", "ihost")
 
-    # "example.com"
-    Pyjo.URL.new('http://example.com').ihost
+    ihost = Pyjo.URL.new('http://example.com').ihost
+    is_ok(ihost, "example.com", "ihost")
+
+    # is_abs
+    url = Pyjo.URL.new()
+    boolean = url.is_abs()
+    is_ok(boolean, False, "boolean")
+
+    boolean = Pyjo.URL.new('http://example.com').is_abs()
+    is_ok(boolean, True, "boolean")
+    boolean = Pyjo.URL.new('http://example.com/test/index.html').is_abs()
+    is_ok(boolean, True, "boolean")
+
+    boolean = Pyjo.URL.new('test/index.html').is_abs()
+    is_ok(boolean, False, "boolean")
+    boolean = Pyjo.URL.new('/test/index.html').is_abs()
+    is_ok(boolean, False, "boolean")
+    boolean = Pyjo.URL.new('//example.com/test/index.html').is_abs()
+    is_ok(boolean, False, "boolean")
 
     done_testing()
