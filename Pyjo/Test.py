@@ -285,7 +285,10 @@ class Guard(object):
         if not done:
             if not failed:
                 failed = 255 - test
-            os._exit(failed)
+            try:
+                os._exit(failed)
+            except:
+                pass
 
 _guard = Guard()
 
