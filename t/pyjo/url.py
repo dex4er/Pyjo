@@ -40,13 +40,9 @@ if __name__ == '__main__':
     is_ok(url.query, 'monkey=biz&foo=1', 'right query')
     is_ok(url.path_query, '/x/index.html?monkey=biz&foo=1', 'right path and query')
     is_ok(url.fragment, '/!%?@3', 'right fragment')
-    is_ok(url,
-          'https://sri:foobar@example.com:8080/x/index.html?monkey=biz&foo=1#/!%?@3',
-          'right format')
+    is_ok(url, 'https://sri:foobar@example.com:8080/x/index.html?monkey=biz&foo=1#/!%?@3', 'right format')
     url.path = '/index.xml'
-    is_ok(url,
-          'https://sri:foobar@example.com:8080/index.xml?monkey=biz&foo=1#/!%?@3',
-          'right format')
+    is_ok(url, 'https://sri:foobar@example.com:8080/index.xml?monkey=biz&foo=1#/!%?@3', 'right format')
 
     # Advanced userinfo and fragment roundtrip
     url = Pyjo.URL.new('ws://AZaz09-._~!$&\'()*+,;=:@localhost#AZaz09-._~!$&\'()*+,;=%:@/?')
@@ -54,8 +50,6 @@ if __name__ == '__main__':
     is_ok(url.userinfo, 'AZaz09-._~!$&\'()*+,;=:', 'right userinfo')
     is_ok(url.host, 'localhost', 'right host')
     is_ok(url.fragment, 'AZaz09-._~!$&\'()*+,;=%:@/?', 'right fragment')
-    is_ok(url,
-          'ws://AZaz09-._~!$&\'()*+,;=:@localhost#AZaz09-._~!$&\'()*+,;=%:@/?',
-          'right format')
+    is_ok(url, 'ws://AZaz09-._~!$&\'()*+,;=:@localhost#AZaz09-._~!$&\'()*+,;=%:@/?', 'right format')
 
     done_testing()

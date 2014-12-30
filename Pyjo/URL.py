@@ -1,5 +1,38 @@
+# -*- coding: utf-8 -*-
+
 """
-Pyjo.URL
+Pyjo.URL- Uniform Resource Locator
+==================================
+::
+
+    import Pyjo.URL
+
+    # Parse
+    url = Pyjo.URL.new('http://sri:foobar@example.com:3000/foo/bar?foo=bar#23')
+    print(url.scheme)
+    print(url.userinfo)
+    print(url.host)
+    print(url.port)
+    print(url.path)
+    print(url.query)
+    print(url.fragment)
+
+    # Build
+    url = Pyjo.URL.new()
+    url.scheme = 'http'
+    url.userinfo = 'sri:foobar'
+    url.host = 'example.com'
+    url.port = 3000
+    url.path = '/foo/bar'
+    url.query.param('foo', 'bar')
+    url.fragment = 23
+    print(url)
+
+:mod:`Pyjo.URL` implements a subset of
+:rfc:`3986`,
+:rfc:`3987` and the
+`URL Living Standard <https://url.spec.whatwg.org>`_ for Uniform Resource
+Locators with support for IDNA and IRIs.
 """
 
 import Pyjo.Base.String
@@ -13,16 +46,79 @@ from Pyjo.Util import (
 
 
 class Pyjo_URL(Pyjo.Base.String.object):
+    """::
+
+        url = Pyjo.URL.new()
+        url = Pyjo.URL.new('http://127.0.0.1:3000/foo?f=b&baz=2#foo')
+
+    Construct a new :mod:`Pyjo.URL` object and :meth:`parse` URL if necessary.
+    """
 
     base = lazy(lambda self: Pyjo_URL())
+    """::
+
+        base = url.base
+        url.base = Pyjo.URL.new()
+
+    Base of this URL, defaults to a :mod:`Pyjo.URL` object.
+    """
+
     fragment = None
+    """::
+
+        fragment = url.fragment
+        url.fragment = u'♥pyjo♥'
+
+    Fragment part of this URL.
+    """
+
     host = None
+    """::
+
+        host = url.host
+        url.host = '127.0.0.1'
+
+    Host part of this URL.
+    """
+
     port = None
+    """::
+
+        port = url.port
+        url.port = 8080
+
+    Port part of this URL.
+    """
+
     scheme = None
+    """::
+
+        scheme = url.scheme
+        url.scheme = 'http'
+
+    Scheme part of this URL.
+
+    """
+
     userinfo = None
+    """::
+
+        info = url.userinfo
+        url.userinfo = u'root:♥'
+
+    Userinfo part of this URL.
+    """
 
     _path = None
     _query = None
+
+    def __init__(self, *args, **kwargs):
+        if len(args) == 1:
+            self.parse(args[0])
+        elif args:
+            self.set(*args)
+        elif kwargs:
+            self.set(**kwargs)
 
     @property
     def authority(self):
@@ -92,14 +188,6 @@ class Pyjo_URL(Pyjo.Base.String.object):
 
     def is_abs(self):
         return bool(self.scheme)
-
-    def __init__(self, *args, **kwargs):
-        if len(args) == 1:
-            self.parse(args[0])
-        elif args:
-            self.set(*args)
-        elif kwargs:
-            self.set(**kwargs)
 
     def parse(self, url):
         g = url == m(r'^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?')
@@ -193,7 +281,7 @@ class Pyjo_URL(Pyjo.Base.String.object):
         if fragment is None:
             return url
 
-        return url + '#' + url_escape(fragment, r'^A-Za-z0-9\-._~!$&\'()*+,;=%:@\/?')
+        return url + '#' + url_escape(fragment.encode('utf-8'), r'^A-Za-z0-9\-._~!$&\'()*+,;=%:@\/?')
 
 
 new = Pyjo_URL.new
