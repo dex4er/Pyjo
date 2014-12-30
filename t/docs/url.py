@@ -41,9 +41,9 @@ if __name__ == '__main__':
 
     # __init __
     url = Pyjo.URL.new()
-    is_ok(url.to_str(), '', "url")
+    is_ok(url, '', "url")
     url = Pyjo.URL.new('http://127.0.0.1:3000/foo?f=b&baz=2#foo')
-    is_ok(url.to_str(), 'http://127.0.0.1:3000/foo?f=b&baz=2#foo', "url")
+    is_ok(url, 'http://127.0.0.1:3000/foo?f=b&baz=2#foo', "url")
 
     # Attributes
     url = Pyjo.URL.new()
@@ -77,5 +77,23 @@ if __name__ == '__main__':
     is_ok(userinfo, None, "userinfo")
     url.userinfo = u'root:♥'
     is_ok(url.userinfo, u'root:♥', "url.userinfo")
+
+    # authority
+    url = Pyjo.URL.new()
+    authority = url.authority
+    is_ok(authority, None, "authority")
+    url.authority = 'root:%E2%99%A5@localhost:8080'
+    is_ok(url.authority, 'root:%E2%99%A5@localhost:8080', "url.authority")
+
+    authority = Pyjo.URL.new(u'http://root:♥@☃.net:8080/test').authority
+    is_ok(authority, "root:%E2%99%A5@xn--n3h.net:8080", "authority")
+
+    authority = Pyjo.URL.new('http://root@example.com/test').authority
+    is_ok(authority, "root@example.com", "authority")
+
+    # clone
+    url = Pyjo.URL.new('http://sri:foobar@example.com:3000/foo/bar?foo=bar#23')
+    url2 = url.clone()
+    is_ok(url2, 'http://sri:foobar@example.com:3000/foo/bar?foo=bar#23', "url2")
 
     done_testing()

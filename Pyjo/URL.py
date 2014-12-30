@@ -41,7 +41,7 @@ import Pyjo.Path
 
 from Pyjo.Regexp import m, s
 from Pyjo.Util import (
-    b, lazy, punycode_decode, punycode_encode, url_escape, url_unescape
+    b, punycode_decode, punycode_encode, url_escape, url_unescape
 )
 
 
@@ -52,15 +52,6 @@ class Pyjo_URL(Pyjo.Base.String.object):
         url = Pyjo.URL.new('http://127.0.0.1:3000/foo?f=b&baz=2#foo')
 
     Construct a new :mod:`Pyjo.URL` object and :meth:`parse` URL if necessary.
-    """
-
-    base = lazy(lambda self: Pyjo_URL())
-    """::
-
-        base = url.base
-        url.base = Pyjo.URL.new()
-
-    Base of this URL, defaults to a :mod:`Pyjo.URL` object.
     """
 
     fragment = None
@@ -109,10 +100,18 @@ class Pyjo_URL(Pyjo.Base.String.object):
     Userinfo part of this URL.
     """
 
+    _base = None
     _path = None
     _query = None
 
     def __init__(self, *args, **kwargs):
+        """::
+
+            url = Pyjo.URL.new()
+            url = Pyjo.URL.new('http://127.0.0.1:3000/foo?f=b&baz=2#foo');
+
+        Construct a new :mod:`Pyjo.URL` object and :meth:`parse` URL if necessary.
+        """
         if len(args) == 1:
             self.parse(args[0])
         elif args:
@@ -122,6 +121,19 @@ class Pyjo_URL(Pyjo.Base.String.object):
 
     @property
     def authority(self):
+        """::
+
+            authority = url.authority
+            url.authority = 'root:%E2%99%A5@localhost:8080'
+
+        Authority part of this URL. ::
+
+            # "root:%E2%99%A5@xn--n3h.net:8080"
+            Pyjo.URL.new('http://root:♥@☃.net:8080/test').authority
+
+            # "root@example.com"
+            Pyjo.URL.new('http://root@example.com/test').authority
+        """
         # Build authority
         authority = self.host_port
         if authority is None:
@@ -157,6 +169,46 @@ class Pyjo_URL(Pyjo.Base.String.object):
             self.host = host.decode('ascii')
 
         return self
+
+    @property
+    def base(self):
+        """::
+
+            base = url.base
+            url.base = Pyjo.URL.new()
+
+        Base of this URL, defaults to a :mod:`Pyjo.URL` object.
+        """
+        if self._base is None:
+            self._base = Pyjo.URL.new()
+        return self._base
+
+    @base.setter
+    def base(self, value):
+        # TODO old path / new path
+        self._base = Pyjo.URL.new(value)
+        return self
+
+    def clone(self):
+        """::
+
+            url2 = url.clone()
+
+        Clone this URL.
+        """
+        clone = self.new()
+        clone.fragment = self.fragment
+        clone.host = self.host
+        clone.port = self.port
+        clone.scheme = self.scheme
+        clone.userinfo = self.userinfo
+        if self._base is not None:
+            clone._base = self._base.clone()
+        if self._path is not None:
+            clone._path = self._path.clone()
+        if self._query is not None:
+            clone._query = self._query.clone()
+        return clone
 
     @property
     def host_port(self):
