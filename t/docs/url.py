@@ -96,4 +96,27 @@ if __name__ == '__main__':
     url2 = url.clone()
     is_ok(url2, 'http://sri:foobar@example.com:3000/foo/bar?foo=bar#23', "url2")
 
+    # host_port
+    url = Pyjo.URL.new()
+    host_port = url.host_port
+    is_ok(host_port, None, "host_port")
+
+    host_port = Pyjo.URL.new(u'http://☃.net:8080/test').host_port
+    is_ok(host_port, 'xn--n3h.net:8080', "host_port")
+
+    host_port = Pyjo.URL.new('http://example.com/test').host_port
+    is_ok(host_port, 'example.com', "host_port")
+
+    # ihost
+    ihost = url.ihost
+    is_ok(ihost, None, "ihost")
+    url.ihost = 'xn--bcher-kva.ch'
+    is_ok(url.ihost, 'xn--bcher-kva.ch', "url.ihost")
+
+    ihost = Pyjo.URL.new(u'http://☃.net').ihost
+    is_ok(ihost, "xn--n3h.net", "ihost")
+
+    # "example.com"
+    Pyjo.URL.new('http://example.com').ihost
+
     done_testing()

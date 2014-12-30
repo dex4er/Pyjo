@@ -164,7 +164,7 @@ class Pyjo_URL(Pyjo.Base.String.object):
         # Host
         host = url_unescape(authority.encode('utf-8'))
         if host == m(br'[^\x00-\x7f]'):
-            self.ihost = host
+            self.ihost = host.decode('utf-8')
         else:
             self.host = host.decode('ascii')
 
@@ -212,6 +212,18 @@ class Pyjo_URL(Pyjo.Base.String.object):
 
     @property
     def host_port(self):
+        """::
+
+            host_port = url.host_port
+
+        Normalized version of :attr:`host` and :attr:`port`. ::
+
+            # "xn--n3h.net:8080"
+            Pyjo.URL.new('http://☃.net:8080/test').host_port
+
+            # "example.com"
+            Pyjo.URL.new('http://example.com/test').host_port
+        """
         host = self.ihost
         port = self.port
         if port is not None:
@@ -221,21 +233,36 @@ class Pyjo_URL(Pyjo.Base.String.object):
 
     @property
     def ihost(self):
+        """::
+
+            ihost = url.ihost
+            url.ihost = 'xn--bcher-kva.ch'
+
+        Host part of this URL in punycode format. ::
+
+            # "xn--n3h.net"
+            Pyjo.URL.new('http://☃.net').ihost
+
+            # "example.com"
+            Pyjo.URL.new('http://example.com').ihost
+        """
         host = self.host
 
         if host is None:
             return
 
         if host != m(r'[^\x00-\x7f]'):
-            return b(host).decode('ascii').lower()
+            return b(host, 'ascii').decode('ascii').lower()
 
         # Encode
-        return '.'.join(map(lambda s: ('xn--' + punycode_encode(s)) if s == m(r'[^\x00-\x7f]') else s, host.split('.'))).lower()
+        parts = map(lambda s: ('xn--' + punycode_encode(s).decode('ascii')) if s == m(r'[^\x00-\x7f]') else s, host.split('.'))
+        return '.'.join(parts).lower()
 
     @ihost.setter
     def ihost(self, value):
         # Decode
-        self.host = '.'.join(map(lambda s: punycode_decode(s) if s == m(r'^xn--(.+)$') else s, value.decode('utf-8').split('.')))
+        parts = map(lambda s: punycode_decode(s[4:]) if s == m(r'^xn--(.+)$') else s, value.split('.'))
+        self.host = '.'.join(parts)
         return self
 
     def is_abs(self):
