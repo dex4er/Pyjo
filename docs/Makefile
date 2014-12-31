@@ -36,7 +36,8 @@ help:
 	@echo "  devhelp    to make HTML files and a Devhelp project"
 	@echo "  epub       to make an epub"
 	@echo "  latex      to make LaTeX files, you can set PAPER=a4 or PAPER=letter"
-	@echo "  pdf        to make LaTeX files and run them through xelatex"
+	@echo "  pdf        to make PDF files with XeTeX"
+	@echo "  pdfmono    to make PDF monochromatic files with XeTeX"
 	@echo "  text       to make text files"
 	@echo "  man        to make manual pages"
 	@echo "  texinfo    to make Texinfo files"
@@ -109,16 +110,17 @@ latex:
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/latex
 	@echo
 	@echo "Build finished; the LaTeX files are in $(BUILDDIR)/latex."
-	@echo "Run \`make' in that directory to run these through (pdf)latex" \
-	      "(use \`make latexpdf' here to do that automatically)."
 
-latexpdf:
-	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/latex
-	@echo "Running LaTeX files through xelatex..."
+latexpdf: latex
 	cd $(BUILDDIR)/latex && for f in *.tex; do xelatex $(LATEXOPTS) $$f; done
 	@echo "xelatex finished; the PDF files are in $(BUILDDIR)/latex."
 
 pdf: latexpdf
+
+latexmono: latex
+	sed -i 's/\[rgb\]{[0-9.]*,[0-9.]*,[0-9.]*}/[rgb]{0,0,0}/g' $(BUILDDIR)/latex/*
+
+pdfmono: latexmono latexpdf
 
 text:
 	$(SPHINXBUILD) -b text $(ALLSPHINXOPTS) $(BUILDDIR)/text

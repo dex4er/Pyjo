@@ -194,7 +194,17 @@ latex_elements = {
 #'pointsize': '10pt',
 
 # Additional stuff for the LaTeX preamble.
-#'preamble': '',
+'preamble': """
+\usepackage{fontspec}
+\setsansfont{Liberation Sans}
+\setromanfont{Liberation Serif}
+\setmonofont{FreeMono}
+""",
+
+'inputenc': '',
+
+'utf8extra': '',
+
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
@@ -226,17 +236,6 @@ latex_show_urls = True
 #latex_domain_indices = True
 
 # Additional preamble content, default empty.
-latex_elements = {
-    'inputenc': '',
-    'utf8extra': '',
-    'preamble': """
-\usepackage{fontspec}
-\setsansfont{Liberation Sans}
-\setromanfont{Liberation Serif}
-\setmonofont{FreeMono}
-""",
-}
-
 # -- Options for manual page output ---------------------------------------
 
 # One entry per manual page. List of tuples
