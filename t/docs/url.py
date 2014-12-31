@@ -168,4 +168,35 @@ if __name__ == '__main__':
     url.path = Pyjo.Path.new()
     is_ok(url, '', "url")
 
+    part = Pyjo.URL.new('http://example.com/perldoc/Mojo').path.parts[0]
+    is_ok(part, "perldoc", "part")
+
+    url = Pyjo.URL.new('http://example.com/perldoc/Mojo').set(path='/DOM/HTML')
+    is_ok(url, "http://example.com/DOM/HTML", "url")
+
+    url = Pyjo.URL.new('http://example.com/perldoc/Mojo').set(path='DOM/HTML')
+    is_ok(url, "http://example.com/perldoc/DOM/HTML", "url")
+
+    url = Pyjo.URL.new('http://example.com/perldoc/Mojo/').set(path='DOM/HTML')
+    is_ok(url, "http://example.com/perldoc/Mojo/DOM/HTML", "url")
+
+    # path_query
+    url = Pyjo.URL.new()
+    path_query = url.path_query
+    is_ok(path_query, "", "path_query")
+
+    path_query = Pyjo.URL.new('http://example.com/test?a=1&b=2').path_query
+    is_ok(path_query, "/test?a=1&b=2", "path_query")
+
+    path_query = Pyjo.URL.new('http://example.com/').path_query
+    is_ok(path_query, "/", "path_query")
+
+    # protocol
+    url = Pyjo.URL.new()
+    proto = url.protocol
+    is_ok(proto, "", "proto")
+
+    proto = Pyjo.URL.new('HtTp://example.com').protocol
+    is_ok(proto, "http", "proto")
+
     done_testing()

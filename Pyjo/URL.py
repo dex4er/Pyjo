@@ -355,6 +355,18 @@ class Pyjo_URL(Pyjo.Base.String.object):
 
     @property
     def path_query(self):
+        """::
+
+            path_query = url.path_query
+
+        Normalized version of :attr:`path` and :attr:`query`. ::
+
+            # "/test?a=1&b=2"
+            Pyjo.URL.new('http://example.com/test?a=1&b=2').path_query
+
+            # "/"
+            Pyjo.URL.new('http://example.com/').path_query
+        """
         query = self.query.to_str()
         if len(query):
             query = '?' + query
@@ -364,6 +376,15 @@ class Pyjo_URL(Pyjo.Base.String.object):
 
     @property
     def protocol(self):
+        """::
+
+            proto = url.protocol
+
+        Normalized version of :attr:`scheme`. ::
+
+            # "http"
+            Pyjo.URL.new('HtTp://example.com').protocol
+        """
         scheme = self.scheme
 
         if scheme is None:
@@ -373,6 +394,35 @@ class Pyjo_URL(Pyjo.Base.String.object):
 
     @property
     def query(self):
+        """::
+
+            query = url.query
+            url.query = ['param', 'value']
+            url.query = {'param': 'value'}
+            url.query.append(['append', 'to'])
+            url.query.param('replace', 'with')
+            url.query = Pyjo.Parameters.new()
+
+        Query part of this URL, defaults to a :mod:`Pyjo.Parameters` object. ::
+
+            # "2"
+            Pyjo.URL.new('http://example.com?a=1&b=2').query.param('b')
+
+            # "http://example.com?a=2&c=3"
+            Pyjo.URL.new('http://example.com?a=1&b=2').query = ['a', 2, 'c', 3]
+
+            # "http://example.com?a=2&a=3"
+            Pyjo.URL.new('http://example.com?a=1&b=2')->query(a => [2, 3]);
+
+            # "http://example.com?a=2&b=2&c=3"
+            Pyjo.URL.new('http://example.com?a=1&b=2')->query([a => 2, c => 3]);
+
+            # "http://example.com?b=2"
+            Pyjo.URL.new('http://example.com?a=1&b=2')->query([a => undef]);
+
+            # "http://example.com?a=1&b=2&a=2&c=3"
+            Pyjo.URL.new('http://example.com?a=1&b=2')->query({a => 2, c => 3});
+        """
         if self._query is None:
             self._query = Pyjo.Parameters.new()
         return self._query
