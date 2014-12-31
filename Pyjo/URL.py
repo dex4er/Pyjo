@@ -119,6 +119,17 @@ class Pyjo_URL(Pyjo.Base.String.object):
         elif kwargs:
             self.set(**kwargs)
 
+    def __bool__(self):
+        """::
+
+            boolean = bool(url)
+
+        Always true.
+        """
+        return True
+
+    __nonzero__ = __bool__
+
     @property
     def authority(self):
         """::
@@ -471,7 +482,73 @@ class Pyjo_URL(Pyjo.Base.String.object):
 
         return self
 
+    def to_abs(self, base=None):
+        """::
+
+            absolute = url.to_abs()
+            absolute = url.to_abs(Pyjo.URL.new('http://example.com/foo'))
+
+        Clone relative URL and turn it into an absolute one using :attr:`base` or
+        provided base URL. ::
+
+            # "http://example.com/foo/baz.xml?test=123"
+            Pyjo.URL.new('baz.xml?test=123') \\
+                .to_abs(Pyjo.URL.new('http://example.com/foo/bar.html'))
+
+            # "http://example.com/baz.xml?test=123"
+            Pyjo.URL.new('/baz.xml?test=123') \\
+                .to_abs(Pyjo.URL.new('http://example.com/foo/bar.html'))
+
+            # "http://example.com/foo/baz.xml?test=123"
+            Pyjo.URL.new('//example.com/foo/baz.xml?test=123') \\
+                .to_abs(Pyjo.URL.new('http://example.com/foo/bar.html'))
+        """
+        absolute = self.clone()
+        if absolute.is_abs():
+            return absolute
+
+        # Scheme
+        if base is None:
+            base = absolute.base
+        else:
+            absolute.base = base
+        absolute.scheme = base.scheme
+
+        # Authority
+        if absolute.authority:
+            return absolute
+        absolute.authority = base.authority
+
+        # Absolute path
+        path = absolute.path
+        if path.leading_slash:
+            return absolute
+
+        # Inherit path
+        base_path = base.path
+
+        if not path.parts:
+            path = absolute.set(path=base_path.clone()).path.set(trailing_slash=False).canonicalize()
+
+            # Query
+            if len(absolute.query.to_str()):
+                return absolute
+
+            absolute.query = base.query.clone()
+
+        # Merge paths
+        else:
+            absolute.path = base_path.clone().merge(path).canonicalize()
+
+        return absolute
+
     def to_str(self):
+        """::
+
+            string = url.to_str()
+
+        Turn URL into a string.
+        """
         # Scheme
         url = ''
         proto = self.protocol

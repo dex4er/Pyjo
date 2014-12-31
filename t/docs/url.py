@@ -78,6 +78,9 @@ if __name__ == '__main__':
     url.userinfo = u'root:♥'
     is_ok(url.userinfo, u'root:♥', "url.userinfo")
 
+    # __bool__
+    ok(Pyjo.URL.new(), "Pyjo.URL.new()")
+
     # authority
     url = Pyjo.URL.new()
     authority = url.authority
@@ -231,5 +234,21 @@ if __name__ == '__main__':
 
     url = Pyjo.URL.new('http://example.com?a=1&b=2').set(query=[['a', 2, 'c', 3]])
     is_ok(url, "http://example.com?a=1&b=2&a=2&c=3", "url")
+
+    # to_abs
+    url = Pyjo.URL.new()
+    absolute = url.to_abs()
+    is_ok(absolute, "", "absolute")
+    absolute = url.to_abs(Pyjo.URL.new('http://example.com/foo'))
+    is_ok(absolute, "http://example.com/foo", "absolute")
+
+    url = Pyjo.URL.new('baz.xml?test=123').to_abs(Pyjo.URL.new('http://example.com/foo/bar.html'))
+    is_ok(url, "http://example.com/foo/baz.xml?test=123", "url")
+
+    url = Pyjo.URL.new('/baz.xml?test=123').to_abs(Pyjo.URL.new('http://example.com/foo/bar.html'))
+    is_ok(url, "http://example.com/baz.xml?test=123", "url")
+
+    url = Pyjo.URL.new('//example.com/foo/baz.xml?test=123').to_abs(Pyjo.URL.new('http://example.com/foo/bar.html'))
+    is_ok(url, "http://example.com/foo/baz.xml?test=123", "url")
 
     done_testing()
