@@ -192,7 +192,7 @@ class Pyjo_Path(Pyjo.Base.String.object):
             return self.parse(path)
 
         # Merge
-        if not self.trailing_slash:
+        if not self.trailing_slash and self.parts:
             self.parts.pop()
 
         path = self.new(path)

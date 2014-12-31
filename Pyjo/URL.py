@@ -284,6 +284,21 @@ class Pyjo_URL(Pyjo.Base.String.object):
         return bool(self.scheme)
 
     def parse(self, url):
+        """::
+
+            url = url.parse('http://127.0.0.1:3000/foo/bar?fo=o&baz=23#foo')
+
+        Parse relative or absolute URL. ::
+
+            # "/test/123"
+            url.parse('/test/123?foo=bar').path
+
+            # "example.com"
+            url.parse('http://example.com/test/123?foo=bar').host
+
+            # "sri@example.com"
+            url.parse('mailto:sri@example.com').path
+        """
         g = url == m(r'^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?')
         if g:
             if g[2] is not None:
@@ -300,15 +315,43 @@ class Pyjo_URL(Pyjo.Base.String.object):
 
     @property
     def path(self):
+        """::
+
+            path = url.path
+            url.path = '/foo/bar'
+            url.path = 'foo/bar'
+            url.path = Pyjo.Path.new()
+
+        Path part of this URL, relative paths will be merged with the existing path,
+        defaults to a :mod:`Mojo::Path` object. ::
+
+            # "perldoc"
+            Pyjo.URL.new('http://example.com/perldoc/Mojo').path.parts[0]
+
+            # "http://example.com/DOM/HTML"
+            Pyjo.URL.new('http://example.com/perldoc/Mojo').set(path='/DOM/HTML')
+
+            # "http://example.com/perldoc/DOM/HTML"
+            Pyjo.URL.new('http://example.com/perldoc/Mojo').set(path='DOM/HTML')
+
+            # "http://example.com/perldoc/Mojo/DOM/HTML"
+            Pyjo.URL.new('http://example.com/perldoc/Mojo/').set(path='DOM/HTML')
+        """
         if self._path is None:
             self._path = Pyjo.Path.new()
         return self._path
 
     @path.setter
     def path(self, value):
-        # TODO old path / new path
-        self._path = Pyjo.Path.new(value)
-        return self
+        # Old path
+        if self._path is None:
+            self._path = Pyjo.Path.new()
+
+        # New path
+        if isinstance(value, Pyjo.Path.object):
+            self._path = value
+        else:
+            self._path.merge(value)
 
     @property
     def path_query(self):

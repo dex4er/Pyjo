@@ -137,4 +137,35 @@ if __name__ == '__main__':
     boolean = Pyjo.URL.new('//example.com/test/index.html').is_abs()
     is_ok(boolean, False, "boolean")
 
+    # parse
+    url = Pyjo.URL.new()
+    url = url.parse('http://127.0.0.1:3000/foo/bar?fo=o&baz=23#foo')
+    is_ok(url, 'http://127.0.0.1:3000/foo/bar?fo=o&baz=23#foo', "url")
+
+    url = Pyjo.URL.new()
+    path = url.parse('/test/123?foo=bar').path
+    is_ok(path, '/test/123', "path")
+
+    url = Pyjo.URL.new()
+    host = url.parse('http://example.com/test/123?foo=bar').host
+    is_ok(host, 'example.com', "host")
+
+    url = Pyjo.URL.new()
+    path = url.parse('mailto:sri@example.com').path
+    is_ok(path, "sri@example.com", "path")
+
+    # path
+    url = Pyjo.URL.new()
+    path = url.path
+    is_ok(url, '', "url")
+    url = Pyjo.URL.new()
+    url.path = '/foo/bar'
+    is_ok(url, '/foo/bar', "url")
+    url = Pyjo.URL.new()
+    url.path = 'foo/bar'
+    is_ok(url, 'foo/bar', "url")
+    url = Pyjo.URL.new()
+    url.path = Pyjo.Path.new()
+    is_ok(url, '', "url")
+
     done_testing()
