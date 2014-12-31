@@ -94,9 +94,9 @@ if __name__ == '__main__':
     is_ok(foo, 'bar', "params.param(['foo', 'baz'])[0]")
     is_ok(baz, '23', "params.param(['foo', 'baz'])[1]")
     params = params.param('foo', 'ba&r')
-    is_ok(params.to_str(), 'baz=23&foo=ba%26r', "params.param('foo', 'ba&r')")
+    is_ok(params.to_str(), 'foo=ba%26r&baz=23', "params.param('foo', 'ba&r')")
     params = params.param('foo', ['ba;r', 'baz'])
-    is_ok(params.to_str(), 'baz=23&foo=ba%3Br&foo=baz', "params.param('foo', ['ba;r', 'baz'])")
+    is_ok(params.to_str(), 'foo=ba%3Br&baz=23&foo=baz', "params.param('foo', ['ba;r', 'baz'])")
 
     # params
     params = Pyjo.Parameters.new('foo=bar&baz=23')

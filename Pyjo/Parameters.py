@@ -351,21 +351,29 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
 
     def _replace(self, name, value):
         params = self.params
-        seen_name = False
+
+        if isinstance(value, (list, tuple,)):
+            values = value
+        else:
+            values = [value]
+
         i = 0
-        while i < len(params):
+
+        while i < len(params) and len(values):
             if params[i] == name:
-                seen_name = True
-                params[i + 1] = value
+                params[i + 1] = values.pop(0)
             i += 2
+
         while i < len(params):
             if params[i] == name:
                 params.pop(i)
                 params.pop(i)
             else:
                 i += 2
-        if not seen_name:
-            self.append(name, value)
+
+        while len(values):
+            self.append(name, values.pop(0))
+
         return self
 
 
