@@ -399,11 +399,13 @@ class Pyjo_URL(Pyjo.Base.String.object):
             query = url.query
             url.query = ['param', 'value']
             url.query = {'param': 'value'}
-            url.query.append(['append', 'to'])
-            url.query.param('replace', 'with')
+            url.query = [['append', 'to']]
+            url.query = [{'replace', 'with'}]
             url.query = Pyjo.Parameters.new()
 
-        Query part of this URL, defaults to a :mod:`Pyjo.Parameters` object. ::
+        Query part of this URL, pairs in an list of ``list[0]`` will be appended
+        and pairs in a dict of ``list[0]`` merged,
+        defaults to a :mod:`Pyjo.Parameters` object. ::
 
             # "2"
             Pyjo.URL.new('http://example.com?a=1&b=2').query.param('b')
@@ -412,16 +414,16 @@ class Pyjo_URL(Pyjo.Base.String.object):
             Pyjo.URL.new('http://example.com?a=1&b=2').query = ['a', 2, 'c', 3]
 
             # "http://example.com?a=2&a=3"
-            Pyjo.URL.new('http://example.com?a=1&b=2')->query(a => [2, 3]);
+            Pyjo.URL.new('http://example.com?a=1&b=2').query = {'a': [2, 3]}
 
             # "http://example.com?a=2&b=2&c=3"
-            Pyjo.URL.new('http://example.com?a=1&b=2')->query([a => 2, c => 3]);
+            Pyjo.URL.new('http://example.com?a=1&b=2').query = [{'a': 2, 'c': 3}]
 
             # "http://example.com?b=2"
-            Pyjo.URL.new('http://example.com?a=1&b=2')->query([a => undef]);
+            Pyjo.URL.new('http://example.com?a=1&b=2').query = [{'a': None}]
 
             # "http://example.com?a=1&b=2&a=2&c=3"
-            Pyjo.URL.new('http://example.com?a=1&b=2')->query({a => 2, c => 3});
+            Pyjo.URL.new('http://example.com?a=1&b=2').query = [['a', 2, 'c', 3]]
         """
         if self._query is None:
             self._query = Pyjo.Parameters.new()
@@ -429,15 +431,44 @@ class Pyjo_URL(Pyjo.Base.String.object):
 
     @query.setter
     def query(self, value):
-        args = []
-        kwargs = {}
+        # Old parameters
+        if self._query is None:
+            self._query = Pyjo.Parameters.new()
+
+        # Replace with dict
         if hasattr(value, 'items'):
-            kwargs = value
+            self._query = Pyjo.Parameters.new(**value)
+            return self
+
         elif isinstance(value, (list, tuple,)):
-            args = value
+
+            # Replace with list
+            if len(value) == 0 or not isinstance(value[0], (list, tuple, dict,)):
+                self._query = Pyjo.Parameters.new(*value)
+                return self
+
+            # Append list
+            elif isinstance(value[0], (list, tuple,)):
+                self._query.append(*value[0])
+                return self
+
+            # Merge with dict
+            elif isinstance(value[0], (dict,)):
+                for name, value in value[0].items():
+                    if value is not None:
+                        self._query.param(name, value)
+                    else:
+                        self._query.remove(name)
+                return self
+
+            value = value[0]
+
+        # New parameters
+        if isinstance(value, Pyjo.Parameters.object):
+            self._query = value
         else:
-            args = [value]
-        self._query = Pyjo.Parameters.new(*args, **kwargs)
+            self._query = self._query.parse(value)
+
         return self
 
     def to_str(self):

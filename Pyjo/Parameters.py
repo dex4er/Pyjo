@@ -185,8 +185,7 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
                 return
 
         # Replace values
-        self.remove(name)
-        return self.append(name, value)
+        return self._replace(name, value)
 
     @property
     def params(self):
@@ -349,6 +348,25 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
                 values.append(v)
 
         return values
+
+    def _replace(self, name, value):
+        params = self.params
+        seen_name = False
+        i = 0
+        while i < len(params):
+            if params[i] == name:
+                seen_name = True
+                params[i + 1] = value
+            i += 2
+        while i < len(params):
+            if params[i] == name:
+                params.pop(i)
+                params.pop(i)
+            else:
+                i += 2
+        if not seen_name:
+            self.append(name, value)
+        return self
 
 
 new = Pyjo_Parameters.new
