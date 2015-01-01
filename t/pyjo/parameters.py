@@ -33,6 +33,7 @@ if __name__ == '__main__':
     is_ok(params.to_str(), 'foo=b%3Bar&baz=23&a=4&a=5&b=6&b=7', 'right format')
     params.append('c', 'f;oo')
     is_ok(params.to_str(), 'foo=b%3Bar&baz=23&a=4&a=5&b=6&b=7&c=f%3Boo', 'right format')
+    is_ok(params.remove('a').to_str(), 'foo=b%3Bar&baz=23&b=6&b=7&c=f%3Boo', 'right format')
 
     # Clone
     clone = params.clone()
@@ -41,16 +42,19 @@ if __name__ == '__main__':
     isnt_ok(params.to_str(), clone.to_str(), 'unequal parameters')
 
     # Merge
+    params = Pyjo.Parameters.new('foo=b%3Bar&baz=23&a=4&a=5&b=6&b=7&c=f%3Boo')
     params.merge(params2)
     is_ok(params.to_str(), 'foo=b%3Bar&baz=23&a=4&a=5&b=6&b=7&c=f%3Boo&x=1&y=2', 'right format')
     is_ok(params2.to_str(), 'x=1&y=2', 'right format')
+    is_ok(params.merge('baz', None).to_str(), 'foo=b%3Bar&a=4&a=5&b=6&b=7&c=f%3Boo&x=1&y=2', 'right format')
 
     # Param
+    params = Pyjo.Parameters.new('foo=b%3Bar&a=4&a=5&b=6&b=7&c=f%3Boo&x=1&y=3&z=6')
     is_deeply_ok(params.param('foo'), 'b;ar', 'right structure')
     is_deeply_ok(params.every_param('foo'), ['b;ar'], 'right structure')
-    is_deeply_ok(params.every_param('a'), [4, 5], 'right structure')
-    is_deeply_ok(params.param(['a']), [5], 'right structure')
-    is_deeply_ok(params.param(['a', 'foo']), [5, 'b;ar'], 'right structure')
+    is_deeply_ok(params.every_param('a'), ['4', '5'], 'right structure')
+    is_deeply_ok(params.param(['a']), ['5'], 'right structure')
+    is_deeply_ok(params.param(['a', 'foo']), ['5', 'b;ar'], 'right structure')
     params.param('foo', 'bar')
     is_deeply_ok([params.param('foo')], ['bar'], 'right structure')
     is_deeply_ok(params.param('foo', ['baz', 'yada']).every_param('foo'), ['baz', 'yada'], 'right structure')

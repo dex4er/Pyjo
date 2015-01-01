@@ -25,23 +25,23 @@ if __name__ == '__main__':
     # Build
     params = Pyjo.Parameters.new('foo', 'bar', 'baz', 23)
     params.append(i='♥ pyjo')
-    is_ok(params.to_str(), 'foo=bar&baz=23&i=%E2%99%A5+pyjo', 'params')
+    is_ok(params, 'foo=bar&baz=23&i=%E2%99%A5+pyjo', 'params')
 
     # __init__
     params = Pyjo.Parameters.new()
-    is_ok(params.to_str(), '', 'params')
+    is_ok(params, '', 'params')
 
     params = Pyjo.Parameters.new('foo=b%3Bar&baz=23')
-    is_ok(params.to_str(), 'foo=b%3Bar&baz=23', 'params')
+    is_ok(params, 'foo=b%3Bar&baz=23', 'params')
 
     params = Pyjo.Parameters.new(foo='b&ar')
-    is_ok(params.to_str(), 'foo=b%26ar', 'params')
+    is_ok(params, 'foo=b%26ar', 'params')
 
     params = Pyjo.Parameters.new(foo=['ba&r', 'baz'])
-    is_ok(params.to_str(), 'foo=ba%26r&foo=baz', 'params')
+    is_ok(params, 'foo=ba%26r&foo=baz', 'params')
 
     params = Pyjo.Parameters.new(foo=['bar', 'baz'], bar=23)
-    is_ok(params.to_str(), 'bar=23&foo=bar&foo=baz', 'params')
+    is_ok(params, 'bar=23&foo=bar&foo=baz', 'params')
 
     # charset
     params = Pyjo.Parameters.new('foo=bar&baz=23')
@@ -61,18 +61,18 @@ if __name__ == '__main__':
 
     # append
     params = Pyjo.Parameters.new('foo=bar').append(foo='baz')
-    is_ok(params.to_str(), 'foo=bar&foo=baz', 'params')
+    is_ok(params, 'foo=bar&foo=baz', 'params')
 
     params = Pyjo.Parameters.new('foo=bar').append(foo=['baz', 'yada'])
-    is_ok(params.to_str(), 'foo=bar&foo=baz&foo=yada', 'params')
+    is_ok(params, 'foo=bar&foo=baz&foo=yada', 'params')
 
     params = Pyjo.Parameters.new('foo=bar').append('foo', ['baz', 'yada'], 'bar', 23)
-    is_ok(params.to_str(), 'foo=bar&foo=baz&foo=yada&bar=23', 'params')
+    is_ok(params, 'foo=bar&foo=baz&foo=yada&bar=23', 'params')
 
     # clone
     params = Pyjo.Parameters.new('foo=b%3Bar&baz=23')
     params2 = params.clone()
-    is_ok(params2.to_str(), 'foo=b%3Bar&baz=23', 'params2')
+    is_ok(params2, 'foo=b%3Bar&baz=23', 'params2')
     isnt_ok(id(params), id(params2), 'params')
 
     # every_param
@@ -84,6 +84,28 @@ if __name__ == '__main__':
     value = params.every_param('foo')[0]
     is_ok(value, 'bar', "params.every_param('foo')[0]")
 
+    # merge
+    params = Pyjo.Parameters.new()
+    params = params.merge('foo', 'ba&r')
+    is_ok(params, "foo=ba%26r", "params")
+    params = params.merge(foo='baz')
+    is_ok(params, "foo=baz", "params")
+    params = params.merge(foo=['ba&r', 'baz'])
+    is_ok(params, "foo=ba%26r&foo=baz", "params")
+    params = params.merge('foo', ['bar', 'baz'], 'bar', 23)
+    is_ok(params, "foo=bar&foo=baz&bar=23", "params")
+    params = params.merge(Pyjo.Parameters.new())
+    is_ok(params, "foo=bar&foo=baz&bar=23", "params")
+
+    params = Pyjo.Parameters.new('foo=bar').merge(Pyjo.Parameters.new('foo=baz'))
+    is_ok(params, "foo=baz", "params")
+
+    params = Pyjo.Parameters.new('foo=bar&yada=yada').merge(foo='baz')
+    is_ok(params, "foo=baz&yada=yada", "params")
+
+    params = Pyjo.Parameters.new('foo=bar&yada=yada').merge(foo=None)
+    is_ok(params, "yada=yada", "params")
+
     # param
     params = Pyjo.Parameters.new('foo=bar&baz=23')
     names = params.param()
@@ -94,16 +116,16 @@ if __name__ == '__main__':
     is_ok(foo, 'bar', "params.param(['foo', 'baz'])[0]")
     is_ok(baz, '23', "params.param(['foo', 'baz'])[1]")
     params = params.param('foo', 'ba&r')
-    is_ok(params.to_str(), 'foo=ba%26r&baz=23', "params.param('foo', 'ba&r')")
+    is_ok(params, 'foo=ba%26r&baz=23', "params.param('foo', 'ba&r')")
     params = params.param('foo', ['ba;r', 'baz'])
-    is_ok(params.to_str(), 'foo=ba%3Br&baz=23&foo=baz', "params.param('foo', ['ba;r', 'baz'])")
+    is_ok(params, 'foo=ba%3Br&baz=23&foo=baz', "params.param('foo', ['ba;r', 'baz'])")
 
     # params
     params = Pyjo.Parameters.new('foo=bar&baz=23')
     array = params.params
     is_deeply_ok(array, ['foo', 'bar', 'baz', '23'], "params.params")
     params.params = ['foo', 'b&ar', 'baz', 23]
-    is_ok(params.to_str(), 'foo=b%26ar&baz=23', "params")
+    is_ok(params, 'foo=b%26ar&baz=23', "params")
 
     # parse
     params = Pyjo.Parameters.new()
@@ -112,7 +134,7 @@ if __name__ == '__main__':
 
     # remove
     params = Pyjo.Parameters.new('foo=bar&foo=baz&bar=yada').remove('foo')
-    is_ok(params.to_str(), 'bar=yada', "params.remove('foo')")
+    is_ok(params, 'bar=yada', "params.remove('foo')")
 
     # to_dict
     d = Pyjo.Parameters.new('foo=bar&foo=baz').to_dict()

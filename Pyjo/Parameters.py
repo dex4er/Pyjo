@@ -141,19 +141,38 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
         """
         return self._param(name)
 
-    def merge(self, *args):
+    def merge(self, *args, **kwargs):
         """::
 
-            params = params.merge(Pyjo.Parameters.new('foo', 'b&ar', 'baz', 23))
+            params = params.merge('foo', 'ba&r')
+            params = params.merge(foo='baz')
+            params = params.merge(foo=['ba&r', 'baz'])
+            params = params.merge('foo', ['bar', 'baz'], 'bar', 23)
+            params = params.merge(Pyjo.Parameters.new())
 
-        Merge :mod:`Pyjo.Parameters` objects. Note that this method will normalize the
-        parameters. ::
+        Merge parameters. Note that this method will normalize the parameters. ::
 
-            # "foo=bar&foo=baz"
+            # "foo=baz"
             Pyjo.Parameters.new('foo=bar').merge(Pyjo.Parameters.new('foo=baz'))
+
+            # "yada=yada&foo=baz"
+            Pyjo.Parameters.new('foo=bar&yada=yada').merge(foo='baz')
+
+            # "yada=yada"
+            Pyjo.Parameters.new('foo=bar&yada=yada').merge(foo=None)
         """
-        for p in args:
-            self.params += p.params
+        if len(args) == 1:
+            params = args[0].params
+            params = list(zip(params[::2], params[1::2]))
+        else:
+            params = list(zip(args[::2], args[1::2])) + sorted(kwargs.items())
+        for p in params:
+            (k, v) = p
+            if v is None:
+                self.remove(k)
+            else:
+                self.param(k, v)
+        return self
 
     def param(self, name=None, value=None):
         """::
