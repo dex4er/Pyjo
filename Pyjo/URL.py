@@ -130,6 +130,24 @@ class Pyjo_URL(Pyjo.Base.String.object):
 
     __nonzero__ = __bool__
 
+    def append(self, **kwargs):
+        """::
+
+            params = params.append(query={'foo': 'bar'})
+            # params.query.append(foo='bar')
+
+        Calls :meth:`append` method on each attribute.
+        """
+        for k, v in kwargs.items():
+            m = getattr(self, k)
+            if isinstance(v, (list, tuple,)):
+                m.append(*v)
+            elif isinstance(v, dict):
+                m.append(**v)
+            else:
+                m.append(v)
+        return self
+
     @property
     def authority(self):
         """::
@@ -294,6 +312,24 @@ class Pyjo_URL(Pyjo.Base.String.object):
         """
         return bool(self.scheme)
 
+    def merge(self, **kwargs):
+        """::
+
+            params = params.merge(query={'foo': 'bar'})
+            # params.query.merge(foo='bar')
+
+        Calls :meth:`merge` method on each attribute.
+        """
+        for k, v in kwargs.items():
+            m = getattr(self, k)
+            if isinstance(v, (list, tuple,)):
+                m.merge(*v)
+            elif isinstance(v, dict):
+                m.merge(**v)
+            else:
+                m.merge(v)
+        return self
+
     def parse(self, url):
         """::
 
@@ -410,31 +446,29 @@ class Pyjo_URL(Pyjo.Base.String.object):
             query = url.query
             url.query = ['param', 'value']
             url.query = {'param': 'value'}
-            url.query = [['append', 'to']]
-            url.query = [{'replace', 'with'}]
+            url.query.append('append', 'to')
+            url.query.merge('replace', 'with')
             url.query = Pyjo.Parameters.new()
 
-        Query part of this URL, pairs in an list of ``list[0]`` will be appended
-        and pairs in a dict of ``list[0]`` merged,
-        defaults to a :mod:`Pyjo.Parameters` object. ::
+        Query part of this URL as :mod:`Pyjo.Parameters` object. ::
 
             # "2"
             Pyjo.URL.new('http://example.com?a=1&b=2').query.param('b')
 
             # "http://example.com?a=2&c=3"
-            Pyjo.URL.new('http://example.com?a=1&b=2').query = ['a', 2, 'c', 3]
+            Pyjo.URL.new('http://example.com?a=1&b=2').set(query=['a', 2, 'c', 3])
 
             # "http://example.com?a=2&a=3"
-            Pyjo.URL.new('http://example.com?a=1&b=2').query = {'a': [2, 3]}
+            Pyjo.URL.new('http://example.com?a=1&b=2').set(query={'a': [2, 3]})
 
             # "http://example.com?a=2&b=2&c=3"
-            Pyjo.URL.new('http://example.com?a=1&b=2').query = [{'a': 2, 'c': 3}]
+            Pyjo.URL.new('http://example.com?a=1&b=2').merge(query={'a': 2, 'c': 3})
 
             # "http://example.com?b=2"
-            Pyjo.URL.new('http://example.com?a=1&b=2').query = [{'a': None}]
+            Pyjo.URL.new('http://example.com?a=1&b=2').merge(query={'a': None})
 
             # "http://example.com?a=1&b=2&a=2&c=3"
-            Pyjo.URL.new('http://example.com?a=1&b=2').query = [['a', 2, 'c', 3]]
+            Pyjo.URL.new('http://example.com?a=1&b=2').append(query=['a', 2, 'c', 3])
         """
         if self._query is None:
             self._query = Pyjo.Parameters.new()

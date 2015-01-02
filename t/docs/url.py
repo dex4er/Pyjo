@@ -226,13 +226,13 @@ if __name__ == '__main__':
     url = Pyjo.URL.new('http://example.com?a=1&b=2').set(query={'a': [2, 3]})
     is_ok(url, "http://example.com?a=2&a=3", "url")
 
-    url = Pyjo.URL.new('http://example.com?a=1&b=2').set(query=[{'a': 2, 'c': 3}])
+    url = Pyjo.URL.new('http://example.com?a=1&b=2').merge(query={'a': 2, 'c': 3})
     is_ok(url, "http://example.com?a=2&b=2&c=3", "url")
 
-    url = Pyjo.URL.new('http://example.com?a=1&b=2').set(query=[{'a': None}])
+    url = Pyjo.URL.new('http://example.com?a=1&b=2').merge(query={'a': None})
     is_ok(url, "http://example.com?b=2", "url")
 
-    url = Pyjo.URL.new('http://example.com?a=1&b=2').set(query=[['a', 2, 'c', 3]])
+    url = Pyjo.URL.new('http://example.com?a=1&b=2').append(query=['a', 2, 'c', 3])
     is_ok(url, "http://example.com?a=1&b=2&a=2&c=3", "url")
 
     # to_abs
