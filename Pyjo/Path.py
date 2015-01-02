@@ -12,7 +12,7 @@ Pyjo.Path - Path
     print(path[0])
 
     # Build
-    path = Pyjo.Path.new('/i/♥')
+    path = Pyjo.Path.new(u'/i/♥')
     path.append('pyjo')
     print(path)
 
