@@ -134,9 +134,9 @@ class Pyjo_URL(Pyjo.Base.String.object):
         """::
 
             params = params.append(query={'foo': 'bar'})
-            # params.query.append(foo='bar')
+            # calls params.query.append(foo='bar')
 
-        Calls :meth:`append` method on each attribute.
+        Calls :meth:`append` method on each attribute from :param:`kwargs`.
         """
         for k, v in kwargs.items():
             m = getattr(self, k)
@@ -316,9 +316,9 @@ class Pyjo_URL(Pyjo.Base.String.object):
         """::
 
             params = params.merge(query={'foo': 'bar'})
-            # params.query.merge(foo='bar')
+            # calls params.query.merge(foo='bar')
 
-        Calls :meth:`merge` method on each attribute.
+        Calls :meth:`merge` method on each attribute from :param:`kwargs`.
         """
         for k, v in kwargs.items():
             m = getattr(self, k)
