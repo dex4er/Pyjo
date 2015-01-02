@@ -481,36 +481,17 @@ class Pyjo_URL(Pyjo.Base.String.object):
             self._query = Pyjo.Parameters.new()
 
         # Replace with dict
-        if hasattr(value, 'items'):
+        if isinstance(value, dict):
             self._query = Pyjo.Parameters.new(**value)
-            return self
 
+        # Replace with list or tuple
         elif isinstance(value, (list, tuple,)):
-
-            # Replace with list
-            if len(value) == 0 or not isinstance(value[0], (list, tuple, dict,)):
-                self._query = Pyjo.Parameters.new(*value)
-                return self
-
-            # Append list
-            elif isinstance(value[0], (list, tuple,)):
-                self._query.append(*value[0])
-                return self
-
-            # Merge with dict
-            elif isinstance(value[0], (dict,)):
-                for name, value in value[0].items():
-                    if value is not None:
-                        self._query.param(name, value)
-                    else:
-                        self._query.remove(name)
-                return self
-
-            value = value[0]
+            self._query = Pyjo.Parameters.new(*value)
 
         # New parameters
-        if isinstance(value, Pyjo.Parameters.object):
+        elif isinstance(value, Pyjo.Parameters.object):
             self._query = value
+
         else:
             self._query = self._query.parse(value)
 
