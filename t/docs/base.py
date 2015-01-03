@@ -17,7 +17,7 @@ if __name__ == '__main__':
     from Pyjo.Test import *  # @UnusedWildImport
 
     import Pyjo.Base
-    from Pyjo.Util import lazy
+    from Pyjo.Base import lazy
 
     class Cat(Pyjo.Base.object):
         name = 'Nyan'

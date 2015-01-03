@@ -2,7 +2,7 @@ from __future__ import print_function
 
 import Pyjo.Base
 
-from Pyjo.Util import lazy
+from Pyjo.Base import lazy
 
 
 class Point(Pyjo.Base.object):

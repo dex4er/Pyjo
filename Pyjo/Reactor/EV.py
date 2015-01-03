@@ -7,7 +7,7 @@ import weakref
 
 import Pyjo.Reactor.Select
 
-from Pyjo.Util import lazy
+from Pyjo.Base import lazy
 
 
 class Pyjo_Reactor_EV(Pyjo.Reactor.Select.object):

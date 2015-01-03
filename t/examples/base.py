@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     import Pyjo.Base
 
-    from Pyjo.Util import lazy
+    from Pyjo.Base import lazy
 
     class Point(Pyjo.Base.object):
         x = 0

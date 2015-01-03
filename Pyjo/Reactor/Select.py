@@ -8,7 +8,8 @@ import time
 
 import Pyjo.Reactor
 
-from Pyjo.Util import getenv, lazy, md5_sum, rand, steady_time, warn
+from Pyjo.Base import lazy
+from Pyjo.Util import getenv, md5_sum, rand, steady_time, warn
 
 
 DEBUG = getenv('PYJO_REACTOR_DEBUG', 0)

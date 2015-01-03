@@ -23,7 +23,8 @@ and based on :rfc:`3986` as well as `the HTML Living Standard <https://html.spec
 import Pyjo.Base.String
 
 from Pyjo.Regexp import m, s
-from Pyjo.Util import isiterable_not_str, lazy, u, url_escape, url_unescape
+from Pyjo.Base import lazy
+from Pyjo.Util import isiterable_not_str, u, url_escape, url_unescape
 
 
 class Pyjo_Parameters(Pyjo.Base.String.object):

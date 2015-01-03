@@ -6,7 +6,7 @@ Pyjo.Base - Minimal base class
 ::
 
     import Pyjo.Base
-    from Pyjo.Util import lazy
+    from Pyjo.Base import lazy
 
     class Cat(Pyjo.Base.object):
         name = 'Nyan'
@@ -26,9 +26,6 @@ Pyjo.Base - Minimal base class
 
 :mod:`Pyjo.Base` is a simple base class for :mod:`Pyjo` projects.
 """
-
-from Pyjo.Util import lazy
-
 
 class Pyjo_Base(object):
     def __new__(cls, *args, **kwargs):
@@ -57,6 +54,24 @@ class Pyjo_Base(object):
         else:
             getattr(self, _method)(*args, **kwargs)
         return self
+
+
+class lazy(object):
+    def __init__(self, default=None, name=None):
+        self.default = default
+        self.name = name
+
+    def __get__(self, obj, objtype):
+        if obj is None:
+            return self
+        if callable(self.default):
+            default = self.default(obj if obj is not None else objtype)
+        else:
+            default = self.default
+        if self.name is None:
+            return default
+        setattr(obj, self.name, default)
+        return getattr(obj, self.name)
 
 
 new = Pyjo_Base.new

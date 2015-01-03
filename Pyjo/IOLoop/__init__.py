@@ -12,8 +12,9 @@ import Pyjo.IOLoop.Server
 import Pyjo.IOLoop.Stream
 import Pyjo.Reactor
 
+from Pyjo.Base import lazy
 from Pyjo.Util import (
-    decorator, decoratormethod, getenv, lazy, md5_sum, steady_time, rand,
+    decorator, decoratormethod, getenv, md5_sum, steady_time, rand,
     warn
 )
 

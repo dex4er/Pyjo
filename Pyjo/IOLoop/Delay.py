@@ -5,7 +5,7 @@ Pyjo.IOLoop.Delay
 import Pyjo.EventEmitter
 import Pyjo.IOLoop
 
-from Pyjo.Util import lazy
+from Pyjo.Base import lazy
 
 
 REMAINING = {}

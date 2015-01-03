@@ -6,7 +6,8 @@ import weakref
 
 import Pyjo.Base
 
-from Pyjo.Util import getenv, lazy, warn
+from Pyjo.Base import lazy
+from Pyjo.Util import getenv, warn
 
 
 DEBUG = getenv('PYJO_EVENTEMITTER_DEBUG', 0)
