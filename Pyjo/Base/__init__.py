@@ -64,7 +64,7 @@ class Pyjo_Base(object):
 
         Sets each attribute from either a list of pairs of tuples or a dict.
         """
-        for k, v in list(args) + list(kwargs.items()):
+        for k, v in list(args) + sorted(kwargs.items()):
             setattr(self, k, v)
         return self
 
