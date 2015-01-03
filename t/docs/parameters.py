@@ -23,7 +23,7 @@ if __name__ == '__main__':
     is_ok(params.param('baz'), '23', "params.param('baz')")
 
     # Build
-    params = Pyjo.Parameters.new('foo', 'bar', 'baz', 23)
+    params = Pyjo.Parameters.new(('foo', 'bar'), ('baz', 23))
     params.append(i='♥ pyjo')
     is_ok(params, 'foo=bar&baz=23&i=%E2%99%A5+pyjo', 'params')
 
@@ -54,7 +54,7 @@ if __name__ == '__main__':
     # __iter__
     params = Pyjo.Parameters.new('foo=bar&baz=23')
     l = [v for v in params]
-    is_deeply_ok(l, ['foo', 'bar', 'baz', '23'], "[v for v in params]")
+    is_deeply_ok(l, [('foo', 'bar'), ('baz', '23')], "[v for v in params]")
 
     # __bool__
     ok(Pyjo.Parameters.new(), "Pyjo.Parameters.new()")
@@ -66,7 +66,7 @@ if __name__ == '__main__':
     params = Pyjo.Parameters.new('foo=bar').append(foo=['baz', 'yada'])
     is_ok(params, 'foo=bar&foo=baz&foo=yada', 'params')
 
-    params = Pyjo.Parameters.new('foo=bar').append('foo', ['baz', 'yada'], 'bar', 23)
+    params = Pyjo.Parameters.new('foo=bar').append(('foo', ['baz', 'yada']), ('bar', 23))
     is_ok(params, 'foo=bar&foo=baz&foo=yada&bar=23', 'params')
 
     # clone
@@ -86,13 +86,13 @@ if __name__ == '__main__':
 
     # merge
     params = Pyjo.Parameters.new()
-    params = params.merge('foo', 'ba&r')
+    params = params.merge(('foo', 'ba&r'),)
     is_ok(params, "foo=ba%26r", "params")
     params = params.merge(foo='baz')
     is_ok(params, "foo=baz", "params")
     params = params.merge(foo=['ba&r', 'baz'])
     is_ok(params, "foo=ba%26r&foo=baz", "params")
-    params = params.merge('foo', ['bar', 'baz'], 'bar', 23)
+    params = params.merge(('foo', ['bar', 'baz']), ('bar', 23))
     is_ok(params, "foo=bar&foo=baz&bar=23", "params")
     params = params.merge(Pyjo.Parameters.new())
     is_ok(params, "foo=bar&foo=baz&bar=23", "params")
@@ -123,14 +123,14 @@ if __name__ == '__main__':
     # params
     params = Pyjo.Parameters.new('foo=bar&baz=23')
     array = params.params
-    is_deeply_ok(array, ['foo', 'bar', 'baz', '23'], "params.params")
-    params.params = ['foo', 'b&ar', 'baz', 23]
+    is_deeply_ok(array, [('foo', 'bar'), ('baz', '23')], "params.params")
+    params.params = [('foo', 'b&ar'), ('baz', 23)]
     is_ok(params, 'foo=b%26ar&baz=23', "params")
 
     # parse
     params = Pyjo.Parameters.new()
     params = params.parse('foo=b%3Bar&baz=23')
-    is_deeply_ok(params.params, ['foo', 'b;ar', 'baz', '23'], "params.parse('foo=b%3Bar&baz=23')")
+    is_deeply_ok(params.params, [('foo', 'b;ar'), ('baz', '23')], "params.parse('foo=b%3Bar&baz=23')")
 
     # remove
     params = Pyjo.Parameters.new('foo=bar&foo=baz&bar=yada').remove('foo')

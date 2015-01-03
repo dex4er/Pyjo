@@ -87,7 +87,7 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
 
             params = params.append(foo='ba&r')
             params = params.append(foo=['ba&r', 'baz'])
-            params = params.append('foo', ['bar', 'baz'], 'bar', 23)
+            params = params.append(('foo', ['bar', 'baz']), ('bar', 23))
 
         Append parameters. Note that this method will normalize the parameters.
 
@@ -100,18 +100,15 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
             Pyjo.Parameters.new('foo=bar').append(foo=['baz', 'yada'])
 
             # "foo=bar&foo=baz&foo=yada&bar=23"
-            Pyjo.Parameters.new('foo=bar').append('foo', ['baz', 'yada'], 'bar', 23)
+            Pyjo.Parameters.new('foo=bar').append(('foo', ['baz', 'yada']), ('bar', 23))
         """
         params = self.params
-        for p in list(zip(args[::2], args[1::2])) + sorted(kwargs.items()):
-            (k, v) = p
+        for k, v in list(args) + sorted(kwargs.items()):
             if isiterable_not_str(v):
                 for vv in v:
-                    params.append(k)
-                    params.append(vv)
+                    params.append((k, vv),)
             else:
-                params.append(k)
-                params.append(v)
+                params.append((k, v),)
         return self
 
     def clone(self):
@@ -145,10 +142,10 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
     def merge(self, *args, **kwargs):
         """::
 
-            params = params.merge('foo', 'ba&r')
+            params = params.merge(('foo', 'ba&r'),)
             params = params.merge(foo='baz')
             params = params.merge(foo=['ba&r', 'baz'])
-            params = params.merge('foo', ['bar', 'baz'], 'bar', 23)
+            params = params.merge(('foo', ['bar', 'baz']), ('bar', 23))
             params = params.merge(Pyjo.Parameters.new())
 
         Merge parameters. Note that this method will normalize the parameters. ::
@@ -162,13 +159,11 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
             # "yada=yada"
             Pyjo.Parameters.new('foo=bar&yada=yada').merge(foo=None)
         """
-        if len(args) == 1:
+        if len(args) == 1 and hasattr(args[0], 'params'):
             params = args[0].params
-            params = list(zip(params[::2], params[1::2]))
         else:
-            params = list(zip(args[::2], args[1::2])) + sorted(kwargs.items())
-        for p in params:
-            (k, v) = p
+            params = list(args) + sorted(kwargs.items())
+        for k, v in params:
             if v is None:
                 self.remove(k)
             else:
@@ -212,7 +207,7 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
         """::
 
             array = params.params
-            params.params = ['foo', 'b&ar', 'baz', 23]
+            params.params = [('foo', 'b&ar'), ('baz', 23)]
 
         Parsed parameters. Note that setting this property will normalize the parameters.
         """
@@ -247,8 +242,7 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
                     name = name.decode(charset)
                     value = value.decode(charset)
 
-                self._params.append(name)
-                self._params.append(value)
+                self._params.append((name, value),)
 
         return self._params
 
@@ -266,14 +260,13 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
 
         Parse parameters.
         """
-        if len(args) > 1 or kwargs:
+        if len(args) == 1 and not isinstance(args[0], tuple):
+            # String
+            self._string = u(args[0])
+            return self
+        else:
             # Pairs
             return self.append(*args, **kwargs)
-        else:
-            if args:
-                # String
-                self._string = args[0]
-            return self
 
     def remove(self, name):
         """::
@@ -288,11 +281,10 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
         params = self.params
         i = 0
         while i < len(params):
-            if params[i] == name:
-                params.pop(i)
+            if params[i][0] == name:
                 params.pop(i)
             else:
-                i += 2
+                i += 1
         return self
 
     def to_dict(self):
@@ -308,7 +300,7 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
         """
         d = {}
         params = self.params
-        for k, v in list(zip(params[::2], params[1::2])):
+        for k, v in params:
             if k in d:
                 if not isinstance(d[k], list):
                     d[k] = [d[k]]
@@ -339,7 +331,7 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
             return ''
 
         pairs = []
-        for name, value in list(zip(params[::2], params[1::2])):
+        for name, value in params:
             if not isinstance(name, (bytes, str,)):
                 name = u(name)
 
@@ -363,7 +355,7 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
     def _param(self, name):
         values = []
         params = self.params
-        for k, v in list(zip(params[::2], params[1::2])):
+        for k, v in params:
             if k == name:
                 values.append(v)
 
@@ -380,19 +372,18 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
         i = 0
 
         while i < len(params) and len(values):
-            if params[i] == name:
-                params[i + 1] = values.pop(0)
-            i += 2
+            if params[i][0] == name:
+                params[i] = (name, values.pop(0),)
+            i += 1
 
         while i < len(params):
             if params[i] == name:
                 params.pop(i)
-                params.pop(i)
             else:
-                i += 2
+                i += 1
 
         while len(values):
-            self.append(name, values.pop(0))
+            self.append((name, values.pop(0)),)
 
         return self
 

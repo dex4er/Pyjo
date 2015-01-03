@@ -18,7 +18,7 @@ if __name__ == '__main__':
 
     import Pyjo.URL
 
-    url1 = Pyjo.URL.new('http://pl.wikipedia.org').set(path='/w/index.php', query=['title', u'Wikipedia:Strona_główna', 'action', 'history'])
+    url1 = Pyjo.URL.new('http://pl.wikipedia.org').set(path='/w/index.php', query=[('title', u'Wikipedia:Strona_główna'), ('action', 'history')])
     is_ok(url1, 'http://pl.wikipedia.org/w/index.php?title=Wikipedia:Strona_g%C5%82%C3%B3wna&action=history', 'url1')
 
     url2 = Pyjo.URL.new('http://pl.wikipedia.org').set(path=u'/wiki/Wikipedia:Strona_główna')

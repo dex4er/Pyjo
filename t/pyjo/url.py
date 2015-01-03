@@ -64,11 +64,11 @@ if __name__ == '__main__':
     is_deeply_ok(url.query.to_dict(), {'_monkey': ['biz;', '23']}, 'right structure')
     is_ok(url.fragment, '23', 'right fragment')
     is_ok(url, 'http://sri:foobar@example.com:8080?_monkey=biz%3B&_monkey=23#23', 'right format')
-    url.query = ['monkey', 'foo']
+    url.query = [('monkey', 'foo')]
     is_ok(url, 'http://sri:foobar@example.com:8080?monkey=foo#23', 'right format')
-    url.query.merge('monkey', 'bar')
+    url.query.merge(('monkey', 'bar'),)
     is_ok(url, 'http://sri:foobar@example.com:8080?monkey=bar#23', 'right format')
-    url.query.append('foo', 'bar')
+    url.query.append(('foo', 'bar'),)
     is_ok(url, 'http://sri:foobar@example.com:8080?monkey=bar&foo=bar#23', 'right format')
     url.query = 'foo'
     is_ok(url, 'http://sri:foobar@example.com:8080?foo#23', 'right format')
@@ -76,7 +76,7 @@ if __name__ == '__main__':
     is_ok(url, 'http://sri:foobar@example.com:8080?foo=bar#23', 'right format')
     url.query.merge(foo=None)
     is_ok(url, 'http://sri:foobar@example.com:8080#23', 'right format')
-    url.query.append('foo', 23, 'bar', 24, 'baz', 25)
+    url.query.append(('foo', 23), ('bar', 24), ('baz', 25))
     is_ok(url, 'http://sri:foobar@example.com:8080?foo=23&bar=24&baz=25#23', 'right format')
     url.query.merge(foo=26, bar=None, baz=None)
     is_ok(url, 'http://sri:foobar@example.com:8080?foo=26#23', 'right format')
@@ -94,7 +94,7 @@ if __name__ == '__main__':
     is_ok(url.port, 8080, 'right port')
     is_ok(url.path, '', 'no path')
     is_ok(url.query, '_monkeybiz%3B&_monkey;23', 'right query')
-    is_deeply_ok(url.query.params, ['_monkeybiz;', '', '_monkey;23', ''], 'right structure')
+    is_deeply_ok(url.query.params, [('_monkeybiz;', ''), ('_monkey;23', '')], 'right structure')
     is_ok(url.query, '_monkeybiz%3B=&_monkey%3B23=', 'right query')
     is_ok(url.fragment, '23', 'right fragment')
     is_ok(url, 'wss://sri:foobar@example.com:8080?_monkeybiz%3B=&_monkey%3B23=#23', 'right format')

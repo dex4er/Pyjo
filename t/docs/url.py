@@ -206,11 +206,11 @@ if __name__ == '__main__':
     url = Pyjo.URL.new()
     query = url.query
     is_ok(query, "", "query")
-    url.query = ['param', 'value']
+    url.query = [('param', 'value')]
     is_ok(url.query, "param=value", "url.query")
     url.query = {'param': 'value'}
     is_ok(url.query, "param=value", "url.query")
-    url.query.append('append', 'to')
+    url.query.append(('append', 'to'),)
     is_ok(url.query, "param=value&append=to", "url.query")
     url.query.param('replace', 'with')
     is_ok(url.query, "param=value&append=to&replace=with", "url.query")
@@ -220,7 +220,7 @@ if __name__ == '__main__':
     param = Pyjo.URL.new('http://example.com?a=1&b=2').query.param('b')
     is_ok(param, "2", "param")
 
-    url = Pyjo.URL.new('http://example.com?a=1&b=2').set(query=['a', 2, 'c', 3])
+    url = Pyjo.URL.new('http://example.com?a=1&b=2').set(query=[('a', 2), ('c', 3)])
     is_ok(url, "http://example.com?a=2&c=3", "url")
 
     url = Pyjo.URL.new('http://example.com?a=1&b=2').set(query={'a': [2, 3]})
@@ -232,7 +232,7 @@ if __name__ == '__main__':
     url = Pyjo.URL.new('http://example.com?a=1&b=2').merge(query={'a': None})
     is_ok(url, "http://example.com?b=2", "url")
 
-    url = Pyjo.URL.new('http://example.com?a=1&b=2').append(query=['a', 2, 'c', 3])
+    url = Pyjo.URL.new('http://example.com?a=1&b=2').append(query=[('a', 2), ('c', 3)])
     is_ok(url, "http://example.com?a=1&b=2&a=2&c=3", "url")
 
     # to_abs
