@@ -35,4 +35,56 @@ if __name__ == '__main__':
     rawr = Tiger.new(stripes=23, mice=0)
     is_ok(rawr.tap(lambda rawr: rawr.friend.set(name='Tacgnol')).mice, 0, "rawr.tap(...).mice")
 
+    class SubClass(Pyjo.Base.object):
+        name = None
+
+    # new
+    obj = SubClass.new()
+    isa_ok(obj, SubClass, "obj")
+    none_ok(obj.name, "obj.name")
+
+    obj = SubClass.new(('name', 'value',))
+    is_ok(obj.name, 'value', "obj.name")
+    obj = SubClass.new(name='value')
+    is_ok(obj.name, 'value', "obj.name")
+
+    # set
+    obj = SubClass.new()
+    obj = obj.set(('name', 'value',))
+    isa_ok(obj, SubClass, "obj")
+    is_ok(obj.name, 'value', "obj.name")
+
+    obj = SubClass.new()
+    obj = obj.set(name='value')
+    isa_ok(obj, SubClass, "obj")
+    is_ok(obj.name, 'value', "obj.name")
+
+    # tap
+    obj = SubClass.new()
+    obj = obj.tap(lambda obj: obj.set(name='value'))
+    isa_ok(obj, SubClass, "obj")
+    is_ok(obj.name, 'value', "obj.name")
+
+    obj = SubClass.new()
+    obj = obj.tap('set', ('name', 'value',))
+    isa_ok(obj, SubClass, "obj")
+    is_ok(obj.name, 'value', "obj.name")
+
+    obj = SubClass.new()
+    obj = obj.tap('set', name='value')
+    isa_ok(obj, SubClass, "obj")
+    is_ok(obj.name, 'value', "obj.name")
+
+    # lazy
+    class SubClass(Pyjo.Base.object):
+        simple = lazy(42)
+        complex = lazy(lambda self: [1, 2, 3])
+
+    obj = SubClass.new()
+    isa_ok(obj, SubClass, "obj")
+
+    ok('simple' not in vars(obj), "'simple' in vars(obj)")
+    is_ok(obj.simple, 42, "obj.simple")
+    ok('simple' in vars(obj), "'simple' in vars(obj)")
+
     done_testing()
