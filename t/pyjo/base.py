@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     import Pyjo.Base
 
-    from Pyjo.Util import has, lazy
+    from Pyjo.Util import lazy
 
     class A(Pyjo.Base.object):
         pass
@@ -33,27 +33,25 @@ if __name__ == '__main__':
     is_ok(obj.c, 1, 'obj.c')
     is_ok(obj.d, 2, 'obj.d')
 
-    @has('a')
-    @has('b', 2)
-    @has('c', lambda self: 3)
-    @has(['d', 'e'], 45)
     class B(Pyjo.Base.object):
-        pass
+        a = 1
+        b = 2
+        c = lazy(3)
+        d = 45
+        e = 45
 
     obj = B()
 
     isa_ok(obj, B, 'obj')
 
-    none_ok(obj.a, 'obj.a')
+    is_ok(obj.a, 1, 'obj.a')
     is_ok(obj.b, 2, 'obj.b')
     is_ok(obj.c, 3, 'obj.c')
     is_ok(obj.d, 45, 'obj.d')
     is_ok(obj.e, 45, 'obj.e')
 
     class C(Pyjo.Base.object):
-        pass
-
-    C.attr('a', 1)
+        a = 1
 
     obj1 = C()
 

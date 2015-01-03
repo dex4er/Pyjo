@@ -59,10 +59,6 @@ def getenv(name, default):
     return os.environ.get(name, default)
 
 
-def has(attrs, default=None, *args):
-    return lambda cls: cls.attr(attrs, default)
-
-
 def isbytes(obj):
     return isinstance(obj, bytes) and not isinstance(obj, str)
 

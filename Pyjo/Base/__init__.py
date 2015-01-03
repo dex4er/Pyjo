@@ -43,16 +43,6 @@ class Pyjo_Base(object):
         self.set(**kwargs)
 
     @classmethod
-    def attr(cls, attrs, default=None):
-        if not isinstance(attrs, (list, tuple)):
-            attrs = [attrs]
-
-        for attr in attrs:
-            setattr(cls, attr, lazy(default, attr))
-
-        return cls
-
-    @classmethod
     def new(cls, *args, **kwargs):
         return cls(*args, **kwargs)
 
