@@ -112,6 +112,7 @@ class Pyjo_URL(Pyjo.Base.String.object):
 
         Construct a new :mod:`Pyjo.URL` object and :meth:`parse` URL if necessary.
         """
+        super(Pyjo_URL, self).__init__()
         if len(args) == 1:
             self.parse(args[0])
         elif args:
