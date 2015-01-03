@@ -32,7 +32,7 @@ class Pyjo_Base(object):
     """::
 
         obj = SubClass.new()
-        obj = SubClass.new(('name', 'value',))
+        obj = SubClass.new(('name', 'value'),)
         obj = SubClass.new(name='value')
 
     This base class provides a standard constructor for :mod:`Pyjo` objects. You can
@@ -59,7 +59,7 @@ class Pyjo_Base(object):
     def set(self, *args, **kwargs):
         """::
 
-            obj = obj.set(('name', 'value',))
+            obj = obj.set(('name', 'value'),)
             obj = obj.set(name='value')
 
         Sets each attribute from either a list of pairs of tuples or a dict.
