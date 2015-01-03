@@ -61,6 +61,13 @@ class Pyjo_Base(object):
             setattr(self, k, v)
         return self
 
+    def tap(self, _method, *args, **kwargs):
+        if callable(_method):
+            _method(self, *args, **kwargs)
+        else:
+            getattr(self, _method)(*args, **kwargs)
+        return self
+
 
 new = Pyjo_Base.new
 object = Pyjo_Base  # @ReservedAssignment
