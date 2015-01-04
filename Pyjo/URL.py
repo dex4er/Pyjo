@@ -36,6 +36,7 @@ Locators with support for IDNA and IRIs.
 """
 
 import Pyjo.Base
+import Pyjo.Mixin.String
 import Pyjo.Parameters
 import Pyjo.Path
 
@@ -45,7 +46,7 @@ from Pyjo.Util import (
 )
 
 
-class Pyjo_URL(Pyjo.Base.object):
+class Pyjo_URL(Pyjo.Base.object, Pyjo.Mixin.String.object):
     """::
 
         url = Pyjo.URL.new()
@@ -125,50 +126,18 @@ class Pyjo_URL(Pyjo.Base.object):
 
             boolean = bool(url)
 
-        Always true.
+        Always true. (Python 3.x)
         """
         return True
 
-    def __bytes__(self):
+    def __nonzero__(self):
         """::
 
-            bytestring = bytes(url)
+            boolean = bool(url)
 
-        Byte-string representation of an object. (Python 3.x)
+        Always true. (Python 2.x)
         """
-        return bytes(self.to_str(), 'utf-8')
-
-    __nonzero__ = __bool__
-
-    def __repr__(self):
-        """::
-
-            reprstring = repr(url)
-
-        String representation of an object.
-        """
-        return "{0}.{1}('{2}')".format(self.__module__, self.__class__.__name__, str(self))
-
-    def __str__(self):
-        """::
-
-            string = str(url)
-
-        Alias for :meth:`to_str`.
-        """
-        string = self.to_str()
-        if string is None:
-            string = 'None'
-        return string
-
-    def __unicode__(self):
-        """::
-
-            unicodestring = unicode(url)
-
-        Unicode-string representation of an object. (Python 2.x)
-        """
-        return unicode(self.to_str())
+        return True
 
     def append(self, **kwargs):
         """::

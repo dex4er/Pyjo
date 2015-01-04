@@ -21,13 +21,14 @@ and based on :rfc:`3986` as well as `the HTML Living Standard <https://html.spec
 """
 
 import Pyjo.Base
+import Pyjo.Mixin.String
 
 from Pyjo.Regexp import m, s
 from Pyjo.Base import lazy
 from Pyjo.Util import isiterable_not_str, u, url_escape, url_unescape
 
 
-class Pyjo_Parameters(Pyjo.Base.object):
+class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
     """::
 
         params = Pyjo.Parameters.new()
@@ -64,7 +65,7 @@ class Pyjo_Parameters(Pyjo.Base.object):
 
             boolean = bool(params)
 
-        Always true.
+        Always true. (Python 3.x)
         """
         return True
 
@@ -88,37 +89,14 @@ class Pyjo_Parameters(Pyjo.Base.object):
         for p in params:
             yield p
 
-    __nonzero__ = __bool__
-
-    def __repr__(self):
+    def __nonzero__(self):
         """::
 
-            reprstring = repr(params)
+            boolean = bool(params)
 
-        String representation of an object.
+        Always true. (Python 2.x)
         """
-        return "{0}.{1}('{2}')".format(self.__module__, self.__class__.__name__, str(self))
-
-    def __str__(self):
-        """::
-
-            string = str(params)
-
-        Alias for :meth:`to_str`.
-        """
-        string = self.to_str()
-        if string is None:
-            string = 'None'
-        return string
-
-    def __unicode__(self):
-        """::
-
-            unicodestring = unicode(params)
-
-        Unicode-string representation of an object. (Python 2.x)
-        """
-        return unicode(self.to_str())
+        return True
 
     def append(self, *args, **kwargs):
         """::

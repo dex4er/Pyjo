@@ -21,11 +21,12 @@ Pyjo.Path - Path
 """
 
 import Pyjo.Base
+import Pyjo.Mixin.String
 
 from Pyjo.Util import u, url_escape, url_unescape
 
 
-class Pyjo_Path(Pyjo.Base.object):
+class Pyjo_Path(Pyjo.Base.object, Pyjo.Mixin.String.object):
     """::
 
         path = Pyjo.Path.new()
@@ -61,7 +62,7 @@ class Pyjo_Path(Pyjo.Base.object):
 
             boolean = bool(path)
 
-        Always true.
+        Always true. (Python 3.x)
         """
         return True
 
@@ -86,37 +87,14 @@ class Pyjo_Path(Pyjo.Base.object):
         for p in parts:
             yield p
 
-    __nonzero__ = __bool__
-
-    def __repr__(self):
+    def __nonzero__(self):
         """::
 
-            reprstring = repr(path)
+            boolean = bool(path)
 
-        String representation of an object.
+        Always true. (Python 2.x)
         """
-        return "{0}.{1}('{2}')".format(self.__module__, self.__class__.__name__, str(self))
-
-    def __str__(self):
-        """::
-
-            string = str(path)
-
-        Alias for :meth:`to_str`.
-        """
-        string = self.to_str()
-        if string is None:
-            string = 'None'
-        return string
-
-    def __unicode__(self):
-        """::
-
-            unicodestring = unicode(path)
-
-        Unicode-string representation of an object. (Python 2.x)
-        """
-        return unicode(self.to_str())
+        return True
 
     def canonicalize(self):
         """::

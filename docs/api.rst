@@ -9,6 +9,10 @@ Pyjo API
 .. automodule:: Pyjo.Base
     :members:
 
+.. automodule:: Pyjo.Mixin.String
+    :members:
+    :special-members:
+
 .. automodule:: Pyjo.Parameters
     :members:
     :special-members:
