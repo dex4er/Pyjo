@@ -13,7 +13,7 @@ import unittest
 
 
 __all__ = ['done_testing', 'diag', 'fail', 'is_ok', 'isa_ok', 'is_deeply_ok',
-           'isnt_ok', 'none_ok', 'ok', 'pass_ok', 'plan']
+           'isnt_ok', 'none_ok', 'ok', 'pass_ok', 'plan', 'skip']
 
 
 test = 0
@@ -132,6 +132,17 @@ def plan(**kwargs):
     if 'tests' in kwargs:
         tests = kwargs['tests']
         _print('1..{0}'.format(tests))
+
+
+def skip(why=None, how_many=1):
+    global test
+    if why is not None:
+        message = "skip " + why
+    else:
+        message = "skip"
+    for _ in range(how_many):
+        test += 1
+        _print("ok {0} # {1}".format(test, message))
 
 
 def done_testing():
