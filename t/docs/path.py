@@ -17,12 +17,13 @@ if __name__ == '__main__':
     from Pyjo.Test import *  # @UnusedWildImport
 
     import Pyjo.Path
+    from Pyjo.Util import u
 
     # __init __
     path = Pyjo.Path.new()
-    is_ok(path.to_str(), '', "path")
+    is_ok(str(path), '', "path")
     path = Pyjo.Path.new('/foo%2Fbar%3B/baz.html')
-    is_ok(path.to_str(), '/foo%2Fbar%3B/baz.html', "path")
+    is_ok(str(path), '/foo%2Fbar%3B/baz.html', "path")
 
     # charset
     path = Pyjo.Path.new('/foo%2Fbar%3B/baz.html')
@@ -42,15 +43,15 @@ if __name__ == '__main__':
 
     # canonicalize
     path = Pyjo.Path.new('/foo/./bar/../baz').canonicalize()
-    is_ok(path.to_str(), "/foo/baz", "path")
+    is_ok(str(path), "/foo/baz", "path")
 
     path = Pyjo.Path.new('/foo/../bar/../../baz').canonicalize()
-    is_ok(path.to_str(), "/../baz", "path")
+    is_ok(str(path), "/../baz", "path")
 
     # clone
     path = Pyjo.Path.new('/foo%2Fbar%3B/baz.html')
     path2 = path.clone()
-    is_ok(path2.to_str(), '/foo%2Fbar%3B/baz.html', 'path2')
+    is_ok(str(path2), '/foo%2Fbar%3B/baz.html', 'path2')
     isnt_ok(id(path), id(path2), 'path')
 
     # contains
@@ -78,13 +79,13 @@ if __name__ == '__main__':
 
     # merge
     path = Pyjo.Path.new('/foo/bar').merge('/baz/yada')
-    is_ok(path, "/baz/yada", "path")
+    is_ok(str(path), "/baz/yada", "path")
 
     path = Pyjo.Path.new('/foo/bar').merge('baz/yada')
-    is_ok(path, "/foo/baz/yada", "path")
+    is_ok(str(path), "/foo/baz/yada", "path")
 
     path = Pyjo.Path.new('/foo/bar/').merge('baz/yada')
-    is_ok(path, "/foo/bar/baz/yada", "path")
+    is_ok(str(path), "/foo/bar/baz/yada", "path")
 
     # parse
     path = Pyjo.Path.new()
@@ -94,38 +95,38 @@ if __name__ == '__main__':
     # paths
     path = Pyjo.Path.new()
     path.parts = ['foo', 'bar', 'baz']
-    is_ok(path.to_str(), 'foo/bar/baz', 'path')
+    is_ok(str(path), 'foo/bar/baz', 'path')
 
     path.parts.append('foo/bar')
-    is_ok(path.to_str(), 'foo/bar/baz/foo%2Fbar', 'path')
+    is_ok(str(path), 'foo/bar/baz/foo%2Fbar', 'path')
 
     # to_abs_str
     path = Pyjo.Path.new('/i/%E2%99%A5/pyjo').to_abs_str()
-    is_ok(path, "/i/%E2%99%A5/pyjo", "path")
+    is_ok(str(path), "/i/%E2%99%A5/pyjo", "path")
 
     path = Pyjo.Path.new('i/%E2%99%A5/pyjo').to_abs_str()
-    is_ok(path, "/i/%E2%99%A5/pyjo", "path")
+    is_ok(str(path), "/i/%E2%99%A5/pyjo", "path")
 
     # to_dir
     path = Pyjo.Path.new('/i/%E2%99%A5/pyjo').to_dir()
-    is_ok(path, "/i/%E2%99%A5/", "path")
+    is_ok(str(path), "/i/%E2%99%A5/", "path")
 
     path = Pyjo.Path.new('i/%E2%99%A5/pyjo').to_dir()
-    is_ok(path, "i/%E2%99%A5/", "path")
+    is_ok(str(path), "i/%E2%99%A5/", "path")
 
     # to_route
     path = Pyjo.Path.new('/i/%E2%99%A5/pyjo').to_route()
-    is_ok(path, u"/i/♥/pyjo", "path")
+    is_ok(u(path), u"/i/♥/pyjo", "path")
 
     path = Pyjo.Path.new('i/%E2%99%A5/pyjo').to_route()
-    is_ok(path, u"/i/♥/pyjo", "path")
+    is_ok(u(path), u"/i/♥/pyjo", "path")
 
     # to_str
-    path = Pyjo.Path.new('/i/%E2%99%A5/pyjo').to_str()
-    is_ok(path, "/i/%E2%99%A5/pyjo", "path")
+    path = Pyjo.Path.new('/i/%E2%99%A5/pyjo')
+    is_ok(str(path), "/i/%E2%99%A5/pyjo", "path")
 
-    path = Pyjo.Path.new('i/%E2%99%A5/pyjo').to_str()
-    is_ok(path, "i/%E2%99%A5/pyjo", "path")
+    path = Pyjo.Path.new('i/%E2%99%A5/pyjo')
+    is_ok(str(path), "i/%E2%99%A5/pyjo", "path")
 
     # trailing_slash
     path = Pyjo.Path.new('/foo%2Fbar%3B/baz.html')

@@ -20,14 +20,14 @@ Pyjo.Parameters - Parameters
 and based on :rfc:`3986` as well as `the HTML Living Standard <https://html.spec.whatwg.org>`_.
 """
 
-import Pyjo.Base.String
+import Pyjo.Base
 
 from Pyjo.Regexp import m, s
 from Pyjo.Base import lazy
 from Pyjo.Util import isiterable_not_str, u, url_escape, url_unescape
 
 
-class Pyjo_Parameters(Pyjo.Base.String.object):
+class Pyjo_Parameters(Pyjo.Base.object):
     """::
 
         params = Pyjo.Parameters.new()
@@ -59,18 +59,6 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
         super(Pyjo_Parameters, self).__init__()
         self.parse(*args, **kwargs)
 
-    def __iter__(self):
-        """::
-
-            for p in params:
-                print(p)
-
-        Iterator based on :attr:`params`. Note that this will normalize the parameters.
-        """
-        params = self.params
-        for p in params:
-            yield p
-
     def __bool__(self):
         """::
 
@@ -80,7 +68,57 @@ class Pyjo_Parameters(Pyjo.Base.String.object):
         """
         return True
 
+    def __bytes__(self):
+        """::
+
+            bytestring = bytes(params)
+
+        Byte-string representation of an object. (Python 3.x)
+        """
+        return bytes(self.to_str(), self.charset if self.charset is None else 'utf-8')
+
+    def __iter__(self):
+        """::
+
+            pairs = list(params)
+
+        Iterator based on :attr:`params`. Note that this will normalize the parameters.
+        """
+        params = self.params
+        for p in params:
+            yield p
+
     __nonzero__ = __bool__
+
+    def __repr__(self):
+        """::
+
+            reprstring = repr(params)
+
+        String representation of an object.
+        """
+        return "{0}.{1}('{2}')".format(self.__module__, self.__class__.__name__, str(self))
+
+    def __str__(self):
+        """::
+
+            string = str(params)
+
+        Alias for :meth:`to_str`.
+        """
+        string = self.to_str()
+        if string is None:
+            string = 'None'
+        return string
+
+    def __unicode__(self):
+        """::
+
+            unicodestring = unicode(params)
+
+        Unicode-string representation of an object. (Python 2.x)
+        """
+        return unicode(self.to_str())
 
     def append(self, *args, **kwargs):
         """::

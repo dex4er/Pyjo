@@ -24,8 +24,8 @@ if __name__ == '__main__':
     is_ok(url.userinfo, 'sri:foobar', "url.userinfo")
     is_ok(url.host, 'example.com', "url.host")
     is_ok(url.port, 3000, "url.port")
-    is_ok(url.path, '/foo/bar', "url.path")
-    is_ok(url.query, 'foo=bar', "url.query.to_dict()")
+    is_ok(str(url.path), '/foo/bar', "url.path")
+    is_ok(str(url.query), 'foo=bar', "url.query.to_dict()")
     is_ok(url.fragment, '23', "url.fragment")
 
     # Build
@@ -37,21 +37,21 @@ if __name__ == '__main__':
     url.path = '/foo/bar'
     url.query.param('foo', 'bar')
     url.fragment = '23'
-    is_ok(url, 'http://sri:foobar@example.com:3000/foo/bar?foo=bar#23', "url")
+    is_ok(str(url), 'http://sri:foobar@example.com:3000/foo/bar?foo=bar#23', "url")
 
     # __init __
     url = Pyjo.URL.new()
-    is_ok(url, '', "url")
+    is_ok(str(url), '', "url")
     url = Pyjo.URL.new('http://127.0.0.1:3000/foo?f=b&baz=2#foo')
-    is_ok(url, 'http://127.0.0.1:3000/foo?f=b&baz=2#foo', "url")
+    is_ok(str(url), 'http://127.0.0.1:3000/foo?f=b&baz=2#foo', "url")
 
     # Attributes
     url = Pyjo.URL.new()
 
     base = url.base
-    is_ok(base, '', "base")
+    is_ok(str(base), '', "base")
     url.base = Pyjo.URL.new()
-    is_ok(url.base, '', "url.base")
+    is_ok(str(url.base), '', "url.base")
 
     fragment = url.fragment
     is_ok(fragment, None, "fragment")
@@ -97,7 +97,7 @@ if __name__ == '__main__':
     # clone
     url = Pyjo.URL.new('http://sri:foobar@example.com:3000/foo/bar?foo=bar#23')
     url2 = url.clone()
-    is_ok(url2, 'http://sri:foobar@example.com:3000/foo/bar?foo=bar#23', "url2")
+    is_ok(str(url2), 'http://sri:foobar@example.com:3000/foo/bar?foo=bar#23', "url2")
 
     # host_port
     url = Pyjo.URL.new()
@@ -143,11 +143,11 @@ if __name__ == '__main__':
     # parse
     url = Pyjo.URL.new()
     url = url.parse('http://127.0.0.1:3000/foo/bar?fo=o&baz=23#foo')
-    is_ok(url, 'http://127.0.0.1:3000/foo/bar?fo=o&baz=23#foo', "url")
+    is_ok(str(url), 'http://127.0.0.1:3000/foo/bar?fo=o&baz=23#foo', "url")
 
     url = Pyjo.URL.new()
     path = url.parse('/test/123?foo=bar').path
-    is_ok(path, '/test/123', "path")
+    is_ok(str(path), '/test/123', "path")
 
     url = Pyjo.URL.new()
     host = url.parse('http://example.com/test/123?foo=bar').host
@@ -155,33 +155,33 @@ if __name__ == '__main__':
 
     url = Pyjo.URL.new()
     path = url.parse('mailto:sri@example.com').path
-    is_ok(path, "sri@example.com", "path")
+    is_ok(str(path), "sri@example.com", "path")
 
     # path
     url = Pyjo.URL.new()
     path = url.path
-    is_ok(url, '', "url")
+    is_ok(str(url), '', "url")
     url = Pyjo.URL.new()
     url.path = '/foo/bar'
-    is_ok(url, '/foo/bar', "url")
+    is_ok(str(url), '/foo/bar', "url")
     url = Pyjo.URL.new()
     url.path = 'foo/bar'
-    is_ok(url, 'foo/bar', "url")
+    is_ok(str(url), 'foo/bar', "url")
     url = Pyjo.URL.new()
     url.path = Pyjo.Path.new()
-    is_ok(url, '', "url")
+    is_ok(str(url), '', "url")
 
     part = Pyjo.URL.new('http://example.com/perldoc/Mojo').path.parts[0]
     is_ok(part, "perldoc", "part")
 
     url = Pyjo.URL.new('http://example.com/perldoc/Mojo').set(path='/DOM/HTML')
-    is_ok(url, "http://example.com/DOM/HTML", "url")
+    is_ok(str(url), "http://example.com/DOM/HTML", "url")
 
     url = Pyjo.URL.new('http://example.com/perldoc/Mojo').set(path='DOM/HTML')
-    is_ok(url, "http://example.com/perldoc/DOM/HTML", "url")
+    is_ok(str(url), "http://example.com/perldoc/DOM/HTML", "url")
 
     url = Pyjo.URL.new('http://example.com/perldoc/Mojo/').set(path='DOM/HTML')
-    is_ok(url, "http://example.com/perldoc/Mojo/DOM/HTML", "url")
+    is_ok(str(url), "http://example.com/perldoc/Mojo/DOM/HTML", "url")
 
     # path_query
     url = Pyjo.URL.new()
@@ -205,50 +205,50 @@ if __name__ == '__main__':
     # query
     url = Pyjo.URL.new()
     query = url.query
-    is_ok(query, "", "query")
+    is_ok(str(query), "", "query")
     url.query = [('param', 'value')]
-    is_ok(url.query, "param=value", "url.query")
+    is_ok(str(url.query), "param=value", "url.query")
     url.query = {'param': 'value'}
-    is_ok(url.query, "param=value", "url.query")
+    is_ok(str(url.query), "param=value", "url.query")
     url.query.append(('append', 'to'),)
-    is_ok(url.query, "param=value&append=to", "url.query")
+    is_ok(str(url.query), "param=value&append=to", "url.query")
     url.query.param('replace', 'with')
-    is_ok(url.query, "param=value&append=to&replace=with", "url.query")
+    is_ok(str(url.query), "param=value&append=to&replace=with", "url.query")
     url.query = Pyjo.Parameters.new()
-    is_ok(query, "", "query")
+    is_ok(str(query), "", "query")
 
     param = Pyjo.URL.new('http://example.com?a=1&b=2').query.param('b')
     is_ok(param, "2", "param")
 
     url = Pyjo.URL.new('http://example.com?a=1&b=2').set(query=[('a', 2), ('c', 3)])
-    is_ok(url, "http://example.com?a=2&c=3", "url")
+    is_ok(str(url), "http://example.com?a=2&c=3", "url")
 
     url = Pyjo.URL.new('http://example.com?a=1&b=2').set(query={'a': [2, 3]})
-    is_ok(url, "http://example.com?a=2&a=3", "url")
+    is_ok(str(url), "http://example.com?a=2&a=3", "url")
 
     url = Pyjo.URL.new('http://example.com?a=1&b=2').merge(query={'a': 2, 'c': 3})
-    is_ok(url, "http://example.com?a=2&b=2&c=3", "url")
+    is_ok(str(url), "http://example.com?a=2&b=2&c=3", "url")
 
     url = Pyjo.URL.new('http://example.com?a=1&b=2').merge(query={'a': None})
-    is_ok(url, "http://example.com?b=2", "url")
+    is_ok(str(url), "http://example.com?b=2", "url")
 
     url = Pyjo.URL.new('http://example.com?a=1&b=2').append(query=[('a', 2), ('c', 3)])
-    is_ok(url, "http://example.com?a=1&b=2&a=2&c=3", "url")
+    is_ok(str(url), "http://example.com?a=1&b=2&a=2&c=3", "url")
 
     # to_abs
     url = Pyjo.URL.new()
     absolute = url.to_abs()
-    is_ok(absolute, "", "absolute")
+    is_ok(str(absolute), "", "absolute")
     absolute = url.to_abs(Pyjo.URL.new('http://example.com/foo'))
-    is_ok(absolute, "http://example.com/foo", "absolute")
+    is_ok(str(absolute), "http://example.com/foo", "absolute")
 
     url = Pyjo.URL.new('baz.xml?test=123').to_abs(Pyjo.URL.new('http://example.com/foo/bar.html'))
-    is_ok(url, "http://example.com/foo/baz.xml?test=123", "url")
+    is_ok(str(url), "http://example.com/foo/baz.xml?test=123", "url")
 
     url = Pyjo.URL.new('/baz.xml?test=123').to_abs(Pyjo.URL.new('http://example.com/foo/bar.html'))
-    is_ok(url, "http://example.com/baz.xml?test=123", "url")
+    is_ok(str(url), "http://example.com/baz.xml?test=123", "url")
 
     url = Pyjo.URL.new('//example.com/foo/baz.xml?test=123').to_abs(Pyjo.URL.new('http://example.com/foo/bar.html'))
-    is_ok(url, "http://example.com/foo/baz.xml?test=123", "url")
+    is_ok(str(url), "http://example.com/foo/baz.xml?test=123", "url")
 
     done_testing()

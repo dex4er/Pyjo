@@ -24,10 +24,10 @@ Early developement stage. Implemented already:
   * Main event loop which handle IO and timer events
   * Event emitter with subscriptions
   * Synchronizer and sequentializer of multiple events
-  * Low level event reactor based on poll(2) function or libev (pyev) library
+  * Low level event reactor based on select(2) and poll(2) or libev (pyev)
   * Non-blocking TCP client and server
   * Lazy properties for objects
-  * URL parser
+  * URL parser with container classes for URL, path and querystring
   * Test units with API based on Perl's Test::More and TAP protocol
   * Regexp objects with overloaded operators
 
@@ -42,12 +42,13 @@ URL manipulation
 from __future__ import print_function
 
 import Pyjo.URL
+from Pyjo.Util import u
 
 url = Pyjo.URL.new(scheme='https', host='github.com', path='/dex4er/Pyjo')
 print(url)
 # 'https://github.com/dex4er/Pyjo'
 
-print(url.set(scheme='ssh+git', userinfo='git', path=url.path+'.git'))
+print(url.set(scheme='ssh+git', userinfo='git', path=u(url.path) + '.git'))
 # 'ssh+git://git@github.com/dex4er/Pyjo.git'
 ```
 

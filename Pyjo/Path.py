@@ -20,12 +20,12 @@ Pyjo.Path - Path
 :rfc:`3986`.
 """
 
-import Pyjo.Base.String
+import Pyjo.Base
 
 from Pyjo.Util import u, url_escape, url_unescape
 
 
-class Pyjo_Path(Pyjo.Base.String.object):
+class Pyjo_Path(Pyjo.Base.object):
     """::
 
         path = Pyjo.Path.new()
@@ -56,11 +56,28 @@ class Pyjo_Path(Pyjo.Base.String.object):
         if path is not None:
             self.parse(path)
 
+    def __bool__(self):
+        """::
+
+            boolean = bool(path)
+
+        Always true.
+        """
+        return True
+
+    def __bytes__(self):
+        """::
+
+            bytestring = bytes(path)
+
+        Byte-string representation of an object. (Python 3.x)
+        """
+        return bytes(self.to_str(), self.charset if self.charset is None else 'utf-8')
+
     def __iter__(self):
         """::
 
-            for p in path:
-                print(p)
+            parts = list(path)
 
         Iterator based on :attr:`parts`. Note that this will normalize the path and that ``%2F``
         will be treated as ``/`` for security reasons.
@@ -69,16 +86,37 @@ class Pyjo_Path(Pyjo.Base.String.object):
         for p in parts:
             yield p
 
-    def __bool__(self):
+    __nonzero__ = __bool__
+
+    def __repr__(self):
         """::
 
-            boolean = bool(params)
+            reprstring = repr(path)
 
-        Always true.
+        String representation of an object.
         """
-        return True
+        return "{0}.{1}('{2}')".format(self.__module__, self.__class__.__name__, str(self))
 
-    __nonzero__ = __bool__
+    def __str__(self):
+        """::
+
+            string = str(path)
+
+        Alias for :meth:`to_str`.
+        """
+        string = self.to_str()
+        if string is None:
+            string = 'None'
+        return string
+
+    def __unicode__(self):
+        """::
+
+            unicodestring = unicode(path)
+
+        Unicode-string representation of an object. (Python 2.x)
+        """
+        return unicode(self.to_str())
 
     def canonicalize(self):
         """::
@@ -331,6 +369,22 @@ class Pyjo_Path(Pyjo.Base.String.object):
 
         return path
 
+    @property
+    def trailing_slash(self):
+        """::
+
+            boolean = path.trailing_slash
+            path.trailing_slash = boolean
+
+        Path has a trailing slash. Note that this method will normalize the path and
+        that ``%2F`` will be treated as ``/`` for security reasons.
+        """
+        return self._parse('trailing_slash')
+
+    @trailing_slash.setter
+    def trailing_slash(self, value):
+        self._parse('trailing_slash', value)
+
     def _parse(self, name, *args):
         if self._parts is None:
             path = url_unescape(self._path if self._path is not None else '')
@@ -361,22 +415,6 @@ class Pyjo_Path(Pyjo.Base.String.object):
             return getattr(self, '_' + name)
 
         setattr(self, '_' + name, args[0])
-
-    @property
-    def trailing_slash(self):
-        """::
-
-            boolean = path.trailing_slash
-            path.trailing_slash = boolean
-
-        Path has a trailing slash. Note that this method will normalize the path and
-        that ``%2F`` will be treated as ``/`` for security reasons.
-        """
-        return self._parse('trailing_slash')
-
-    @trailing_slash.setter
-    def trailing_slash(self, value):
-        self._parse('trailing_slash', value)
 
 
 new = Pyjo_Path.new
