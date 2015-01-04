@@ -43,14 +43,14 @@ if __name__ == '__main__':
     isa_ok(obj, SubClass, "obj")
     none_ok(obj.name, "obj.name")
 
-    obj = SubClass.new(('name', 'value',))
+    obj = SubClass.new(('name', 'value'),)
     is_ok(obj.name, 'value', "obj.name")
     obj = SubClass.new(name='value')
     is_ok(obj.name, 'value', "obj.name")
 
     # set
     obj = SubClass.new()
-    obj = obj.set(('name', 'value',))
+    obj = obj.set(('name', 'value'),)
     isa_ok(obj, SubClass, "obj")
     is_ok(obj.name, 'value', "obj.name")
 
@@ -66,7 +66,7 @@ if __name__ == '__main__':
     is_ok(obj.name, 'value', "obj.name")
 
     obj = SubClass.new()
-    obj = obj.tap('set', ('name', 'value',))
+    obj = obj.tap('set', ('name', 'value'),)
     isa_ok(obj, SubClass, "obj")
     is_ok(obj.name, 'value', "obj.name")
 
