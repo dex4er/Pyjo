@@ -18,13 +18,13 @@ class Error(Exception):
 
 
 if sys.version_info >= (3, 0):
-    def b(string, charset='utf-8'):
+    def binary(string, charset='utf-8'):
         if isinstance(string, bytes):
             return string
         else:
             return bytes(string, charset)
 else:
-    def b(string, charset='utf-8'):
+    def binary(string, charset='utf-8'):
         if isinstance(string, unicode):
             return string.encode(charset)
         else:
@@ -93,11 +93,11 @@ def not_implemented(method):
 
 
 def punycode_decode(string):
-    return b(string, 'iso-8859-1').decode('punycode')
+    return binary(string, 'iso-8859-1').decode('punycode')
 
 
 def punycode_encode(string):
-    return u(string).encode('punycode')
+    return text(string).encode('punycode')
 
 
 def rand(value=1):
@@ -111,30 +111,30 @@ def steady_time():
 def url_escape(string, pattern=None):
     if pattern is not None:
         if isinstance(pattern, bytes):
-            pattern = b'([' + b(pattern, 'iso-8859-1') + b'])'
+            pattern = b'([' + binary(pattern, 'iso-8859-1') + b'])'
         else:
             pattern = '([{0}])'.format(pattern)
     else:
         pattern = '([^A-Za-z0-9\-._~])'
 
     if isinstance(string, bytes):
-        pattern = b(pattern, 'iso-8859-1')
-        replacement = lambda m: b('%' + format(ord(m[1]), 'X'), 'iso-8859-1')
+        pattern = binary(pattern, 'iso-8859-1')
+        replacement = lambda m: binary('%' + format(ord(m[1]), 'X'), 'iso-8859-1')
     else:
         replacement = lambda m: '%' + format(ord(m[1]), 'X')
 
-    return b(string == s(pattern, replacement, 'gr'), 'iso-8859-1').decode('iso-8859-1')
+    return binary(string == s(pattern, replacement, 'gr'), 'iso-8859-1').decode('iso-8859-1')
 
 
 def url_unescape(string):
-    return b(string) == s(br'%([0-9a-fA-F]{2})', lambda m: b(chr(int(m[1], 16)), 'iso-8859-1'), 'gr')
+    return binary(string) == s(br'%([0-9a-fA-F]{2})', lambda m: binary(chr(int(m[1], 16)), 'iso-8859-1'), 'gr')
 
 
 if sys.version_info >= (3, 0):
-    def u(string):
+    def text(string):
         return str(string)
 else:
-    def u(string):
+    def text(string):
         if isinstance(string, unicode):
             return string
         else:

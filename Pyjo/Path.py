@@ -23,7 +23,7 @@ Pyjo.Path - Path
 import Pyjo.Base
 import Pyjo.Mixin.String
 
-from Pyjo.Util import u, url_escape, url_unescape
+from Pyjo.Util import text, url_escape, url_unescape
 
 
 class Pyjo_Path(Pyjo.Base.object, Pyjo.Mixin.String.object):
@@ -204,7 +204,7 @@ class Pyjo_Path(Pyjo.Base.object, Pyjo.Mixin.String.object):
             Pyjo.Path.new('/foo/bar/').merge('baz/yada')
         """
         # Replace
-        if u(path).startswith('/'):
+        if text(path).startswith('/'):
             return self.parse(path)
 
         # Merge

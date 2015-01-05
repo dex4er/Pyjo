@@ -17,7 +17,7 @@ if __name__ == '__main__':
     from Pyjo.Test import *  # @UnusedWildImport
 
     import Pyjo.Path
-    from Pyjo.Util import u
+    from Pyjo.Util import text
 
     # __init __
     path = Pyjo.Path.new()
@@ -116,10 +116,10 @@ if __name__ == '__main__':
 
     # to_route
     path = Pyjo.Path.new('/i/%E2%99%A5/pyjo').to_route()
-    is_ok(u(path), u"/i/♥/pyjo", "path")
+    is_ok(text(path), u"/i/♥/pyjo", "path")
 
     path = Pyjo.Path.new('i/%E2%99%A5/pyjo').to_route()
-    is_ok(u(path), u"/i/♥/pyjo", "path")
+    is_ok(text(path), u"/i/♥/pyjo", "path")
 
     # to_str
     path = Pyjo.Path.new('/i/%E2%99%A5/pyjo')
