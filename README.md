@@ -42,13 +42,13 @@ URL manipulation
 from __future__ import print_function
 
 import Pyjo.URL
-from Pyjo.Util import u
+from Pyjo.Util import text
 
 url = Pyjo.URL.new(scheme='https', host='github.com', path='/dex4er/Pyjo')
 print(url)
 # 'https://github.com/dex4er/Pyjo'
 
-print(url.set(scheme='ssh+git', userinfo='git', path=u(url.path) + '.git'))
+print(url.set(scheme='ssh+git', userinfo='git', path=text(url.path) + '.git'))
 # 'ssh+git://git@github.com/dex4er/Pyjo.git'
 ```
 
