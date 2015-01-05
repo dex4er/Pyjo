@@ -17,6 +17,9 @@ The mixin class for objects with :meth:`to_str` method.
 
 from Pyjo.Util import not_implemented
 
+import platform
+import sys
+
 
 class Pyjo_Mixin_String(object):
     """
@@ -104,14 +107,17 @@ class Pyjo_Mixin_String(object):
         """
         return hex(int(self.to_str()))
 
-    def __int__(self):
-        """::
+    if platform.python_implementation() != 'PyPy' or sys.version_info < (3, 0):
+        def __int__(self):
+            """::
 
-            intnumber = int(obj)
+                intnumber = int(obj)
 
-        Converts string representation into integer number.
-        """
-        return int(self.to_str())
+            Converts string representation into integer number.
+            """
+            return int(self.to_str())
+    else:
+        pass  # PyPy3 error
 
     def __le__(self, other):
         """::
