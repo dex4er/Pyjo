@@ -112,7 +112,7 @@ latex:
 	@echo "Build finished; the LaTeX files are in $(BUILDDIR)/latex."
 
 latexpdf: latex
-	cd $(BUILDDIR)/latex && for f in *.tex; do xelatex $(LATEXOPTS) $$f; done
+	cd $(BUILDDIR)/latex && for f in *.tex; do xelatex $(LATEXOPTS) $$f && xelatex $(LATEXOPTS) $$f; done
 	@echo "xelatex finished; the PDF files are in $(BUILDDIR)/latex."
 
 pdf: latexpdf

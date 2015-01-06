@@ -40,10 +40,9 @@ import Pyjo.Mixin.String
 import Pyjo.Parameters
 import Pyjo.Path
 
+from Pyjo.ByteStream import b
 from Pyjo.Regexp import m, s
-from Pyjo.Util import (
-    binary, punycode_decode, punycode_encode, url_escape, url_unescape
-)
+from Pyjo.Util import punycode_decode, punycode_encode, url_escape, url_unescape
 
 
 class Pyjo_URL(Pyjo.Base.object, Pyjo.Mixin.String.object):
@@ -289,7 +288,7 @@ class Pyjo_URL(Pyjo.Base.object, Pyjo.Mixin.String.object):
             return
 
         if host != m(r'[^\x00-\x7f]'):
-            return binary(host, 'ascii').decode('ascii').lower()
+            return b(host, 'ascii').decode('ascii').lower()
 
         # Encode
         parts = map(lambda s: ('xn--' + punycode_encode(s).decode('ascii')) if s == m(r'[^\x00-\x7f]') else s, host.split('.'))

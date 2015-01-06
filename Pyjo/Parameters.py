@@ -25,7 +25,8 @@ import Pyjo.Mixin.String
 
 from Pyjo.Regexp import m, s
 from Pyjo.Base import lazy
-from Pyjo.Util import isiterable_not_str, text, url_escape, url_unescape
+from Pyjo.TextStream import u
+from Pyjo.Util import isiterable_not_str, url_escape, url_unescape
 
 
 class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
@@ -278,7 +279,7 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
         """
         if len(args) == 1 and not isinstance(args[0], tuple):
             # String
-            self._string = text(args[0])
+            self._string = u(args[0])
             return self
         else:
             # Pairs
@@ -349,14 +350,14 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
         pairs = []
         for name, value in params:
             if not isinstance(name, (bytes, str,)):
-                name = text(name)
+                name = u(name)
 
             if not isinstance(value, (bytes, str,)):
-                value = text(value)
+                value = u(value)
 
             if charset:
-                name = text(name).encode(charset).decode('iso-8859-1')
-                value = text(value).encode(charset).decode('iso-8859-1')
+                name = u(name).encode(charset).decode('iso-8859-1')
+                value = u(value).encode(charset).decode('iso-8859-1')
 
             name = url_escape(name, r'^A-Za-z0-9\-._~!$\'()*,:@/?')
             value = url_escape(value, r'^A-Za-z0-9\-._~!$\'()*,:@/?')
