@@ -11,6 +11,11 @@ Pyjo API
 
 .. automodule:: Pyjo.ByteStream
     :members:
+    :special-members:
+
+.. automodule:: Pyjo.Collection
+    :members:
+    :special-members:
 
 .. automodule:: Pyjo.Mixin.String
     :members:
@@ -26,6 +31,7 @@ Pyjo API
 
 .. automodule:: Pyjo.TextStream
     :members:
+    :special-members:
 
 .. automodule:: Pyjo.URL
     :members:
