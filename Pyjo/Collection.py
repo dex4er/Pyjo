@@ -11,9 +11,6 @@ Pyjo.Collection - Collection
 """
 
 
-import Pyjo.ByteStream
-
-
 DEFAULT_CHARSET = 'utf-8'
 
 

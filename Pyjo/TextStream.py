@@ -12,6 +12,7 @@ Pyjo.TextStream - TextStream
 
 
 import Pyjo.ByteStream
+import Pyjo.Util
 
 import sys
 
@@ -46,12 +47,35 @@ class Pyjo_TextStream(base_object):
             else:
                 return super(Pyjo_TextStream, cls).__new__(cls, unicode(value))
 
+    def html_unescape(self):
+        """::
+
+            stream = stream.html_unescape()
+
+        Unescape all HTML entities in bytestream with :func:`Pyjo.Util.html_unescape`. ::
+
+            b('&lt;html&gt;').html_unescape().url_escape().say()
+        """
+        return self.new(Pyjo.Util.html_unescape(self))
+
     def encode(self, charset=DEFAULT_CHARSET):
+        """::
+
+            stream = $stream->encode;
+            stream = $stream->encode('iso-8859-1')
+
+        Encode bytestream, defaults to ``utf-8``, and return new :mod:`Pyjo.ByteStream` object. ::
+
+            stream.trim().quote().encode().say()
+        """
         return Pyjo.ByteStream.new(super(Pyjo_TextStream, self).encode(charset))
 
     @classmethod
     def new(cls, value, charset=DEFAULT_CHARSET):
         return Pyjo_TextStream(value, charset)
+
+    def say(self):
+        print(self)
 
 
 def u(value, charset=DEFAULT_CHARSET):
