@@ -27,4 +27,10 @@ setup(
         'Framework :: Django',
     ],
     test_suite='test.TestSuite',
+    install_requires=[
+        "regex",
+    ],
+    extras_require={
+        'EV': ['pyev'],
+    },
 )

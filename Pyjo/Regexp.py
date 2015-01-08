@@ -3,22 +3,22 @@ Pyjo.Regexp
 """
 
 
-import re
+import regex
 
 
 re_EXTRA = 0
 
 FLAGS = {
-    'd': re.DEBUG,
+    'd': regex.DEBUG,
     'g': re_EXTRA,
-    'i': re.IGNORECASE,
-    'l': re.LOCALE,
-    'm': re.MULTILINE,
+    'i': regex.IGNORECASE,
+    'l': regex.LOCALE,
+    'm': regex.MULTILINE,
     'o': re_EXTRA,
     'r': re_EXTRA,
-    's': re.DOTALL,
-    'u': re.UNICODE,
-    'x': re.VERBOSE,
+    's': regex.DOTALL,
+    'u': regex.UNICODE,
+    'x': regex.VERBOSE,
 }
 
 
@@ -32,7 +32,7 @@ class Pyjo_Regexp(object):
         self._pattern = pattern
         self._replacement = replacement
         self._flags = flags
-        self._re = re.compile(pattern, self._re_flags(flags))
+        self._re = regex.compile(pattern, self._re_flags(flags))
 
     @classmethod
     def m(cls, pattern, flags=''):
@@ -75,15 +75,22 @@ class Pyjo_Regexp(object):
             result.update(match.groupdict())
         return result
 
+    def _match_result_iter(self, string):
+        for match in self._re.finditer(string):
+            yield self._match_result(match)
+        return
+
     def match(self, string, _flag_g=None, _flag_r=None):
         if _flag_g is None:
             _flag_g = 'g' in self._flags
 
         if self._action == 'm':
             if _flag_g:
-                return self._re.findall(string)
-            match = self._re.search(string)
-            return self._match_result(match)
+                match = self._re.finditer(string)
+                return self._match_result_iter(match)
+            else:
+                match = self._re.search(string)
+                return self._match_result(match)
 
         elif self._action == 's':
             if _flag_g:
