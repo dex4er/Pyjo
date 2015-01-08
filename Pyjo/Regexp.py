@@ -75,8 +75,8 @@ class Pyjo_Regexp(object):
             result.update(match.groupdict())
         return result
 
-    def _match_result_iter(self, string):
-        for match in self._re.finditer(string):
+    def _match_result_iter(self, matchiter):
+        for match in matchiter:
             yield self._match_result(match)
         return
 
@@ -86,8 +86,8 @@ class Pyjo_Regexp(object):
 
         if self._action == 'm':
             if _flag_g:
-                match = self._re.finditer(string)
-                return self._match_result_iter(match)
+                matchiter = self._re.finditer(string)
+                return self._match_result_iter(matchiter)
             else:
                 match = self._re.search(string)
                 return self._match_result(match)
