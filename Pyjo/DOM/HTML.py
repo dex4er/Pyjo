@@ -54,11 +54,11 @@ TOKEN_RE = r'''
     |
       \?(.*?)\?                                       # Processing Instruction
     |
-      \s*([^<>\s]+\s*(?:(?:''' + ATTR_RE + '''){0,32766})*+)     # Tag
+      \s*([^<>\s]+\s*(?:''' + ATTR_RE + ''')*)     # Tag
     )>
   |
     (<)                                               # Runaway "<"
-  )??
+  )?
 '''
 
 # HTML elements that only contain raw text

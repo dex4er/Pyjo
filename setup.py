@@ -28,9 +28,9 @@ setup(
     ],
     test_suite='test.TestSuite',
     install_requires=[
-        "regex",
     ],
     extras_require={
+        'regex': ['regex'],
         'EV': ['pyev'],
     },
 )
