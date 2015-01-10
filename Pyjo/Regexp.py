@@ -3,23 +3,30 @@ Pyjo.Regexp
 """
 
 
-import regex
+import importlib
+import os
 
 
-regex_EXTRA = 0
+try:
+    re = importlib.import_module(os.environ.get('PYJO_REGEXP', 'regex'))
+except ImportError:
+    import re
+
+
+re_EXTRA = 0
 
 FLAGS = {
-    'c': regex_EXTRA,
-    'd': regex.DEBUG,
-    'g': regex_EXTRA,
-    'i': regex.IGNORECASE,
-    'l': regex.LOCALE,
-    'm': regex.MULTILINE,
-    'o': regex_EXTRA,
-    'r': regex_EXTRA,
-    's': regex.DOTALL,
-    'u': regex.UNICODE,
-    'x': regex.VERBOSE,
+    'c': re_EXTRA,
+    'd': re.DEBUG,
+    'g': re_EXTRA,
+    'i': re.IGNORECASE,
+    'l': re.LOCALE,
+    'm': re.MULTILINE,
+    'o': re_EXTRA,
+    'r': re_EXTRA,
+    's': re.DOTALL,
+    'u': re.UNICODE,
+    'x': re.VERBOSE,
 }
 
 
@@ -33,7 +40,7 @@ class Pyjo_Regexp(object):
         self._pattern = pattern
         self._replacement = replacement
         self._flags = flags
-        self._re = regex.compile(pattern, self._re_flags(flags))
+        self._re = re.compile(pattern, self._re_flags(flags))
         self.pos = pos
 
     @classmethod
