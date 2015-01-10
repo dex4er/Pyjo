@@ -77,6 +77,15 @@ class Pyjo_TextStream(base_object):
     def say(self):
         print(self)
 
+    def xml_escape(self):
+        """::
+
+            stream = stream.xml_escape()
+
+        Escape only the characters ``&``, ``<``, ``>``, ``"`` and ``'`` in bytestream with :func:`Pyjo.Util.xml_escape`.
+        """
+        return self.new(Pyjo.Util.xml_escape(self))
+
 
 def u(value, charset=DEFAULT_CHARSET):
     """::

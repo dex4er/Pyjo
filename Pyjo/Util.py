@@ -128,6 +128,21 @@ def warn(*args):
     print(*args, file=sys.stderr)
 
 
+# Characters that should be escaped in XML
+XML = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    '\'': '&#39;'
+}
+
+
+def xml_escape(string):
+    string -= s(r'([&<>"\'])', lambda g: XML[g[1]], 'g')
+    return string
+
+
 ENTITIES = {
     "Aacute": "\xc1",
     "aacute": "\xe1",

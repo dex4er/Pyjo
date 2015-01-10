@@ -6,16 +6,17 @@ Pyjo.Regexp
 import regex
 
 
-re_EXTRA = 0
+regex_EXTRA = 0
 
 FLAGS = {
+    'c': regex_EXTRA,
     'd': regex.DEBUG,
-    'g': re_EXTRA,
+    'g': regex_EXTRA,
     'i': regex.IGNORECASE,
     'l': regex.LOCALE,
     'm': regex.MULTILINE,
-    'o': re_EXTRA,
-    'r': re_EXTRA,
+    'o': regex_EXTRA,
+    'r': regex_EXTRA,
     's': regex.DOTALL,
     'u': regex.UNICODE,
     'x': regex.VERBOSE,
@@ -27,12 +28,13 @@ CACHE = {}
 
 class Pyjo_Regexp(object):
 
-    def __init__(self, action, pattern, replacement=None, flags=''):
+    def __init__(self, action, pattern, replacement=None, flags='', pos=0):
         self._action = action
         self._pattern = pattern
         self._replacement = replacement
         self._flags = flags
         self._re = regex.compile(pattern, self._re_flags(flags))
+        self.pos = pos
 
     @classmethod
     def m(cls, pattern, flags=''):
@@ -71,25 +73,30 @@ class Pyjo_Regexp(object):
         result = {}
         if match is not None:
             result[0] = match.group()
+            result['start'] = match.start()
+            result['end'] = match.end()
             result.update(enumerate(match.groups(), start=1))
             result.update(match.groupdict())
         return result
 
-    def _match_result_iter(self, matchiter):
+    def _match_iter(self, string):
+        matchiter = self._re.finditer(string, pos=self.pos)
+        if matchiter is None:
+            return
         for match in matchiter:
             yield self._match_result(match)
         return
 
     def match(self, string, _flag_g=None, _flag_r=None):
+        _flag_c = 'c' in self._flags
         if _flag_g is None:
             _flag_g = 'g' in self._flags
 
         if self._action == 'm':
             if _flag_g:
-                matchiter = self._re.finditer(string)
-                return self._match_result_iter(matchiter)
+                return self._match_iter(string)
             else:
-                match = self._re.search(string)
+                match = self._re.search(string, pos=self.pos)
                 return self._match_result(match)
 
         elif self._action == 's':

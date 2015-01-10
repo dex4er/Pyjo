@@ -17,6 +17,10 @@ Pyjo API
     :members:
     :special-members:
 
+.. automodule:: Pyjo.DOM.HTML
+    :members:
+    :special-members:
+
 .. automodule:: Pyjo.Mixin.String
     :members:
     :special-members:
