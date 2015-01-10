@@ -87,7 +87,7 @@ class Pyjo_Regexp(object):
         return result
 
     def _match_iter(self, string):
-        matchiter = self._re.finditer(string, pos=self.pos)
+        matchiter = self._re.finditer(string, self.pos)
         if matchiter is None:
             return
         for match in matchiter:
@@ -103,7 +103,7 @@ class Pyjo_Regexp(object):
             if _flag_g:
                 return self._match_iter(string)
             else:
-                match = self._re.search(string, pos=self.pos)
+                match = self._re.search(string, self.pos)
                 return self._match_result(match)
 
         elif self._action == 's':
