@@ -10,6 +10,7 @@ Pyjo.TextStream - TextStream
     stream = Pyjo.TextStream.new('foo_bar_baz')
 """
 
+
 from __future__ import print_function
 
 import Pyjo.ByteStream
@@ -75,12 +76,23 @@ class Pyjo_TextStream(base_object):
     def new(cls, value, charset=DEFAULT_CHARSET):
         return Pyjo_TextStream(value, charset)
 
-    def print(self):
-        print(self)
-        return self
+    def say(self, **kwargs):
+        """::
 
-    def say(self):
-        return self.print()
+            stream = stream.say()
+            stream = stream.say(file=sys.stderr, end='', flush=True)
+
+        Print bytestream to handle and append a newline, defaults to :attr:`sys.stdout`.
+        """
+        if 'flush' in kwargs and sys.version_info < (3, 0):
+            flush = kwargs.pop('flush')
+        else:
+            flush = False
+        print(self, **kwargs)
+        if flush:
+            f = kwargs.get('file', sys.stdout)
+            f.flush()
+        return self
 
     def xml_escape(self):
         """::
