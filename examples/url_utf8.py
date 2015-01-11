@@ -4,7 +4,7 @@ from __future__ import print_function
 
 import Pyjo.URL
 
-url1 = Pyjo.URL.new('http://pl.wikipedia.org').set(path='/w/index.php', query=['title', u'Wikipedia:Strona_główna', 'action', 'history'])
+url1 = Pyjo.URL.new('http://pl.wikipedia.org').set(path='/w/index.php', query=[('title', u'Wikipedia:Strona_główna'), ('action', 'history')])
 print(url1)
 
 url2 = Pyjo.URL.new('http://pl.wikipedia.org').set(path=u'/wiki/Wikipedia:Strona_główna')

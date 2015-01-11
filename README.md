@@ -39,17 +39,16 @@ URL manipulation
 ----------------
 
 ```python
-from __future__ import print_function
-
 import Pyjo.URL
 from Pyjo.TextStream import u
 
-url = Pyjo.URL.new(scheme='https', host='github.com', path='/dex4er/Pyjo')
-print(url)
-# 'https://github.com/dex4er/Pyjo'
-
-print(url.set(scheme='ssh+git', userinfo='git', path=u(url.path) + '.git'))
 # 'ssh+git://git@github.com/dex4er/Pyjo.git'
+url = Pyjo.URL.new('https://github.com/dex4er/Pyjo')
+print(url.set(scheme='ssh+git', userinfo='git', path=u(url.path) + '.git'))
+
+# 'http://metacpan.org/search?q=Mojo::URL&size=20'
+print(Pyjo.URL.new('http://metacpan.org/search')
+      .set(query={'q': 'Mojo::URL', 'size': 20}))
 ```
 
 
@@ -57,8 +56,6 @@ Non-blocking TCP client/server
 ------------------------------
 
 ```python
-from __future__ import print_function
-
 import Pyjo.IOLoop
 
 
