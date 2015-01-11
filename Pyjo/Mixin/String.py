@@ -15,6 +15,9 @@ Pyjo.Mixin.String - Methods for object with to_str() method
 The mixin class for objects with :meth:`to_str` method.
 """
 
+
+import Pyjo.Base
+
 from Pyjo.Util import not_implemented
 
 import platform
@@ -182,6 +185,8 @@ class Pyjo_Mixin_String(object):
         """
         if self.__module__ == '__main__':
             return "{0}('{1}')".format(self.__class__.__name__, str(self))
+        elif isinstance(self, Pyjo.Base.object):
+            return "{0}.new('{1}')".format(self.__module__, str(self))
         else:
             return "{0}.{1}('{2}')".format(self.__module__, self.__class__.__name__, str(self))
 
