@@ -74,8 +74,12 @@ class Pyjo_TextStream(base_object):
     def new(cls, value, charset=DEFAULT_CHARSET):
         return Pyjo_TextStream(value, charset)
 
-    def say(self):
+    def print(self):
         print(self)
+        return self
+
+    def say(self):
+        return self.print()
 
     def xml_escape(self):
         """::
