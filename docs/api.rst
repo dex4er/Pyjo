@@ -17,6 +17,14 @@ Pyjo API
     :members:
     :special-members:
 
+.. automodule:: Pyjo.DOM
+    :members:
+    :special-members:
+
+.. automodule:: Pyjo.DOM.CSS
+    :members:
+    :special-members:
+
 .. automodule:: Pyjo.DOM.HTML
     :members:
     :special-members:
