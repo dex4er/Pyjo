@@ -102,6 +102,13 @@ def steady_time():
     return time.time()
 
 
+def uchr(i):
+    if sys.version_info >= (3, 0):
+        return chr(i)
+    else:
+        return unichr(i)
+
+
 def url_escape(string, pattern=None):
     if pattern is not None:
         if isinstance(pattern, bytes):
