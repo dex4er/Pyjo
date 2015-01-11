@@ -10,6 +10,7 @@ Pyjo.TextStream - TextStream
     stream = Pyjo.TextStream.new('foo_bar_baz')
 """
 
+from __future__ import print_function
 
 import Pyjo.ByteStream
 import Pyjo.Util
