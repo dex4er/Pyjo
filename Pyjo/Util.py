@@ -49,6 +49,7 @@ def getenv(name, default):
 
 
 def html_unescape(string):
+    print(repr(string))
     string -= s(r'&(?:\#((?:\d{1,7}|x[0-9a-fA-F]{1,6}));|(\w+;?))', lambda g: _decode(g[1], g[2]), 'g')
     return string
 
@@ -96,6 +97,11 @@ def punycode_encode(string):
 
 def rand(value=1):
     return random.random() * value
+
+
+def slurp(path):
+    with open(path, "r") as f:
+        return Pyjo.ByteStream.new(f.read())
 
 
 def steady_time():
@@ -2386,12 +2392,17 @@ ENTITIES = {
 
 
 def _decode(point, name):
+    if isinstance(point, bytes):
+        xchr = chr
+    else:
+        xchr = uchr
+
     # Code point
     if name is None:
         if point.startswith('x'):
-            return chr(int(point[1:], 16))
+            return xchr(int(point[1:], 16))
         else:
-            return chr(int(point))
+            return xchr(int(point))
 
     rest = ''
 
