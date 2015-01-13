@@ -83,10 +83,10 @@ TABLE = {'colgroup', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr'}
 # HTML elements with optional end tags and scoping rules
 CLOSE = {'li': ({'li'}, {'ul', 'ol'}),
          'tr': ({'tr'}, {'table'}),
-         'colgroup': [TABLE],
-         'tbody': [TABLE],
-         'tfoot': [TABLE],
-         'thead': [TABLE],
+         'colgroup': (TABLE, {'table'}),
+         'tbody': (TABLE, {'table'}),
+         'tfoot': (TABLE, {'table'}),
+         'thead': (TABLE, {'table'}),
          'dd': ({'dd', 'dt'}, {'dl'}),
          'dt': ({'dd', 'dt'}, {'dl'}),
          'rp': ({'rp', 'rt'}, {'ruby'}),
@@ -406,7 +406,7 @@ def _start(start, attrs, xml, current):
 
             # Close allowed parent elements in scope
             parent = current
-            while parent[0] != 'root' and not scope[parent[1]]:
+            while parent[0] != 'root' and parent[1] not in scope:
                 if allowed[parent[1]]:
                     node = _end(parent[1], 0, current)
                     if node:

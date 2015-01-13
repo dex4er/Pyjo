@@ -295,7 +295,11 @@ TOKEN_RE = r'''
 
 
 class Pyjo_DOM_CSS(Pyjo.Base.object):
-    """
+    """::
+
+        html = Pyjo.DOM.CSS.new()
+
+    Construct a new :mod:`Pyjo.DOM.CSS` object.
     """
 
     tree = None
