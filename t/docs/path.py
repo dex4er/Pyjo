@@ -107,6 +107,13 @@ if __name__ == '__main__':
     path = Pyjo.Path.new('i/%E2%99%A5/pyjo').to_abs_str()
     is_ok(str(path), "/i/%E2%99%A5/pyjo", "path")
 
+    # to_bytes
+    path = Pyjo.Path.new('/i/%E2%99%A5/pyjo')
+    is_ok(bytes(path), b"/i/%E2%99%A5/pyjo", "path")
+
+    path = Pyjo.Path.new('i/%E2%99%A5/pyjo')
+    is_ok(bytes(path), b"i/%E2%99%A5/pyjo", "path")
+
     # to_dir
     path = Pyjo.Path.new('/i/%E2%99%A5/pyjo').to_dir()
     is_ok(str(path), "/i/%E2%99%A5/", "path")

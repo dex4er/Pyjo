@@ -244,7 +244,7 @@ if __name__ == '__main__':
     is_ok(str(path.clone()), '/foob%E4r', 'right path')
 
     # No charset
-    path = Pyjo.Path.new().set(charset=None).parse('/%E4')
+    path = Pyjo.Path.new().set(charset=None).parse(b'/%E4')
     is_deeply_ok(path.parts, [b"\xe4"], 'right structure')
     ok(path.leading_slash, 'has leading slash')
     ok(not path.trailing_slash, 'no trailing slash')

@@ -41,7 +41,7 @@ class Pyjo_Mixin_String(object):
     def __bytes__(self):
         """::
 
-            bytestring = bytes(obj)
+            bstring = bytes(obj)
 
         Byte-string representation of an object. (Python 3.x)
         """
@@ -205,7 +205,7 @@ class Pyjo_Mixin_String(object):
     def __unicode__(self):
         """::
 
-            unicodestring = unicode(obj)
+            ustring = unicode(obj)
 
         Unicode-string representation of an object. (Python 2.x)
         """

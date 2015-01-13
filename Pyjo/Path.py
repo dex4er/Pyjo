@@ -23,6 +23,7 @@ Pyjo.Path - Path
 import Pyjo.Base
 import Pyjo.Mixin.String
 
+from Pyjo.ByteStream import b
 from Pyjo.TextStream import u
 from Pyjo.Util import url_escape, url_unescape
 
@@ -70,11 +71,11 @@ class Pyjo_Path(Pyjo.Base.object, Pyjo.Mixin.String.object):
     def __bytes__(self):
         """::
 
-            bytestring = bytes(path)
+            bstring = bytes(path)
 
         Byte-string representation of an object. (Python 3.x)
         """
-        return bytes(self.to_str(), self.charset if self.charset is None else 'utf-8')
+        return self.to_bytes()
 
     def __iter__(self):
         """::
@@ -269,6 +270,45 @@ class Pyjo_Path(Pyjo.Base.object, Pyjo.Mixin.String.object):
             path = '/' + path
         return path
 
+    def to_bytes(self):
+        """::
+
+            bstring = path.to_bytes()
+
+        Turn path into a bytes string. ::
+
+            # b"/i/%E2%99%A5/pyjo"
+            Pyjo.Path.new('/i/%E2%99%A5/pyjo').to_bytes()
+
+            # b"i/%E2%99%A5/pyjo"
+            Pyjo.Path.new('i/%E2%99%A5/pyjo').to_bytes()
+        """
+        # Path
+        charset = self.charset
+
+        if self._path is not None:
+            if charset:
+                path = self._path.encode(charset)
+            else:
+                path = self._path
+            return url_escape(path, br'^A-Za-z0-9\-._~!$&\'()*+,;=%:@/')
+
+        if self._parts:
+            parts = self._parts
+            if charset:
+                parts = map(lambda p: p.encode(charset), parts)
+            path = b'/'.join(map(lambda p: url_escape(p, br'^A-Za-z0-9\-._~!$&\'()*+,;=:@'), parts))
+        else:
+            path = b''
+
+        if self._leading_slash:
+            path = b'/' + path
+
+        if self._trailing_slash:
+            path = path + b'/'
+
+        return path
+
     def to_dir(self):
         """::
 
@@ -322,31 +362,7 @@ class Pyjo_Path(Pyjo.Base.object, Pyjo.Mixin.String.object):
             # "i/%E2%99%A5/pyjo"
             Pyjo.Path.new('i/%E2%99%A5/pyjo').to_str()
         """
-        # Path
-        charset = self.charset
-
-        if self._path is not None:
-            if charset:
-                path = self._path.encode(charset).decode('iso-8859-1')
-            else:
-                path = self._path
-            return url_escape(path, r'^A-Za-z0-9\-._~!$&\'()*+,;=%:@/')
-
-        if self._parts:
-            parts = self._parts
-            if charset:
-                parts = map(lambda p: p.encode(charset).decode('iso-8859-1'), parts)
-            path = '/'.join(map(lambda p: url_escape(p, r'^A-Za-z0-9\-._~!$&\'()*+,;=:@'), parts))
-        else:
-            path = ''
-
-        if self._leading_slash:
-            path = '/' + path
-
-        if self._trailing_slash:
-            path = path + '/'
-
-        return path
+        return self.to_bytes().decode('ascii')
 
     @property
     def trailing_slash(self):
@@ -366,16 +382,21 @@ class Pyjo_Path(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
     def _parse(self, name, *args):
         if self._parts is None:
-            path = url_unescape(self._path if self._path is not None else '')
-            self._path = None
-
             charset = self.charset
 
-            if charset:
-                path = path.decode(charset)
-                slash = '/'
+            if self._path is not None:
+                path = self._path
             else:
+                path = u'' if charset else b''
+
+            if charset:
+                path = url_unescape(b(path, charset)).decode(charset)
+                slash = u'/'
+            else:
+                path = url_unescape(path)
                 slash = b'/'
+
+            self._path = None
 
             if path.startswith(slash):
                 path = path[1:]
