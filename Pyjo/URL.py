@@ -42,6 +42,7 @@ import Pyjo.Path
 
 from Pyjo.ByteStream import b
 from Pyjo.Regexp import m, s
+from Pyjo.TextStream import u
 from Pyjo.Util import punycode_decode, punycode_encode, url_escape, url_unescape
 
 
@@ -179,7 +180,7 @@ class Pyjo_URL(Pyjo.Base.object, Pyjo.Mixin.String.object):
         info = self.userinfo
         if info is None:
             return authority
-        info = url_escape(info.encode('utf-8'), r'^A-Za-z0-9\-._~!$&\'()*+,;=:')
+        info = u(url_escape(b(info), br'^A-Za-z0-9\-._~!$&\'()*+,;=:'))
 
         return info + '@' + authority
 
@@ -189,21 +190,21 @@ class Pyjo_URL(Pyjo.Base.object, Pyjo.Mixin.String.object):
             return self
 
         # Userinfo
-        (authority, found, g) = authority == s(r'^([^\@]+)\@', '')
+        (authority, found, g) = b(authority) == s(br'^([^\@]+)\@', '')
         if found:
-            self.userinfo = url_unescape(g[1]).decode('utf-8')
+            self.userinfo = u(url_unescape(g[1]))
 
         # Port
-        (authority, found, g) = authority == s(r':(\d+)$', '')
+        (authority, found, g) = authority == s(br':(\d+)$', '')
         if found:
             self.port = int(g[1])
 
         # Host
-        host = url_unescape(authority.encode('utf-8'))
+        host = url_unescape(authority)
         if host == m(br'[^\x00-\x7f]'):
-            self.ihost = host.decode('utf-8')
+            self.ihost = host
         else:
-            self.host = host.decode('ascii')
+            self.host = str(u(host))
 
         return self
 
@@ -282,22 +283,20 @@ class Pyjo_URL(Pyjo.Base.object, Pyjo.Mixin.String.object):
             # "example.com"
             Pyjo.URL.new('http://example.com').ihost
         """
-        host = self.host
-
-        if host is None:
+        if self.host is None:
             return
 
-        if host != m(r'[^\x00-\x7f]'):
-            return b(host, 'ascii').decode('ascii').lower()
+        if b(self.host) != m(br'[^\x00-\x7f]'):
+            return self.host.lower()
 
         # Encode
-        parts = map(lambda s: ('xn--' + punycode_encode(s).decode('ascii')) if s == m(r'[^\x00-\x7f]') else s, host.split('.'))
+        parts = map(lambda s: ('xn--' + punycode_encode(s).decode('ascii')) if b(s) == m(br'[^\x00-\x7f]') else s, self.host.split('.'))
         return '.'.join(parts).lower()
 
     @ihost.setter
     def ihost(self, value):
         # Decode
-        parts = map(lambda s: punycode_decode(s[4:]) if s == m(r'^xn--(.+)$') else s, value.split('.'))
+        parts = map(lambda s: punycode_decode(s[4:]) if s == m(br'^xn--(.+)$') else u(s), b(value).split(b'.'))
         self.host = '.'.join(parts)
         return self
 
@@ -353,10 +352,10 @@ class Pyjo_URL(Pyjo.Base.object, Pyjo.Mixin.String.object):
             # "sri@example.com"
             url.parse('mailto:sri@example.com').path
         """
-        g = url == m(r'^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?')
+        g = b(url) == m(br'^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?')
         if g:
             if g[2] is not None:
-                self.scheme = g[2]
+                self.scheme = u(g[2])
             if g[4] is not None:
                 self.authority = g[4]
             if g[5] is not None:
@@ -364,7 +363,7 @@ class Pyjo_URL(Pyjo.Base.object, Pyjo.Mixin.String.object):
             if g[7] is not None:
                 self.query = g[7]
             if g[9] is not None:
-                self.fragment = url_unescape(g[9]).decode('utf-8')
+                self.fragment = u(url_unescape(g[9]))
         return self
 
     @property
@@ -564,6 +563,15 @@ class Pyjo_URL(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
         return absolute
 
+    def to_bytes(self):
+        """::
+
+            bstring = url.to_bytes()
+
+        Turn URL into a bytes string.
+        """
+        return self.to_str().encode('ascii')
+
     def to_str(self):
         """::
 
@@ -598,7 +606,7 @@ class Pyjo_URL(Pyjo.Base.object, Pyjo.Mixin.String.object):
         if fragment is None:
             return url
 
-        return url + '#' + url_escape(fragment.encode('utf-8'), r'^A-Za-z0-9\-._~!$&\'()*+,;=%:@\/?')
+        return url + '#' + u(url_escape(b(fragment), br'^A-Za-z0-9\-._~!$&\'()*+,;=%:@\/?'))
 
 
 new = Pyjo_URL.new

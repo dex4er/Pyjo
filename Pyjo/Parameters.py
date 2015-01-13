@@ -13,7 +13,7 @@ Pyjo.Parameters - Parameters
 
     # Build
     params = Pyjo.Parameters.new(foo='bar', baz=23)
-    params.append(i='♥ pyjo')
+    params.append(i=u'♥ pyjo')
     print(params)
 
 :mod:`Pyjo.Parameters` is a container for form parameters used by :mod:`Pyjo.URL`
@@ -23,6 +23,7 @@ and based on :rfc:`3986` as well as `the HTML Living Standard <https://html.spec
 import Pyjo.Base
 import Pyjo.Mixin.String
 
+from Pyjo.ByteStream import b
 from Pyjo.Regexp import m, s
 from Pyjo.Base import lazy
 from Pyjo.TextStream import u
@@ -73,11 +74,11 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
     def __bytes__(self):
         """::
 
-            bytestring = bytes(params)
+            bstring = bytes(params)
 
         Byte-string representation of an object. (Python 3.x)
         """
-        return bytes(self.to_str(), self.charset if self.charset is None else 'utf-8')
+        return self.to_bytes()
 
     def __iter__(self):
         """::
@@ -239,25 +240,25 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
             charset = self.charset
 
-            for pair in string.split('&'):
-                g = pair == m(r'^([^=]+)(?:=(.*))?$')
+            for pair in string.split(b'&'):
+                g = pair == m(br'^([^=]+)(?:=(.*))?$')
 
                 if not g:
                     continue
 
                 name = g[1]
-                value = g[2] if g[2] is not None else ''
+                value = g[2] if g[2] is not None else b''
 
                 # Replace "+" with whitespace, unescape and decode
-                name -= s(r'\+', ' ', 'g')
-                value -= s(r'\+', ' ', 'g')
+                name -= s(br'\+', b' ', 'g')
+                value -= s(br'\+', b' ', 'g')
 
                 name = url_unescape(name)
                 value = url_unescape(value)
 
                 if charset:
-                    name = name.decode(charset)
-                    value = value.decode(charset)
+                    name = u(name, charset)
+                    value = u(value, charset)
 
                 self._params.append((name, value),)
 
@@ -279,7 +280,7 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
         """
         if len(args) == 1 and not isinstance(args[0], tuple):
             # String
-            self._string = u(args[0])
+            self._string = b(args[0], self.charset)
             return self
         else:
             # Pairs
@@ -303,6 +304,40 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
             else:
                 i += 1
         return self
+
+    def to_bytes(self):
+        """::
+
+            bstring = params.to_bytes()
+
+        Turn parameters into a bytes string.
+        """
+        # String
+        charset = self.charset
+
+        if self._string is not None:
+            return url_escape(self._string, br'^A-Za-z0-9\-._~!$&\'()*+,;=%:@/?')
+
+        # Build pairs
+        params = self.params
+        if not params:
+            return b''
+
+        pairs = []
+        for name, value in params:
+            if charset:
+                name = b(name, charset)
+                value = b(value, charset)
+
+            name = url_escape(name, br'^A-Za-z0-9\-._~!$\'()*,:@/?')
+            value = url_escape(value, br'^A-Za-z0-9\-._~!$\'()*,:@/?')
+
+            name -= s(br'%20', b'+', 'g')
+            value -= s(br'%20', b'+', 'g')
+
+            pairs.append(name + b'=' + value)
+
+        return b'&'.join(pairs)
 
     def to_dict(self):
         """::
@@ -333,41 +368,7 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
         Turn parameters into a string.
         """
-        # String
-        charset = self.charset
-        if self._string is not None:
-            if charset:
-                string = self._string.encode(charset).decode('iso-8859-1')
-            else:
-                string = self._string
-            return url_escape(string, r'^A-Za-z0-9\-._~!$&\'()*+,;=%:@/?')
-
-        # Build pairs
-        params = self.params
-        if not params:
-            return ''
-
-        pairs = []
-        for name, value in params:
-            if not isinstance(name, (bytes, str,)):
-                name = u(name)
-
-            if not isinstance(value, (bytes, str,)):
-                value = u(value)
-
-            if charset:
-                name = u(name).encode(charset).decode('iso-8859-1')
-                value = u(value).encode(charset).decode('iso-8859-1')
-
-            name = url_escape(name, r'^A-Za-z0-9\-._~!$\'()*,:@/?')
-            value = url_escape(value, r'^A-Za-z0-9\-._~!$\'()*,:@/?')
-
-            name -= s(r'%20', '+', 'g')
-            value -= s(r'%20', '+', 'g')
-
-            pairs.append(name + '=' + value)
-
-        return '&'.join(pairs)
+        return self.to_bytes().decode('ascii')
 
     def _param(self, name):
         values = []

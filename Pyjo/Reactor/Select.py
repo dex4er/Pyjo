@@ -191,7 +191,7 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.object):
     def _timer(self, cb, recurring, after):
         tid = None
         while True:
-            tid = md5_sum('t{0}{1}'.format(steady_time(), rand()))
+            tid = md5_sum('t{0}{1}'.format(steady_time(), rand()).encode('ascii'))
             if tid not in self._timers:
                 break
 

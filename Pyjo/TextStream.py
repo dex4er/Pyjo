@@ -45,7 +45,7 @@ class Pyjo_TextStream(base_object):
             if isinstance(value, unicode):
                 return super(Pyjo_TextStream, cls).__new__(cls, value)
             elif isinstance(value, str):
-                return super(Pyjo_TextStream, cls).__new__(cls, unicode(value).decode(charset))
+                return super(Pyjo_TextStream, cls).__new__(cls, value.decode(charset))
             else:
                 return super(Pyjo_TextStream, cls).__new__(cls, unicode(value))
 

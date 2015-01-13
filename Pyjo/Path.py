@@ -227,7 +227,7 @@ class Pyjo_Path(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
         Parse path.
         """
-        self._path = path
+        self._path = b(path, self.charset)
 
         self._parts = None
         self._leading_slash = False
@@ -287,11 +287,7 @@ class Pyjo_Path(Pyjo.Base.object, Pyjo.Mixin.String.object):
         charset = self.charset
 
         if self._path is not None:
-            if charset:
-                path = self._path.encode(charset)
-            else:
-                path = self._path
-            return url_escape(path, br'^A-Za-z0-9\-._~!$&\'()*+,;=%:@/')
+            return url_escape(self._path, br'^A-Za-z0-9\-._~!$&\'()*+,;=%:@/')
 
         if self._parts:
             parts = self._parts

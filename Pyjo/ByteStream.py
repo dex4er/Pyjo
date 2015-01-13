@@ -36,8 +36,10 @@ class Pyjo_ByteStream(base_object):
         if sys.version_info >= (3, 0):
             if isinstance(value, bytes):
                 return super(Pyjo_ByteStream, cls).__new__(cls, value)
-            else:
+            elif isinstance(value, str):
                 return super(Pyjo_ByteStream, cls).__new__(cls, value, charset)
+            else:
+                return super(Pyjo_ByteStream, cls).__new__(cls, str(value), charset)
         else:
             if isinstance(value, unicode):
                 return super(Pyjo_ByteStream, cls).__new__(cls, value.encode(charset))

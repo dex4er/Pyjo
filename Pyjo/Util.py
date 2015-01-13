@@ -72,7 +72,7 @@ def isiterable_not_str(obj):
 def md5_sum(bstring):
     m = hashlib.md5()
     m.update(bstring)
-    return Pyjo.ByteStream.new(m.hexdigest())
+    return m.hexdigest()
 
 
 class nonlocals(object):

@@ -45,7 +45,10 @@ class Pyjo_Mixin_String(object):
 
         Byte-string representation of an object. (Python 3.x)
         """
-        return bytes(self.to_str(), 'utf-8')
+        if hasattr(self, 'to_bytes'):
+            return self.to_bytes()
+        else:
+            return bytes(self.to_str(), 'utf-8')
 
     def __complex__(self):
         """::

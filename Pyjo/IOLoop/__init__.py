@@ -226,7 +226,7 @@ class Pyjo_IOLoop(Pyjo.Base.object):
     def _id(self):
         taskid = None
         while True:
-            taskid = md5_sum('c{0}{1}'.format(steady_time(), rand()))
+            taskid = md5_sum('c{0}{1}'.format(steady_time(), rand()).encode('ascii'))
             if taskid not in self._connections and taskid not in self._acceptors:
                 break
         return taskid
