@@ -167,7 +167,7 @@ class Pyjo_URL(Pyjo.Base.object, Pyjo.Mixin.String.object):
         Authority part of this URL. ::
 
             # "root:%E2%99%A5@xn--n3h.net:8080"
-            Pyjo.URL.new('http://root:♥@☃.net:8080/test').authority
+            Pyjo.URL.new(u'http://root:♥@☃.net:8080/test').authority
 
             # "root@example.com"
             Pyjo.URL.new('http://root@example.com/test').authority
@@ -256,7 +256,7 @@ class Pyjo_URL(Pyjo.Base.object, Pyjo.Mixin.String.object):
         Normalized version of :attr:`host` and :attr:`port`. ::
 
             # "xn--n3h.net:8080"
-            Pyjo.URL.new('http://☃.net:8080/test').host_port
+            Pyjo.URL.new(u'http://☃.net:8080/test').host_port
 
             # "example.com"
             Pyjo.URL.new('http://example.com/test').host_port
@@ -278,7 +278,7 @@ class Pyjo_URL(Pyjo.Base.object, Pyjo.Mixin.String.object):
         Host part of this URL in punycode format. ::
 
             # "xn--n3h.net"
-            Pyjo.URL.new('http://☃.net').ihost
+            Pyjo.URL.new(u'http://☃.net').ihost
 
             # "example.com"
             Pyjo.URL.new('http://example.com').ihost
