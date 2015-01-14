@@ -36,7 +36,7 @@ class Pyjo_TextStream(base_object):
     Construct a new :mod:`Pyjo.TextStream` object.
     """
     def __new__(cls, value, charset=DEFAULT_CHARSET):
-        return super(Pyjo_TextStream, cls).__new__(cls, Pyjo.Util.text(value))
+        return super(Pyjo_TextStream, cls).__new__(cls, Pyjo.Util.u(value, charset))
 
     def html_unescape(self):
         """::

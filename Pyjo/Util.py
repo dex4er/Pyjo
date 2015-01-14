@@ -21,13 +21,13 @@ DEFAULT_CHARSET = 'utf-8'
 
 
 if sys.version_info >= (3, 0):
-    def binary(string, charset=DEFAULT_CHARSET):
+    def b(string, charset=DEFAULT_CHARSET):
         if isbytes(string):
             return bytes(string)
         else:
             return bytes(str(string), charset)
 else:
-    def binary(string, charset=DEFAULT_CHARSET):
+    def b(string, charset=DEFAULT_CHARSET):
         if isinstance(string, unicode):
             return string.encode(charset)
         else:
@@ -106,7 +106,7 @@ def rand(value=1):
 
 def slurp(path):
     with open(path, "r") as f:
-        return binary(f.read())
+        return b(f.read())
 
 
 def steady_time():
@@ -114,13 +114,13 @@ def steady_time():
 
 
 if sys.version_info >= (3, 0):
-    def text(string, charset=DEFAULT_CHARSET):
+    def u(string, charset=DEFAULT_CHARSET):
         if isbytes(string):
             return string.decode(charset)
         else:
             return str(string)
 else:
-    def text(string, charset=DEFAULT_CHARSET):
+    def u(string, charset=DEFAULT_CHARSET):
         if isinstance(string, unicode):
             return string
         elif hasattr(string, '__unicode__'):
@@ -147,7 +147,7 @@ def url_escape(bstring, pattern=None):
 
 
 def url_unescape(bstring):
-    return bstring == s(br'%([0-9a-fA-F]{2})', lambda m: binary(chr(int(m[1], 16)), 'iso-8859-1'), 'gr')
+    return bstring == s(br'%([0-9a-fA-F]{2})', lambda m: b(chr(int(m[1], 16)), 'iso-8859-1'), 'gr')
 
 
 def warn(*args):

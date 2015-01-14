@@ -34,7 +34,7 @@ class Pyjo_ByteStream(base_object):
     Construct a new :mod:`Pyjo.ByteStream` object.
     """
     def __new__(cls, value, charset=DEFAULT_CHARSET):
-        return Pyjo.Util.binary(value, charset)
+        return super(Pyjo_ByteStream, cls).__new__(cls, Pyjo.Util.b(value, charset))
 
     def decode(self, charset=DEFAULT_CHARSET):
         """::
@@ -51,7 +51,7 @@ class Pyjo_ByteStream(base_object):
 
     @classmethod
     def new(cls, value, charset=DEFAULT_CHARSET):
-        return super(Pyjo_ByteStream, cls).__new__(cls, Pyjo.Util.binary(value))
+        return Pyjo_ByteStream(value, charset)
 
     def url_escape(self):
         """::
