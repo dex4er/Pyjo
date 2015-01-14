@@ -86,14 +86,6 @@ def not_implemented(method):
     return stub
 
 
-def punycode_decode(string):
-    return Pyjo.ByteStream.new(string, 'iso-8859-1').decode('punycode')
-
-
-def punycode_encode(string):
-    return Pyjo.TextStream.new(string).encode('punycode')
-
-
 def rand(value=1):
     return random.random() * value
 
@@ -122,11 +114,11 @@ def url_escape(bstring, pattern=None):
 
     replacement = lambda m: b'%' + format(ord(m[1]), 'X').encode('ascii')
 
-    return Pyjo.ByteStream.new(bstring == s(pattern, replacement, 'gr'))
+    return bstring == s(pattern, replacement, 'gr')
 
 
 def url_unescape(bstring):
-    return Pyjo.ByteStream.new(bstring == s(br'%([0-9a-fA-F]{2})', lambda m: Pyjo.ByteStream.new(chr(int(m[1], 16)), 'iso-8859-1'), 'gr'))
+    return bstring == s(br'%([0-9a-fA-F]{2})', lambda m: Pyjo.ByteStream.new(chr(int(m[1], 16)), 'iso-8859-1'), 'gr')
 
 
 def warn(*args):

@@ -43,7 +43,7 @@ import Pyjo.Path
 from Pyjo.ByteStream import b
 from Pyjo.Regexp import m, s
 from Pyjo.TextStream import u
-from Pyjo.Util import punycode_decode, punycode_encode, url_escape, url_unescape
+from Pyjo.Util import url_escape, url_unescape
 
 
 class Pyjo_URL(Pyjo.Base.object, Pyjo.Mixin.String.object):
@@ -290,13 +290,13 @@ class Pyjo_URL(Pyjo.Base.object, Pyjo.Mixin.String.object):
             return self.host.lower()
 
         # Encode
-        parts = map(lambda s: ('xn--' + punycode_encode(s).decode('ascii')) if b(s) == m(br'[^\x00-\x7f]') else s, self.host.split('.'))
+        parts = map(lambda s: ('xn--' + s.encode('punycode').decode('ascii')) if b(s) == m(br'[^\x00-\x7f]') else s, self.host.split('.'))
         return '.'.join(parts).lower()
 
     @ihost.setter
     def ihost(self, value):
         # Decode
-        parts = map(lambda s: punycode_decode(s[4:]) if s == m(br'^xn--(.+)$') else u(s), b(value).split(b'.'))
+        parts = map(lambda s: s[4:].decode('punycode') if s == m(br'^xn--(.+)$') else u(s), b(value).split(b'.'))
         self.host = '.'.join(parts)
         return self
 
