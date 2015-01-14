@@ -187,11 +187,11 @@ class Pyjo_Mixin_String(object):
         String representation of an object shown in console.
         """
         if self.__module__ == '__main__':
-            return "{0}('{1}')".format(self.__class__.__name__, str(self))
+            return "{0}({1})".format(self.__class__.__name__, repr(self.to_str()))
         elif isinstance(self, Pyjo.Base.object):
-            return "{0}.new('{1}')".format(self.__module__, str(self))
+            return "{0}.new({1})".format(self.__module__, repr(self.to_str()))
         else:
-            return "{0}.{1}('{2}')".format(self.__module__, self.__class__.__name__, str(self))
+            return "{0}.{1}({2})".format(self.__module__, self.__class__.__name__, repr(self.to_str()))
 
     def __str__(self):
         """::
