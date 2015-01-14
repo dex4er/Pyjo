@@ -51,7 +51,7 @@ class Pyjo_ByteStream(base_object):
 
     @classmethod
     def new(cls, value, charset=DEFAULT_CHARSET):
-        return Pyjo_ByteStream(value, charset)
+        return super(Pyjo_ByteStream, cls).__new__(cls, Pyjo.Util.binary(value))
 
     def url_escape(self):
         """::
