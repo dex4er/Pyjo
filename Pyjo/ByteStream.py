@@ -47,11 +47,46 @@ class Pyjo_ByteStream(base_object):
                 return super(Pyjo_ByteStream, cls).__new__(cls, value)
 
     def decode(self, charset=DEFAULT_CHARSET):
+        """::
+
+            stream = stream.decode()
+            stream = stream.decode('iso-8859-1')
+
+        Decode bytestream, defaults to ``utf-8``, and return new :mod:`Pyjo.TextStream` object. ::
+
+            stream.decode('UTF-16LE').unquote().trim().say()
+
+        """
         return Pyjo.TextStream.new(super(Pyjo_ByteStream, self).decode(charset))
 
     @classmethod
     def new(cls, value, charset=DEFAULT_CHARSET):
         return Pyjo_ByteStream(value, charset)
+
+    def url_escape(self):
+        """::
+
+            stream = stream.url_escape()
+            stream = stream.url_escape(br'^A-Za-z0-9\-._~')
+
+        Percent encode all unsafe characters in bytestream with
+        :func:`Pyjo.Util.url_escape`. ::
+
+            b('foo bar baz').url_escape().decode().say()
+        """
+        return self.new(Pyjo.Util.url_escape(self))
+
+    def url_unescape(self):
+        """
+
+            stream = stream.url_unescape()
+
+        Decode percent encoded characters in bytestream with
+        :func:`Pyjo.Util.url_unescape`. ::
+
+            b('%3Chtml%3E').url_unescape().decode().xml_escape().say()
+        """
+        return self.new(Pyjo.Util.url_unescape(self))
 
 
 def b(value, charset=DEFAULT_CHARSET):

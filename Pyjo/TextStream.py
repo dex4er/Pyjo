@@ -63,8 +63,8 @@ class Pyjo_TextStream(base_object):
     def encode(self, charset=DEFAULT_CHARSET):
         """::
 
-            stream = $stream->encode;
-            stream = $stream->encode('iso-8859-1')
+            stream = stream.encode
+            stream = stream.encode('iso-8859-1')
 
         Encode bytestream, defaults to ``utf-8``, and return new :mod:`Pyjo.ByteStream` object. ::
 
