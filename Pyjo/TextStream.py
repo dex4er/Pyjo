@@ -35,8 +35,11 @@ class Pyjo_TextStream(base_object):
 
     Construct a new :mod:`Pyjo.TextStream` object.
     """
-    def __new__(cls, value, charset=DEFAULT_CHARSET):
+    def __new__(cls, value=u'', charset=DEFAULT_CHARSET):
         return super(Pyjo_TextStream, cls).__new__(cls, Pyjo.Util.u(value, charset))
+
+    def __repr__(self):
+        return "{0}.new({1})".format(self.__module__, super(Pyjo_TextStream, self).__repr__())
 
     def html_unescape(self):
         """::
@@ -62,7 +65,7 @@ class Pyjo_TextStream(base_object):
         return Pyjo.ByteStream.new(super(Pyjo_TextStream, self).encode(charset))
 
     @classmethod
-    def new(cls, value, charset=DEFAULT_CHARSET):
+    def new(cls, value=u'', charset=DEFAULT_CHARSET):
         return Pyjo_TextStream(value, charset)
 
     def say(self, **kwargs):
@@ -93,7 +96,7 @@ class Pyjo_TextStream(base_object):
         return self.new(Pyjo.Util.xml_escape(self))
 
 
-def u(value, charset=DEFAULT_CHARSET):
+def u(value=u'', charset=DEFAULT_CHARSET):
     """::
 
         stream = u('test123')

@@ -24,11 +24,14 @@ class Pyjo_Collection(list):
 
     Construct a new :mod:`Pyjo.Collection` object.
     """
-    def __new__(cls, value):
-        return super(Pyjo_Collection, cls).__new__(cls)
+    def __new__(cls, value=[]):
+        return super(Pyjo_Collection, cls).__new__(cls, value)
+
+    def __repr__(self):
+        return "{0}.new({1})".format(self.__module__, super(Pyjo_Collection, self).__repr__())
 
     @classmethod
-    def new(cls, value):
+    def new(cls, value=[]):
         return Pyjo_Collection(value)
 
     def flatten(self):
@@ -38,7 +41,7 @@ class Pyjo_Collection(list):
         return Pyjo.TextStream.new(string.join(map(lambda s: Pyjo.Util.u(s), self)))
 
 
-def c(value):
+def c(value=[]):
     """::
 
         collection = c([1, 2, 3])
