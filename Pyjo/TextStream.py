@@ -13,10 +13,10 @@ Pyjo.TextStream - TextStream
 
 from __future__ import print_function
 
+import sys
+
 import Pyjo.ByteStream
 import Pyjo.Util
-
-import sys
 
 
 if sys.version_info >= (3, 0):
@@ -36,18 +36,7 @@ class Pyjo_TextStream(base_object):
     Construct a new :mod:`Pyjo.TextStream` object.
     """
     def __new__(cls, value, charset=DEFAULT_CHARSET):
-        if sys.version_info >= (3, 0):
-            if isinstance(value, bytes):
-                return super(Pyjo_TextStream, cls).__new__(cls, value.decode(charset))
-            else:
-                return super(Pyjo_TextStream, cls).__new__(cls, str(value))
-        else:
-            if isinstance(value, unicode):
-                return super(Pyjo_TextStream, cls).__new__(cls, value)
-            elif isinstance(value, str):
-                return super(Pyjo_TextStream, cls).__new__(cls, value.decode(charset))
-            else:
-                return super(Pyjo_TextStream, cls).__new__(cls, unicode(value))
+        return Pyjo.Util.text(value, charset)
 
     def html_unescape(self):
         """::

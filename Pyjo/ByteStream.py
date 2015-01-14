@@ -11,9 +11,10 @@ Pyjo.ByteStream - ByteStream
 """
 
 
-import Pyjo.TextStream
-
 import sys
+
+import Pyjo.TextStream
+import Pyjo.Util
 
 
 if sys.version_info >= (3, 0):
@@ -33,18 +34,7 @@ class Pyjo_ByteStream(base_object):
     Construct a new :mod:`Pyjo.ByteStream` object.
     """
     def __new__(cls, value, charset=DEFAULT_CHARSET):
-        if sys.version_info >= (3, 0):
-            if isinstance(value, bytes):
-                return super(Pyjo_ByteStream, cls).__new__(cls, value)
-            elif isinstance(value, str):
-                return super(Pyjo_ByteStream, cls).__new__(cls, value, charset)
-            else:
-                return super(Pyjo_ByteStream, cls).__new__(cls, str(value), charset)
-        else:
-            if isinstance(value, unicode):
-                return super(Pyjo_ByteStream, cls).__new__(cls, value.encode(charset))
-            else:
-                return super(Pyjo_ByteStream, cls).__new__(cls, value)
+        return Pyjo.Util.binary(value, charset)
 
     def decode(self, charset=DEFAULT_CHARSET):
         """::
