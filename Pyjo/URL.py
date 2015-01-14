@@ -190,12 +190,12 @@ class Pyjo_URL(Pyjo.Base.object, Pyjo.Mixin.String.object):
             return self
 
         # Userinfo
-        (authority, found, g) = b(authority) == s(br'^([^\@]+)\@', '')
+        (authority, found, g) = b(authority) == s(br'^([^\@]+)\@', b'')
         if found:
             self.userinfo = u(url_unescape(g[1]))
 
         # Port
-        (authority, found, g) = authority == s(br':(\d+)$', '')
+        (authority, found, g) = authority == s(br':(\d+)$', b'')
         if found:
             self.port = int(g[1])
 
