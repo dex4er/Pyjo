@@ -10,14 +10,28 @@ import random
 import sys
 import time
 
-import Pyjo.ByteStream
-import Pyjo.TextStream
-
 from Pyjo.Regexp import s
 
 
 class Error(Exception):
     pass
+
+
+DEFAULT_CHARSET = 'utf-8'
+
+
+if sys.version_info >= (3, 0):
+    def binary(string, charset=DEFAULT_CHARSET):
+        if isbytes(string):
+            return bytes(string)
+        else:
+            return bytes(str(string), charset)
+else:
+    def binary(string, charset=DEFAULT_CHARSET):
+        if isinstance(string, unicode):
+            return string.encode(charset)
+        else:
+            return str(string)
 
 
 def decorator(func):
@@ -92,18 +106,33 @@ def rand(value=1):
 
 def slurp(path):
     with open(path, "r") as f:
-        return Pyjo.ByteStream.new(f.read())
+        return binary(f.read())
 
 
 def steady_time():
     return time.time()
 
 
-def uchr(i):
-    if sys.version_info >= (3, 0):
-        return chr(i)
-    else:
-        return unichr(i)
+if sys.version_info >= (3, 0):
+    def text(string, charset=DEFAULT_CHARSET):
+        if isbytes(string):
+            return string.decode(charset)
+        else:
+            return str(string)
+else:
+    def text(string, charset=DEFAULT_CHARSET):
+        if isinstance(string, unicode):
+            return string
+        elif hasattr(string, '__unicode__'):
+            return unicode(string)
+        else:
+            return str(string).decode(charset)
+
+
+if sys.version_info >= (3, 0):
+    uchr = chr
+else:
+    uchr = unichr
 
 
 def url_escape(bstring, pattern=None):
@@ -118,7 +147,7 @@ def url_escape(bstring, pattern=None):
 
 
 def url_unescape(bstring):
-    return bstring == s(br'%([0-9a-fA-F]{2})', lambda m: Pyjo.ByteStream.new(chr(int(m[1], 16)), 'iso-8859-1'), 'gr')
+    return bstring == s(br'%([0-9a-fA-F]{2})', lambda m: binary(chr(int(m[1], 16)), 'iso-8859-1'), 'gr')
 
 
 def warn(*args):
