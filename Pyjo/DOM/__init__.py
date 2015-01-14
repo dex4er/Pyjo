@@ -36,6 +36,7 @@ should not use it for validation.
 
 
 import Pyjo.Base
+import Pyjo.Collection
 import Pyjo.DOM.CSS
 import Pyjo.DOM.HTML
 import Pyjo.Mixin.String
@@ -88,6 +89,10 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
     def _build(self, tree, xml):
         return self.new().set(tree=tree, xml=xml)
+
+    def _collect(self, *args):
+        xml = self.xml
+        return Pyjo.Collection.new(map(lambda a: self._build(a, xml), args))
 
     def _css(self):
         return Pyjo.DOM.CSS.new(tree=self.tree)
