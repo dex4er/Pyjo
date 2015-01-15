@@ -21,46 +21,6 @@ from Pyjo.Regexp import m
 from Pyjo.Util import html_unescape, xml_escape
 
 
-ATTR_RE = r'''
-  ([^<>=\s\/]+|\/)   # Key
-  (?:
-    \s*=\s*
-    (?:
-      "([^"]*?)"     # Quotation marks
-    |
-      '([^']*?)'     # Apostrophes
-    |
-      ([^>\s]*)      # Unquoted
-    )
-  )?
-  \s*
-'''
-
-TOKEN_RE = r'''
-  (?P<text>[^<]+)?                                     # Text
-  (?:
-    <(?:
-      !(?:
-        DOCTYPE(?P<doctype>
-        \s+\w+                                         # Doctype
-        (?:(?:\s+\w+)?(?:\s+(?:"[^"]*"|'[^']*'))+)?    # External ID
-        (?:\s+\[.+?\])?                                # Int Subset
-        \s*)
-      |
-        --(?P<comment>.*?)--\s*                        # Comment
-      |
-        \[CDATA\[(?P<cdata>.*?)\]\]                    # CDATA
-      )
-    |
-      \?(?P<pi>.*?)\?                                  # Processing Instruction
-    |
-      \s*(?P<raw>(?P<rawtag>textarea)\s*(?:''' + ATTR_RE + ''')*.*?(.*?)<\s*/\s*(?P=rawtag)\s*)  # Raw
-    |
-      \s*(?P<tag>[^<>\s]+\s*(?:''' + ATTR_RE + ''')*)  # Tag
-    )>
-  )?
-'''
-
 # HTML elements that only contain raw text
 RAW = {'script', 'style'}
 
@@ -126,6 +86,49 @@ BLOCK = {'a', 'address', 'applet', 'article', 'aside', 'b', 'big',
          'style', 'summary', 'table', 'tbody', 'td', 'template', 'textarea',
          'tfoot', 'th', 'thead', 'title', 'tr', 'tt', 'u', 'ul', 'xmp'}
 
+ATTR_RE = r'''
+  ([^<>=\s\/]+|\/)   # Key
+  (?:
+    \s*=\s*
+    (?:
+      "([^"]*?)"     # Quotation marks
+    |
+      '([^']*?)'     # Apostrophes
+    |
+      ([^>\s]*)      # Unquoted
+    )
+  )?
+  \s*
+'''
+
+TOKEN_RE = r'''
+  (?P<text>[^<]+)?                                     # Text
+  (?:
+    <(?:
+      !(?:
+        DOCTYPE(?P<doctype>
+        \s+\w+                                        # Doctype
+        (?:(?:\s+\w+)?(?:\s+(?:"[^"]*"|'[^']*'))+)?   # External ID
+        (?:\s+\[.+?\])?                               # Int Subset
+        \s*)
+      |
+        --(?P<comment>.*?)--\s*                       # Comment
+      |
+        \[CDATA\[(?P<cdata>.*?)\]\]                   # CDATA
+      )
+    |
+      \?(?P<pi>.*?)\?                                 # Processing Instruction
+    |
+      \s*(?P<rawtag>''' + '|'.join(RAW | RCDATA) + ''')\s*
+      (?:''' + ATTR_RE + ''')*>
+      (?P<raw>.*?)                                    # Raw
+      <\s*/\s*(?P=rawtag)\s*
+    |
+      \s*(?P<tag>[^<>\s]+\s*(?:''' + ATTR_RE + ''')*) # Tag
+    )>
+  )?
+'''
+
 
 class Pyjo_DOM_HTML(Pyjo.Base.object):
     """::
@@ -167,8 +170,7 @@ class Pyjo_DOM_HTML(Pyjo.Base.object):
         current = tree
         text = None
 
-        for g in m(TOKEN_RE, 'cgisx').match(html):
-            print(g);
+        for g in m(TOKEN_RE, 'gisx').match(html):
             text, doctype, comment, cdata, pi, tag, raw, rawtag = g['text'], g['doctype'], g['comment'], g['cdata'], g['pi'], g['tag'], g['raw'], g['rawtag']
             if rawtag is not None:
                 tag = rawtag
@@ -223,20 +225,16 @@ class Pyjo_DOM_HTML(Pyjo.Base.object):
 
                         current = _start(start, attrs, xml, current)
 
+                        # Raw text elements
+                        if not xml and raw is not None:
+                            node = _node(current, 'raw', html_unescape(raw) if start in RCDATA else raw)
+                            if node:
+                                current = node
+                            current = _end(start, 0, current)
+
                         # Element without end tag (self-closing)
                         if not xml and start in EMPTY or (xml or start not in BLOCK) and closing:
                             current = _end(start, xml, current)
-
-#                             # Raw text elements
-#                             if xml or start not in RAW and start not in RCDATA:
-#                                 continue
-#                             g = html[pos:] == m(r'^(.*?)<\s*/\s*' + start + '\s*>', 'is')
-#                             if not g:
-#                                 continue
-#                             node = _node(current, 'raw', html_unescape(g[1]) if start in RCDATA else g[1])
-#                             if node:
-#                                 current = node
-#                             current = _end(start, 0, current)
 
             # DOCTYPE
             elif doctype is not None:
