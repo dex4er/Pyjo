@@ -37,27 +37,27 @@ ATTR_RE = r'''
 '''
 
 TOKEN_RE = r'''
-  ([^<]+)?                                            # Text
+  (?P<text>[^<]+)?                                     # Text
   (?:
     <(?:
       !(?:
-        DOCTYPE(
-        \s+\w+                                        # Doctype
-        (?:(?:\s+\w+)?(?:\s+(?:"[^"]*"|'[^']*'))+)?   # External ID
-        (?:\s+\[.+?\])?                               # Int Subset
+        DOCTYPE(?P<doctype>
+        \s+\w+                                         # Doctype
+        (?:(?:\s+\w+)?(?:\s+(?:"[^"]*"|'[^']*'))+)?    # External ID
+        (?:\s+\[.+?\])?                                # Int Subset
         \s*)
       |
-        --(.*?)--\s*                                  # Comment
+        --(?P<comment>.*?)--\s*                        # Comment
       |
-        \[CDATA\[(.*?)\]\]                            # CDATA
+        \[CDATA\[(?P<cdata>.*?)\]\]                    # CDATA
       )
     |
-      \?(.*?)\?                                       # Processing Instruction
+      \?(?P<pi>.*?)\?                                  # Processing Instruction
     |
-      \s*([^<>\s]+\s*(?:''' + ATTR_RE + ''')*)     # Tag
+      \s*(?P<raw>(?P<rawtag>textarea)\s*(?:''' + ATTR_RE + ''')*.*?(.*?)<\s*/\s*(?P=rawtag)\s*)  # Raw
+    |
+      \s*(?P<tag>[^<>\s]+\s*(?:''' + ATTR_RE + ''')*)  # Tag
     )>
-  |
-    (<)                                               # Runaway "<"
   )?
 '''
 
@@ -170,17 +170,16 @@ class Pyjo_DOM_HTML(Pyjo.Base.object):
         pos = 0
         while True:
             prevpos = pos
-            matchiter = html[pos:] == m('^' + TOKEN_RE, 'cgisx')
+            matchiter = html[pos:] == m(TOKEN_RE, 'cgisx')
             if not matchiter:
                 break
             for g in matchiter:
-                text, doctype, comment, cdata, pi, tag, runaway = g[1], g[2], g[3], g[4], g[5], g[6], g[11]
+                print(g);
+                text, doctype, comment, cdata, pi, tag, raw, rawtag = g['text'], g['doctype'], g['comment'], g['cdata'], g['pi'], g['tag'], g['raw'], g['rawtag']
+                if rawtag is not None:
+                    tag = rawtag
 
                 pos += g['end']
-
-                # Text (and runaway "<")
-                if runaway is not None and text is not None:
-                    text += '<'
 
                 if text is not None:
                     node = _node(current, 'text', html_unescape(text))
