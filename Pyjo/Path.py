@@ -23,9 +23,7 @@ Pyjo.Path - Path
 import Pyjo.Base
 import Pyjo.Mixin.String
 
-from Pyjo.ByteStream import b
-from Pyjo.TextStream import u
-from Pyjo.Util import url_escape, url_unescape
+from Pyjo.Util import b, u, url_escape, url_unescape
 
 
 class Pyjo_Path(Pyjo.Base.object, Pyjo.Mixin.String.object):

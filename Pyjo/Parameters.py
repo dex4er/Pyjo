@@ -23,11 +23,9 @@ and based on :rfc:`3986` as well as `the HTML Living Standard <https://html.spec
 import Pyjo.Base
 import Pyjo.Mixin.String
 
-from Pyjo.ByteStream import b
-from Pyjo.Regexp import m, s
 from Pyjo.Base import lazy
-from Pyjo.TextStream import u
-from Pyjo.Util import isiterable_not_str, url_escape, url_unescape
+from Pyjo.Regexp import m, s
+from Pyjo.Util import b, u, isiterable_not_str, url_escape, url_unescape
 
 
 class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
