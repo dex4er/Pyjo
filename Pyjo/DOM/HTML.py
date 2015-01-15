@@ -167,115 +167,103 @@ class Pyjo_DOM_HTML(Pyjo.Base.object):
         current = tree
         text = None
 
-        pos = 0
-        while True:
-            prevpos = pos
-            matchiter = html[pos:] == m(TOKEN_RE, 'cgisx')
-            if not matchiter:
-                break
-            for g in matchiter:
-                print(g);
-                text, doctype, comment, cdata, pi, tag, raw, rawtag = g['text'], g['doctype'], g['comment'], g['cdata'], g['pi'], g['tag'], g['raw'], g['rawtag']
-                if rawtag is not None:
-                    tag = rawtag
+        for g in m(TOKEN_RE, 'cgisx').match(html):
+            print(g);
+            text, doctype, comment, cdata, pi, tag, raw, rawtag = g['text'], g['doctype'], g['comment'], g['cdata'], g['pi'], g['tag'], g['raw'], g['rawtag']
+            if rawtag is not None:
+                tag = rawtag
 
-                pos += g['end']
+            if text is not None:
+                node = _node(current, 'text', html_unescape(text))
+                if node:
+                    current = node
 
-                if text is not None:
-                    node = _node(current, 'text', html_unescape(text))
-                    if node:
-                        current = node
+            # Tag
+            if tag is not None:
 
-                # Tag
-                if tag is not None:
+                # End
+                g = tag == m(r'^\/\s*(\S+)')
+                if g:
+                    current = _end(g[1] if xml else g[1].lower(), xml, current)
 
-                    # End
-                    g = tag == m(r'^\/\s*(\S+)')
+                # Start
+                else:
+                    g = tag == m(r'^([^\s/]+)([\s\S]*)')
                     if g:
-                        current = _end(g[1] if xml else g[1].lower(), xml, current)
+                        start, attr = g[1], g[2]
+                        if not xml:
+                            start = start.lower()
 
-                    # Start
-                    else:
-                        g = tag == m(r'^([^\s/]+)([\s\S]*)')
-                        if g:
-                            start, attr = g[1], g[2]
-                            if not xml:
-                                start = start.lower()
+                        attrs = {}
+                        closing = False
 
-                            attrs = {}
-                            closing = False
+                        # Attributes
+                        for g in m(ATTR_RE, 'gx').match(attr):
+                            key = g[1]
+                            if g[2] is not None:
+                                value = g[2]
+                            elif g[2] is not None:
+                                value = g[3]
+                            else:
+                                value = g[4]
 
-                            # Attributes
-                            for g in m(ATTR_RE, 'gx').match(attr):
-                                key = g[1]
-                                if g[2] is not None:
-                                    value = g[2]
-                                elif g[2] is not None:
-                                    value = g[3]
-                                else:
-                                    value = g[4]
-
-                                # Empty tag
-                                if key == '/':
-                                    closing = True
-                                    continue
-
-                                if value is not None:
-                                    attrs[key] = html_unescape(value)
-                                else:
-                                    attrs[key] = value
-
-                            # "image" is an alias for "img"
-                            if not xml and start == 'image':
-                                start = 'img'
-
-                            current = _start(start, attrs, xml, current)
-
-                            # Element without end tag (self-closing)
-                            if not xml and start in EMPTY or (xml or start not in BLOCK) and closing:
-                                current = _end(start, xml, current)
-
-                            # Raw text elements
-                            if xml or start not in RAW and start not in RCDATA:
+                            # Empty tag
+                            if key == '/':
+                                closing = True
                                 continue
-                            g = html[pos:] == m(r'^(.*?)<\s*/\s*' + start + '\s*>', 'is')
-                            if not g:
-                                continue
-                            pos += g['end']
-                            node = _node(current, 'raw', html_unescape(g[1]) if start in RCDATA else g[1])
-                            if node:
-                                current = node
-                            current = _end(start, 0, current)
 
-                # DOCTYPE
-                elif doctype is not None:
-                    node = _node(current, 'doctype', doctype)
-                    if node:
-                        current = node
+                            if value is not None:
+                                attrs[key] = html_unescape(value)
+                            else:
+                                attrs[key] = value
 
-                # Comment
-                elif comment is not None:
-                    node = _node(current, 'comment', comment)
-                    if node:
-                        current = node
+                        # "image" is an alias for "img"
+                        if not xml and start == 'image':
+                            start = 'img'
 
-                # CDATA
-                elif cdata is not None:
-                    node = _node(current, 'cdata', cdata)
-                    if node:
-                        current = node
+                        current = _start(start, attrs, xml, current)
 
-                # Processing instruction (try to detect XML)
-                elif pi is not None:
-                    if self.xml is None and pi == m('xml', 'i'):
-                        xml = True
-                        self.xml = xml
-                    node = _node(current, 'pi', pi)
-                    if node:
-                        current = node
+                        # Element without end tag (self-closing)
+                        if not xml and start in EMPTY or (xml or start not in BLOCK) and closing:
+                            current = _end(start, xml, current)
 
-            if pos == prevpos:
-                break
+#                             # Raw text elements
+#                             if xml or start not in RAW and start not in RCDATA:
+#                                 continue
+#                             g = html[pos:] == m(r'^(.*?)<\s*/\s*' + start + '\s*>', 'is')
+#                             if not g:
+#                                 continue
+#                             node = _node(current, 'raw', html_unescape(g[1]) if start in RCDATA else g[1])
+#                             if node:
+#                                 current = node
+#                             current = _end(start, 0, current)
+
+            # DOCTYPE
+            elif doctype is not None:
+                node = _node(current, 'doctype', doctype)
+                if node:
+                    current = node
+
+            # Comment
+            elif comment is not None:
+                node = _node(current, 'comment', comment)
+                if node:
+                    current = node
+
+            # CDATA
+            elif cdata is not None:
+                node = _node(current, 'cdata', cdata)
+                if node:
+                    current = node
+
+            # Processing instruction (try to detect XML)
+            elif pi is not None:
+                if self.xml is None and pi == m('xml', 'i'):
+                    xml = True
+                    self.xml = xml
+                node = _node(current, 'pi', pi)
+                if node:
+                    current = node
 
         self.tree = tree
         return self
