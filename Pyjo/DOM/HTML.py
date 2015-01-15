@@ -119,10 +119,12 @@ TOKEN_RE = r'''
     |
       \?(?P<pi>.*?)\?                                 # Processing Instruction
     |
-      \s*(?P<rawtag>''' + '|'.join(RAW | RCDATA) + ''')\s*
-      (?:''' + ATTR_RE + ''')*>
+      \s*(?P<rawtag>
+        (?P<rawtagname>''' + '|'.join(RAW | RCDATA) + ''')\s*
+        (?:''' + ATTR_RE + ''')*
+      )>
       (?P<raw>.*?)                                    # Raw
-      <\s*/\s*(?P=rawtag)\s*
+      <\s*/\s*(?P=rawtagname)\s*
     |
       \s*(?P<tag>[^<>\s]+\s*(?:''' + ATTR_RE + ''')*) # Tag
     )>
