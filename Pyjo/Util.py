@@ -116,7 +116,7 @@ def steady_time():
 if sys.version_info >= (3, 0):
     def u(string, charset=DEFAULT_CHARSET):
         if isbytes(string):
-            return str(string).decode(charset)
+            return bytes(string).decode(charset)
         else:
             return str(string)
 else:
