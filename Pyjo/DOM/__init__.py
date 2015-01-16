@@ -95,7 +95,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         This element's attributes.
 
             # List id attributes
-            dom.find('*')->map(attr => 'id')->compact->join("\n");
+            dom.find('*').map('attr', 'id').compact().join("\n").say()
         """
         tree = self.tree
 
@@ -131,7 +131,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         All selectors from :mod:`Pyjo.DOM.CSS` are supported. ::
 
             # Find a specific element and extract information
-            _id = dom.find('div')[23]['id']
+            div_id = dom.find('div')[23]['id']
 
             # Extract information from multiple elements
             headers = dom.find('h1, h2, h3').map('text').each()

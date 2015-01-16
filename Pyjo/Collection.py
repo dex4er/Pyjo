@@ -56,7 +56,7 @@ class Pyjo_Collection(list):
         """
         return Pyjo.TextStream.new(string.join(map(lambda s: Pyjo.Util.u(s), self)))
 
-    def map(self, method, *args):
+    def map(self, attribute, *args):
         """::
 
             new = collection.map(lambda a: ...)
@@ -70,18 +70,22 @@ class Pyjo_Collection(list):
         argument passed to the callback. ::
 
             # Longer version for attribute
-            new = collection.map(lambda a: getattr(a, attribute), *args)
+            new = collection.map(lambda a: getattr(a, attribute))
 
             # Longer version for method
-            new = collection.map(lambda a: getattr(a, method)(*args), *args)
+            new = collection.map(lambda a: getattr(a, method)(*args))
 
             # Append the word "pyjo" to all values
             pyjoified = collection.map(lambda a: a + 'pyjo')
         """
-        if callable(method):
-            return self.new(map(method, self))
+        if callable(attribute):
+            return self.new(map(attribute, self))
         else:
-            return self.new(map(lambda a: getattr(a, method)(*args) if callable(getattr(a, method)) else getattr(a, method), self))
+            return self.new(
+                map(lambda a:
+                    getattr(a, attribute)(*args) if callable(getattr(a, attribute))
+                    else getattr(a, attribute),
+                    self))
 
     @classmethod
     def new(cls, value=[]):
