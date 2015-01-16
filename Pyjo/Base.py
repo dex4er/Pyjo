@@ -68,7 +68,7 @@ class Pyjo_Base(object):
             setattr(self, k, v)
         return self
 
-    def tap(self, _method, *args, **kwargs):
+    def tap(self, *args, **kwargs):
         """::
 
             obj = obj.tap(lambda obj: expression)
@@ -84,10 +84,11 @@ class Pyjo_Base(object):
             # Inject side effects into a method chain
             obj.foo('A').tap(lambda obj: print(obj.foo)).set(foo='B')
         """
-        if callable(_method):
-            _method(self, *args, **kwargs)
+        method = args[0]
+        if callable(method):
+            method(self, *args[1:], **kwargs)
         else:
-            getattr(self, _method)(*args, **kwargs)
+            getattr(self, method)(*args[1:], **kwargs)
         return self
 
 
