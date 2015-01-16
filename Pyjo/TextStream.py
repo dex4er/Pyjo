@@ -86,6 +86,39 @@ class Pyjo_TextStream(base_object):
             f.flush()
         return self
 
+    def to_bytes(self, charset=DEFAULT_CHARSET):
+        """::
+
+            bstring = stream.to_bytes()
+            bstring = stream.to_bytes(charset)
+
+        Turn parameters into a bytes string.
+        """
+        return Pyjo.Util.b(self, charset)
+
+    def to_str(self, charset=DEFAULT_CHARSET):
+        """::
+
+            string = stream.to_str()
+
+        Turn parameters into a string:
+        on Python 2.x into bytes string, on Python 3.x into unicode string.
+        """
+        if sys.version_info >= (3, 0):
+            return self.to_unicode(charset)
+        else:
+            return self.to_bytes(charset)
+
+    def to_unicode(self, charset=DEFAULT_CHARSET):
+        """::
+
+            ustring = stream.to_unicode()
+            ustring = stream.to_unicode(charset)
+
+        Turn parameters into an unicode string.
+        """
+        return Pyjo.Util.u(self, charset)
+
     def xml_escape(self):
         """::
 

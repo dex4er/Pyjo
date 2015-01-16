@@ -29,7 +29,7 @@ if sys.version_info >= (3, 0):
 else:
     def b(string, charset=DEFAULT_CHARSET):
         if isinstance(string, unicode):
-            return string.encode(charset)
+            return unicode(string).encode(charset)
         else:
             return str(string)
 
@@ -116,14 +116,12 @@ def steady_time():
 if sys.version_info >= (3, 0):
     def u(string, charset=DEFAULT_CHARSET):
         if isbytes(string):
-            return string.decode(charset)
+            return str(string).decode(charset)
         else:
             return str(string)
 else:
     def u(string, charset=DEFAULT_CHARSET):
-        if isinstance(string, unicode):
-            return string
-        elif hasattr(string, '__unicode__'):
+        if isinstance(string, unicode) or hasattr(string, '__unicode__'):
             return unicode(string)
         else:
             return str(string).decode(charset)
