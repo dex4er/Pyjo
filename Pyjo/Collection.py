@@ -30,6 +30,11 @@ class Pyjo_Collection(list):
     def __repr__(self):
         return "{0}.new({1})".format(self.__module__, super(Pyjo_Collection, self).__repr__())
 
+    def each(self, cb):
+        for i in self:
+            cb(i)
+        return self
+
     def flatten(self):
         """::
 
@@ -100,6 +105,18 @@ class Pyjo_Collection(list):
 
             # {'b': 2, 'a': 1, 'c': 3}
             Pyjo.Collection.new([('a', 1), ('b', 2), ('c', 3)]).to_dict()
+        """
+        return list(self)
+
+    def to_iter(self):
+        """::
+
+            i = params.to_iter()
+
+        Turn collection into a :class:`iter` iterator. ::
+
+            for i in Pyjo.Collection.new([1, 2, 3]).to_iter():
+                print(i)
         """
         return list(self)
 

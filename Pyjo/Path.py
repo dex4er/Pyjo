@@ -83,9 +83,7 @@ class Pyjo_Path(Pyjo.Base.object, Pyjo.Mixin.String.object):
         Iterator based on :attr:`parts`. Note that this will normalize the path and that ``%2F``
         will be treated as ``/`` for security reasons.
         """
-        parts = self.parts
-        for p in parts:
-            yield p
+        return iter(self.parts)
 
     def __nonzero__(self):
         """::

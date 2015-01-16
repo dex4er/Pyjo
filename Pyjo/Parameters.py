@@ -85,9 +85,7 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
         Iterator based on :attr:`params`. Note that this will normalize the parameters.
         """
-        params = self.params
-        for p in params:
-            yield p
+        return iter(self.params)
 
     def __nonzero__(self):
         """::
