@@ -273,9 +273,9 @@ class Pyjo_DOM_HTML(Pyjo.Base.object):
 
             string = html.render()
 
-        Render DOM to HTML/XML. Returns :mod:`Pyjo.TextStream` object.
+        Render DOM to HTML/XML.
         """
-        return Pyjo.TextStream.new(_render(self.tree, self.xml))
+        return _render(self.tree, self.xml)
 
 
 def _end(end, xml, current):
