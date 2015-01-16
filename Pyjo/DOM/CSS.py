@@ -364,7 +364,7 @@ def _attr(name_re, value_re, current):
 
 def _combinator(selectors, current, tree, pos):
     # Selector
-    if len(selectors) > pos and selectors[pos]:
+    if len(selectors) > pos:
         c = selectors[pos]
         pos += 1
     else:
@@ -414,9 +414,9 @@ def _compile(css):
             # Tag
             selector = []
             part.append(selector)
-            element, count, result = element == s('^((?:\\\.|\\\#|[^.#])+)', '')
-            if count and result[1] != '*':
-                selector.append(['tag', _name(result[1])])
+            element, count, g = element == s('^((?:\\\.|\\\#|[^.#])+)', '')
+            if count and g[1] != '*':
+                selector.append(['tag', _name(g[1])])
 
             # Class or ID
             for g in m('(?:([.#])((?:\\[.\#]|[^\#.])+))', 'g').match(element):
