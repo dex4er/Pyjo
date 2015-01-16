@@ -59,6 +59,15 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         if html is not None:
             self.parse(html)
 
+    def __getitem__(self, key):
+        return self.attr(key)
+
+    def __setitem__(self, key, value):
+        return self.attr(key, value)
+
+    def __delitem__(self, key):
+        del self.attr()[key]
+
     def at(self, pattern):
         """::
 
@@ -74,6 +83,43 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         result = self._css.select_one(pattern)
         if result:
             return self._build(result, self.xml)
+
+    def attr(self, *args, **kwargs):
+        """::
+
+            my_dict = dom.attr()
+            foo = dom.attr('foo')
+            dom = dom.attr(foo='bar')
+            dom = dom.attr('foo', 'bar')
+
+        This element's attributes.
+
+            # List id attributes
+            dom.find('*')->map(attr => 'id')->compact->join("\n");
+        """
+        tree = self.tree
+
+        if tree[0] != 'tag':
+            attrs = {}
+        else:
+            attrs = tree[2]
+
+        # Dict
+        if not args and not kwargs:
+            return attrs
+
+        # Get
+        if len(args) == 1:
+            return self.to_dict()[args[0]]
+
+        # Set
+        if len(args) == 2:
+            attrs[args[0]] = args[1]
+
+        for k, v in kwargs.items():
+            attrs[k] = v
+
+        return self
 
     def find(self, pattern):
         """::
@@ -98,6 +144,9 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
     def parse(self, html):
         self.html.parse(html)
         return self
+
+    def to_dict(self):
+        return self.attr()
 
     def to_str(self):
         return self.html.render()
