@@ -30,10 +30,29 @@ class Pyjo_Collection(list):
     def __repr__(self):
         return "{0}.new({1})".format(self.__module__, super(Pyjo_Collection, self).__repr__())
 
-    def each(self, cb):
-        for i in self:
-            cb(i)
-        return self
+    def each(self, cb=None):
+        """::
+
+            elements = collection.each()
+            collection = collection.each(lambda e, num: ...)
+
+        Evaluate callback for each element in collection or return all elements as a
+        list if none has been provided. The element will be the first argument passed
+        to the callback. ::
+
+            # Make a numbered list
+            collection.each(lambda e, num:
+                print("{0}: {1}".format(e, num)
+            )
+        """
+        if cb is None:
+            return self.to_list()
+        else:
+            num = 1
+            for i in self:
+                cb(i, num)
+                num += 1
+            return self
 
     def flatten(self):
         """::
