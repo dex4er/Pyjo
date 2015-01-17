@@ -68,6 +68,21 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
     def __delitem__(self, key):
         del self.attr()[key]
 
+    def all_contents(self):
+        """::
+
+            collection = dom.all_contents()
+
+        Return a :mod:`Pyjo.Collection` object containing all nodes in DOM structure as
+        :mod:`Pyjo.DOM` objects. ::
+
+            # "<p><b>123</b></p>"
+            dom.parse('<p><!-- Test --><b>123<!-- 456 --></b></p>')
+               .all_contents()
+               .grep(lambda i: i.node == 'comment').map('remove').first()
+        """
+        return self._collect(_all(_nodes(self.tree)))
+
     def at(self, pattern):
         """::
 
@@ -134,12 +149,23 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             div_id = dom.find('div')[23]['id']
 
             # Extract information from multiple elements
-            headers = dom.find('h1, h2, h3').map('text').each()
+            headers = dom.find('h1, h2, h3').map('text').to_list()
 
             # Find elements with a class that contains dots
-            divs = dom.find('div.foo\.bar').each()
+            divs = dom.find('div.foo\.bar').to_list()
         """
         return self._collect(self._css.select(pattern))
+
+    @property
+    def node(self):
+        """::
+
+            type = dom.node
+
+        This node's type, usually ``cdata``, ``comment``, ``doctype``, ``pi``, ``raw``,
+        ``root``, ``tag`` or ``text``.
+        """
+        return self.tree[0]
 
     def parse(self, html):
         self.html.parse(html)
@@ -177,6 +203,34 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
     @property
     def _css(self):
         return Pyjo.DOM.CSS.new(tree=self.tree)
+
+
+def _all(nodes):
+    for n in nodes:
+        if n[0] == 'tag':
+            yield n
+            for a in _all(_nodes(n)):
+                yield a
+        else:
+            yield n
+
+
+def _nodes(tree=None, nodetype=None):
+    #print('_nodes', tree)
+    if not tree:
+        return []
+    nodes = tree[_start(tree):]
+    if nodetype:
+        return filter(lambda n: n[0] == 'tag', nodes)
+    else:
+        return nodes
+
+
+def _start(tree):
+    if tree[0] == 'root':
+        return 1
+    else:
+        return 4
 
 
 new = Pyjo_DOM.new
