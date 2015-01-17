@@ -13,6 +13,8 @@ Pyjo.Collection - Collection
 
 import Pyjo.TextStream
 
+from Pyjo.Regexp import m
+
 
 DEFAULT_CHARSET = 'utf-8'
 
@@ -66,6 +68,28 @@ class Pyjo_Collection(list):
             Pyjo.Collection.new([1, [2, [3, 4], 5, [6]], 7]).flatten().join(', ').say()
         """
         return self.new(_flatten(self))
+
+    def grep(self, cb, flags=''):
+        """::
+
+            new = collection.grep(r'pattern', 'flags')
+            new = collection.grep(lambda i: ...)
+
+        Evaluate regular expression or callback for each element in collection and
+        create a new collection with all elements that matched the regular expression,
+        or for which the callback returned true. The element will be the first
+        argument passed to the callback.
+
+            # Find all values that contain the word "mojo"
+            interesting = collection.grep('mojo', 'i')
+
+            # Find all values that are greater than 5
+            greater = collection.grep(lambda i: i > 5)
+        """
+        if callable(cb):
+            return self.new(filter(lambda i: cb(i), self))
+        else:
+            return self.new(filter(lambda i: i == m(cb, flags), self))
 
     def join(self, string=u''):
         """::
