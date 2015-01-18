@@ -121,6 +121,18 @@ class Pyjo_Collection(list):
         else:
             return self.new(filter(lambda i: i == m(cb, flags), self))
 
+    def item(self, offset):
+        """::
+
+            item = collection.item(0)
+
+        Return element from collection. ::
+
+            # the same as
+            item = collection[0]
+        """
+        return self[offset]
+
     def join(self, string=u''):
         """::
 
