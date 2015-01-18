@@ -199,8 +199,52 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             return self._build(self._parent(), self.xml)
 
     def parse(self, html):
+        """::
+
+            dom = dom.parse(u'<foo bar="baz">I ♥ Mojolicious!</foo>')
+
+        Parse HTML/XML fragment with :mod:`Pyjo.DOM.HTML`. ::
+
+            # Parse XML
+            dom = Pyjo.DOM.new().set(xml=True).parse(xml)
+        """
         self.html.parse(html)
         return self
+
+    def remove(self):
+        """::
+
+            parent = dom.remove()
+
+        Remove this node and return :meth:`parent`. ::
+
+            # "<div></div>"
+            dom.parse('<div><h1>Test</h1></div>').at('h1').remove()
+
+            # "<p><b>456</b></p>"
+            dom.parse('<p>123<b>456</b></p>').at('p').contents().first().remove().root()
+        """
+        return self.replace('')
+
+    def replace(self, new):
+        """::
+
+            parent = dom.replace(u'<div>I ♥ Mojolicious!</div>')
+
+        Replace this node with HTML/XML fragment and return :meth:`parent`. ::
+
+            # "<div><h2>123</h2></div>"
+            dom.parse('<div><h1>Test</h1></div>').at('h1').replace('<h2>123</h2>')
+
+            # "<p><b>123</b></p>"
+            dom.parse('<p>Test</p>')
+               .at('p').contents().item(0).replace('<b>123</b>').root()
+        """
+        tree = self.tree
+        if tree[0] == 'root':
+            return self.parse(new)
+        else:
+            return self._replace(self._parent(), tree, self._parse(new))
 
     def root(self):
         """::
@@ -281,6 +325,18 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
     def _parent(self):
         return self.tree[3 if self.node() == 'tag' else 2]
 
+    def _parse(self, new):
+        return Pyjo.DOM.HTML.new(xml=self.xml).parse(new).tree
+
+    def _replace(self, parent, tree, new):
+        # splice @$parent, _offset($parent, $tree), 1, _link($new, $parent);
+        offset = _offset(parent, tree)
+        parent.pop(offset)
+        for n in _link(new, parent):
+            parent.insert(offset, n)
+            offset += 1
+        return self.parent()
+
 
 def _all(nodes):
     for n in nodes:
@@ -292,6 +348,18 @@ def _all(nodes):
             yield n
 
 
+def _link(children, parent):
+    # Link parent to children
+    for n in children[1:]:
+        yield n
+        if n[0] == 'tag':
+            offset = 3
+        else:
+            offset = 2
+        n[offset] = parent
+        # TODO weakref n[offset]
+
+
 def _nodes(tree=None, nodetype=None):
     if not tree:
         return []
@@ -300,6 +368,16 @@ def _nodes(tree=None, nodetype=None):
         return filter(lambda n: n[0] == 'tag', nodes)
     else:
         return nodes
+
+
+def _offset(parent, child):
+    i = _start(parent)
+    for n in parent[i:]:
+        if n == child:
+            break
+        else:
+            i += 1
+    return i
 
 
 def _select(collection, selector=None):
