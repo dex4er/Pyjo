@@ -56,6 +56,36 @@ class Pyjo_Collection(list):
                 num += 1
             return self
 
+    def first(self, cb=None, flags=''):
+        """::
+
+            first = collection.first()
+            first = collection.first(r'pattern', 'flags')
+            first = collection.first(lambda i: ...)
+
+        Evaluate regular expression or callback for each element in collection and
+        return the first one that matched the regular expression, or for which the
+        callback returned true. The element will be the first argument passed to the
+        callback. ::
+
+            # Find first value that contains the word "mojo"
+            interesting = collection.first('pyjo', 'i')
+
+            # Find first value that is greater than 5
+            greater = collection.first(lambda i: i > 5)
+        """
+        if cb is None:
+            return self[0]
+        elif callable(cb):
+            for i in self:
+                if cb(i):
+                    return i
+        else:
+            for i in self:
+                if i == m(cb, flags):
+                    return i
+        return
+
     def flatten(self):
         """::
 
