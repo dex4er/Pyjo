@@ -79,9 +79,12 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             # "<p><b>123</b></p>"
             dom.parse('<p><!-- Test --><b>123<!-- 456 --></b></p>')
                .all_contents()
-               .grep(lambda i: i.node == 'comment').map('remove').first()
+               .grep(lambda i: i.node() == 'comment').map('remove').first()
         """
         return self._collect(_all(_nodes(self.tree)))
+
+    def ancestors(self, pattern=None):
+        return _select(self._collect(self._ancestors()), pattern)
 
     def at(self, pattern):
         """::
@@ -156,20 +159,45 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         """
         return self._collect(self._css.select(pattern))
 
-    @property
     def node(self):
         """::
 
-            type = dom.node
+            type = dom.node()
 
         This node's type, usually ``cdata``, ``comment``, ``doctype``, ``pi``, ``raw``,
         ``root``, ``tag`` or ``text``.
         """
         return self.tree[0]
 
+    def parent(self):
+        """::
+
+            parent = dom.parent()
+
+        Return :mod:`Pyjo.DOM` object for parent of this node or :obj:`None` if this node
+        has no parent.
+        """
+        if self.tree[0] == 'root':
+            return
+        else:
+            return self._build(self._parent(), self.xml)
+
     def parse(self, html):
         self.html.parse(html)
         return self
+
+    def root(self):
+        """::
+
+            root = dom.root()
+
+        Return :mod:`Pyjo.DOM` object for root node.
+        """
+        tree = self._ancestors(True)
+        if not tree:
+            return self
+        else:
+            return self._build(next(tree), self.xml)
 
     def to_dict(self):
         return self.attr()
@@ -193,6 +221,36 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
     def xml(self, value):
         self.html.xml = value
 
+    def _all_text(self, recurse, trim=True):
+        # Detect "pre" tag
+        tree = self.tree
+        if trim:
+            for node in (self._ancestors(), tree):
+                for n in node:
+                    if n[1] == 'pre':
+                        trim = False
+
+        return _text(_nodes(tree), recurse, trim)
+
+    def _ancestors(self, isroot=False):
+        if self.node() == 'root':
+            return
+
+        ancestors = []
+        tree = self._parent()
+
+        while True:
+            ancestors.append(tree)
+            if tree[0] != 'tag':
+                break
+            tree = tree[3]
+
+        if isroot:
+            yield ancestors[-1]
+        else:
+            for i in ancestors[:-1]:
+                yield i
+
     def _build(self, tree, xml):
         return self.new().set(tree=tree, xml=xml)
 
@@ -203,6 +261,9 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
     @property
     def _css(self):
         return Pyjo.DOM.CSS.new(tree=self.tree)
+
+    def _parent(self):
+        return self.tree[3 if self.node() == 'tag' else 2]
 
 
 def _all(nodes):
@@ -216,7 +277,6 @@ def _all(nodes):
 
 
 def _nodes(tree=None, nodetype=None):
-    #print('_nodes', tree)
     if not tree:
         return []
     nodes = tree[_start(tree):]
@@ -226,12 +286,22 @@ def _nodes(tree=None, nodetype=None):
         return nodes
 
 
+def _select(collection, selector=None):
+    if selector is None:
+        return collection
+    else:
+        collection.new(filter(lambda i: i.match(selector), collection))
+
+
 def _start(tree):
     if tree[0] == 'root':
         return 1
     else:
         return 4
 
+
+def _text(nodes, recurse, trim):
+    return '' # TODO
 
 new = Pyjo_DOM.new
 object = Pyjo_DOM  # @ReservedAssignment
