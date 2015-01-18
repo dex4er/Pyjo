@@ -139,6 +139,22 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
         return self
 
+    def contents(self):
+        """::
+
+            collection = dom.contents()
+
+        Return a :mod:`Pyjo.Collection` object containing the child nodes of this element
+        as :mod:`Pyjo.DOM` objects. ::
+
+            # "<p><b>123</b></p>"
+            dom.parse('<p>Test<b>123</b></p>').at('p').contents().first().remove()
+
+            # "<!-- Test -->"
+            dom.parse('<!-- Test --><b>123</b>').contents().first()
+        """
+        return self._collect(_nodes(self.tree))
+
     def find(self, pattern):
         """::
 
