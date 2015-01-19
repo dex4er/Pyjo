@@ -104,9 +104,21 @@ def rand(value=1):
     return random.random() * value
 
 
+def squish(string):
+    string = trim(string)
+    string -= s(r'\s+', '', 'g')
+    return string
+
+
 def slurp(path):
     with open(path, "r") as f:
         return b(f.read())
+
+
+def trim(string):
+    string -= s(r'^\s+', '')
+    string -= s(r'\s+$', '')
+    return string
 
 
 def steady_time():
