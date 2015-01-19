@@ -346,7 +346,12 @@ class Pyjo_DOM_CSS(Pyjo.Base.object):
 
 
 def _ancestor(selectors, current, tree, pos):
-    # TOOD
+    while len(current) > 3 and current[3]:
+        current = current[3]
+        if current[0] == 'root' or current == tree:
+            return False
+        if _combinator(selectors, current, tree, pos):
+            return True
     return False
 
 
@@ -363,20 +368,21 @@ def _attr(name_re, value_re, current):
 
 
 def _combinator(selectors, current, tree, pos):
-    # Selector
     if len(selectors) > pos:
         c = selectors[pos]
-        pos += 1
     else:
         return False
 
     if isinstance(c, list):
         if not _selector(c, current):
             return False
+        pos += 1
         if len(selectors) > pos and selectors[pos]:
             c = selectors[pos]
         else:
             return True
+
+    pos += 1
 
     # ">" (parent only)
     if c == '>':
@@ -488,8 +494,9 @@ def _equation(equation):
 
 def _match(pattern, current, tree):
     for p in pattern:
-        p.reverse()
-        if _combinator(p, current, tree, 0):
+        selectors = list(p)
+        selectors.reverse()
+        if _combinator(selectors, current, tree, 0):
             return True
     return False
 
@@ -499,6 +506,18 @@ def _name(value):
 
 
 def _parent(selectors, current, tree, pos):
+    if len(current) <= 3 or not current[3]:
+        return False
+
+    parent = current[3]
+
+    if parent[0] == 'root' or parent == tree:
+        return False
+
+    return _combinator(selectors, parent, tree, pos)
+
+
+def _pc(pclass, args, current):
     # TODO
     return False
 
@@ -540,13 +559,43 @@ def _selector(selector, current):
                 if not _attr(s[1], s[2], current):
                     return False
 
+            # Pseudo class
+            elif nodetype == 'pc':
+                if not _pc(s[1], s[2], current):
+                    return False
+
     # TODO
     return True
 
 
 def _sibling(selectors, current, tree, immediate, pos):
-    # TODO
+    found = False
+
+    for sibling in _siblings(current):
+        if sibling == current:
+            return found
+
+        # "+" (immediately preceding sibling)
+        if immediate:
+            found = _combinator(selectors, sibling, tree, pos)
+
+        # "~" (preceding sibling)
+        elif _combinator(selectors, sibling, tree, pos):
+            return True
+
     return False
+
+
+def _siblings(current, nodetype=None):
+    parent = current[3]
+
+    siblings = filter(lambda n: n[0] == 'tag',
+                      parent[(1 if parent[0] == 'root' else 4):])
+
+    if nodetype is not None:
+        siblings = filter(lambda n: type == n[1], siblings)
+
+    return siblings
 
 
 def _unescape(value):
