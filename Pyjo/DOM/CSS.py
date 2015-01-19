@@ -398,8 +398,8 @@ def _compile(css):
     pattern = [[]]
     for g in m(TOKEN_RE, 'gx').match(css):
         separator, element, pc, attrs, combinator = g[1], g[2], g[3], g[6], g[12]
-        if g[2] is None:
-            g[2] = ''
+        if element is None:
+            element = ''
 
         if separator or element or pc or attrs or combinator:
             # New selector
