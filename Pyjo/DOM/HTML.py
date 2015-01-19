@@ -14,7 +14,6 @@ Pyjo.DOM.HTML - HTML/XML engine
 
 
 import Pyjo.Base
-import Pyjo.TextStream
 
 from Pyjo.Base import lazy
 from Pyjo.Regexp import m
@@ -203,7 +202,11 @@ class Pyjo_DOM_HTML(Pyjo.Base.object):
 
                         # Attributes
                         for g in m(ATTR_RE, 'gx').match(attr):
-                            key = g[1]
+                            if xml:
+                                key = g[1]
+                            else:
+                                key = g[1].lower()
+
                             if g[2] is not None:
                                 value = g[2]
                             elif g[2] is not None:
