@@ -13,7 +13,7 @@ import unittest
 
 
 __all__ = ['done_testing', 'diag', 'fail', 'is_ok', 'isa_ok', 'is_deeply_ok',
-           'isnt_ok', 'none_ok', 'ok', 'pass_ok', 'plan', 'skip']
+           'isnt_ok', 'none_ok', 'ok', 'pass_ok', 'plan', 'skip', 'throws_ok']
 
 
 test = 0
@@ -132,6 +132,20 @@ def plan(**kwargs):
     if 'tests' in kwargs:
         tests = kwargs['tests']
         _print('1..{0}'.format(tests))
+
+
+def throws_ok(cb, expected, test_name=None):
+    if test_name is None:
+        test_name = "Raised".format(type(expected))
+    else:
+        test_name = "{0} raised".format(test_name)
+    got = None
+    try:
+        cb()
+    except Exception as e:
+        got = e
+    check = got == expected
+    _ok(check, test_name)
 
 
 def skip(why=None, how_many=1):
