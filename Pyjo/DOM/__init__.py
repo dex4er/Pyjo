@@ -43,6 +43,8 @@ import Pyjo.Mixin.String
 import Pyjo.TextStream
 
 from Pyjo.Base import lazy
+from Pyjo.Regexp import m, s
+from Pyjo.Util import squish
 
 
 class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
@@ -82,6 +84,23 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
                .grep(lambda i: i.node() == 'comment').map('remove').first()
         """
         return self._collect(_all(_nodes(self.tree)))
+
+    def all_text(self, trim=True):
+        """::
+
+            trimmed   = dom.all_text
+            untrimmed = dom.all_text(False)
+
+        Extract all text content from DOM structure, smart whitespace trimming is
+        enabled by default. ::
+
+            # "foo bar baz"
+            dom.parse("<div>foo\n<p>bar</p>baz\n</div>").at('div').all_text()
+
+            # "foo\nbar baz\n"
+            dom.parse("<div>foo\n<p>bar</p>baz\n</div>").at('div').all_text(False)
+        """
+        return self._all_text(True, trim)
 
     def ancestors(self, pattern=None):
         return _select(self._collect(self._ancestors()), pattern)
@@ -265,6 +284,23 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
     def to_str(self):
         return self.html.render()
 
+    def text(self, trim=True):
+        """::
+
+            trimmed = dom.text()
+            untrimmed = dom.text(False)
+
+        Extract text content from this element only (not including child elements),
+        smart whitespace trimming is enabled by default. ::
+
+            # "foo baz"
+            dom.parse("<div>foo\n<p>bar</p>baz\n</div>").at('div').text()
+
+            # "foo\nbaz\n"
+            dom.parse("<div>foo\n<p>bar</p>baz\n</div>").at('div').text(False)
+        """
+        return self._all_text(False, trim)
+
     @property
     def tree(self):
         return self.html.tree
@@ -285,8 +321,8 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         # Detect "pre" tag
         tree = self.tree
         if trim:
-            for node in (self._ancestors(), tree):
-                for n in node:
+            for i in self._ancestors(), (tree,):
+                for n in i:
                     if n[1] == 'pre':
                         trim = False
 
@@ -395,7 +431,48 @@ def _start(tree):
 
 
 def _text(nodes, recurse, trim):
-    return '' # TODO
+    # Merge successive text nodes
+    i = 0
+    while i + 1 < len(nodes):
+        nextnode = nodes[i + 1]
+        if nodes[i][0] == 'text' and nextnode[0] == 'text':
+            nodes.pop(i)
+            nodes.pop(i)
+            nodes.insert(i, ['text', nodes[i][1] + nextnode[1]])
+        else:
+            i += 1
+            continue
+
+    text = ''
+    for n in nodes:
+        nodetype = n[0]
+
+        content = ''
+
+        # Nested tag
+        if nodetype == 'tag' and recurse:
+            content = _text(_nodes(n), True, False if n[1] == 'pre' else trim)
+
+        # Text
+        elif nodetype == 'text':
+            if trim:
+                content = squish(n[1])
+            else:
+                content = n[1]
+
+        # CDATA or raw text
+        elif nodetype == 'cdata' or nodetype == 'raw':
+            content = n[1]
+
+        # Add leading whitespace if punctuation allows it
+        if text == m(r'\S\Z') and content == m(r'^[^.!?,;:\s]+'):
+            content = " " + content
+
+        # Trim whitespace blocks
+        if content == m(r'\S+') or not trim:
+            text += content
+
+    return text
 
 new = Pyjo_DOM.new
 object = Pyjo_DOM  # @ReservedAssignment
