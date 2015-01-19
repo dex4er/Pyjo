@@ -137,7 +137,7 @@ class Pyjo_Collection(list):
         """::
 
             stream = collection.join()
-            stream = collection.join("\n")
+            stream = collection.join("\\n")
 
         Turn collection into :mod:`Pyjo.ByteStream`. ::
 

@@ -88,17 +88,17 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
     def all_text(self, trim=True):
         """::
 
-            trimmed   = dom.all_text
+            trimmed   = dom.all_text()
             untrimmed = dom.all_text(False)
 
         Extract all text content from DOM structure, smart whitespace trimming is
         enabled by default. ::
 
             # "foo bar baz"
-            dom.parse("<div>foo\n<p>bar</p>baz\n</div>").at('div').all_text()
+            dom.parse("<div>foo\\n<p>bar</p>baz\\n</div>").at('div').all_text()
 
-            # "foo\nbar baz\n"
-            dom.parse("<div>foo\n<p>bar</p>baz\n</div>").at('div').all_text(False)
+            # "foo\\nbar baz\\n"
+            dom.parse("<div>foo\\n<p>bar</p>baz\\n</div>").at('div').all_text(False)
         """
         return self._all_text(True, trim)
 
@@ -294,10 +294,10 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         smart whitespace trimming is enabled by default. ::
 
             # "foo baz"
-            dom.parse("<div>foo\n<p>bar</p>baz\n</div>").at('div').text()
+            dom.parse("<div>foo\\n<p>bar</p>baz\\n</div>").at('div').text()
 
-            # "foo\nbaz\n"
-            dom.parse("<div>foo\n<p>bar</p>baz\n</div>").at('div').text(False)
+            # "foo\\nbaz\\n"
+            dom.parse("<div>foo\\n<p>bar</p>baz\\n</div>").at('div').text(False)
         """
         return self._all_text(False, trim)
 
