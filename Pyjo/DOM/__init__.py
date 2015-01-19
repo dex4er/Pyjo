@@ -83,7 +83,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
                .all_contents()
                .grep(lambda i: i.node() == 'comment').map('remove').first()
         """
-        return self._collect(_all(_nodes(self.tree)))
+        return self._collect(self._all(self._nodes(self.tree)))
 
     def all_text(self, trim=True):
         """::
@@ -103,7 +103,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         return self._all_text(True, trim)
 
     def ancestors(self, pattern=None):
-        return _select(self._collect(self._ancestors()), pattern)
+        return self._select(self._collect(self._ancestors()), pattern)
 
     def at(self, pattern):
         """::
@@ -172,7 +172,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             # "<!-- Test -->"
             dom.parse('<!-- Test --><b>123</b>').contents().first()
         """
-        return self._collect(_nodes(self.tree))
+        return self._collect(self._nodes(self.tree))
 
     def find(self, pattern):
         """::
@@ -317,6 +317,15 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
     def xml(self, value):
         self.html.xml = value
 
+    def _all(self, nodes):
+        for n in nodes:
+            if n[0] == 'tag':
+                yield n
+                for a in self._all(self._nodes(n)):
+                    yield a
+            else:
+                yield n
+
     def _all_text(self, recurse, trim=True):
         # Detect "pre" tag
         tree = self.tree
@@ -326,7 +335,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
                     if n[1] == 'pre':
                         trim = False
 
-        return _text(_nodes(tree), recurse, trim)
+        return self._text(self._nodes(tree), recurse, trim)
 
     def _ancestors(self, isroot=False):
         if self.node() == 'root':
@@ -358,6 +367,35 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
     def _css(self):
         return Pyjo.DOM.CSS.new(tree=self.tree)
 
+    def _link(self, children, parent):
+        # Link parent to children
+        for n in children[1:]:
+            yield n
+            if n[0] == 'tag':
+                offset = 3
+            else:
+                offset = 2
+            n[offset] = parent
+            # TODO weakref n[offset]
+
+    def _nodes(self, tree=None, nodetype=None):
+        if not tree:
+            return []
+        nodes = tree[self._start(tree):]
+        if nodetype:
+            return filter(lambda n: n[0] == 'tag', nodes)
+        else:
+            return nodes
+
+    def _offset(self, parent, child):
+        i = self._start(parent)
+        for n in parent[i:]:
+            if n == child:
+                break
+            else:
+                i += 1
+        return i
+
     def _parent(self):
         return self.tree[3 if self.node() == 'tag' else 2]
 
@@ -366,113 +404,69 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
     def _replace(self, parent, tree, new):
         # splice @$parent, _offset($parent, $tree), 1, _link($new, $parent);
-        offset = _offset(parent, tree)
+        offset = self._offset(parent, tree)
         parent.pop(offset)
-        for n in _link(new, parent):
+        for n in self._link(new, parent):
             parent.insert(offset, n)
             offset += 1
         return self.parent()
 
-
-def _all(nodes):
-    for n in nodes:
-        if n[0] == 'tag':
-            yield n
-            for a in _all(_nodes(n)):
-                yield a
+    def _select(self, collection, selector=None):
+        if selector is None:
+            return collection
         else:
-            yield n
+            collection.new(filter(lambda i: i.match(selector), collection))
 
-
-def _link(children, parent):
-    # Link parent to children
-    for n in children[1:]:
-        yield n
-        if n[0] == 'tag':
-            offset = 3
+    def _start(self, tree):
+        if tree[0] == 'root':
+            return 1
         else:
-            offset = 2
-        n[offset] = parent
-        # TODO weakref n[offset]
+            return 4
 
-
-def _nodes(tree=None, nodetype=None):
-    if not tree:
-        return []
-    nodes = tree[_start(tree):]
-    if nodetype:
-        return filter(lambda n: n[0] == 'tag', nodes)
-    else:
-        return nodes
-
-
-def _offset(parent, child):
-    i = _start(parent)
-    for n in parent[i:]:
-        if n == child:
-            break
-        else:
-            i += 1
-    return i
-
-
-def _select(collection, selector=None):
-    if selector is None:
-        return collection
-    else:
-        collection.new(filter(lambda i: i.match(selector), collection))
-
-
-def _start(tree):
-    if tree[0] == 'root':
-        return 1
-    else:
-        return 4
-
-
-def _text(nodes, recurse, trim):
-    # Merge successive text nodes
-    i = 0
-    while i + 1 < len(nodes):
-        nextnode = nodes[i + 1]
-        if nodes[i][0] == 'text' and nextnode[0] == 'text':
-            nodes.pop(i)
-            nodes.pop(i)
-            nodes.insert(i, ['text', nodes[i][1] + nextnode[1]])
-        else:
-            i += 1
-            continue
-
-    text = ''
-    for n in nodes:
-        nodetype = n[0]
-
-        content = ''
-
-        # Nested tag
-        if nodetype == 'tag' and recurse:
-            content = _text(_nodes(n), True, False if n[1] == 'pre' else trim)
-
-        # Text
-        elif nodetype == 'text':
-            if trim:
-                content = squish(n[1])
+    def _text(self, nodes, recurse, trim):
+        # Merge successive text nodes
+        i = 0
+        while i + 1 < len(nodes):
+            nextnode = nodes[i + 1]
+            if nodes[i][0] == 'text' and nextnode[0] == 'text':
+                nodes.pop(i)
+                nodes.pop(i)
+                nodes.insert(i, ['text', nodes[i][1] + nextnode[1]])
             else:
+                i += 1
+                continue
+
+        text = ''
+        for n in nodes:
+            nodetype = n[0]
+
+            content = ''
+
+            # Nested tag
+            if nodetype == 'tag' and recurse:
+                content = self._text(self._nodes(n), True, False if n[1] == 'pre' else trim)
+
+            # Text
+            elif nodetype == 'text':
+                if trim:
+                    content = squish(n[1])
+                else:
+                    content = n[1]
+
+            # CDATA or raw text
+            elif nodetype == 'cdata' or nodetype == 'raw':
                 content = n[1]
 
-        # CDATA or raw text
-        elif nodetype == 'cdata' or nodetype == 'raw':
-            content = n[1]
+            # Add leading whitespace if punctuation allows it
+            if text == m(r'\S\Z') and content == m(r'^[^.!?,;:\s]+'):
+                content = " " + content
 
-        # Add leading whitespace if punctuation allows it
-        if text == m(r'\S\Z') and content == m(r'^[^.!?,;:\s]+'):
-            content = " " + content
+            # Trim whitespace blocks
+            if content == m(r'\S+') or not trim:
+                text += content
 
-        # Trim whitespace blocks
-        if content == m(r'\S+') or not trim:
-            text += content
+        return text
 
-    return text
 
 new = Pyjo_DOM.new
 object = Pyjo_DOM  # @ReservedAssignment
