@@ -136,16 +136,20 @@ def plan(**kwargs):
 
 def throws_ok(cb, expected, test_name=None):
     if test_name is None:
-        test_name = "Raised".format(type(expected))
+        test_name = "Raised {0}".format(expected.__name__)
     else:
-        test_name = "{0} raised".format(test_name)
+        test_name = "{0} raised {1}".format(test_name, expected.__name__)
     got = None
+    check = False
     try:
         cb()
+    except expected:
+        check = True
     except Exception as e:
         got = e
-    check = got == expected
     _ok(check, test_name)
+    if not check:
+        diag("         got: {0}\n    expected: {1}\n".format(got.__class__.__name__ if got is not None else None, expected.__name__))
 
 
 def skip(why=None, how_many=1):
