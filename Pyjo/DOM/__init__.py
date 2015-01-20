@@ -235,6 +235,20 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         self.html.parse(html)
         return self
 
+    @property
+    def raw_text(self):
+        """::
+
+            untrimmed = dom.raw_text
+
+        Extract text content from this element only (not including child elements),
+        smart whitespace trimming is disabled. ::
+
+            # "foo\\nbaz\\n"
+            dom.parse("<div>foo\\n<p>bar</p>baz\\n</div>").at('div').raw_text
+        """
+        return self._all_text(False, False)
+
     def remove(self):
         """::
 
@@ -289,22 +303,19 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
     def to_str(self):
         return self.html.render()
 
-    def text(self, trim=True):
+    @property
+    def text(self):
         """::
 
-            trimmed = dom.text()
-            untrimmed = dom.text(False)
+            trimmed = dom.text
 
         Extract text content from this element only (not including child elements),
-        smart whitespace trimming is enabled by default. ::
+        smart whitespace trimming is enabled. ::
 
             # "foo baz"
-            dom.parse("<div>foo\\n<p>bar</p>baz\\n</div>").at('div').text()
-
-            # "foo\\nbaz\\n"
-            dom.parse("<div>foo\\n<p>bar</p>baz\\n</div>").at('div').text(False)
+            dom.parse("<div>foo\\n<p>bar</p>baz\\n</div>").at('div').text
         """
-        return self._all_text(False, trim)
+        return self._all_text(False, True)
 
     @property
     def tree(self):
