@@ -127,6 +127,7 @@ TOKEN_RE = r'''
     |
       \s*(?P<tag>[^<>\s]+\s*(?:''' + ATTR_RE + ''')*) # Tag
     )>
+    | (?P<runaway><)                                  # Runaway "<"
   )?
 '''
 
@@ -172,9 +173,15 @@ class Pyjo_DOM_HTML(Pyjo.Base.object):
         text = None
 
         for g in m(TOKEN_RE, 'gisx').match(html):
-            text, doctype, comment, cdata, pi, tag, raw, rawtag = g['text'], g['doctype'], g['comment'], g['cdata'], g['pi'], g['tag'], g['raw'], g['rawtag']
+            text, doctype, comment, cdata, pi, tag, raw, rawtag, runaway = g['text'], g['doctype'], g['comment'], g['cdata'], g['pi'], g['tag'], g['raw'], g['rawtag'], g['runaway']
             if rawtag is not None:
                 tag = rawtag
+
+            if runaway is not None:
+                if text is not None:
+                    text += '<'
+                else:
+                    text = '<'
 
             if text is not None:
                 node = _node(current, 'text', html_unescape(text))
