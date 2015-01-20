@@ -151,16 +151,18 @@ class Pyjo_Collection(list):
 
             new = collection.map(lambda a: ...)
             new = collection.map(attribute)
+            new = collection.map(attribute, value)
             new = collection.map(method)
             new = collection.map(method, *args)
 
-        Evaluate callback for, or get attribute from,
+        Evaluate callback for, or get/set attribute from,
         or call method on, each element in collection and
         create a new collection from the results. The element will be the first
         argument passed to the callback. ::
 
             # Longer version for attribute
             new = collection.map(lambda a: getattr(a, attribute))
+            new = collection.map(lambda a: setattr(a, attribute, value))
 
             # Longer version for method
             new = collection.map(lambda a: getattr(a, method)(*args))
@@ -174,6 +176,7 @@ class Pyjo_Collection(list):
             return self.new(
                 map(lambda a:
                     getattr(a, attribute)(*args) if callable(getattr(a, attribute))
+                    else getattr(a, attribute, setattr(a, attribute, args[0])) if args
                     else getattr(a, attribute),
                     self))
 
