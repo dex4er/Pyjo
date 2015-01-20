@@ -13,7 +13,7 @@ Pyjo.DOM - Minimalistic HTML/XML DOM parser with CSS selectors
     # Find
     dom.at('#b').text().say()
     print(dom.find('p').map('text').join("\\n"))
-    dom.find('[id]').map(lambda i: i.attr['id']).join("\\n")
+    dom.find('[id]').map(attr='id').join("\\n")
 
     # Iterate
     dom.find('p[id]').reverse().each(lambda e: print(e.id))
@@ -44,7 +44,7 @@ import Pyjo.TextStream
 
 from Pyjo.Base import lazy
 from Pyjo.Regexp import m, s
-from Pyjo.Util import squish
+from Pyjo.Util import squish, u
 
 
 class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
@@ -61,6 +61,15 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         if html is not None:
             self.parse(html)
 
+    def __getitem__(self, key):
+        return self.attr(key)
+
+    def __setitem__(self, key, value):
+        return self.attr(key, value)
+
+    def __delitem__(self, key):
+        del self.attr()[key]
+
     def all_contents(self):
         """::
 
@@ -76,20 +85,31 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         """
         return self._collect(self._all(self._nodes(self.tree)))
 
+    @property
     def all_text(self, trim=True):
         """::
 
-            trimmed   = dom.all_text()
-            untrimmed = dom.all_text(False)
+            trimmed   = dom.all_text
 
         Extract all text content from DOM structure, smart whitespace trimming is
-        enabled by default. ::
+        enabled. ::
 
             # "foo bar baz"
-            dom.parse("<div>foo\\n<p>bar</p>baz\\n</div>").at('div').all_text()
+            dom.parse("<div>foo\\n<p>bar</p>baz\\n</div>").at('div').all_text
+        """
+        return self._all_text(True, True)
+
+    @property
+    def all_raw_text(self, trim=True):
+        """::
+
+            untrimmed = dom.all_raw_text
+
+        Extract all text content from DOM structure, smart whitespace trimming is
+        disabled. ::
 
             # "foo\\nbar baz\\n"
-            dom.parse("<div>foo\\n<p>bar</p>baz\\n</div>").at('div').all_text(False)
+            dom.parse("<div>foo\\n<p>bar</p>baz\\n</div>").at('div').all_raw_text
         """
         return self._all_text(True, trim)
 
@@ -112,18 +132,19 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         if result:
             return self._build(result, self.xml)
 
-    @property
     def attr(self, *args, **kwargs):
         """::
 
-            my_dict = dom.attr
-            foo = dom.attr['foo']
-            dom.attr['foo'] = 'bar'
+            my_dict = dom.attr()
+            foo = dom.attr('foo')
+            dom = dom.attr('foo', 'bar')
+            dom = dom.attr(foo='bar')
 
-        This element's attributes.
+        This element's attributes. Returns :class:`None` if attribute is missing.
+        Setting value to :class:`None` deletes attribute. ::
 
             # List id attributes
-            dom.find('*').map(lambda i: i.attr['id']).compact().join("\n").say()
+            dom.find('*').map('attr', 'id').compact().join("\n").say()
         """
         tree = self.tree
 
@@ -133,7 +154,29 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             attrs = tree[2]
 
         # Dict
-        return attrs
+        if not args and not kwargs:
+            return attrs
+
+        # Get
+        if len(args) == 1:
+            attrs = self.to_dict()
+            if args[0] in attrs:
+                return attrs[args[0]]
+            else:
+                return
+
+        # Set
+        if len(args) == 2:
+            attrs[args[0]] = args[1]
+
+        for k, v in kwargs.items():
+            if v is None:
+                if k in attrs:
+                    del attrs[k]
+            else:
+                attrs[k] = u(v)
+
+        return self
 
     def contents(self):
         """::
@@ -182,10 +225,11 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         """
         return self.tree[0]
 
+    @property
     def parent(self):
         """::
 
-            parent = dom.parent()
+            parent = dom.parent
 
         Return :mod:`Pyjo.DOM` object for parent of this node or :obj:`None` if this node
         has no parent.
@@ -271,7 +315,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             return self._build(next(tree), self.xml)
 
     def to_dict(self):
-        return self.attr
+        return self.attr()
 
     def to_str(self):
         return self.html.render()
@@ -422,7 +466,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         for n in self._link(new, parent):
             parent.insert(offset, n)
             offset += 1
-        return self.parent()
+        return self.parent
 
     def _select(self, collection, selector=None):
         if selector is None:
