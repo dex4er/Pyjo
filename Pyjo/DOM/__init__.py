@@ -121,18 +121,18 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         if result:
             return self._build(result, self.xml)
 
+    @property
     def attr(self, *args, **kwargs):
         """::
 
-            my_dict = dom.attr()
-            foo = dom.attr('foo')
-            dom = dom.attr(foo='bar')
-            dom = dom.attr('foo', 'bar')
+            my_dict = dom.attr
+            foo = dom.attr['foo']
+            dom.attr['foo'] = 'bar'
 
-        This element's attributes. Returns :class:`None` if attribute is missing.
+        This element's attributes.
 
             # List id attributes
-            dom.find('*').map('attr', 'id').compact().join("\n").say()
+            dom.find('*').map(lambda i: i.attr['id']).compact().join("\n").say()
         """
         tree = self.tree
 
@@ -142,25 +142,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             attrs = tree[2]
 
         # Dict
-        if not args and not kwargs:
-            return attrs
-
-        # Get
-        if len(args) == 1:
-            attrs = self.to_dict()
-            if args[0] in attrs:
-                return attrs[args[0]]
-            else:
-                return
-
-        # Set
-        if len(args) == 2:
-            attrs[args[0]] = args[1]
-
-        for k, v in kwargs.items():
-            attrs[k] = v
-
-        return self
+        return attrs
 
     def contents(self):
         """::
@@ -298,7 +280,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             return self._build(next(tree), self.xml)
 
     def to_dict(self):
-        return self.attr()
+        return self.attr
 
     def to_str(self):
         return self.html.render()
