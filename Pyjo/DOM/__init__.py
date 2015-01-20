@@ -13,7 +13,7 @@ Pyjo.DOM - Minimalistic HTML/XML DOM parser with CSS selectors
     # Find
     dom.at('#b').text().say()
     print(dom.find('p').map('text').join("\\n"))
-    dom.find('[id]').map(attr='id').join("\\n")
+    dom.find('[id]').map(lambda i: i.attr['id']).join("\\n")
 
     # Iterate
     dom.find('p[id]').reverse().each(lambda e: print(e.id))
@@ -60,15 +60,6 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
     def __init__(self, html=None):
         if html is not None:
             self.parse(html)
-
-    def __getitem__(self, key):
-        return self.attr(key)
-
-    def __setitem__(self, key, value):
-        return self.attr(key, value)
-
-    def __delitem__(self, key):
-        del self.attr()[key]
 
     def all_contents(self):
         """::
