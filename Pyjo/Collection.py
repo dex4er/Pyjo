@@ -181,6 +181,15 @@ class Pyjo_Collection(list):
     def new(cls, value=[]):
         return Pyjo_Collection(value)
 
+    def len(self):
+        """::
+
+            size = collection.len()
+
+        Number of elements in collection.
+        """
+        return len(self)
+
     def to_dict(self):
         """::
 
