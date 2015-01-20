@@ -321,7 +321,7 @@ class Pyjo_DOM_CSS(Pyjo.Base.object):
         """
         tree = self.tree
         if tree[0] == 'tag':
-            return _match(_compile(pattern), tree, tree)
+            return self._match(self._compile(pattern), tree, tree)
         else:
             return
 
@@ -332,7 +332,7 @@ class Pyjo_DOM_CSS(Pyjo.Base.object):
 
         Run CSS selector against :attr:`tree`.
         """
-        return _select(False, self.tree, _compile(pattern))
+        return self._select(False, self.tree, self._compile(pattern))
 
     def select_one(self, pattern):
         """::
@@ -342,302 +342,286 @@ class Pyjo_DOM_CSS(Pyjo.Base.object):
         Run CSS selector against :attr:`tree` and stop as soon as the first node
         matched.
         """
-        return _select(True, self.tree, _compile(pattern))
+        return self._select(True, self.tree, self._compile(pattern))
 
-
-def _ancestor(selectors, current, tree, pos):
-    while len(current) > 3 and current[3]:
-        current = current[3]
-        if current[0] == 'root' or current == tree:
-            return False
-        if _combinator(selectors, current, tree, pos):
-            return True
-    return False
-
-
-def _attr(name_re, value_re, current):
-    attrs = current[2]
-    for name, value in attrs.items():
-        if name == m(name_re):
-            if value is not None and value_re is not None:
-                if value == m(value_re):
-                    return True
-            else:
+    def _ancestor(self, selectors, current, tree, pos):
+        while len(current) > 3 and current[3]:
+            current = current[3]
+            if current[0] == 'root' or current == tree:
+                return False
+            if self._combinator(selectors, current, tree, pos):
                 return True
-    return False
-
-
-def _combinator(selectors, current, tree, pos):
-    if len(selectors) > pos:
-        c = selectors[pos]
-    else:
         return False
 
-    if isinstance(c, list):
-        if not _selector(c, current):
-            return False
-        pos += 1
-        if len(selectors) > pos and selectors[pos]:
+    def _attr(self, name_re, value_re, current):
+        attrs = current[2]
+        for name, value in attrs.items():
+            if name == m(name_re):
+                if value is not None and value_re is not None:
+                    if value == m(value_re):
+                        return True
+                else:
+                    return True
+        return False
+
+    def _combinator(self, selectors, current, tree, pos):
+        if len(selectors) > pos:
             c = selectors[pos]
         else:
-            return True
+            return False
 
-    pos += 1
+        if isinstance(c, list):
+            if not self._selector(c, current):
+                return False
+            pos += 1
+            if len(selectors) > pos and selectors[pos]:
+                c = selectors[pos]
+            else:
+                return True
 
-    # ">" (parent only)
-    if c == '>':
-        return _parent(selectors, current, tree, pos)
+        pos += 1
 
-    # "~" (preceding siblings)
-    if c == '~':
-        return _sibling(selectors, current, tree, False, pos)
+        # ">" (parent only)
+        if c == '>':
+            return self._parent(selectors, current, tree, pos)
 
-    # "+" (immediately preceding siblings)
-    if c == '+':
-        return _sibling(selectors, current, tree, True, pos)
+        # "~" (preceding siblings)
+        if c == '~':
+            return self._sibling(selectors, current, tree, False, pos)
 
-    # " " (ancestor)
-    return _ancestor(selectors, current, tree, pos)
+        # "+" (immediately preceding siblings)
+        if c == '+':
+            return self._sibling(selectors, current, tree, True, pos)
 
+        # " " (ancestor)
+        return self._ancestor(selectors, current, tree, pos)
 
-def _compile(css):
-    pattern = [[]]
-    for g in m(TOKEN_RE, 'gx').match(css):
-        separator, element, pc, attrs, combinator = g[1], g[2], g[3], g[6], g[12]
-        if element is None:
-            element = ''
+    def _compile(self, css):
+        pattern = [[]]
+        for g in m(TOKEN_RE, 'gx').match(css):
+            separator, element, pc, attrs, combinator = g[1], g[2], g[3], g[6], g[12]
+            if element is None:
+                element = ''
 
-        if separator or element or pc or attrs or combinator:
-            # New selector
-            if separator:
-                pattern.append([])
-            part = pattern[-1]
+            if separator or element or pc or attrs or combinator:
+                # New selector
+                if separator:
+                    pattern.append([])
+                part = pattern[-1]
 
-            # Empty combinator
-            if part and part[-1] and isinstance(part[-1], list):
-                part.append(' ')
+                # Empty combinator
+                if part and part[-1] and isinstance(part[-1], list):
+                    part.append(' ')
 
-            # Tag
-            selector = []
-            part.append(selector)
-            element, count, g = element == s('^((?:\\\.|\\\#|[^.#])+)', '')
-            if count and g[1] != '*':
-                selector.append(['tag', _name(g[1])])
+                # Tag
+                selector = []
+                part.append(selector)
+                element, count, g = element == s('^((?:\\\.|\\\#|[^.#])+)', '')
+                if count and g[1] != '*':
+                    selector.append(['tag', self._name(g[1])])
 
-            # Class or ID
-            for g in m('(?:([.#])((?:\\[.\#]|[^\#.])+))', 'g').match(element):
-                if g[1] == '.':
-                    name, op = 'class', '~'
-                else:
-                    name, op = 'id', ''
-                selector.append(['attr', _name(name), _value(op, g[2])])
+                # Class or ID
+                for g in m('(?:([.#])((?:\\[.\#]|[^\#.])+))', 'g').match(element):
+                    if g[1] == '.':
+                        name, op = 'class', '~'
+                    else:
+                        name, op = 'id', ''
+                    selector.append(['attr', self._name(name), self._value(op, g[2])])
 
-            # Pseudo classes (":not" contains more selectors)
-            for g in m(PSEUDO_CLASS_RE, 'g').match(pc):
-                if g[1] == 'not':
-                    value = _compile(g[2])
-                else:
-                    value = _equation(g[2])
-                selector.append(['pc', g[1].lower(), value])
+                # Pseudo classes (":not" contains more selectors)
+                for g in m(PSEUDO_CLASS_RE, 'g').match(pc):
+                    if g[1] == 'not':
+                        value = self._compile(g[2])
+                    else:
+                        value = self._equation(g[2])
+                    selector.append(['pc', g[1].lower(), value])
 
-            # Attributes
-            for g in m(ATTR_RE, 'gx').match(attrs):
-                if g[2] is not None:
-                    op = g[2]
-                else:
-                    op = ''
-                if g[3] is not None:
-                    value = g[3]
-                else:
-                    value = g[4]
-                insensitive = bool(g[5])
-                selector.append(['attr', _name(g[1]), _value(op, value, insensitive)])
+                # Attributes
+                for g in m(ATTR_RE, 'gx').match(attrs):
+                    if g[2] is not None:
+                        op = g[2]
+                    else:
+                        op = ''
+                    if g[3] is not None:
+                        value = g[3]
+                    else:
+                        value = g[4]
+                    insensitive = bool(g[5])
+                    selector.append(['attr', self._name(g[1]), self._value(op, value, insensitive)])
 
-            # Combinator
-            if combinator:
-                part.append(combinator)
+                # Combinator
+                if combinator:
+                    part.append(combinator)
 
-    return pattern
+        return pattern
 
+    def _equation(self, equation):
+        if not equation:
+            return []
 
-def _equation(equation):
-    if not equation:
-        return []
+        # "even"
+        if equation == m(r'^\s*even\s*$', 'i'):
+            return [2, 2]
 
-    # "even"
-    if equation == m(r'^\s*even\s*$', 'i'):
-        return [2, 2]
+        # "odd"
+        if equation == m(r'^\s*odd\s*$', 'i'):
+            return [2, 1]
 
-    # "odd"
-    if equation == m(r'^\s*odd\s*$', 'i'):
-        return [2, 1]
+        # Equation
+        num = [1, 1]
+        g = equation == m(r'(?:(-?(?:\d+)?)?(n))?\s*\+?\s*(-?\s*\d+)?\s*$', 'i')
+        if g:
+            if g[1] is not None and len(g[1]):
+                num[0] = int(g[1])
+            elif g[2]:
+                num[0] = 1
+            else:
+                num[0] = 0
+            if num[0] == '-':
+                num[0] = -1
+            if g[3] is not None:
+                num[1] = int(g[3])
+            else:
+                num[1] = 0
 
-    # Equation
-    num = [1, 1]
-    g = equation == m(r'(?:(-?(?:\d+)?)?(n))?\s*\+?\s*(-?\s*\d+)?\s*$', 'i')
-    if g:
-        if g[1] is not None and len(g[1]):
-            num[0] = int(g[1])
-        elif g[2]:
-            num[0] = 1
-        else:
-            num[0] = 0
-        if num[0] == '-':
-            num[0] = -1
-        if g[3] is not None:
-            num[1] = int(g[3])
-        else:
-            num[1] = 0
+        return num
 
-    return num
-
-
-def _match(pattern, current, tree):
-    for p in pattern:
-        selectors = list(p)
-        selectors.reverse()
-        if _combinator(selectors, current, tree, 0):
-            return True
-    return False
-
-
-def _name(value):
-    return r'(?:^|:)' + Pyjo.Regexp.re.escape(_unescape(value)) + r'$'
-
-
-def _parent(selectors, current, tree, pos):
-    if len(current) <= 3 or not current[3]:
+    def _match(self, pattern, current, tree):
+        for p in pattern:
+            selectors = list(p)
+            selectors.reverse()
+            if self._combinator(selectors, current, tree, 0):
+                return True
         return False
 
-    parent = current[3]
+    def _name(self, value):
+        return r'(?:^|:)' + Pyjo.Regexp.re.escape(self._unescape(value)) + r'$'
 
-    if parent[0] == 'root' or parent == tree:
+    def _parent(self, selectors, current, tree, pos):
+        if len(current) <= 3 or not current[3]:
+            return False
+
+        parent = current[3]
+
+        if parent[0] == 'root' or parent == tree:
+            return False
+
+        return self._combinator(selectors, parent, tree, pos)
+
+    def _pc(self, pclass, args, current):
+        # TODO
         return False
 
-    return _combinator(selectors, parent, tree, pos)
+    def _select(self, one, tree, pattern):
+        results = []
+        if tree[0] == 'root':
+            pos = 1
+        else:
+            pos = 4
+        queue = tree[pos:]
+        while queue:
+            current = queue.pop(0)
+            if current[0] == 'tag':
+                queue = current[4:] + queue
+                if self._match(pattern, current, tree):
+                    if one:
+                        return current
+                    else:
+                        results.append(current)
+        if one:
+            return
+        else:
+            return results
 
+    def _selector(self, selector, current):
+        for s in selector:
+            if s:
+                nodetype = s[0]
 
-def _pc(pclass, args, current):
-    # TODO
-    return False
+                # Tag
+                if nodetype == 'tag':
+                    if current[1] != m(s[1]):
+                        return False
 
+                # Attribute
+                elif nodetype == 'attr':
+                    if not self._attr(s[1], s[2], current):
+                        return False
 
-def _select(one, tree, pattern):
-    results = []
-    if tree[0] == 'root':
-        pos = 1
-    else:
-        pos = 4
-    queue = tree[pos:]
-    while queue:
-        current = queue.pop(0)
-        if current[0] == 'tag':
-            queue = current[4:] + queue
-            if _match(pattern, current, tree):
-                if one:
-                    return current
-                else:
-                    results.append(current)
-    if one:
-        return
-    else:
-        return results
+                # Pseudo class
+                elif nodetype == 'pc':
+                    if not self._pc(s[1], s[2], current):
+                        return False
 
+        return True
 
-def _selector(selector, current):
-    for s in selector:
-        if s:
-            nodetype = s[0]
+    def _sibling(self, selectors, current, tree, immediate, pos):
+        found = False
 
-            # Tag
-            if nodetype == 'tag':
-                if current[1] != m(s[1]):
-                    return False
+        for sibling in self._siblings(current):
+            if sibling == current:
+                return found
 
-            # Attribute
-            elif nodetype == 'attr':
-                if not _attr(s[1], s[2], current):
-                    return False
+            # "+" (immediately preceding sibling)
+            if immediate:
+                found = self._combinator(selectors, sibling, tree, pos)
 
-            # Pseudo class
-            elif nodetype == 'pc':
-                if not _pc(s[1], s[2], current):
-                    return False
+            # "~" (preceding sibling)
+            elif self._combinator(selectors, sibling, tree, pos):
+                return True
 
-    # TODO
-    return True
+        return False
 
+    def _siblings(self, current, nodetype=None):
+        parent = current[3]
 
-def _sibling(selectors, current, tree, immediate, pos):
-    found = False
+        siblings = filter(lambda n: n[0] == 'tag',
+                          parent[(1 if parent[0] == 'root' else 4):])
 
-    for sibling in _siblings(current):
-        if sibling == current:
-            return found
+        if nodetype is not None:
+            siblings = filter(lambda n: type == n[1], siblings)
 
-        # "+" (immediately preceding sibling)
-        if immediate:
-            found = _combinator(selectors, sibling, tree, pos)
+        return siblings
 
-        # "~" (preceding sibling)
-        elif _combinator(selectors, sibling, tree, pos):
-            return True
+    def _unescape(self, value):
 
-    return False
+        # Remove escaped newlines
+        value -= s(r'\\n', '', 'g')  # TODO bug in Mojo?
 
+        # Unescape Unicode characters
+        value -= s(r'\\([0-9a-fA-F]{1,6})\s?', lambda g: uchr(int(g[1], 16)), 'g')
 
-def _siblings(current, nodetype=None):
-    parent = current[3]
+        # Remove backslash
+        value -= s(r'\\', '', 'g')
 
-    siblings = filter(lambda n: n[0] == 'tag',
-                      parent[(1 if parent[0] == 'root' else 4):])
-
-    if nodetype is not None:
-        siblings = filter(lambda n: type == n[1], siblings)
-
-    return siblings
-
-
-def _unescape(value):
-
-    # Remove escaped newlines
-    value -= s(r'\\n', '', 'g')  # TODO bug in Mojo?
-
-    # Unescape Unicode characters
-    value -= s(r'\\([0-9a-fA-F]{1,6})\s?', lambda g: uchr(int(g[1], 16)), 'g')
-
-    # Remove backslash
-    value -= s(r'\\', '', 'g')
-
-    return value
-
-
-def _value(op, value, insensitive=False):
-    if value is None:
-        return
-
-    value = Pyjo.Regexp.re.escape(_unescape(value))
-    if insensitive:
-        value = '(?i)' + value
-
-    # "~=" (word)
-    if op == '~':
-        return r'(?:^|\s+)' + value + '(?:\s+|$)'
-
-    # "*=" (contains)
-    if op == '*':
         return value
 
-    # "^=" (begins with)
-    if op == '^':
-        return r'^' + value
+    def _value(self, op, value, insensitive=False):
+        if value is None:
+            return
 
-    # "$=" (ends with)
-    if op == '$':
-        return value + r'$'
+        value = Pyjo.Regexp.re.escape(self._unescape(value))
+        if insensitive:
+            value = '(?i)' + value
 
-    # Everything else
-    return r'^' + value + r'$'
+        # "~=" (word)
+        if op == '~':
+            return r'(?:^|\s+)' + value + '(?:\s+|$)'
+
+        # "*=" (contains)
+        if op == '*':
+            return value
+
+        # "^=" (begins with)
+        if op == '^':
+            return r'^' + value
+
+        # "$=" (ends with)
+        if op == '$':
+            return value + r'$'
+
+        # Everything else
+        return r'^' + value + r'$'
 
 
 new = Pyjo_DOM_CSS.new
