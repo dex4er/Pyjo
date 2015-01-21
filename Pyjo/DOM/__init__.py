@@ -483,12 +483,13 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
     def _text(self, nodes, recurse, trim):
         # Merge successive text nodes
         i = 0
-        while i + 1 < len(nodes):
+        while len(nodes) > i + 1:
             nextnode = nodes[i + 1]
             if nodes[i][0] == 'text' and nextnode[0] == 'text':
+                text = nodes[i][1] + nextnode[1]
                 nodes.pop(i)
                 nodes.pop(i)
-                nodes.insert(i, ['text', nodes[i][1] + nextnode[1]])
+                nodes.insert(i, ['text', text])
             else:
                 i += 1
                 continue
