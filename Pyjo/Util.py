@@ -106,7 +106,7 @@ def rand(value=1):
 
 def squish(string):
     string = trim(string)
-    string -= s(r'\s+', '', 'g')
+    string -= s(r'\s+', ' ', 'g')
     return string
 
 
