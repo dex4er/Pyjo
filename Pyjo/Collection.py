@@ -184,10 +184,11 @@ class Pyjo_Collection(list):
     def new(cls, value=[]):
         return Pyjo_Collection(value)
 
+    @property
     def size(self):
         """::
 
-            size = collection.size()
+            size = collection.size
 
         Number of elements in collection.
         """
