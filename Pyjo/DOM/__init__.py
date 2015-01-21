@@ -383,7 +383,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             else:
                 yield n
 
-    def _all_text(self, recurse, trim=True):
+    def _all_text(self, recurse, trim):
         # Detect "pre" tag
         tree = self.tree
         if trim:
@@ -494,33 +494,32 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
                 continue
 
         text = ''
-        for n in nodes:
-            nodetype = n[0]
-
-            content = ''
-
-            # Nested tag
-            if nodetype == 'tag' and recurse:
-                content = self._text(self._nodes(n), True, False if n[1] == 'pre' else trim)
+        for node in nodes:
+            nodetype = node[0]
 
             # Text
-            elif nodetype == 'text':
+            chunk = ''
+            if nodetype == 'text':
                 if trim:
-                    content = squish(n[1])
+                    chunk = squish(node[1])
                 else:
-                    content = n[1]
+                    chunk = node[1]
 
             # CDATA or raw text
             elif nodetype == 'cdata' or nodetype == 'raw':
-                content = n[1]
+                chunk = node[1]
+
+            # Nested tag
+            elif nodetype == 'tag' and recurse:
+                chunk = self._text(self._nodes(node), True, False if node[1] == 'pre' else trim)
 
             # Add leading whitespace if punctuation allows it
-            if text == m(r'\S\Z') and content == m(r'^[^.!?,;:\s]+'):
-                content = " " + content
+            if text == m(r'\S\Z') and chunk == m(r'^[^.!?,;:\s]+'):
+                chunk = " " + chunk
 
             # Trim whitespace blocks
-            if content == m(r'\S+') or not trim:
-                text += content
+            if chunk == m(r'\S+') or not trim:
+                text += chunk
 
         return text
 
