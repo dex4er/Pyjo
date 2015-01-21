@@ -253,6 +253,25 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         return self._maybe(self._siblings(True, 0)[1])
 
     @property
+    def next_sibling(self):
+        """::
+
+            sibling = dom.next_sibling
+
+        Return :mod:`Pyjo.DOM` object for next sibling node or :class:`None` if there are
+        no more siblings. ::
+
+            # "456"
+            dom.parse('<p><b>123</b><!-- Test -->456</p>')
+               .at('b').next_sibling.next_sibling
+
+            # " Test "
+            dom.parse('<p><b>123</b><!-- Test -->456</p>')
+               .at('b').next_sibling.content
+        """
+        return self._maybe(self._siblings(False, 0)[1])
+
+    @property
     def node(self):
         """::
 
@@ -291,6 +310,24 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         return self
 
     @property
+    def preceding(self):
+        return self._collect(self._siblings(True)[0])
+
+    @property
+    def preceding_siblings(self):
+        """::
+            collection = dom.preceding
+
+        Find all sibling elements before this node and
+        return a :mod:`Pyjo.Collection` object containing these elements as :mod:`Pyjo.DOM`
+        objects.
+
+            # List types of sibling elements before this node
+            dom.preceding.map('type').join("\n").say()
+        """
+        return self._collect(self._siblings(False)[0])
+
+    @property
     def previous(self):
         """::
 
@@ -303,6 +340,25 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             dom.parse('<div><h1>Test</h1><h2>123</h2></div>').at('h2').previous
         """
         return self._maybe(self._siblings(True, -1)[0])
+
+    @property
+    def previous_sibling(self):
+        """::
+
+            sibling = dom.previous_sibling
+
+        Return :mod:`Pyjo.DOM` object for previous sibling node or :class:`None` if there
+        are no more siblings. ::
+
+            # "123"
+            dom.parse('<p>123<!-- Test --><b>456</b></p>')
+               .at('b').previous_sibling.previous_sibling
+
+            # " Test "
+            dom.parse('<p>123<!-- Test --><b>456</b></p>')
+               .at('b').previous_sibling.content
+        """
+        return self._maybe(self._siblings(False, -1)[0])
 
     @property
     def raw_text(self):
@@ -533,7 +589,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         else:
             collection.new(filter(lambda i: i.match(selector), collection))
 
-    def _siblings(self, tags, i):
+    def _siblings(self, tags, i=None):
         parent = self.parent
         if parent is None:
             return [None, None]
