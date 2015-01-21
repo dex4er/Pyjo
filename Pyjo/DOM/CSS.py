@@ -579,7 +579,7 @@ class Pyjo_DOM_CSS(Pyjo.Base.object):
                           parent[(1 if parent[0] == 'root' else 4):])
 
         if nodetype is not None:
-            siblings = filter(lambda n: type == n[1], siblings)
+            siblings = filter(lambda n: nodetype == n[1], siblings)
 
         return siblings
 

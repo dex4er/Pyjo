@@ -70,17 +70,18 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
     def __delitem__(self, key):
         del self.attr()[key]
 
+    @property
     def all_contents(self):
         """::
 
-            collection = dom.all_contents()
+            collection = dom.all_contents
 
         Return a :mod:`Pyjo.Collection` object containing all nodes in DOM structure as
         :mod:`Pyjo.DOM` objects. ::
 
             # "<p><b>123</b></p>"
             dom.parse('<p><!-- Test --><b>123<!-- 456 --></b></p>')
-               .all_contents()
+               .all_contents
                .grep(lambda i: i.node == 'comment').map('remove').first()
         """
         return self._collect(self._all(self._nodes(self.tree)))
@@ -113,8 +114,16 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         """
         return self._all_text(True, trim)
 
-    def ancestors(self, pattern=None):
-        return self._select(self._collect(self._ancestors()), pattern)
+    @property
+    def ancestors(self):
+        """::
+
+            collection = dom.ancestors
+
+        Find all ancestors of this node and return a
+        :mod:`Pyjo.Collection` object containing these elements as :mod:`Pyjo.DOM` objects.
+        """
+        return self._collect(self._ancestors())
 
     def at(self, pattern):
         """::
@@ -178,19 +187,34 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
         return self
 
+    @property
+    def children(self):
+        """::
+
+            collection = dom.children
+
+        Find all children of this element and return a
+        :mod:`Pyjo.Collection` object containing these elements as :mod:`Pyjo.DOM` objects. ::
+
+            # Show type of random child element
+            print(dom.children.shuffle().first().type)
+        """
+        return self._collect(self._nodes(self.tree, True))
+
+    @property
     def contents(self):
         """::
 
-            collection = dom.contents()
+            collection = dom.contents
 
         Return a :mod:`Pyjo.Collection` object containing the child nodes of this element
         as :mod:`Pyjo.DOM` objects. ::
 
             # "<p><b>123</b></p>"
-            dom.parse('<p>Test<b>123</b></p>').at('p').contents().first().remove()
+            dom.parse('<p>Test<b>123</b></p>').at('p').contents.first().remove()
 
             # "<!-- Test -->"
-            dom.parse('<!-- Test --><b>123</b>').contents().first()
+            dom.parse('<!-- Test --><b>123</b>').contents.first()
         """
         return self._collect(self._nodes(self.tree))
 
@@ -213,6 +237,20 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             divs = dom.find('div.foo\.bar').to_list()
         """
         return self._collect(self._css.select(pattern))
+
+    @property
+    def next(self):
+        """::
+
+            sibling = dom.next
+
+        Return :mod:`Pyjo.DOM` object for next sibling element or :class:`None` if there are
+        no more siblings. ::
+
+            # "<h2>123</h2>"
+            dom.parse('<div><h1>Test</h1><h2>123</h2></div>').at('h1').next
+        """
+        return self._maybe(self._siblings(True, 0)[1])
 
     @property
     def node(self):
@@ -251,6 +289,20 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         """
         self.html.parse(html)
         return self
+
+    @property
+    def previous(self):
+        """::
+
+            sibling = dom.previous
+
+        Return :mod:`Pyjo.DOM` object for previous sibling element or :class:`None` if there
+        are no more siblings. ::
+
+            # "<h1>Test</h1>"
+            dom.parse('<div><h1>Test</h1><h2>123</h2></div>').at('h2').previous
+        """
+        return self._maybe(self._siblings(True, -1)[0])
 
     @property
     def raw_text(self):
@@ -301,10 +353,11 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         else:
             return self._replace(self._parent(), tree, self._parse(new))
 
+    @property
     def root(self):
         """::
 
-            root = dom.root()
+            root = dom.root
 
         Return :mod:`Pyjo.DOM` object for root node.
         """
@@ -352,7 +405,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         This element's type.
 
             # List types of child elements
-            dom.children().map('type').join("\n").say()
+            dom.children().map('type').join("\\n").say()
         """
         tree = self.tree
         if tree[0] != 'tag':
@@ -435,11 +488,17 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             n[offset] = parent
             # TODO weakref n[offset]
 
-    def _nodes(self, tree=None, nodetype=None):
+    def _maybe(self, tree):
+        if tree:
+            return self._build(tree, self.xml)
+        else:
+            return None
+
+    def _nodes(self, tree=None, tags=False):
         if not tree:
             return []
         nodes = tree[self._start(tree):]
-        if nodetype:
+        if tags:
             return filter(lambda n: n[0] == 'tag', nodes)
         else:
             return nodes
@@ -473,6 +532,34 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             return collection
         else:
             collection.new(filter(lambda i: i.match(selector), collection))
+
+    def _siblings(self, tags, i):
+        parent = self.parent
+        if parent is None:
+            return [None, None]
+
+        tree = self.tree
+        before = []
+        after = []
+        match = 0
+        for node in self._nodes(parent.tree):
+            if not match and node == tree:
+                match += 1
+                continue
+            if tags and node[0] != 'tag':
+                continue
+            if match:
+                after.append(node)
+            else:
+                before.append(node)
+
+        if i is not None:
+            if i >= 0:
+                return [before[i] if len(before) > i else None, after[i] if len(after) > i else None]
+            else:
+                return [before[i] if len(before) >= -i else None, after[i] if len(after) >= -i else None]
+        else:
+            return [before, after]
 
     def _start(self, tree):
         if tree[0] == 'root':
