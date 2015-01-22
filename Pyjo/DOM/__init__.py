@@ -202,6 +202,50 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         return self._collect(self._nodes(self.tree, True))
 
     @property
+    def content(self):
+        """::
+
+            string = dom.content
+            dom.content = u'<p>I ♥ Mojolicious!</p>'
+
+        Return this node's content or replace it with HTML/XML fragment (for ``root``
+        and ``tag`` nodes) or raw content. ::
+
+            # "<b>Test</b>"
+            dom.parse('<div><b>Test</b></div>').at('div').content
+
+            # "<div><h1>123</h1></div>"
+            dom.parse('<div><h1>Test</h1></div>').at('h1').set(content='123').root
+
+            # "<p><i>123</i></p>"
+            dom.parse('<p>Test</p>').at('p').set(content='<i>123</i>').root
+
+            # "<div><h1></h1></div>"
+            dom.parse('<div><h1>Test</h1></div>').at('h1').set(content='').root
+
+            # " Test "
+            dom.parse('<!-- Test --><br>').contents.first().content
+
+            # "<div><!-- 123 -.456</div>"
+            dom.parse('<div><!-- Test -->456</div>')
+               .at('div').contents.first().set(content=' 123 ').root
+        """
+        nodetype = self.node
+        if nodetype == 'root' or nodetype == 'tag':
+            html = Pyjo.DOM.HTML.new(xml=self.xml)
+            return u''.join(map(lambda i: html.set(tree=i).render(), self._nodes(self.tree)))
+        else:
+            return self.tree[1]
+
+    @content.setter
+    def content(self, value):
+        nodetype = self.node
+        if nodetype == 'root' or nodetype == 'tag':
+            self._content(0, 1, value)
+        else:
+            self.tree[1] = value
+
+    @property
     def contents(self):
         """::
 
@@ -385,7 +429,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             dom.parse('<div><h1>Test</h1></div>').at('h1').remove()
 
             # "<p><b>456</b></p>"
-            dom.parse('<p>123<b>456</b></p>').at('p').contents().first().remove().root()
+            dom.parse('<p>123<b>456</b></p>').at('p').contents().first().remove().root
         """
         return self.replace('')
 
@@ -401,7 +445,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
             # "<p><b>123</b></p>"
             dom.parse('<p>Test</p>')
-               .at('p').contents().item(0).replace('<b>123</b>').root()
+               .at('p').contents().item(0).replace('<b>123</b>').root
         """
         tree = self.tree
         if tree[0] == 'root':
@@ -527,7 +571,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
     def _collect(self, results):
         xml = self.xml
-        return Pyjo.Collection.new(map(lambda a: self._build(a, xml), results))
+        return Pyjo.Collection.new(map(lambda a: self._build(a, xml), results) if results else [])
 
     @property
     def _css(self):
@@ -587,6 +631,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         if selector is None:
             return collection
         else:
+            # TODO def match
             collection.new(filter(lambda i: i.match(selector), collection))
 
     def _siblings(self, tags, i=None):
