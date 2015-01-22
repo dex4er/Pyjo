@@ -56,33 +56,33 @@ class Pyjo_Collection(list):
                 num += 1
             return self
 
-    def first(self, cb=None, flags=''):
+    def first(self, matched=None):
         """::
 
-            first = collection.first()
-            first = collection.first(r'pattern', 'flags')
-            first = collection.first(lambda i: ...)
+            first = collection.find_first('string')
+            first = collection.find_first(m(r'pattern', 'flags'))
+            first = collection.find_first(lambda i: ...)
 
-        Evaluate regular expression or callback for each element in collection and
-        return the first one that matched the regular expression, or for which the
+        Evaluate string or regular expression or callback for each element in collection and
+        return the first one that matched the string or regular expression, or for which the
         callback returned true. The element will be the first argument passed to the
         callback. ::
 
             # Find first value that contains the word "mojo"
-            interesting = collection.first('pyjo', 'i')
+            interesting = collection.first(m('pyjo', 'i'))
 
             # Find first value that is greater than 5
             greater = collection.first(lambda i: i > 5)
         """
-        if cb is None:
+        if matched is None:
             return self[0]
-        elif callable(cb):
+        elif callable(matched):
             for i in self:
-                if cb(i):
+                if matched(i):
                     return i
         else:
             for i in self:
-                if i == m(cb, flags):
+                if i == matched:
                     return i
         return
 
@@ -99,27 +99,28 @@ class Pyjo_Collection(list):
         """
         return self.new(_flatten(self))
 
-    def grep(self, cb, flags=''):
+    def grep(self, matched):
         """::
 
-            new = collection.grep(r'pattern', 'flags')
+            new = collection.grep('string')
+            new = collection.grep(m(r'pattern', 'flags'))
             new = collection.grep(lambda i: ...)
 
-        Evaluate regular expression or callback for each element in collection and
+        Evaluate string or regular expression or callback for each element in collection and
         create a new collection with all elements that matched the regular expression,
         or for which the callback returned true. The element will be the first
         argument passed to the callback.
 
             # Find all values that contain the word "mojo"
-            interesting = collection.grep('mojo', 'i')
+            interesting = collection.grep(m('mojo', 'i'))
 
             # Find all values that are greater than 5
             greater = collection.grep(lambda i: i > 5)
         """
-        if callable(cb):
-            return self.new(filter(lambda i: cb(i), self))
+        if callable(matched):
+            return self.new(filter(lambda i: matched(i), self))
         else:
-            return self.new(filter(lambda i: i == m(cb, flags), self))
+            return self.new(filter(lambda i: i == matched, self))
 
     def item(self, offset):
         """::
@@ -145,6 +146,18 @@ class Pyjo_Collection(list):
             collection.join(', ').say()
         """
         return Pyjo.TextStream.new(string.join(map(lambda s: Pyjo.Util.u(s), self)))
+
+    def last(self):
+        """::
+
+            last = collection.last()
+
+        Return the last element in collection or :class:`None` if collection is empty.
+        """
+        if len(self) > 0:
+            return self[-1]
+        else:
+            return
 
     def map(self, attribute, *args):
         """::
