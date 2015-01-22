@@ -190,7 +190,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         Setting value to :class:`None` deletes attribute. ::
 
             # List id attributes
-            dom.find('*').map('attr', 'id').compact().join("\n").say()
+            dom.find('*').map('attr', 'id').compact().join("\\n").say()
         """
         tree = self.tree
 
@@ -618,7 +618,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             elemtype = dom.type
             dom.type = 'div'
 
-        This element's type.
+        This element's type. ::
 
             # List types of child elements
             dom.children().map('type').join("\\n").say()
@@ -641,7 +641,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             dom = dom.wrap('<div></div>')
 
         Wrap HTML/XML fragment around this node, placing it as the last child of the
-        first innermost element.
+        first innermost element. ::
 
             # "<p>123<b>Test</b></p>"
             dom.parse('<b>Test</b>').at('b').wrap('<p>123</p>').root
@@ -663,7 +663,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             dom = dom.wrap_content('<div></div>')
 
         Wrap HTML/XML fragment around this node's content, placing it as the last
-        children of the first innermost element.
+        children of the first innermost element. ::
 
             # "<p><b>123Test</b></p>"
             dom.parse('<p>Test<p>').at('p').wrap_content('<b>123</b>').root
