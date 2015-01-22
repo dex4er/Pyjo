@@ -635,6 +635,44 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         if tree[0] == 'tag':
             tree[1] = value
 
+    def wrap(self, string):
+        """::
+
+            dom = dom.wrap('<div></div>')
+
+        Wrap HTML/XML fragment around this node, placing it as the last child of the
+        first innermost element.
+
+            # "<p>123<b>Test</b></p>"
+            dom.parse('<b>Test</b>').at('b').wrap('<p>123</p>').root
+
+            # "<div><p><b>Test</b></p>123</div>"
+            dom.parse('<b>Test</b>').at('b').wrap('<div><p></p>123</div>').root
+
+            # "<p><b>Test</b></p><p>123</p>"
+            dom.parse('<b>Test</b>').at('b').wrap('<p></p><p>123</p>').root
+
+            # "<p><b>Test</b></p>"
+            dom.parse('<p>Test</p>').at('p').contents.first().wrap('<b>').root
+        """
+        return self._wrap(False, string)
+
+    def wrap_content(self, string):
+        """::
+
+            dom = dom.wrap_content('<div></div>')
+
+        Wrap HTML/XML fragment around this node's content, placing it as the last
+        children of the first innermost element.
+
+            # "<p><b>123Test</b></p>"
+            dom.parse('<p>Test<p>').at('p').wrap_content('<b>123</b>').root
+
+            # "<p><b>Test</b></p><p>123</p>"
+            dom.parse('<b>Test</b>').wrap_content('<p></p><p>123</p>')
+        """
+        return self._wrap(True, string)
+
     @property
     def xml(self):
         return self.html.xml
@@ -865,6 +903,50 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
                 text += chunk
 
         return text
+
+    def _wrap(self, content, new):
+        tree = self.tree
+
+        if tree[0] == 'root':
+            content = True
+        if tree[0] != 'root' and tree[0] != 'tag':
+            content = False
+
+        # Find innermost tag
+        current = None
+        new = self._parse(new)
+        first = new
+        while True:
+            node = None
+            for node in self._nodes(first, True):
+                break
+            first = node
+            if not first:
+                break
+            current = first
+        if current is None:
+            return self
+
+        # Wrap content
+        if content:
+            root = list(self._nodes(tree))
+            root.insert(0, 'root')
+            for link in self._link(root, current):
+                current.append(link)
+            start = self._start(tree)
+            for _ in range(start, len(tree)):
+                tree.pop(-1)
+            for link in self._link(new, tree):
+                tree.insert(start, link)
+                start += 1
+
+        # Wrap element
+        else:
+            self._replace(self._parent(), tree, new)
+            for link in self._link(['root', tree], current):
+                current.append(link)
+
+        return self
 
 
 new = Pyjo_DOM.new
