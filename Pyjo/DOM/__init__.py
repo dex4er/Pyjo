@@ -125,6 +125,43 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         """
         return self._collect(self._ancestors())
 
+    def append(self, string):
+        """::
+
+            dom = dom.append(u'<p>I ♥ Mojolicious!</p>')
+
+        Append HTML/XML fragment to this node. ::
+
+            # "<div><h1>Test</h1><h2>123</h2></div>"
+            dom.parse('<div><h1>Test</h1></div>')
+               .at('h1').append('<h2>123</h2>').root
+
+            # "<p>Test 123</p>"
+            dom.parse('<p>Test</p>').at('p').contents.first().append(' 123').root
+        """
+        return self._add(1, string)
+
+    def append_content(self, string):
+        """::
+
+            dom = dom.append_content(u'<p>I ♥ Mojolicious!</p>')
+
+        Append HTML/XML fragment (for C<root> and C<tag> nodes) or raw content to this
+        node's content.
+
+            # "<div><h1>Test123</h1></div>"
+            dom.parse('<div><h1>Test</h1></div>')
+               .at('h1').append_content('123').root
+
+            # "<!-- Test 123 --><br>"
+            dom.parse('<!-- Test --><br>')
+               .contents.first().append_content('123 ').root
+
+            # "<p>Test<i>123</i></p>"
+            dom.parse('<p>Test</p>').at('p').append_content('<i>123</i>').root
+        """
+        return self._content(True, False, string)
+
     def at(self, pattern):
         """::
 
@@ -569,6 +606,20 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
     def xml(self, value):
         self.html.xml = value
 
+    def _add(self, offset, new):
+        tree = self.tree
+
+        if tree[0] == 'root':
+            return self
+
+        parent = self._parent()
+        n = self._offset(parent, tree) + offset
+        for link in self._link(self._parse(new), parent):
+            parent.insert(n, link)
+            n += 1
+
+        return self
+
     def _all(self, nodes):
         for n in nodes:
             if n[0] == 'tag':
@@ -614,6 +665,29 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
     def _collect(self, results):
         xml = self.xml
         return Pyjo.Collection.new(map(lambda a: self._build(a, xml), results) if results else [])
+
+    def _content(self, start, offset, new):
+        tree = self.tree
+
+        if tree[0] == 'root' or tree[0] == 'tag':
+            if start:
+                start = len(tree) + 1
+            else:
+                start = self._start(tree)
+            if offset:
+                for _ in range(start, len(tree)):
+                    tree.pop(-1)
+            for link in self._link(self._parse(new), tree):
+                tree.append(link)
+
+        else:
+            old = self.content
+            if start:
+                self.content = old + new
+            else:
+                self.content = new + old
+
+        return self
 
     @property
     def _css(self):
