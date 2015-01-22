@@ -13,8 +13,6 @@ Pyjo.Collection - Collection
 
 import Pyjo.TextStream
 
-from Pyjo.Regexp import m
-
 
 DEFAULT_CHARSET = 'utf-8'
 
@@ -59,9 +57,10 @@ class Pyjo_Collection(list):
     def first(self, matched=None):
         """::
 
-            first = collection.find_first('string')
-            first = collection.find_first(m(r'pattern', 'flags'))
-            first = collection.find_first(lambda i: ...)
+            first = collection.first()
+            first = collection.first('string')
+            first = collection.first(m(r'pattern', 'flags'))
+            first = collection.first(lambda i: ...)
 
         Evaluate string or regular expression or callback for each element in collection and
         return the first one that matched the string or regular expression, or for which the
@@ -73,9 +72,12 @@ class Pyjo_Collection(list):
 
             # Find first value that is greater than 5
             greater = collection.first(lambda i: i > 5)
+
+        Return the first element in collection or :class:`None` if collection is empty.
         """
         if matched is None:
-            return self[0]
+            if len(self) > 0:
+                return self[0]
         elif callable(matched):
             for i in self:
                 if matched(i):
