@@ -146,8 +146,8 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
             dom = dom.append_content(u'<p>I ♥ Mojolicious!</p>')
 
-        Append HTML/XML fragment (for C<root> and C<tag> nodes) or raw content to this
-        node's content.
+        Append HTML/XML fragment (for ``root`` and ``tag`` nodes) or raw content to this
+        node's content. ::
 
             # "<div><h1>Test123</h1></div>"
             dom.parse('<div><h1>Test</h1></div>')
@@ -450,6 +450,43 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         """
         return self._collect(self._siblings(False)[0])
 
+    def prepend(self, string):
+        """::
+
+            dom = dom.prepend(u'<p>I ♥ Mojolicious!</p>')
+
+        Prepend HTML/XML fragment to this node. ::
+
+            # "<div><h1>Test</h1><h2>123</h2></div>"
+            dom.parse('<div><h2>Test</h2></div>')
+               .at('h2').prepend('<h1>123</h1>').root
+
+            # "<p>Test 123</p>"
+            dom.parse('<p>123</p>').at('p').contents.first().prepend('Test ').root
+        """
+        return self._add(0, string)
+
+    def prepend_content(self, string):
+        """::
+
+            dom = dom.prepend_content(u'<p>I ♥ Mojolicious!</p>')
+
+        Prepend HTML/XML fragment (for ``root`` and ``tag`` nodes) or raw content to this
+        node's content. ::
+
+            # "<div><h2>Test123</h2></div>"
+            dom.parse('<div><h2>Test</h2></div>')
+               .at('h2').prepend_content('123').root
+
+            # "<!-- Test 123 --><br>"
+            dom.parse('<!-- 123 --><br>')
+               .contents.first().prepend_content(' Test').root
+
+            # "<p><i>123</i>Test</p>"
+            dom.parse('<p>Test</p>').at('p').prepend_content('<i>123</i>').root
+        """
+        return self._content(False, False, string)
+
     @property
     def previous(self):
         """::
@@ -678,7 +715,8 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
                 for _ in range(start, len(tree)):
                     tree.pop(-1)
             for link in self._link(self._parse(new), tree):
-                tree.append(link)
+                tree.insert(start, link)
+                start += 1
 
         else:
             old = self.content
