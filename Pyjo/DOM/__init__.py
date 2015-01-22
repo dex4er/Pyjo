@@ -283,6 +283,36 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         return self._collect(self._css.select(pattern))
 
     @property
+    def following(self):
+        """::
+
+            collection = dom.following
+            collection = dom.following('div > p')
+
+        Find all sibling elements after this node and
+        return a :mod:`Pyjo.Collection` object containing these elements as :mod:`Pyjo.DOM`
+        objects. ::
+
+            # List types of sibling elements before this node
+            dom.following.map('type').join("\\n").say()
+        """
+        return self._collect(self._siblings(True)[1])
+
+    @property
+    def following_siblings(self):
+        """::
+            collection = dom.following_siblings
+
+        Return a :mod:`Pyjo.Collection` object containing the sibling nodes after this
+        node as :mod:`Pyjo.DOM` objects. ::
+
+            # "C"
+            dom.parse('A<!-- B --><p>C</p>')
+               .at('p').following_siblings.last().content
+        """
+        return self._collect(self._siblings(False)[1])
+
+    @property
     def next(self):
         """::
 
@@ -355,19 +385,31 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
     @property
     def preceding(self):
+        """::
+
+            collection = dom.preceding
+            collection = dom.preceding('div > p')
+
+        Find all sibling elements before this node and
+        return a :mod:`Pyjo.Collection` object containing these elements as :mod:`Pyjo.DOM`
+        objects. ::
+
+            # List types of sibling elements before this node
+            dom.preceding.map('type').join("\\n").say()
+        """
         return self._collect(self._siblings(True)[0])
 
     @property
     def preceding_siblings(self):
         """::
-            collection = dom.preceding
+            collection = dom.preceding_siblings
 
-        Find all sibling elements before this node and
-        return a :mod:`Pyjo.Collection` object containing these elements as :mod:`Pyjo.DOM`
-        objects.
+        Return a :mod:`Pyjo.Collection` object containing the sibling nodes before this
+        node as :mod:`Pyjo.DOM` objects. ::
 
-            # List types of sibling elements before this node
-            dom.preceding.map('type').join("\n").say()
+            # "A"
+            dom.parse('A<!-- B --><p>C</p>')
+               .at('p').preceding_siblings.first().content
         """
         return self._collect(self._siblings(False)[0])
 
