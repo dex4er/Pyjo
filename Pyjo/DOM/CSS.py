@@ -9,7 +9,7 @@ Pyjo.DOM.CSS - CSS selector engine
 
     # Select elements from DOM tree
     css = Pyjo.DOM.CSS.new(tree=tree)
-    elements = css.select('h1, h2, h3')
+    elements = css.select('head > title')
 
 :mod:`Pyjo.DOM.CSS` is the CSS selector engine used by :mod:`Pyjo.DOM` and based on
 `Selectors Level 3 <http://www.w3.org/TR/css3-selectors/>`_.

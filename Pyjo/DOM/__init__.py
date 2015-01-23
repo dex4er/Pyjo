@@ -13,14 +13,14 @@ Pyjo.DOM - Minimalistic HTML/XML DOM parser with CSS selectors
     # Find
     print(dom.at('#b').text)
     print(dom.find('p').map('text').join("\\n"))
-    dom.find('[id]').map(attr='id').join("\\n")
+    dom.find('[id]').map('attr', 'id').join("\\n")
 
     # Iterate
-    dom.find('p[id]').reverse().each(lambda e: print(e.id))
+    dom.find('p[id]').reverse().each(lambda i: print(i.attr('id')))
 
     # Loop
-    for e in dom.find('p[id]').each():
-        print(e.id + ':' + e.text())
+    for i in dom.find('p[id]').each():
+        print(i.attr('id') + ':' + i.text)
 
     # Modify
     dom.find('div p').last().append('<p id="c">456</p>')
