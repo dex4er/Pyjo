@@ -124,8 +124,10 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         :mod:`Pyjo.Collection` object containing these elements as :mod:`Pyjo.DOM` objects.
         All selectors from :mod:`Pyjo.DOM.CSS` are supported. ::
 
-            # List types of ancestor elements
-            dom.ancestors().map('type').join("\\n").say()
+            # "div > p > i"
+            dom.parse('<div><p><i>bar</i></p></div>').at('i').contents[0] \\
+               .ancestors() \\
+               .map('type').reverse().join(" > ").say()
         """
         return self._select(self._collect(self._ancestors()), pattern)
 
@@ -176,7 +178,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         from :mod:`Pyjo.DOM.CSS` are supported. ::
 
             # Find first element with ``svg`` namespace definition
-            namespace = dom.at('[xmlns\:svg]')['xmlns:svg']
+            namespace = dom.at('[xmlns\\:svg]')['xmlns:svg']
         """
         result = self._css.select_one(pattern)
         if result:
@@ -194,7 +196,8 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         Setting value to :class:`None` deletes attribute. ::
 
             # List id attributes
-            dom.find('*').map('attr', 'id').compact().join("\\n").say()
+            dom.parse('<div id="a">foo</div><p>bar</p><div id="b">baz</div>') \\
+               .find('*').map('attr', 'id').compact().join("\\n").say()
         """
         tree = self.tree
 
@@ -239,7 +242,8 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         All selectors from :mod:`Pyjo.DOM.CSS` are supported. ::
 
             # Show type of random child element
-            print(dom.children().shuffle().first().type)
+            print(dom.parse('<b>foo</b><i>bar</i><p>baz</p>') \\
+                .children().shuffle().first().type)
         """
         return self._select(self._collect(self._nodes(self.tree, True)), pattern)
 
@@ -268,7 +272,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             # " Test "
             dom.parse('<!-- Test --><br>').contents.first().content
 
-            # "<div><!-- 123 -.456</div>"
+            # "<div><!-- 123 -->456</div>"
             dom.parse('<div><!-- Test -->456</div>')
                .at('div').contents.first().set(content=' 123 ').root
         """
@@ -314,7 +318,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         All selectors from :mod:`Pyjo.DOM.CSS` are supported. ::
 
             # Find a specific element and extract information
-            div_id = dom.find('div')[23]['id']
+            div_id = dom.find('div')[2]['id']
 
             # Extract information from multiple elements
             headers = dom.find('h1, h2, h3').map('text').to_list()
@@ -335,7 +339,8 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         objects. All selectors from :mod:`Pyjo.DOM.CSS` are supported. ::
 
             # List types of sibling elements before this node
-            dom.following().map('type').join("\\n").say()
+            dom.parse('<b>foo</b><i>bar</i><p>baz</p>').at('b') \\
+               .following().map('type').join("\\n").say()
         """
         return self._select(self._collect(self._siblings(True)[1]), pattern)
 
@@ -347,7 +352,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         node as :mod:`Pyjo.DOM` objects. ::
 
             # "C"
-            dom.parse('A<!-- B --><p>C</p>')
+            dom.parse('<p>A</p><!-- B -->C')
                .at('p').following_siblings().last().content
         """
         return self._collect(self._siblings(False)[1])
@@ -480,7 +485,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
         Prepend HTML/XML fragment to this node. ::
 
-            # "<div><h1>Test</h1><h2>123</h2></div>"
+            # "<div><h1>123</h1><h2>Test</h2></div>"
             dom.parse('<div><h2>Test</h2></div>')
                .at('h2').prepend('<h1>123</h1>').root
 
@@ -497,9 +502,9 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         Prepend HTML/XML fragment (for ``root`` and ``tag`` nodes) or raw content to this
         node's content. ::
 
-            # "<div><h2>Test123</h2></div>"
-            dom.parse('<div><h2>Test</h2></div>')
-               .at('h2').prepend_content('123').root
+            # "<div><h2>Test 123</h2></div>"
+            dom.parse('<div><h2>123</h2></div>')
+               .at('h2').prepend_content('Test ').root
 
             # "<!-- Test 123 --><br>"
             dom.parse('<!-- 123 --><br>')
@@ -568,7 +573,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             dom.parse('<div><h1>Test</h1></div>').at('h1').remove()
 
             # "<p><b>456</b></p>"
-            dom.parse('<p>123<b>456</b></p>').at('p').contents().first().remove().root
+            dom.parse('<p>123<b>456</b></p>').at('p').contents.first().remove().root
         """
         return self.replace('')
 
@@ -584,7 +589,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
             # "<p><b>123</b></p>"
             dom.parse('<p>Test</p>')
-               .at('p').contents().item(0).replace('<b>123</b>').root
+               .at('p').contents.item(0).replace('<b>123</b>').root
         """
         tree = self.tree
         if tree[0] == 'root':
@@ -707,7 +712,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         children of the first innermost element. ::
 
             # "<p><b>123Test</b></p>"
-            dom.parse('<p>Test<p>').at('p').wrap_content('<b>123</b>').root
+            dom.parse('<p>Test</p>').at('p').wrap_content('<b>123</b>').root
 
             # "<p><b>Test</b></p><p>123</p>"
             dom.parse('<b>Test</b>').wrap_content('<p></p><p>123</p>')
