@@ -324,7 +324,6 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         """::
 
             collection = dom.following
-            collection = dom.following('div > p')
 
         Find all sibling elements after this node and
         return a :mod:`Pyjo.Collection` object containing these elements as :mod:`Pyjo.DOM`
@@ -425,7 +424,6 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         """::
 
             collection = dom.preceding
-            collection = dom.preceding('div > p')
 
         Find all sibling elements before this node and
         return a :mod:`Pyjo.Collection` object containing these elements as :mod:`Pyjo.DOM`
