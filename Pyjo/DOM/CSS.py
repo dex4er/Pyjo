@@ -416,12 +416,12 @@ class Pyjo_DOM_CSS(Pyjo.Base.object):
                 # Tag
                 selector = []
                 part.append(selector)
-                element, g = element == s('^((?:\\\.|\\\#|[^.#])+)', '')
+                element, g = element == s(r'^((?:\\\.|\\\#|[^.#])+)', '')
                 if g and g[1] != '*':
                     selector.append(['tag', self._name(g[1])])
 
                 # Class or ID
-                for g in m('(?:([.#])((?:\\[.\#]|[^\#.])+))', 'g').match(element):
+                for g in m(r'(?:([.#])((?:\\[.\#]|[^\#.])+))', 'g').match(element):
                     if g[1] == '.':
                         name, op = 'class', '~'
                     else:
