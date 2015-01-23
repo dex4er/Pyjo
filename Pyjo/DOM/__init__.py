@@ -80,8 +80,8 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         :mod:`Pyjo.DOM` objects. ::
 
             # "<p><b>123</b></p>"
-            dom.parse('<p><!-- Test --><b>123<!-- 456 --></b></p>')
-               .all_contents
+            dom.parse('<p><!-- Test --><b>123<!-- 456 --></b></p>') \\
+               .all_contents \\
                .grep(lambda i: i.node == 'comment').map('remove').first()
         """
         return self._collect(self._all(self._nodes(self.tree)))
@@ -101,7 +101,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         return self._all_text(True, True)
 
     @property
-    def all_raw_text(self, trim=True):
+    def all_raw_text(self):
         """::
 
             untrimmed = dom.all_raw_text
@@ -112,7 +112,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             # "foo\\nbar baz\\n"
             dom.parse("<div>foo\\n<p>bar</p>baz\\n</div>").at('div').all_raw_text
         """
-        return self._all_text(True, trim)
+        return self._all_text(True, False)
 
     def ancestors(self, pattern=None):
         """::
@@ -592,6 +592,24 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         else:
             return self._replace(self._parent(), tree, self._parse(new))
 
+    def strip(self):
+        """::
+
+            parent = dom.strip()
+
+        Remove this element while preserving its content and return :meth:`parent`. ::
+
+            # "<div>Test</div>"
+            dom.parse('<div><h1>Test</h1></div>').at('h1').strip()
+        """
+        tree = self.tree
+        if tree[0] != 'tag':
+            return self
+        else:
+            new = list(self._nodes(tree))
+            new.insert(0, 'root')
+            return self._replace(tree[3], tree, new)
+
     @property
     def root(self):
         """::
@@ -834,7 +852,6 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         return Pyjo.DOM.HTML.new(xml=self.xml).parse(new).tree
 
     def _replace(self, parent, tree, new):
-        # splice @$parent, _offset($parent, $tree), 1, _link($new, $parent);
         offset = self._offset(parent, tree)
         parent.pop(offset)
         for n in self._link(new, parent):
