@@ -30,6 +30,19 @@ class Pyjo_Collection(list):
     def __repr__(self):
         return "{0}.new({1})".format(self.__module__, super(Pyjo_Collection, self).__repr__())
 
+    def compact(self):
+        """::
+
+            new = collection.compact()
+
+        Create a new collection with all elements that are defined and not an empty
+        string or list. ::
+
+            # "0, 1, 2, 3"
+            Pyjo.Collection.new(0, 1, None, 2, '', 3).compact().join(', ')
+        """
+        return self.new(filter(lambda i: i is not None and not (hasattr(i, '__len__') and not len(i)), self))
+
     def each(self, cb=None):
         """::
 
@@ -202,12 +215,12 @@ class Pyjo_Collection(list):
     def reverse(self):
         """::
 
-            new = collection.reverse()
+            new = collection.reverse
 
         Create a new collection with all elements in reverse order.
         """
         new = self.new(self)
-        super(Pyjo_Collection, self).reverse()
+        super(Pyjo_Collection, new).reverse()
         return new
 
     @property
