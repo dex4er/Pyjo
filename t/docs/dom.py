@@ -162,6 +162,15 @@ if __name__ == '__main__':
     ok(not dom.parse('<p class="a">A</p>').at('p').match('.b'), 'match result is False')
     ok(not dom.parse('<p class="a">A</p>').at('p').match('p[id]'), 'match result is False')
 
+    # namespace
+    is_ok(dom.parse('<svg xmlns:svg="http://www.w3.org/2000/svg"><svg:circle cx="1" cy="2" r="3"/></svg>')
+          .at('svg > svg\:circle').namespace,
+          "http://www.w3.org/2000/svg", 'namespace result')
+
+    is_ok(dom.parse('<svg xmlns:svg="http://www.w3.org/2000/svg"><svg:circle cx="1" cy="2" r="3"/></svg>')
+          .at('svg > circle').namespace,
+          "http://www.w3.org/2000/svg", 'namespace result')
+
     # next
     is_ok(dom.parse('<div><h1>Test</h1><h2>123</h2></div>').at('h1').next,
           "<h2>123</h2>", 'next result')

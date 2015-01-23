@@ -380,6 +380,46 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             return None
 
     @property
+    def namespace(self):
+        """::
+
+            namespace = dom.namespace
+
+        Find this element's namespace or return :class:`None` if none could be found. ::
+
+            # Find namespace for an element with namespace prefix
+            namespace = dom.at('svg > svg\\:circle').namespace
+
+            # Find namespace for an element that may or may not have a namespace prefix
+            namespace = dom.at('svg > circle').namespace
+        """
+        tree = self.tree
+        if tree[0] != 'tag':
+            return
+
+        # Extract namespace prefix and search parents
+        g = tree[1] == m(r'^(.*?):')
+        if g:
+            ns = 'xmlns:' + g[1]
+        else:
+            ns = None
+
+        for i in ([tree], self._ancestors()):
+            for node in i:
+                # Namespace for prefix
+                attrs = node[2]
+                if ns:
+                    for k in attrs.keys():
+                        if k == ns:
+                            return attrs[k]
+
+                # Namespace attribute
+                elif 'xmlns' in attrs:
+                    return attrs['xmlns']
+
+        return
+
+    @property
     def next(self):
         """::
 
