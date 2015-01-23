@@ -114,16 +114,20 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         """
         return self._all_text(True, trim)
 
-    @property
-    def ancestors(self):
+    def ancestors(self, pattern=None):
         """::
 
-            collection = dom.ancestors
+            collection = dom.ancestors()
+            collection = dom.ancestors('div > p')
 
-        Find all ancestors of this node and return a
+        Find all ancestors of this node matching the CSS selector and return a
         :mod:`Pyjo.Collection` object containing these elements as :mod:`Pyjo.DOM` objects.
+        All selectors from :mod:`Pyjo.DOM.CSS` are supported. ::
+
+            # List types of ancestor elements
+            dom.ancestors().map('type').join("\\n").say()
         """
-        return self._collect(self._ancestors())
+        return self._select(self._collect(self._ancestors()), pattern)
 
     def append(self, string):
         """::
@@ -224,19 +228,20 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
         return self
 
-    @property
-    def children(self):
+    def children(self, pattern=None):
         """::
 
-            collection = dom.children
+            collection = dom.children()
+            collection = dom.children('div > p')
 
-        Find all children of this element and return a
-        :mod:`Pyjo.Collection` object containing these elements as :mod:`Pyjo.DOM` objects. ::
+        Find all children of this element matching the CSS selector and return a
+        :mod:`Pyjo.Collection` object containing these elements as :mod:`Pyjo.DOM` objects.
+        All selectors from :mod:`Pyjo.DOM.CSS` are supported. ::
 
             # Show type of random child element
-            print(dom.children.shuffle().first().type)
+            print(dom.children().shuffle().first().type)
         """
-        return self._collect(self._nodes(self.tree, True))
+        return self._select(self._collect(self._nodes(self.tree, True)), pattern)
 
     @property
     def content(self):
