@@ -216,7 +216,7 @@ class Pyjo_DOM_HTML(Pyjo.Base.object):
 
                             if g[2] is not None:
                                 value = g[2]
-                            elif g[2] is not None:
+                            elif g[3] is not None:
                                 value = g[3]
                             else:
                                 value = g[4]
