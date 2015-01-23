@@ -348,6 +348,28 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         """
         return self._collect(self._siblings(False)[1])
 
+    def match(self, pattern):
+        """::
+
+            result = dom.match('div > p')
+
+        Match the CSS selector against this element and return the :mod:`Pyjo.DOM` object
+        or return :class:`None` if it didn't match. All selectors from
+        :mod:`Pyjo.DOM.CSS` are supported. ::
+
+            # True
+            bool(dom.parse('<p class="a">A</p>').at('p').match('.a'))
+            bool(dom.parse('<p class="a">A</p>').at('p').match('p[class]'))
+
+            # False
+            bool(dom.parse('<p class="a">A</p>').at('p').match('.b'))
+            bool(dom.parse('<p class="a">A</p>').at('p').match('p[id]'))
+        """
+        if self._css.match(pattern):
+            return self
+        else:
+            return None
+
     @property
     def next(self):
         """::
