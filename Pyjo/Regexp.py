@@ -80,8 +80,9 @@ class Pyjo_Regexp(object):
         result = {}
         if match is not None:
             result[0] = match.group()
-            result['start'] = match.start()
-            result['end'] = match.end()
+            if 'c' in self._flags:
+                result['start'] = match.start()
+                result['end'] = match.end()
             result.update(enumerate(match.groups(), start=1))
             result.update(match.groupdict())
         return result
@@ -95,7 +96,6 @@ class Pyjo_Regexp(object):
         return
 
     def match(self, string, _flag_g=None, _flag_r=None):
-        _flag_c = 'c' in self._flags
         if _flag_g is None:
             _flag_g = 'g' in self._flags
 
@@ -127,7 +127,10 @@ class Pyjo_Regexp(object):
                 match = self._re.search(string)
                 result = self._match_result(match)
                 (new_string, count) = self._re.subn(replacement, string, count=count)
-                return (new_string, count, result)
+                if _flag_g:
+                    return (new_string, result, count)
+                else:
+                    return (new_string, result)
 
     def __eq__(self, other):
         return self.match(other)
