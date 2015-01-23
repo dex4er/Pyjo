@@ -199,6 +199,17 @@ class Pyjo_Collection(list):
     def new(cls, value=[]):
         return Pyjo_Collection(value)
 
+    def reverse(self):
+        """::
+
+            new = collection.reverse()
+
+        Create a new collection with all elements in reverse order.
+        """
+        new = self.new(self)
+        super(Pyjo_Collection, self).reverse()
+        return new
+
     @property
     def size(self):
         """::
