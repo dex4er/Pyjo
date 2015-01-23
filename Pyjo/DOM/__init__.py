@@ -319,32 +319,31 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         """
         return self._collect(self._css.select(pattern))
 
-    @property
-    def following(self):
+    def following(self, pattern=None):
         """::
 
-            collection = dom.following
+            collection = dom.following()
+            collection = dom.following('div > p')
 
-        Find all sibling elements after this node and
+        Find all sibling elements after this node matching the CSS selector and
         return a :mod:`Pyjo.Collection` object containing these elements as :mod:`Pyjo.DOM`
-        objects. ::
+        objects. All selectors from :mod:`Pyjo.DOM.CSS` are supported. ::
 
             # List types of sibling elements before this node
-            dom.following.map('type').join("\\n").say()
+            dom.following().map('type').join("\\n").say()
         """
-        return self._collect(self._siblings(True)[1])
+        return self._select(self._collect(self._siblings(True)[1]), pattern)
 
-    @property
     def following_siblings(self):
         """::
-            collection = dom.following_siblings
+            collection = dom.following_siblings()
 
         Return a :mod:`Pyjo.Collection` object containing the sibling nodes after this
         node as :mod:`Pyjo.DOM` objects. ::
 
             # "C"
             dom.parse('A<!-- B --><p>C</p>')
-               .at('p').following_siblings.last().content
+               .at('p').following_siblings().last().content
         """
         return self._collect(self._siblings(False)[1])
 
@@ -441,32 +440,31 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         self.html.parse(html)
         return self
 
-    @property
-    def preceding(self):
+    def preceding(self, pattern=None):
         """::
 
-            collection = dom.preceding
+            collection = dom.preceding()
+            collection = dom.preceding('div > p')
 
-        Find all sibling elements before this node and
+        Find all sibling elements before this node matching the CSS selector and
         return a :mod:`Pyjo.Collection` object containing these elements as :mod:`Pyjo.DOM`
-        objects. ::
+        objects. All selectors from :mod:`Pyjo.DOM.CSS` are supported. ::
 
             # List types of sibling elements before this node
-            dom.preceding.map('type').join("\\n").say()
+            dom.preceding().map('type').join("\\n").say()
         """
-        return self._collect(self._siblings(True)[0])
+        return self._select(self._collect(self._siblings(True)[0]), pattern)
 
-    @property
     def preceding_siblings(self):
         """::
-            collection = dom.preceding_siblings
+            collection = dom.preceding_siblings()
 
         Return a :mod:`Pyjo.Collection` object containing the sibling nodes before this
         node as :mod:`Pyjo.DOM` objects. ::
 
             # "A"
             dom.parse('A<!-- B --><p>C</p>')
-               .at('p').preceding_siblings.first().content
+               .at('p').preceding_siblings().first().content
         """
         return self._collect(self._siblings(False)[0])
 
@@ -843,8 +841,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         if selector is None:
             return collection
         else:
-            # TODO def match
-            collection.new(filter(lambda i: i.match(selector), collection))
+            return collection.new(filter(lambda i: i.match(selector), collection))
 
     def _siblings(self, tags, i=None):
         parent = self.parent
