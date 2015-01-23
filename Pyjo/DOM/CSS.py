@@ -416,8 +416,8 @@ class Pyjo_DOM_CSS(Pyjo.Base.object):
                 # Tag
                 selector = []
                 part.append(selector)
-                element, count, g = element == s('^((?:\\\.|\\\#|[^.#])+)', '')
-                if count and g[1] != '*':
+                element, g = element == s('^((?:\\\.|\\\#|[^.#])+)', '')
+                if g and g[1] != '*':
                     selector.append(['tag', self._name(g[1])])
 
                 # Class or ID
@@ -509,7 +509,64 @@ class Pyjo_DOM_CSS(Pyjo.Base.object):
         return self._combinator(selectors, parent, tree, pos)
 
     def _pc(self, pclass, args, current):
-        # TODO
+        # ":empty"
+        if pclass == 'empty':
+            return not list(filter(lambda i: not self._empty(i)), current[4:])
+
+        # ":root"
+        if pclass == 'root':
+            return current[3] and current[3][0] == 'root'
+
+        # ":not"
+        if pclass == 'not':
+            return not self._match(args, current, current)
+
+        # ":checked"
+        if pclass == 'checked':
+            return 'checked' in current[2] or 'selected' in current[2]
+
+        # ":first-*" or ":last-*" (rewrite with equation)
+        pclass, g = pclass == s(r'^(first|last)-', '')
+        if g:
+            if g[1] == 'first':
+                pclass = 'nth-' + pclass
+                args = [0, 1]
+            else:
+                pclass = 'nth-last-' + pclass
+                args = [-1, 1]
+
+        # ":nth-*"
+        if pclass == m(r'^nth-'):
+            if pclass == m(r'of-type$'):
+                ptype = current[1]
+            else:
+                ptype = None
+            siblings = list(self._siblings(current, ptype))
+
+            # ":nth-last-*"
+            if pclass == m(r'^nth-last'):
+                siblings.reverse()
+
+            for i in range(len(siblings)):
+                result = args[0] * i + args[1]
+                if result < 1:
+                    continue
+                sibling = siblings[result - 1]
+                if sibling:
+                    if sibling == current:
+                        return True
+                else:
+                    break
+
+        # ":only-*"
+        else:
+            g = pclass == m(r'^only-(?:child|(of-type))$')
+            if g:
+                for i in self._siblings(current, current[1] if g[1] else None):
+                    if i != current:
+                        return False
+                return True
+
         return False
 
     def _select(self, one, tree, pattern):
