@@ -18,7 +18,7 @@ The mixin class for objects with :meth:`to_str` method.
 
 import Pyjo.Base
 
-from Pyjo.Util import not_implemented
+from Pyjo.Util import isbytes, not_implemented
 
 import platform
 import sys
@@ -66,7 +66,10 @@ class Pyjo_Mixin_String(object):
 
         True if string representation of the object is equal to other value.
         """
-        return str(self) == other
+        if isbytes(other):
+            return self.__bytes__() == other
+        else:
+            return self.to_str() == other
 
     def __float__(self):
         """::
@@ -84,7 +87,10 @@ class Pyjo_Mixin_String(object):
 
         True if string representation of the object is equal or greater than other value.
         """
-        return str(self) >= other
+        if isbytes(other):
+            return self.__bytes__() >= other
+        else:
+            return self.to_str() >= other
 
     def __gt__(self, other):
         """::
@@ -93,7 +99,10 @@ class Pyjo_Mixin_String(object):
 
         True if string representation of the object is greater than other value.
         """
-        return str(self) > other
+        if isbytes(other):
+            return self.__bytes__() > other
+        else:
+            return self.to_str() > other
 
     def __hash__(self):
         """::
@@ -132,7 +141,10 @@ class Pyjo_Mixin_String(object):
 
         True if string representation of the object is equal or lesser than other value.
         """
-        return str(self) <= other
+        if isbytes(other):
+            return self.__bytes__() <= other
+        else:
+            return self.to_str() <= other
 
     def __long__(self):
         """::
@@ -150,7 +162,10 @@ class Pyjo_Mixin_String(object):
 
         True if string representation of the object is lesser than other value.
         """
-        return str(self) < other
+        if isbytes(other):
+            return self.__bytes__() < other
+        else:
+            return self.to_str() < other
 
     def __ne__(self, other):
         """::
@@ -159,7 +174,10 @@ class Pyjo_Mixin_String(object):
 
         True if string representation of the object is not equal to other value.
         """
-        return str(self) != other
+        if isbytes(other):
+            return self.__bytes__() != other
+        else:
+            return self.to_str() != other
 
     def __nonzero__(self):
         """::
