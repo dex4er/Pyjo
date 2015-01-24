@@ -172,6 +172,9 @@ class Pyjo_DOM_HTML(Pyjo.Base.object):
         current = tree
         text = None
 
+        if isinstance(html, Pyjo.DOM.object):
+            html = html.to_str()
+
         for g in m(TOKEN_RE, 'gisx').match(html):
             text, doctype, comment, cdata, pi, tag, raw, rawtag, runaway = g['text'], g['doctype'], g['comment'], g['cdata'], g['pi'], g['tag'], g['raw'], g['rawtag'], g['runaway']
             if rawtag is not None:
