@@ -407,11 +407,11 @@ def _start(start, attrs, xml, current):
             # Close allowed parent elements in scope
             parent = current
             while parent[0] != 'root' and parent[1] not in scope:
-                if allowed[parent[1]]:
+                if parent[1] in allowed:
                     node = _end(parent[1], 0, current)
                     if node:
                         current = node
-                    parent = parent[3]
+                parent = parent[3]
 
     # New tag
     new = ['tag', start, attrs, current]
