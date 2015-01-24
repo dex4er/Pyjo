@@ -255,7 +255,7 @@ class Pyjo_Collection(list):
             for i in Pyjo.Collection.new([1, 2, 3]).to_iter():
                 print(i)
         """
-        return list(self)
+        return iter(self)
 
     def to_list(self):
         """::
