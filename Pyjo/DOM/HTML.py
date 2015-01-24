@@ -197,7 +197,9 @@ class Pyjo_DOM_HTML(Pyjo.Base.object):
                 # End
                 g = tag == m(r'^\/\s*(\S+)')
                 if g:
-                    current = _end(g[1] if xml else g[1].lower(), xml, current)
+                    node = _end(g[1] if xml else g[1].lower(), xml, current)
+                    if node:
+                        current = node
 
                 # Start
                 else:
@@ -295,7 +297,7 @@ def _end(end, xml, current):
 
     # Search stack for start tag
     nextnode = current
-    while True:
+    while nextnode is not None:
         # Ignore useless end tag
         if nextnode[0] == 'root':
             return
