@@ -643,7 +643,7 @@ class Pyjo_DOM_CSS(Pyjo.Base.object):
     def _unescape(self, value):
 
         # Remove escaped newlines
-        value -= s(r'\\n', '', 'g')  # TODO bug in Mojo?
+        value -= s(r'\\\n', '', 'g')
 
         # Unescape Unicode characters
         value -= s(r'\\([0-9a-fA-F]{1,6})\s?', lambda g: uchr(int(g[1], 16)), 'g')
