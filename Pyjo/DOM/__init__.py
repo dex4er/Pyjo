@@ -663,11 +663,14 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
         Return :mod:`Pyjo.DOM` object for root node.
         """
-        tree = self._ancestors(True)
+        tree = None
+        for tree in self._ancestors(True):
+            break
+
         if not tree:
             return self
         else:
-            return self._build(next(tree), self.xml)
+            return self._build(tree, self.xml)
 
     def to_dict(self):
         return self.attr()
