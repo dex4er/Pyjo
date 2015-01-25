@@ -475,17 +475,20 @@ class Pyjo_DOM_CSS(Pyjo.Base.object):
         g = equation == m(r'(?:(-?(?:\d+)?)?(n))?\s*\+?\s*(-?\s*\d+)?\s*$', 'i')
         if g:
             if g[1] is not None and len(g[1]):
-                num[0] = int(g[1])
+                num[0] = g[1]
             elif g[2]:
                 num[0] = 1
             else:
                 num[0] = 0
             if num[0] == '-':
                 num[0] = -1
+            num[0] = int(num[0])
             if g[3] is not None:
-                num[1] = int(g[3])
+                num[1] = g[3]
             else:
-                num[1] = 0
+                num[1] = '0'
+            num[1] -= s(r'\s+', '', 'g')
+            num[1] = int(num[1])
 
         return num
 
@@ -554,12 +557,13 @@ class Pyjo_DOM_CSS(Pyjo.Base.object):
                 result = args[0] * i + args[1]
                 if result < 1:
                     continue
-                sibling = siblings[result - 1]
-                if sibling:
-                    if sibling == current:
-                        return True
-                else:
+                if not len(siblings) > result - 1:
                     break
+                sibling = siblings[result - 1]
+                if not sibling:
+                    break
+                if sibling == current:
+                    return True
 
         # ":only-*"
         else:
