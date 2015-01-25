@@ -273,13 +273,13 @@ from Pyjo.Regexp import m, s
 from Pyjo.Util import uchr
 
 
-ESCAPE_RE = r'\\[^0-9a-fA-F]|\\[0-9a-fA-F]{1,6}'
+ESCAPE_RE = r'(?:\\[^0-9a-fA-F]|\\[0-9a-fA-F]{1,6})'
 ATTR_RE = r'''
     \[
     ((?:''' + ESCAPE_RE + '''|[\w\-])+)           # Key
     (?:
         (\W)?=                                    # Operator
-        (?:"((?:\\"|[^"])*)"|([^\]]+?))           # Value
+        (?:"((?:\\"|[^"])*?)"|([^\]]+?))          # Value
         (?:\s+(i))?                               # Case-sensitivity
     )?
     \]
