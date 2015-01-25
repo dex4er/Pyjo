@@ -455,6 +455,9 @@ class Pyjo_DOM_CSS(Pyjo.Base.object):
 
         return pattern
 
+    def _empty(self, node):
+        return node[0] == 'comment' or node[0] == 'pi'
+
     def _equation(self, equation):
         if not equation:
             return []
@@ -511,7 +514,7 @@ class Pyjo_DOM_CSS(Pyjo.Base.object):
     def _pc(self, pclass, args, current):
         # ":empty"
         if pclass == 'empty':
-            return not list(filter(lambda i: not self._empty(i)), current[4:])
+            return not list(filter(lambda i: not self._empty(i), current[4:]))
 
         # ":root"
         if pclass == 'root':
