@@ -14,6 +14,7 @@ Pyjo.DOM.HTML - HTML/XML engine
 
 
 import Pyjo.Base
+import Pyjo.DOM
 
 from Pyjo.Base import lazy
 from Pyjo.Regexp import m
@@ -100,7 +101,7 @@ ATTR_RE = r'''
   \s*
 '''
 
-TOKEN_RE = r'''
+TOKEN_1_RE = r'''
   (?P<text>[^<]+)?                                     # Text
   (?:
     <(?:
@@ -118,6 +119,9 @@ TOKEN_RE = r'''
     |
       \?(?P<pi>.*?)\?                                 # Processing Instruction
     |
+'''
+
+RAW_RE = r'''
       \s*(?P<rawtag>
         (?P<rawtagname>''' + '|'.join(RAW | RCDATA) + ''')\s*
         (?:''' + ATTR_RE + ''')*
@@ -125,11 +129,18 @@ TOKEN_RE = r'''
       (?P<raw>.*?)                                    # Raw
       <\s*/\s*(?P=rawtagname)\s*
     |
+'''
+
+TOKEN_2_RE = r'''
       \s*(?P<tag>[^<>\s]+\s*(?:''' + ATTR_RE + ''')*) # Tag
     )>
     | (?P<runaway><)                                  # Runaway "<"
   )?
 '''
+
+XML_TOKEN_RE = TOKEN_1_RE + TOKEN_2_RE
+
+HTML_TOKEN_RE = TOKEN_1_RE + RAW_RE + TOKEN_2_RE
 
 
 class Pyjo_DOM_HTML(Pyjo.Base.object):
@@ -175,8 +186,19 @@ class Pyjo_DOM_HTML(Pyjo.Base.object):
         if isinstance(html, Pyjo.DOM.object):
             html = html.to_str()
 
-        for g in m(TOKEN_RE, 'gisx').match(html):
-            text, doctype, comment, cdata, pi, tag, raw, rawtag, runaway = g['text'], g['doctype'], g['comment'], g['cdata'], g['pi'], g['tag'], g['raw'], g['rawtag'], g['runaway']
+        if xml is None and html[:1024] == m(r'<\?\s*xml\b', 'is'):
+            xml = True
+            self.xml = xml
+
+        if xml:
+            token_re = XML_TOKEN_RE
+        else:
+            token_re = HTML_TOKEN_RE
+
+        for g in m(token_re, 'gisx').match(html):
+            text, doctype, comment, cdata, pi, tag, runaway = g['text'], g['doctype'], g['comment'], g['cdata'], g['pi'], g['tag'], g['runaway']
+            raw = g['raw'] if not xml else None
+            rawtag = g['rawtag'] if not xml else None
             if rawtag is not None:
                 tag = rawtag
 
@@ -242,16 +264,19 @@ class Pyjo_DOM_HTML(Pyjo.Base.object):
 
                         current = _start(start, attrs, xml, current)
 
-                        # Raw text elements
-                        if not xml and raw is not None:
-                            node = _node(current, 'raw', html_unescape(raw) if start in RCDATA else raw)
-                            if node:
-                                current = node
-                            current = _end(start, 0, current)
-
                         # Element without end tag (self-closing)
                         if not xml and start in EMPTY or (xml or start not in BLOCK) and closing:
                             current = _end(start, xml, current)
+
+                        # Raw text elements
+                        if xml or start not in RAW and start not in RCDATA:
+                            continue
+                        if rawtag is None:
+                            continue
+                        current = _node(current, 'raw', html_unescape(raw) if start in RCDATA else raw)
+                        node = _end(start, 0, current)
+                        if node:
+                            current = node
 
             # DOCTYPE
             elif doctype is not None:
@@ -271,11 +296,8 @@ class Pyjo_DOM_HTML(Pyjo.Base.object):
                 if node:
                     current = node
 
-            # Processing instruction (try to detect XML)
+            # Processing instruction
             elif pi is not None:
-                if self.xml is None and pi == m('xml', 'i'):
-                    xml = True
-                    self.xml = xml
                 node = _node(current, 'pi', pi)
                 if node:
                     current = node
