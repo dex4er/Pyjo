@@ -382,7 +382,7 @@ def _render(tree, xml):
 
         for key in sorted(tree[2].keys()):
             # No value
-            if key not in tree[2] or not tree[2][key]:
+            if key not in tree[2] or tree[2][key] is None:
                 attrs.append(key)
             else:
                 value = tree[2][key]
