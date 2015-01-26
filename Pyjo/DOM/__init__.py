@@ -61,15 +61,6 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         if html is not None:
             self.parse(html)
 
-    def __getitem__(self, key):
-        return self.attr(key)
-
-    def __setitem__(self, key, value):
-        return self.attr(key, value)
-
-    def __delitem__(self, key):
-        del self.attr()[key]
-
     @property
     def all_contents(self):
         """::
