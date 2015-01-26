@@ -21,13 +21,14 @@ Status
 
 Early developement stage. Implemented already:
 
+  * HTML/XML DOM parser with CSS selectors
+  * URL parser with container classes for URL, path and querystring
+  * Non-blocking TCP client and server
+  * Synchronizer and sequentializer of multiple events
   * Main event loop which handle IO and timer events
   * Event emitter with subscriptions
-  * Synchronizer and sequentializer of multiple events
   * Low level event reactor based on select(2) and poll(2) or libev (pyev)
-  * Non-blocking TCP client and server
   * Lazy properties for objects
-  * URL parser with container classes for URL, path and querystring
   * Test units with API based on Perl's Test::More and TAP protocol
   * Regexp objects with overloaded operators
 
