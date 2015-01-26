@@ -169,7 +169,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         from :mod:`Pyjo.DOM.CSS` are supported. ::
 
             # Find first element with ``svg`` namespace definition
-            namespace = dom.at('[xmlns\\:svg]')['xmlns:svg']
+            namespace = dom.at('[xmlns\\:svg]').attr('xmlns:svg')
         """
         result = self._css.select_one(pattern)
         if result:
@@ -309,7 +309,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         All selectors from :mod:`Pyjo.DOM.CSS` are supported. ::
 
             # Find a specific element and extract information
-            div_id = dom.find('div')[2]['id']
+            div_id = dom.find('div')[2].attr('id')
 
             # Extract information from multiple elements
             headers = dom.find('h1, h2, h3').map('text').to_list()
