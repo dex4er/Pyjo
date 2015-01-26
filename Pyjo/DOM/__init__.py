@@ -434,11 +434,11 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         no more siblings. ::
 
             # "456"
-            dom.parse('<p><b>123</b><!-- Test -->456</p>')
+            dom.parse('<p><b>123</b><!-- Test -->456</p>') \\
                .at('b').next_sibling.next_sibling
 
             # " Test "
-            dom.parse('<p><b>123</b><!-- Test -->456</p>')
+            dom.parse('<p><b>123</b><!-- Test -->456</p>') \\
                .at('b').next_sibling.content
         """
         return self._maybe(self._siblings(False, 0)[1])
@@ -504,7 +504,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         node as :mod:`Pyjo.DOM` objects. ::
 
             # "A"
-            dom.parse('A<!-- B --><p>C</p>')
+            dom.parse('A<!-- B --><p>C</p>') \\
                .at('p').preceding_siblings().first().content
         """
         return self._collect(self._siblings(False)[0])
@@ -517,7 +517,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         Prepend HTML/XML fragment to this node. ::
 
             # "<div><h1>123</h1><h2>Test</h2></div>"
-            dom.parse('<div><h2>Test</h2></div>')
+            dom.parse('<div><h2>Test</h2></div>') \\
                .at('h2').prepend('<h1>123</h1>').root
 
             # "<p>Test 123</p>"
@@ -534,11 +534,11 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         node's content. ::
 
             # "<div><h2>Test 123</h2></div>"
-            dom.parse('<div><h2>123</h2></div>')
+            dom.parse('<div><h2>123</h2></div>') \\
                .at('h2').prepend_content('Test ').root
 
             # "<!-- Test 123 --><br>"
-            dom.parse('<!-- 123 --><br>')
+            dom.parse('<!-- 123 --><br>') \\
                .contents.first().prepend_content(' Test').root
 
             # "<p><i>123</i>Test</p>"
@@ -570,11 +570,11 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         are no more siblings. ::
 
             # "123"
-            dom.parse('<p>123<!-- Test --><b>456</b></p>')
+            dom.parse('<p>123<!-- Test --><b>456</b></p>') \\
                .at('b').previous_sibling.previous_sibling
 
             # " Test "
-            dom.parse('<p>123<!-- Test --><b>456</b></p>')
+            dom.parse('<p>123<!-- Test --><b>456</b></p>') \\
                .at('b').previous_sibling.content
         """
         return self._maybe(self._siblings(False, -1)[0])
@@ -619,7 +619,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             dom.parse('<div><h1>Test</h1></div>').at('h1').replace('<h2>123</h2>')
 
             # "<p><b>123</b></p>"
-            dom.parse('<p>Test</p>')
+            dom.parse('<p>Test</p>') \\
                .at('p').contents.item(0).replace('<b>123</b>').root
         """
         tree = self.tree
