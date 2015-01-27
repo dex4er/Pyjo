@@ -30,7 +30,7 @@ import Pyjo.Mixin.String
 
 from Pyjo.Base import lazy
 from Pyjo.Regexp import m, s
-from Pyjo.Util import getenv
+from Pyjo.Util import b, getenv
 
 
 NORMALCASE = {}
@@ -48,7 +48,6 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
     max_line_size = int(getenv('PYJO_MAX_LINE_SIZE', 0)) or 10240
     max_lines = int(getenv('PYJO_MAX_LINES', 0)) or 100
 
-
     _buffer = b''
     _cache = lazy(lambda self: [])
     _headers = lazy(lambda self: {})
@@ -63,8 +62,8 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
     def add(self, name, *args):
         """::
 
-            headers = $headers->add(Foo => 'one value');
-            headers = $headers->add(Foo => 'first value', 'second value');
+            headers = headers.add('Foo', 'one value')
+            headers = headers.add('Foo', 'first value', 'second value')
 
         Add one or more header values with one or more lines. ::
 
@@ -73,12 +72,13 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
             headers.set(vary='Accept').add('Vary', 'Accept-Encoding').to_str()
         """
         # Make sure we have a normal case entry for name
-        key = name.lower()
+        key = b(name.lower(), 'ascii')
         if key not in NORMALCASE:
             self._normalcase[key] = name
         if key not in self._headers:
             self._headers[key] = []
-        self._headers[key].extend(args)
+        for value in args:
+            self._headers[key].append(b(value, 'ascii'))
 
         return self
 
@@ -90,7 +90,7 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
         Parse formatted headers.
         """
         self._state = 'headers'
-        self._buffer += string
+        self._buffer += b(string, 'ascii')
         if self._cache:
             headers = self._cache
         else:
