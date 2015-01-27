@@ -33,14 +33,24 @@ from Pyjo.Regexp import m, s
 from Pyjo.Util import b, getenv
 
 
-NORMALCASE = {}
+NORMALCASE = dict(map(lambda i: (b(i.lower()), b(i)), [
+    'Accept', 'Accept-Charset', 'Accept-Encoding', 'Accept-Language', 'Accept-Ranges',
+    'Access-Control-Allow-Origin', 'Allow', 'Authorization', 'Cache-Control', 'Connection',
+    'Content-Disposition', 'Content-Encoding', 'Content-Language', 'Content-Length',
+    'Content-Location', 'Content-Range', 'Content-Type', 'Cookie', 'DNT', 'Date', 'ETag', 'Expect',
+    'Expires', 'Host', 'If-Modified-Since', 'If-None-Match', 'Last-Modified', 'Link', 'Location',
+    'Origin', 'Proxy-Authenticate', 'Proxy-Authorization', 'Range', 'Sec-WebSocket-Accept',
+    'Sec-WebSocket-Extensions', 'Sec-WebSocket-Key', 'Sec-WebSocket-Protocol',
+    'Sec-WebSocket-Version', 'Server', 'Set-Cookie', 'Status', 'Strict-Transport-Security',
+    'TE', 'Trailer', 'Transfer-Encoding', 'Upgrade', 'User-Agent', 'Vary', 'WWW-Authenticate',
+]))
 
 
 class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
     """::
 
         headers = Pyjo.headers.new()
-        headers = Pyjo.headers.new(b"Content-Type: text/plain\x0d\x0a")
+        headers = Pyjo.headers.new(b"Content-Type: text/plain\x0d\x0a\x0d\x0a")
 
     Construct a new :mod`Pyjo.Headers` object and :meth:`parse` headers if necessary.
     """
@@ -72,7 +82,8 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
             headers.set(vary='Accept').add('Vary', 'Accept-Encoding').to_str()
         """
         # Make sure we have a normal case entry for name
-        key = b(name.lower(), 'ascii')
+        name = b(name, 'ascii')
+        key = name.lower()
         if key not in NORMALCASE:
             self._normalcase[key] = name
         if key not in self._headers:
@@ -81,6 +92,30 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
             self._headers[key].append(b(value, 'ascii'))
 
         return self
+
+    def header(self, name, *args):
+        """::
+
+            value = headers.header('Foo')
+            headers = headers.header('Foo', 'one value')
+            headers = headers.header('Foo', 'first value', 'second value')
+
+        Get or replace the current header values.
+        """
+        # Replace
+        if args:
+            return self.remove(name).add(name, *args)
+
+        key = b(name, 'ascii').lower()
+        if key not in self._headers:
+            return
+
+        return b', '.join(self._headers[key])
+
+    @property
+    def names(self):
+        return list(map(lambda i: NORMALCASE[i] if i in NORMALCASE else self._normalcase[i] if i in self._normalcase else i,
+                        self._headers.keys()))
 
     def parse(self, string):
         """::
@@ -139,6 +174,36 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
         return self
 
+    def remove(self, name):
+        """::
+
+            headers = headers.remove('Foo')
+
+        Remove a header.
+        """
+        key = name.lower()
+        if key in self._headers:
+            del self._headers[key]
+        return self
+
+    def to_dict(self):
+        """::
+
+            single = headers.to_dict()
+
+        Turn headers into :class:`dict`. ::
+        """
+        return dict(map(lambda i: (i, self.header(i)), self.names))
+
+    def to_dict_list(self):
+        """::
+
+            multi = headers.to_dict_list()
+
+        Turn headers into :class:`dict` with :class:`list` as its values. ::
+        """
+        return dict(map(lambda i: (i, self._headers[i.lower()]), self.names))
+
     def to_str(self):
         """::
 
@@ -147,7 +212,13 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
         Turn headers into a string, suitable for HTTP messages.
         """
         headers = []
-        return b"\x0d\x0a".join(headers)
+
+        # Make sure multiline values are formatted correctly
+        for name in self.names:
+            for v in self._headers[name.lower()]:
+                headers.append(name + b': ' + v)
+
+        return b"\x0d\x0a".join(headers) + b"\x0d\x0a\x0d\x0a"
 
 
 new = Pyjo_Headers.new
