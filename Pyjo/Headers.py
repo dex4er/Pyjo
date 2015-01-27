@@ -28,6 +28,13 @@ Pyjo.Headers - Headers
 import Pyjo.Base
 import Pyjo.Mixin.String
 
+from Pyjo.Base import lazy
+from Pyjo.Regexp import m, s
+from Pyjo.Util import getenv
+
+
+NORMALCASE = {}
+
 
 class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
     """::
@@ -38,10 +45,99 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
     Construct a new :mod`Pyjo.Headers` object and :meth:`parse` headers if necessary.
     """
 
+    max_line_size = int(getenv('PYJO_MAX_LINE_SIZE', 0)) or 10240
+    max_lines = int(getenv('PYJO_MAX_LINES', 0)) or 100
+
+
+    _buffer = b''
+    _cache = lazy(lambda self: [])
+    _headers = lazy(lambda self: {})
+    _normalcase = lazy(lambda self: {})
+    _state = None
+
     def __init__(self, path=None):
         super(Pyjo_Headers, self).__init__()
         if path is not None:
             self.parse(path)
+
+    def add(self, name, *args):
+        """::
+
+            headers = $headers->add(Foo => 'one value');
+            headers = $headers->add(Foo => 'first value', 'second value');
+
+        Add one or more header values with one or more lines. ::
+
+            # "Vary: Accept"
+            # "Vary: Accept-Encoding"
+            headers.set(vary='Accept').add('Vary', 'Accept-Encoding').to_str()
+        """
+        # Make sure we have a normal case entry for name
+        key = name.lower()
+        if key not in NORMALCASE:
+            self._normalcase[key] = name
+        if key not in self._headers:
+            self._headers[key] = []
+        self._headers[key].extend(args)
+
+        return self
+
+    def parse(self, string):
+        """::
+
+            headers = headers.parse(b"Content-Type: text/plain\x0d\x0a\x0d\x0a")
+
+        Parse formatted headers.
+        """
+        self._state = 'headers'
+        self._buffer += string
+        if self._cache:
+            headers = self._cache
+        else:
+            headers = []
+        size = self.max_line_size
+        lines = self.max_lines
+        pos = 0
+
+        for g in m(br'(.*?)\x0d?\x0a', 'g').match(self._buffer):
+            pos += len(g[0])
+            line = g[1]
+
+            # Check line size limit
+            if len(g[0]) > size or len(headers) >= lines:
+                self._buffer = self._buffer[pos:]
+                self._state = 'finished'
+                self._limit = True
+                return self
+
+            # New header
+            g = line == m(br'^(\S[^:]*)\s*:\s*(.*)$')
+            if g:
+                headers.append((g[1], g[2]))
+
+            else:
+                # Multiline
+                line, g = line == s(br'^\s+', b'')
+                if g and headers:
+                    headers[-1][1] += b' ' + line
+
+                # Empty line
+                else:
+                    for h in headers:
+                        self.add(h[0], h[1])
+                    self._buffer = self._buffer[pos:]
+                    self.state = 'finished'
+                    self.cache = []
+                    return self
+
+        self._buffer = self._buffer[pos:]
+
+        # Check line size limit
+        if len(self._buffer) > size:
+            self._state = 'finished'
+            self._limit = True
+
+        return self
 
     def to_str(self):
         """::
