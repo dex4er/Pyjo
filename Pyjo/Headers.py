@@ -8,14 +8,14 @@ Pyjo.Headers - Headers
     import Pyjo.Headers
 
     # Parse
-    headers = Pyjo.Headers.new
+    headers = Pyjo.Headers.new()
     headers.parse(b"Content-Length: 42\\x0d\\x0a")
     headers.parse(b"Content-Type: text/html\\x0d\\x0a\\x0d\\x0a")
     print(headers.content_length)
     print(headers.content_type)
 
     # Build
-    headers = Pyjo.Headers.new
+    headers = Pyjo.Headers.new()
     headers.content_length = 42
     headers.content_type = 'text/plain'
     print(headers.to_str())
@@ -692,10 +692,7 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
         """
         self._state = 'headers'
         self._buffer += b(string, 'ascii')
-        if self._cache:
-            headers = self._cache
-        else:
-            headers = []
+        headers = self._cache
         size = self.max_line_size
         lines = self.max_lines
         pos = 0
