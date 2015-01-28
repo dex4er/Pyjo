@@ -29,6 +29,10 @@ Pyjo API
     :members:
     :special-members:
 
+.. automodule:: Pyjo.Headers
+    :members:
+    :special-members:
+
 .. automodule:: Pyjo.Mixin.String
     :members:
     :special-members:
