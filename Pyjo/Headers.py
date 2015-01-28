@@ -58,7 +58,24 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
     """
 
     max_line_size = int(getenv('PYJO_MAX_LINE_SIZE', 0)) or 10240
+    """::
+
+        size = headers.max_line_size
+        headers.max_line_size = 1024
+
+    Maximum header line size in bytes, defaults to the value of the
+    ``MOJO_MAX_LINE_SIZE`` environment variable or ``10240`` (10KB).
+    """
+
     max_lines = int(getenv('PYJO_MAX_LINES', 0)) or 100
+    """::
+
+        num = headers.max_lines
+        headers.max_lines = 200
+
+    Maximum number of header lines, defaults to the value of the ``MOJO_MAX_LINES``
+    environment variable or ``100``.
+    """
 
     _buffer = b''
     _cache = lazy(lambda self: [])
