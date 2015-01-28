@@ -124,7 +124,7 @@ if __name__ == '__main__':
     clone.expect = 'nothing'
     is_ok(headers.expect, '100-continue', 'right value')
     is_ok(clone.expect, 'nothing', 'right value')
-    clone = Pyjo.Headers.new().add('Foo', ['bar', 'baz']).clone()
+    clone = Pyjo.Headers.new().add('Foo', 'bar', 'baz').clone()
     is_deeply_ok(clone.to_dict_list()['Foo'], ['bar', 'baz'], 'right structure')
 
     # Parse headers
@@ -164,7 +164,7 @@ Foo: first again
     is_ok(headers.header('Foo'), 'first second third, first again second ":again"', 'right value')
     headers = Pyjo.Headers.new().parse(headers.to_str())
     ok(headers.is_finished, 'parser is_ok(finished')
-    is_deeply_ok(headers.to_dict_list, d, 'successful roundtrip')
+    is_deeply_ok(headers.to_dict_list(), d, 'successful roundtrip')
     d = {
         'Content-Type': 'text/plain',
         'Foo': 'first second third, first again second ":again"',
@@ -179,7 +179,7 @@ Foo: first again
 
     # Remove all headers
     headers.from_dict({})
-    is_deeply_ok(headers.to_dict, {}, 'right structure')
+    is_deeply_ok(headers.to_dict(), {}, 'right structure')
 
     # Append values
     headers = Pyjo.Headers.new()
