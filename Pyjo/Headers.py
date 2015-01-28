@@ -711,7 +711,7 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
             # New header
             g = line == m(br'^(\S[^:]*)\s*:\s*(.*)$')
             if g:
-                headers.append((g[1], g[2]))
+                headers.append([g[1], g[2]])
 
             else:
                 # Multiline
