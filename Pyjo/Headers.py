@@ -51,8 +51,8 @@ NORMALCASE = dict(map(lambda i: (b(i.lower()), b(i)), [
 class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
     """::
 
-        headers = Pyjo.headers.new()
-        headers = Pyjo.headers.new(b"Content-Type: text/plain\\x0d\\x0a\\x0d\\x0a")
+        headers = Pyjo.Headers.new()
+        headers = Pyjo.Headers.new(b"Content-Type: text/plain\\x0d\\x0a\\x0d\\x0a")
 
     Construct a new :mod`Pyjo.Headers` object and :meth:`parse` headers if necessary.
     """
