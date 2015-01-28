@@ -32,6 +32,7 @@ from Pyjo.Base import lazy
 from Pyjo.Regexp import m, s
 from Pyjo.Util import b, getenv
 
+import collections
 import sys
 
 
@@ -79,7 +80,7 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
     _buffer = b''
     _cache = lazy(lambda self: [])
-    _headers = lazy(lambda self: {})
+    _headers = lazy(lambda self: collections.OrderedDict())
     _normalcase = lazy(lambda self: {})
     _state = None
 
