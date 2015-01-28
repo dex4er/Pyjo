@@ -20,4 +20,4 @@ install:
   - # flake8 --config .flake8 .
   - if [ -n "$PACKAGES" ]; then pip install $PACKAGES; fi
 script:
-  - python test.py -v
+  - python test.py
