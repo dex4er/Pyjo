@@ -21,18 +21,18 @@ if __name__ == '__main__':
     # Parse
     headers = Pyjo.Headers.new()
     isa_ok(headers, Pyjo.Headers.object, "headers")
-    is_ok(headers, b"\x0d\x0a\x0d\x0a", "headers")
-    headers.parse(b"Content-Length: 42\x0d\x0a")
-    is_ok(headers, b"\x0d\x0a\x0d\x0a", "headers")
-    headers.parse(b"Content-Type: text/html\x0d\x0a\x0d\x0a")
-    is_ok(headers, b"Content-Length: 42\x0d\x0aContent-Type: text/html\x0d\x0a\x0d\x0a", "headers")
-    is_ok(headers.content_length, b'42', "headers.content_length")
-    is_ok(headers.content_type, b'text/html', "headers.content_type")
+    is_ok(headers, "\x0d\x0a\x0d\x0a", "headers")
+    headers.parse("Content-Length: 42\x0d\x0a")
+    is_ok(headers, "\x0d\x0a\x0d\x0a", "headers")
+    headers.parse("Content-Type: text/html\x0d\x0a\x0d\x0a")
+    is_ok(headers, "Content-Length: 42\x0d\x0aContent-Type: text/html\x0d\x0a\x0d\x0a", "headers")
+    is_ok(headers.content_length, '42', "headers.content_length")
+    is_ok(headers.content_type, 'text/html', "headers.content_type")
 
     # Build
     headers = Pyjo.Headers.new()
     isa_ok(headers, Pyjo.Headers.object, "headers")
-    is_ok(headers, b"\x0d\x0a\x0d\x0a", "headers")
+    is_ok(headers, "\x0d\x0a\x0d\x0a", "headers")
     headers.content_length = 42
     headers.content_type = 'text/plain'
     is_ok(headers.to_str(), "Content-Length: 42\x0d\x0aContent-Type: text/plain\x0d\x0a\x0d\x0a", "headers")

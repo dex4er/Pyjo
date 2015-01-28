@@ -9,8 +9,8 @@ Pyjo.Headers - Headers
 
     # Parse
     headers = Pyjo.Headers.new()
-    headers.parse(b"Content-Length: 42\\x0d\\x0a")
-    headers.parse(b"Content-Type: text/html\\x0d\\x0a\\x0d\\x0a")
+    headers.parse("Content-Length: 42\\x0d\\x0a")
+    headers.parse("Content-Type: text/html\\x0d\\x0a\\x0d\\x0a")
     print(headers.content_length)
     print(headers.content_type)
 
@@ -30,7 +30,7 @@ import Pyjo.Mixin.String
 
 from Pyjo.Base import lazy
 from Pyjo.Regexp import m, s
-from Pyjo.Util import b, getenv
+from Pyjo.Util import b, getenv, u
 
 import collections
 import sys
@@ -232,10 +232,8 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
             # "Vary: Accept, Accept-Encoding"
             headers.set(vary='Accept').append('Vary', 'Accept-Encoding').to_str()
         """
-        name = b(name)
-        value = b(value)
         old = self.header(name)
-        return self.header(name, old + b', ' + value if old is not None else value)
+        return self.header(name, old + ', ' + value if old is not None else value)
 
     @property
     def authorization(self):
@@ -528,7 +526,7 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
         if key not in self._headers:
             return
 
-        return b', '.join(self._headers[key])
+        return ', '.join(map(lambda i: u(i), self._headers[key]))
 
     @property
     def host(self):
@@ -665,8 +663,9 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
             for n in headers.name:
                 print(n)
         """
-        return list(map(lambda i: NORMALCASE[i] if i in NORMALCASE else self._normalcase[i] if i in self._normalcase else i,
-                        self._headers.keys()))
+        return list(map(lambda i: u(i, 'ascii'),
+                        map(lambda i: NORMALCASE[i] if i in NORMALCASE else self._normalcase[i] if i in self._normalcase else i,
+                        self._headers.keys())))
 
     @property
     def origin(self):
@@ -807,7 +806,7 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
         Remove a header.
         """
-        key = name.lower()
+        key = b(name, 'ascii').lower()
         if key in self._headers:
             del self._headers[key]
         return self
@@ -986,7 +985,8 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
         Turn headers into :class:`dict` with :class:`list` as its values. ::
         """
-        return dict(map(lambda i: (i, self._headers[i.lower()]), self.names))
+        return dict(map(lambda i: (i, list(map(lambda i: u(i, 'ascii'), self._headers[b(i.lower(), 'ascii')]))),
+                        self.names))
 
     def to_bytes(self):
         """::
@@ -998,7 +998,7 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
         headers = []
 
         # Make sure multiline values are formatted correctly
-        for name in self.names:
+        for name in map(lambda i: b(i, 'ascii'), self.names):
             for v in self._headers[name.lower()]:
                 headers.append(name + b': ' + v)
 
@@ -1012,7 +1012,7 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
         Turn headers into a string, suitable for HTTP messages.
         """
         if sys.version_info >= (3, 0):
-            return self.to_bytes().decode('ascii')
+            return u(self.to_bytes(), 'ascii')
         else:
             return self.to_bytes()
 
