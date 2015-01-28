@@ -724,8 +724,8 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
                     for h in headers:
                         self.add(h[0], h[1])
                     self._buffer = self._buffer[pos:]
-                    self.state = 'finished'
-                    self.cache = []
+                    self._state = 'finished'
+                    self._cache = []
                     return self
 
         self._buffer = self._buffer[pos:]
