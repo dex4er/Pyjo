@@ -6,6 +6,12 @@ Pyjo API
     :glob:
     :maxdepth: 1
 
+.. automodule:: Pyjo.Asset
+    :members:
+
+.. automodule:: Pyjo.Asset.Memory
+    :members:
+
 .. automodule:: Pyjo.Base
     :members:
 
@@ -14,6 +20,14 @@ Pyjo API
     :special-members:
 
 .. automodule:: Pyjo.Collection
+    :members:
+    :special-members:
+
+.. automodule:: Pyjo.Content
+    :members:
+    :special-members:
+
+.. automodule:: Pyjo.Content.Single
     :members:
     :special-members:
 
