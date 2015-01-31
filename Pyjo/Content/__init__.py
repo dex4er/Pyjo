@@ -72,20 +72,19 @@ Emitted when a new chunk of content arrives. ::
     def read(content, bstring):
         print("Streaming: {0}".format(bstring))
 
-Attributes and methods
-----------------------
+Classess
+--------
 """
 
 import Pyjo.EventEmitter
-import Pyjo.Mixin.String
 
 import Pyjo.Headers
 
 from Pyjo.Base import lazy
-from Pyjo.Util import b, getenv, not_implemented
+from Pyjo.Util import b, getenv, not_implemented, u
 
 
-class Pyjo_Content(Pyjo.EventEmitter.object, Pyjo.Mixin.String.object):
+class Pyjo_Content(Pyjo.EventEmitter.object):
     """
     """
 
@@ -149,6 +148,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object, Pyjo.Mixin.String.object):
     _body = False
     _buffer = b''
     _chunk_state = None
+    _dynamic = False
     _header_buffer = None
     _header_size = 0
     _pre_buffer = b''
@@ -270,9 +270,6 @@ class Pyjo_Content(Pyjo.EventEmitter.object, Pyjo.Mixin.String.object):
             return self._raw_size - self._header_size
         else:
             return 0
-
-    def to_str(self):
-        return self.get_header_chunk(0)
 
     def _decompress(self, chunk):
         # No compression

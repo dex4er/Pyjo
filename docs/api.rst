@@ -31,6 +31,8 @@ Pyjo API
     :members:
     :special-members:
 
+    .. automethod:: __init__
+
 .. automodule:: Pyjo.DOM
     :members:
     :special-members:
