@@ -39,6 +39,9 @@ class Pyjo_UserAgent_Transactor(Pyjo.Base.object):
     :mod:`Pyjo.Base` and implements the following new ones.
     """
 
+    def tx(self, url, **kwargs):
+        ...
+
 
 new = Pyjo_UserAgent_Transactor.new
 object = Pyjo_UserAgent_Transactor  # @ReservedAssignment
