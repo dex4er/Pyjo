@@ -29,8 +29,11 @@ Classes
 """
 
 import Pyjo.Base
+import Pyjo.Transaction.HTTP
+import Pyjo.URL
 
 from Pyjo.Base import lazy
+from Pyjo.Regexp import m
 
 
 class Pyjo_UserAgent_Transactor(Pyjo.Base.object):
@@ -39,8 +42,66 @@ class Pyjo_UserAgent_Transactor(Pyjo.Base.object):
     :mod:`Pyjo.Base` and implements the following new ones.
     """
 
-    def tx(self, url, **kwargs):
+    generators = lazy(lambda self: {'data': self._data, 'form': self._form, 'json': self._json})
+    name = 'Pyjo (Python)'
+
+    def endpoint(self, tx):
+        # Basic endpoint
+        req = tx.req
+        url = req.url
+        proto = url.protocol or 'http'
+        host = url.ihost
+        port = url.port or (443 if proto == 'https' else 80)
+
+        # TODO Proxy for normal HTTP requests
+
+        return proto, host, port
+
+    def peer(self, tx):
+        proto, host, port = self.endpoint(tx)
+        return self._proxy(tx, proto, host, port)
+
+    def tx(self, method, url, headers={}, **kwargs):
+        # Method and URL
+        tx = Pyjo.Transaction.HTTP.new()
+        req = tx.req
+        req.method = method
+        if str(url) != m(r'^/|://'):
+            url = 'http://' + str(url)
+        if isinstance(url, Pyjo.URL.object):
+            req.url(url)
+        else:
+            req.url.parse(url)
+
+        # Headers (we identify ourselves and accept gzip compression)
+        h = req.headers
+        if headers:
+            h.from_dict(headers)
+        if not h.user_agent:
+            h.useragent = self.name
+        # TODO gzip
+        # if not h.accept_encoding:
+        #     h.accept_encoding = 'gzip'
+
+        generators = list(set(self.generators) & set(kwargs))
+        if len(generators) == 1:
+            g = generators[0]
+            self.genertors[g](tx, kwargs[g])
+
+        return tx
+
+    def _data(self, tx, data):
+        tx.req.body = data
+
+    def _form(self, tx, data):
         ...
+
+    def _json(self, tx, data):
+        ...
+
+    def _proxy(self, tx, proto, host, port):
+        # TODO Update with proxy information
+        return proto, host, port
 
 
 new = Pyjo_UserAgent_Transactor.new

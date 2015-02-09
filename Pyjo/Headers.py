@@ -81,6 +81,7 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
     _buffer = b''
     _cache = lazy(lambda self: [])
     _headers = lazy(lambda self: collections.OrderedDict())
+    _limit = False
     _normalcase = lazy(lambda self: {})
     _state = None
 

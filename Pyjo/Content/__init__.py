@@ -88,6 +88,8 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
     """
     """
 
+    auto_decompress = False
+
     auto_relax = False
     """::
 
@@ -151,6 +153,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
     _dynamic = False
     _header_buffer = None
     _header_size = 0
+    _limit = False
     _pre_buffer = b''
     _raw_size = 0
     _real_size = 0
@@ -199,12 +202,24 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
         return self._header_buffer[offset:131072]
 
     @property
+    def header_size(self):
+        return len(self.build_headers())
+
+    @property
     def is_chunked(self):
         return bool(self.headers.transfer_encoding)
 
     @property
+    def is_dynamic(self):
+        return self._dynamic and self.headers.content_length is None
+
+    @property
     def is_finished(self):
         return self._state == 'finished'
+
+    @property
+    def is_limit_exceeded(self):
+        return bool(self._limit)
 
     def parse(self, chunk):
         # Headers
@@ -271,6 +286,23 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
         else:
             return 0
 
+    def _build(self, method):
+        buf, offset = b'', 0
+        while True:
+            # No chunk yet, try again
+            chunk = getattr(self, method)(offset)
+            if chunk is None:
+                continue
+
+            l = len(chunk)
+            if not l:
+                break
+
+            offset += l
+            buf += chunk
+
+        return buf
+
     def _decompress(self, chunk):
         # No compression
         return self.emit('read', chunk)
@@ -278,6 +310,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
         # TODO Decompress
 
     def _parse_chunked(self):
+        # TODO chunked
         ...
 
     def _parse_headers(self):

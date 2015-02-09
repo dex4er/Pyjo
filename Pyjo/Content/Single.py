@@ -79,6 +79,13 @@ class Pyjo_Content_Single(Pyjo.Content.object, Pyjo.Mixin.String.object):
         super(Pyjo_Content_Single, self).__init__(*args, **kwargs)
         self._read = self.on(lambda content, chunk: content.set(asset=content.asset.add_chunk(chunk)), 'read')
 
+    @property
+    def body_size(self):
+        if self._dynamic:
+            return self.headers.content_length
+        else:
+            return self.asset.size
+
     def get_body_chunk(self, offset):
         """::
 

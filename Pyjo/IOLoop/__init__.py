@@ -176,7 +176,7 @@ class Pyjo_IOLoop(Pyjo.Base.object):
     def stream(self, stream):
         # Find stream for id
         if isinstance(stream, str):
-            return self._connections[stream]
+            return self._connections[stream]['stream']
 
         # Release accept mutex
         self._not_accepting()
