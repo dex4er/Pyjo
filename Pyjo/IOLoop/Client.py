@@ -2,6 +2,7 @@
 Pyjo.IOLoop.Client
 """
 
+import select
 import socket
 import weakref
 
@@ -11,6 +12,15 @@ import Pyjo.EventEmitter
 import Pyjo.IOLoop
 
 from Pyjo.Util import getenv, warn
+
+if getenv('PYJO_NO_TLS', 0):
+    TLS = False
+else:
+    try:
+        import ssl
+        TLS = True
+    except ImportError:
+        TLS = None
 
 
 DEBUG = getenv('PYJO_IOLOOP_CLIENT_DEBUG', 0)
@@ -55,6 +65,31 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
                 self._connect(**kwargs)
 
         return reactor.next_tick(lambda: resolved_cb(self))
+
+    def start(self):
+        def ready_cb(self):
+            self._accept()
+        self.reactor.io(lambda: ready_cb(self), self.handle)
+
+    def stop(self):
+        self.reactor.remove(self.handle)
+
+    def _accept(self):
+        # Greedy accept
+        for _ in range(0, self.multi_accept):
+            try:
+                (handle, unused) = self.handle.accept()
+            except:
+                return  # TODO EAGAIN because non-blocking mode
+            if not handle:
+                return
+            handle.setblocking(0)
+
+            # Disable Nagle's algorithm
+            handle.setsockopt(IPPROTO_TCP, TCP_NODELAY, 1)
+
+            self.emit('accept', handle)
+            # TODO TLS
 
     def _cleanup(self):
         reactor = self.reactor
@@ -104,7 +139,7 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
         handle.setsockopt(IPPROTO_TCP, TCP_NODELAY, 1)
 
         # TODO TLS, Socks
-        return self._cleanup().emit('connect', handle)
+        return self._try_tls(**kwargs)
 
     def _port(self, **kwargs):
         port = kwargs.get('port')
@@ -112,30 +147,35 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
             port = 80
         return port
 
-    def start(self):
-        def ready_cb(self):
-            self._accept()
-        self.reactor.io(lambda: ready_cb(self), self.handle)
-
-    def stop(self):
-        self.reactor.remove(self.handle)
-
-    def _accept(self):
-        # Greedy accept
-        for _ in range(0, self.multi_accept):
+    def _tls(self):
+        # Connected
+        handle = self.handle
+        while True:
             try:
-                (handle, unused) = self.handle.accept()
-            except:
-                return  # TODO EAGAIN because non-blocking mode
-            if not handle:
-                return
-            handle.setblocking(0)
+                handle.do_handshake()
+                break
+            except ssl.SSLWantReadError:
+                select.select([handle], [], [])
+            except ssl.SSLWantWriteError:
+                select.select([], [handle], [])
+        return self._cleanup().emit('connect', handle)
+        # TODO Switch between reading and writing?
 
-            # Disable Nagle's algorithm
-            handle.setsockopt(IPPROTO_TCP, TCP_NODELAY, 1)
+    def _try_tls(self, **kwargs):
+        handle = self.handle
+        if not kwargs.get('tls', False) or (TLS and isinstance(handle, ssl.SSLSocket)):
+            return self._cleanup().emit('connect', handle)
+        if not TLS:
+            return self.emit('error', 'ssl required for TLS support')
 
-            self.emit('accept', handle)
-            # TODO TLS
+        reactor = self.reactor
+        reactor.remove(handle)
+        try:
+            ssl_handle = ssl.wrap_socket(handle, do_handshake_on_connect=False) # TODO options
+            self.handle = ssl_handle
+        except ssl.SSLError:
+            return self.emit('error', 'TLS upgrade failed')
+        reactor.io(lambda loop: self._tls(), ssl_handle).watch(ssl_handle, 0, 1)
 
 
 new = Pyjo_IOLoop_Client.new
