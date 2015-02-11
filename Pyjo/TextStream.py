@@ -55,7 +55,7 @@ class Pyjo_TextStream(base_object):
     def encode(self, charset=DEFAULT_CHARSET):
         """::
 
-            stream = stream.encode
+            stream = stream.encode()
             stream = stream.encode('iso-8859-1')
 
         Encode bytestream, defaults to ``utf-8``, and return new :mod:`Pyjo.ByteStream` object. ::
@@ -118,6 +118,15 @@ class Pyjo_TextStream(base_object):
         Turn parameters into an unicode string.
         """
         return Pyjo.Util.u(self, charset)
+
+    def trim(self):
+        """::
+
+            stream = stream.trim()
+
+        Trim whitespace characters from both ends of bytestream with :func:`Pyjo.Util.trim`.
+        """
+        return self.new(Pyjo.Util.trim(self))
 
     def xml_escape(self):
         """::
