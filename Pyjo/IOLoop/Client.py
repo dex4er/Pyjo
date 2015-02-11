@@ -13,14 +13,28 @@ import Pyjo.IOLoop
 
 from Pyjo.Util import getenv, warn
 
+
 if getenv('PYJO_NO_TLS', 0):
     TLS = False
+    TLS_WANT_ERROR = None
 else:
     try:
         import ssl
+        from ssl import SSLError
         TLS = True
+        try:
+            from ssl import SSLWantReadError, SSLWantWriteError
+            TLS_WANT_ERROR = True
+        except ImportError:
+            TLS_WANT_ERROR = False
     except ImportError:
         TLS = None
+        TLS_WANT_ERROR = None
+
+if not TLS:
+    SSLError = None.__class__
+if not TLS_WANT_ERROR:
+    SSLWantReadError = SSLWantWriteError = None.__class__
 
 
 DEBUG = getenv('PYJO_IOLOOP_CLIENT_DEBUG', 0)
@@ -154,10 +168,12 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
             try:
                 handle.do_handshake()
                 break
-            except ssl.SSLWantReadError:
+            except SSLWantReadError:
                 select.select([handle], [], [])
-            except ssl.SSLWantWriteError:
+            except SSLWantWriteError:
                 select.select([], [handle], [])
+            except SSLError:
+                pass
         return self._cleanup().emit('connect', handle)
         # TODO Switch between reading and writing?
 
@@ -173,7 +189,7 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
         try:
             ssl_handle = ssl.wrap_socket(handle, do_handshake_on_connect=False) # TODO options
             self.handle = ssl_handle
-        except ssl.SSLError:
+        except SSLError:
             return self.emit('error', 'TLS upgrade failed')
         reactor.io(lambda loop: self._tls(), ssl_handle).watch(ssl_handle, 0, 1)
 

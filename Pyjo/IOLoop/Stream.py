@@ -2,14 +2,37 @@
 Pyjo.IOLoop.Stream
 """
 
+import Pyjo.EventEmitter
+import Pyjo.IOLoop
+
+from Pyjo.Util import getenv
+
 import socket
-import ssl
 import weakref
 
 from errno import EAGAIN, ECONNRESET, EINTR, EPIPE, EWOULDBLOCK
 
-import Pyjo.EventEmitter
-import Pyjo.IOLoop
+
+if getenv('PYJO_NO_TLS', 0):
+    TLS = False
+    TLS_WANT_ERROR = None
+else:
+    try:
+        from ssl import SSLError
+        TLS = True
+        try:
+            from ssl import SSLWantReadError, SSLWantWriteError
+            TLS_WANT_ERROR = True
+        except ImportError:
+            TLS_WANT_ERROR = False
+    except ImportError:
+        TLS = None
+        TLS_WANT_ERROR = None
+
+if not TLS:
+    SSLError = None.__class__
+if not TLS_WANT_ERROR:
+    SSLWantReadError = SSLWantWriteError = None.__class__
 
 
 class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
@@ -131,6 +154,12 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
         if e.errno == EAGAIN or e.errno == EINTR or e.errno == EWOULDBLOCK:
             return
 
+        if isinstance(e, (SSLWantReadError, SSLWantReadError)):
+            return
+
+        if isinstance(e, (SSLError,)) and e.strerror.startswith('The operation did not complete'):
+            return
+
         # Closed
         if e.errno == ECONNRESET or e.errno == EPIPE:
             return self.close()
@@ -142,10 +171,6 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
         readbuffer = b''
         try:
             readbuffer = self.handle.recv(131072)
-        except ssl.SSLWantReadError:
-            return
-        except ssl.SSLWantWriteError:
-            return
         except socket.error as e:
             return self._error(e)
         if not readbuffer:

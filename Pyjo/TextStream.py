@@ -80,7 +80,7 @@ class Pyjo_TextStream(base_object):
             flush = kwargs.pop('flush')
         else:
             flush = False
-        print(self, **kwargs)
+        print(self.to_str(), **kwargs)
         if flush:
             f = kwargs.get('file', sys.stdout)
             f.flush()
