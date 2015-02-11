@@ -21,6 +21,7 @@ Status
 
 Early developement stage. Implemented already:
 
+  * HTTP user agent with TLS support
   * HTML/XML DOM parser with CSS selectors
   * URL parser with container classes for URL, path and querystring
   * Non-blocking TCP client and server
@@ -35,6 +36,19 @@ Early developement stage. Implemented already:
 
 Examples
 ========
+
+Web scraping
+------------
+
+```python
+import Pyjo.UserAgent
+from Pyjo.TextStream import u
+
+tx = Pyjo.UserAgent.new().get('https://html.spec.whatwg.org')
+for n in tx.res.dom('#named-character-references-table tbody > tr').each():
+    u(n.at('td > code').text + ' ' + n.children('td')[1].text).trim().say()
+```
+
 
 URL manipulation
 ----------------

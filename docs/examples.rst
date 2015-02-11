@@ -1,6 +1,13 @@
 Examples
 ========
 
+Web scraping
+------------
+
+    .. include:: ../examples/entities.py
+       :code: python
+
+
 URL manipulation
 ----------------
 
