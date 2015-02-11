@@ -331,7 +331,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
 
     def _parse_headers(self):
         pre_buffer = self._pre_buffer
-        self._pre_buffer = None
+        self._pre_buffer = b''
         headers = self.headers.parse(pre_buffer)
         if not headers.is_finished:
             return
