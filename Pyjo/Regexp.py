@@ -45,7 +45,7 @@ class Pyjo_Regexp(object):
 
     @classmethod
     def m(cls, pattern, flags=''):
-        idx = '\0'.join((str(hash(pattern)), str(hash(flags)),))
+        idx = ':'.join((str(hash(pattern)), str(hash(flags)), str(hash(type(pattern)))))
         if idx in CACHE:
             return CACHE[idx]
         new_obj = cls('m', pattern, flags=flags)
@@ -55,7 +55,7 @@ class Pyjo_Regexp(object):
 
     @classmethod
     def s(cls, pattern, replacement, flags=''):
-        idx = '\0'.join((str(hash(pattern)), str(hash(replacement)), str(hash(flags)),))
+        idx = ':'.join((str(hash(pattern)), str(hash(replacement)), str(hash(flags)), str(hash(type(pattern)))))
         if idx in CACHE:
             return CACHE[idx]
         new_obj = cls('s', pattern, replacement, flags=flags)
