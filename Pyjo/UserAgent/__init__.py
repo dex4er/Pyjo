@@ -48,9 +48,12 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
     :mod:`Pyjo.EventEmitter` and implements the following new ones.
     """
 
+    ca = lazy(lambda self: getenv('PYJO_CA_FILE'))
+    cert = lazy(lambda self: getenv('PYJO_CERT_FILE'))
     connect_timeout = lazy(lambda self: getenv('PYJO_CONNECT_TIMEOUT', 10))
     inactivity_timeout = lazy(lambda self: getenv('PYJO_INACTIVITY_TIMEOUT', 30))
     ioloop = Pyjo.IOLoop.new()
+    key = lazy(lambda self: getenv('PYJO_KEY_FILE'))
     local_address = None
     request_timeout = lazy(lambda self: getenv('PYJO_REQUEST_TIMEOUT', 0))
     transactor = lazy(lambda self: Pyjo.UserAgent.Transactor.new())
@@ -117,7 +120,14 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
             options['handle'] = handle
 
         # TODO SOCKS
-        # TODO TLS
+
+        # TLS
+        options['tls'] = proto == 'https'
+        if options['tls']:
+            options['tls_ca'] = self.ca
+            options['tls_cert'] = self.cert
+            options['tls_key'] = self.key
+
         connect_vars = nonlocals()
         connect_vars.cb = cb
         connect_vars.ua = weakref.proxy(self)
@@ -178,10 +188,13 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
         return cid
 
     def _error(self, cid, err):
-        ...
+        raise Exception(self, cid, err);
 
     def _finish(self, cid, close):
-        ...
+        # TODO
+        c = self._connections[cid]
+        old = c['tx']
+        c['cb'](self, old)
 
     def _loop(self, nb):
         if nb:
