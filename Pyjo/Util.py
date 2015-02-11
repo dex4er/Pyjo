@@ -58,7 +58,7 @@ def dictget(d, *k):
     return [d[i] for i in k]
 
 
-def getenv(name, default):
+def getenv(name, default=None):
     return os.environ.get(name, default)
 
 
