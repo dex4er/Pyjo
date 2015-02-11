@@ -46,11 +46,11 @@ class Pyjo_Collection(list):
     def each(self, cb=None):
         """::
 
-            elements = collection.each()
+            iterator = collection.each()
             collection = collection.each(lambda e, num: ...)
 
-        Evaluate callback for each element in collection or return all elements as a
-        list if none has been provided. The element will be the first argument passed
+        Evaluate callback for each element in collection or return all elements as an
+        iterator if none has been provided. The element will be the first argument passed
         to the callback. ::
 
             # Make a numbered list
@@ -59,7 +59,7 @@ class Pyjo_Collection(list):
             )
         """
         if cb is None:
-            return self.to_list()
+            return self.to_iter()
         else:
             num = 1
             for i in self:

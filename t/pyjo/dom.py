@@ -29,7 +29,7 @@ if __name__ == '__main__':
     dom = Pyjo.DOM.new('<div><div FOO="0" id="a">A</div><div id="b">B</div></div>')
     is_ok(dom.at('#b').text, 'B', 'right text')
     div = []
-    div.extend(dom.find('div[id]').map('text').each())
+    div.extend(dom.find('div[id]').map('text'))
     is_deeply_ok(div, ['A', 'B'], 'found all div elements with id')
     div = []
     dom.find('div[id]').each(lambda i, n: div.append(i.text))
@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
     # Tap into method chain
     dom = Pyjo.DOM.new().parse('<div id="a">A</div><div id="b">B</div>')
-    is_deeply_ok(dom.find('[id]').map('attr', 'id').each(), ['a', 'b'], 'right result')
+    is_deeply_ok(dom.find('[id]').map('attr', 'id'), ['a', 'b'], 'right result')
     is_ok(str(dom.tap(lambda i: i.at('#b').remove())), '<div id="a">A</div>', 'right result')
 
     # Simple nesting with healing (tree structure)
@@ -151,7 +151,7 @@ if __name__ == '__main__':
     is_ok(dom.previous, None, 'no siblings')
     is_ok(dom.at('foo > a').next, None, 'no next sibling')
     is_ok(dom.at('foo > simple').previous, None, 'no previous sibling')
-    is_deeply_ok(dom.at('simple').ancestors().map('type').each(), ['foo'], 'right results')
+    is_deeply_ok(dom.at('simple').ancestors().map('type'), ['foo'], 'right results')
     ok(not dom.at('simple').ancestors().first().xml, 'XML mode not active')
 
     # Nodes
@@ -299,9 +299,9 @@ if __name__ == '__main__':
     is_deeply_ok(p, ['foo', 'bar'], 'found all p elements')
     ids = ['container', 'header', 'logo', 'buttons', 'buttons', 'content']
     is_deeply_ok(div, ids, 'found all div elements')
-    is_deeply_ok(dom.at('p').ancestors().map('type').each(), ['div', 'div', 'div', 'body', 'html'], 'right results')
-    is_deeply_ok(dom.at('html').ancestors().each(), [], 'no results')
-    is_deeply_ok(dom.ancestors().each(), [], 'no results')
+    is_deeply_ok(dom.at('p').ancestors().map('type'), ['div', 'div', 'div', 'body', 'html'], 'right results')
+    is_deeply_ok(dom.at('html').ancestors(), [], 'no results')
+    is_deeply_ok(dom.ancestors(), [], 'no results')
 
     # Script tag
     dom = Pyjo.DOM.new("""
@@ -500,7 +500,7 @@ if __name__ == '__main__':
     </table>
     """)
     data = []
-    for tr in dom.find('table tr').each():
+    for tr in dom.find('table tr'):
         for td in tr.children():
             data.append(td.type)
             data.append(td.all_text)
@@ -538,7 +538,7 @@ if __name__ == '__main__':
     """)
     ok(dom.xml, 'XML mode detected')
     is_ok(dom.find('rss')[0].attr('version'), '2.0', 'right version')
-    is_deeply_ok(dom.at('title').ancestors().map('type').each(), ['channel', 'rss'], 'right results')
+    is_deeply_ok(dom.at('title').ancestors().map('type'), ['channel', 'rss'], 'right results')
     is_ok(dom.at('extension').attr('foo:id'), 'works', 'right id')
     is_ok(dom.at('#works').text, m(r'\[awesome\]\]'), 'right text')
     is_ok(dom.at('[id="works"]').text, m(r'\[awesome\]\]'), 'right text')
@@ -1477,7 +1477,7 @@ if __name__ == '__main__':
     is_ok(dom.find('tbody > tr > .gamma > a')[0].text, 'Gamma', 'right text')
     is_ok(dom.find('tbody > tr > .alpha')[1].text, 'Alpha Two', 'right text')
     is_ok(dom.find('tbody > tr > .gamma > a')[1].text, 'Gamma Two', 'right text')
-    following = dom.find('tr > td:nth-child(1)').map('following', ':nth-child(even)').flatten().map('all_text').each()
+    following = dom.find('tr > td:nth-child(1)').map('following', ':nth-child(even)').flatten().map('all_text')
     is_deeply_ok(following, ['Beta', 'Delta', 'Beta Two', 'Delta Two'], 'right results')
 
     # Real world list
