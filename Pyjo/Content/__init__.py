@@ -81,6 +81,7 @@ import Pyjo.EventEmitter
 import Pyjo.Headers
 
 from Pyjo.Base import lazy
+from Pyjo.Regexp import m
 from Pyjo.Util import b, getenv, not_implemented, u
 
 
@@ -178,6 +179,17 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
         """
         return self._build('get_header_chunk')
 
+    @property
+    def charset(self):
+        content_type = self.headers.content_type
+        if content_type is None:
+            content_type = ''
+        g = content_type == m(r'charset\s*=\s*"?([^"\s;]+)"?', 'i')
+        if g:
+            return g[1]
+        else:
+            return
+
     @not_implemented
     def get_body_chunk(self, offset):
         """::
@@ -220,6 +232,10 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
     @property
     def is_limit_exceeded(self):
         return bool(self._limit)
+
+    @property
+    def is_multipart(self):
+        return
 
     def parse(self, chunk):
         # Headers

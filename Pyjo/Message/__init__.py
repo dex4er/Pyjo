@@ -30,6 +30,7 @@ Classes
 
 import Pyjo.Asset.Memory
 import Pyjo.Content.Single
+import Pyjo.DOM
 import Pyjo.EventEmitter
 
 from Pyjo.Base import lazy
@@ -48,6 +49,7 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
     version = '1.1'
 
     _buffer = b''
+    _dom = None
     _error = None
     _finished = False
     _fixed = False
@@ -69,6 +71,18 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
 
     def build_start_line(self):
         return self._build('get_start_line_chunk')
+
+    def dom(self, pattern=None):
+        if self.content.is_multipart:
+            return
+        else:
+            if self._dom is None:
+                self._dom = Pyjo.DOM.new(self.text)
+            dom = self._dom
+            if pattern is None:
+                return dom
+            else:
+                return dom.find(pattern)
 
     @not_implemented
     def extract_start_line(self):
@@ -152,6 +166,15 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
     @property
     def start_line_size(self):
         return len(self.build_start_line())
+
+    @property
+    def text(self):
+        body = self.body
+        charset = self.content.charset or 'utf-8'
+        try:
+            return body.decode(charset)
+        except:
+            return body.decode('iso-8859-1')
 
     def _build(self, method):
         buf = b''
