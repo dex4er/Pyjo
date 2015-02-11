@@ -3,6 +3,7 @@ Pyjo.IOLoop.Stream
 """
 
 import socket
+import ssl
 import weakref
 
 from errno import EAGAIN, ECONNRESET, EINTR, EPIPE, EWOULDBLOCK
@@ -32,13 +33,13 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
 
     def close(self):
         reactor = self.reactor
-        if not reactor:
+        if not dir(reactor):
             return
 
         self.timeout = 0
         handle = self.handle
         self.handle = None
-        if not handle:
+        if not dir(handle):
             return
 
         reactor.remove(handle)
@@ -141,6 +142,10 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
         readbuffer = b''
         try:
             readbuffer = self.handle.recv(131072)
+        except ssl.SSLWantReadError:
+            return
+        except ssl.SSLWantWriteError:
+            return
         except socket.error as e:
             return self._error(e)
         if not readbuffer:
