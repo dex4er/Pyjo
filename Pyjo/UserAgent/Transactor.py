@@ -94,10 +94,10 @@ class Pyjo_UserAgent_Transactor(Pyjo.Base.object):
         tx.req.body = data
 
     def _form(self, tx, data):
-        ...
+        raise Exception(self, tx, data);
 
     def _json(self, tx, data):
-        ...
+        raise Exception(self, tx, data);
 
     def _proxy(self, tx, proto, host, port):
         # TODO Update with proxy information

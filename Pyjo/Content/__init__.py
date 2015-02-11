@@ -327,7 +327,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
 
     def _parse_chunked(self):
         # TODO chunked
-        ...
+        raise Exception(self);
 
     def _parse_headers(self):
         pre_buffer = self._pre_buffer
