@@ -164,20 +164,19 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
         return port
 
     def _tls(self):
-        # Connected
         handle = self.handle
         while True:
             try:
                 handle.do_handshake()
-                break
+                # Connected
+                return self._cleanup().emit('connect', handle)
             except SSLWantReadError:
-                select.select([handle], [], [])
+                return self.reactor.watch(handle, 1, 0)
             except SSLWantWriteError:
-                select.select([], [handle], [])
+                return self.reactor.watch(handle, 1, 1)
             except SSLError:
-                pass
-        return self._cleanup().emit('connect', handle)
-        # TODO Switch between reading and writing?
+                return self.reactor.watch(handle, 1, 1)
+        return self.emit('error', 'TLS upgrade failed')
 
     def _try_tls(self, **kwargs):
         handle = self.handle
