@@ -14,6 +14,8 @@ import Pyjo.IOLoop
 from Pyjo.Util import getenv, warn
 
 
+NoneType = None.__class__
+
 if getenv('PYJO_NO_TLS', 0):
     TLS = False
     TLS_WANT_ERROR = None
@@ -32,9 +34,9 @@ else:
         TLS_WANT_ERROR = None
 
 if not TLS:
-    SSLError = None.__class__
+    SSLError = NoneType
 if not TLS_WANT_ERROR:
-    SSLWantReadError = SSLWantWriteError = None.__class__
+    SSLWantReadError = SSLWantWriteError = NoneType
 
 
 DEBUG = getenv('PYJO_IOLOOP_CLIENT_DEBUG', 0)
