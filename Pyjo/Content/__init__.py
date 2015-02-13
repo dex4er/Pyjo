@@ -81,7 +81,7 @@ import Pyjo.EventEmitter
 import Pyjo.Headers
 
 from Pyjo.Base import lazy
-from Pyjo.Regexp import m
+from Pyjo.Regexp import m, s
 from Pyjo.Util import b, getenv, not_implemented, u
 
 
@@ -118,6 +118,8 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
     Content headers, defaults to a :mod:`Pyjo.Headers` object.
     """
 
+    max_buffer_size = int(getenv('PYJO_MAX_BUFFER_SIZE', 0)) or 262144
+
     max_leftover_size = int(getenv('PYJO_MAX_LEFTOVER_SIZE', 0)) or 262144
     """::
 
@@ -150,6 +152,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
 
     _body = False
     _buffer = b''
+    _chunk_len = 0
     _chunk_state = None
     _dynamic = False
     _header_buffer = None
@@ -231,7 +234,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
 
     @property
     def is_limit_exceeded(self):
-        return bool(self._limit)
+        return self._limit
 
     @property
     def is_multipart(self):
@@ -326,8 +329,44 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
         # TODO Decompress
 
     def _parse_chunked(self):
-        # TODO chunked
-        raise Exception(self);
+        # Trailing headers
+        if self._chunk_state == 'trailing_headers':
+            return self._parse_chunked_trailing_headers()
+
+        while True:
+            l = len(self._pre_buffer)
+            if not l:
+                break
+
+            # Start new chunk (ignore the chunk extension)
+            if not self._chunk_len:
+                self._pre_buffer, g = self._pre_buffer == s(br'^(?:\x0d?\x0a)?([0-9a-fA-F]+).*\x0a', '')
+                if not g:
+                    break
+                self._chunk_len = int(g[1], 16)
+                if self._chunk_len:
+                    continue
+
+                # Last chunk
+                self._chunk_state = 'trailing_headers'
+                break
+
+            # Remove as much as possible from payload
+            if self._chunk_len < l:
+                l = self._chunk_len
+            self._buffer += self._pre_buffer[0:l]
+            self._pre_buffer = self._pre_buffer[l:]
+            self._real_size += l
+            self._chunk_len -= l
+
+        # Trailing headers
+        if self._chunk_state == 'trailing_headers':
+            self._parse_chunked_trailing_headers()
+
+        # Check buffer size
+        if len(self._pre_buffer) > self.max_buffer_size:
+            self._state = 'finished'
+            self._limit = True
 
     def _parse_headers(self):
         pre_buffer = self._pre_buffer
@@ -340,6 +379,19 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
         # Take care of leftovers
         leftovers = self._pre_buffer = headers.leftovers
         self._header_size = self._raw_size - len(leftovers)
+
+    def _parse_chunked_trailing_headers(self):
+        headers = self.headers.parse(self._pre_buffer)
+        self._pre_buffer = b''
+        if not headers.is_finished:
+            return
+        self._chunk_state = 'finished'
+
+        # Take care of leftover and replace Transfer-Encoding with Content-Length
+        self._buffer += headers.leftovers
+        headers.remove('Transfer-Encoding')
+        if not headers.content_length:
+            headers.content_length = self._real_size
 
     def _parse_until_body(self, chunk):
         self._raw_size += len(chunk)
