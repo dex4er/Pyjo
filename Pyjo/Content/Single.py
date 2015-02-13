@@ -99,7 +99,7 @@ class Pyjo_Content_Single(Pyjo.Content.object, Pyjo.Mixin.String.object):
             return self.asset.get_chunk(offset)
 
     def to_str(self):
-        return u(self.get_header_chunk(0), 'ascii') + u(self.get_body_chunk(0), 'ascii')
+        return u(self.get_header_chunk(0), 'iso-8859-1') + u(self.get_body_chunk(0), 'iso-8859-1')
 
 
 new = Pyjo_Content_Single.new

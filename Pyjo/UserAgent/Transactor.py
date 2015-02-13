@@ -79,9 +79,8 @@ class Pyjo_UserAgent_Transactor(Pyjo.Base.object):
             h.from_dict(headers)
         if not h.user_agent:
             h.useragent = self.name
-        # TODO gzip
-        # if not h.accept_encoding:
-        #     h.accept_encoding = 'gzip'
+        if not h.accept_encoding:
+            h.accept_encoding = 'gzip'
 
         generators = list(set(self.generators) & set(kwargs))
         if len(generators) == 1:

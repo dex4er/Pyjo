@@ -77,21 +77,29 @@ Classess
 """
 
 import Pyjo.EventEmitter
-
 import Pyjo.Headers
 
 from Pyjo.Base import lazy
 from Pyjo.Regexp import m, s
 from Pyjo.Util import b, getenv, not_implemented, u
 
+import zlib
+
 
 class Pyjo_Content(Pyjo.EventEmitter.object):
     """
     """
 
-    auto_decompress = False
+    auto_decompress = None
+    """::
 
-    auto_relax = False
+        boolean = content.auto_decompress
+        content.auto_decompress = boolean
+
+    Decompress content automatically if :attr:`is_compressed` is true.
+    """
+
+    auto_relax = None
     """::
 
         boolean = content.auto_relax
@@ -155,6 +163,8 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
     _chunk_len = 0
     _chunk_state = None
     _dynamic = False
+    _gz = None
+    _gz_size = 0
     _header_buffer = None
     _header_size = 0
     _limit = False
@@ -223,6 +233,13 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
     @property
     def is_chunked(self):
         return bool(self.headers.transfer_encoding)
+
+    @property
+    def is_compressed(self):
+        if self.headers.content_encoding is None:
+            return False
+        else:
+            return bool(self.headers.content_encoding == m(r'^gzip$', 'i'))
 
     @property
     def is_dynamic(self):
@@ -324,9 +341,31 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
 
     def _decompress(self, chunk):
         # No compression
-        return self.emit('read', chunk)
+        if not self.auto_decompress or not self.is_compressed:
+            return self.emit('read', chunk)
 
-        # TODO Decompress
+        # Decompress
+        if self._gz is None:
+            self._gz = zlib.decompressobj(16 + zlib.MAX_WBITS)
+        gz = self._gz
+
+        out = gz.decompress(chunk)
+        l = len(out)
+
+        if l > 0:
+            self.emit('read', out)
+
+        self._gz_size += l
+
+        # Replace Content-Encoding with Content-Length
+        if gz.eof:
+            self.headers.content_length = self._gz_size
+            self.headers.remove('Content-Encoding')
+
+        # Check buffer size
+        if len(gz.unconsumed_tail) > self.max_buffer_size:
+            self._state = 'finished'
+            self._limit = True
 
     def _parse_chunked(self):
         # Trailing headers

@@ -101,6 +101,13 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
         self._fixed = True
         return self
 
+    def get_body_chunk(self, offset):
+        self.emit('progress', 'body', offset)
+        chunk = self.content.get_body_chunk(offset)
+        if chunk is not None and not len(chunk):
+            self.finish()
+        return chunk
+
     def get_header_chunk(self, offset):
         self.emit('progress', 'headers', offset)
         return self.fix_headers().content.get_header_chunk(offset)
