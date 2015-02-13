@@ -85,7 +85,7 @@ class Pyjo_UserAgent_Transactor(Pyjo.Base.object):
         generators = list(set(self.generators) & set(kwargs))
         if len(generators) == 1:
             g = generators[0]
-            self.genertors[g](tx, kwargs[g])
+            self.generators[g](tx, kwargs[g])
 
         return tx
 
