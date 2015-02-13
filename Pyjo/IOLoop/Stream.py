@@ -68,7 +68,8 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
             return
 
         reactor.remove(handle)
-        handle.close()
+        if handle:
+            handle.close()
 
         return self.emit('close')
 
