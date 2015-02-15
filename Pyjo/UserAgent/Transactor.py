@@ -61,6 +61,10 @@ class Pyjo_UserAgent_Transactor(Pyjo.Base.object):
         proto, host, port = self.endpoint(tx)
         return self._proxy(tx, proto, host, port)
 
+    def redirect(self, old):
+        # TODO
+        raise Exception(self, old)
+
     def tx(self, method, url, headers={}, **kwargs):
         # Method and URL
         tx = Pyjo.Transaction.HTTP.new()
@@ -82,10 +86,13 @@ class Pyjo_UserAgent_Transactor(Pyjo.Base.object):
         if not h.accept_encoding:
             h.accept_encoding = 'gzip'
 
+        # Generator
         generators = list(set(self.generators) & set(kwargs))
         if len(generators) == 1:
             g = generators[0]
             self.generators[g](tx, kwargs[g])
+
+        # TODO Body
 
         return tx
 

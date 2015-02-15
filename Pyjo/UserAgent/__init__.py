@@ -55,6 +55,7 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
     ioloop = Pyjo.IOLoop.new()
     key = lazy(lambda self: getenv('PYJO_KEY_FILE'))
     local_address = None
+    max_redirects = lazy(lambda self: getenv('PYJO_MAX_REDIRECTS', 0))
     request_timeout = lazy(lambda self: getenv('PYJO_REQUEST_TIMEOUT', 0))
     transactor = lazy(lambda self: Pyjo.UserAgent.Transactor.new())
 
@@ -191,10 +192,32 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
         raise Exception(self, cid, err);
 
     def _finish(self, cid, close):
-        # TODO
-        c = self._connections[cid]
+        # Remove request timeout
+        c = self._connections.get('cid')
+        if not c:
+            return
+
+        loop = self._loop(c['nb'])
+        if not loop:
+            return
+
+        if c.get('timeout'):
+            loop.remove(c['timeout'])
+
         old = c['tx']
-        c['cb'](self, old)
+        if not old:
+            return self._remove(cid, close)
+
+        # TODO Finish WebSocket
+
+        # TODO cookie_jar
+
+        # TODO Upgrade connection to WebSocket
+
+        # Finish normal connection and handle redirects
+        self._remove(cid, close)
+        if not self._redirect(c, old):
+            c['cb'](self, old)
 
     def _loop(self, nb):
         if nb:
@@ -227,6 +250,18 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
             self._finish(cid, False)
         elif tx.is_writing:
             self._write(cid)
+
+    def _redirect(self, c, old):
+        new = self.transactor.redirect(old)
+        if not new:
+            return
+
+        if len(old.redirects) >= self.max_redirects:
+            return
+
+        cb = c['cb']
+        del c['cb']
+        return self._start(c['nb'], new, cb)
 
     def _start(self, nb, tx, cb):
         # TODO Application server

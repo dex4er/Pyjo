@@ -52,6 +52,18 @@ class Pyjo_Transaction(Pyjo.EventEmitter.object):
     _connection = None
     _state = None
 
+    def client_close(self, close=False):
+        # Premature connection close
+        res = self.res.finish()
+        if close and not res.code and not res.error:
+            res.error(message='Premature connection close')
+
+        # 4xx/5xx
+        elif res.is_status_class(400) or res.is_status_class(500):
+            res.error(message=res.message, code=res.code)
+
+        return self.server_close()
+
     @not_implemented
     def client_read(self):
         pass
@@ -79,6 +91,13 @@ class Pyjo_Transaction(Pyjo.EventEmitter.object):
             return True
         else:
             return self._state == 'write'
+
+    def server_close(self):
+        return self._state('finished', 'finish')
+
+    def _state(self, state, event):
+        self._state = state
+        return self.emit(event)
 
 
 new = Pyjo_Transaction.new

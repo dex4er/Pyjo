@@ -363,9 +363,10 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
             self.headers.remove('Content-Encoding')
 
         # Check buffer size
-        if len(gz.unconsumed_tail) > self.max_buffer_size:
-            self._state = 'finished'
-            self._limit = True
+        else:
+            if len(gz.unconsumed_tail) > self.max_buffer_size:
+                self._state = 'finished'
+                self._limit = True
 
     def _parse_chunked(self):
         # Trailing headers
