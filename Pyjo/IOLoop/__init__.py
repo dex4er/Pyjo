@@ -138,7 +138,7 @@ class Pyjo_IOLoop(Pyjo.Base.object):
         if taskid in self._connections:
             c = self._connections[taskid]
             if c:
-                stream = c.stream
+                stream = c.get('stream')
                 if stream:
                     return stream.close_gracefully()
 

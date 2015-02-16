@@ -60,6 +60,8 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
     transactor = lazy(lambda self: Pyjo.UserAgent.Transactor.new())
 
     _connections = lazy(lambda self: {})
+    _nb_queue = []
+    _queue = []
 
     def build_tx(self, method, url, **kwargs):
         return self.transactor.tx(method, url, **kwargs)
@@ -103,12 +105,16 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
             if DEBUG:
                 warn("-- Blocking request ({0})\n".format(self._url(tx)))
 
+            start = nonlocals()
+            start.tx = tx
+
             def blocking_cb(ua, tx):
                 ua.ioloop.stop()
+                start.tx = tx
 
             self._start(False, tx, blocking_cb)
             self.ioloop.start()
-            return tx
+            return start.tx
 
     def _connect(self, nb, peer, tx, handle, cb):
         t = self.transactor
@@ -129,14 +135,14 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
             options['tls_cert'] = self.cert
             options['tls_key'] = self.key
 
-        connect_vars = nonlocals()
-        connect_vars.cb = cb
-        connect_vars.ua = weakref.proxy(self)
+        connect = nonlocals()
+        connect.cb = cb
+        connect.ua = weakref.proxy(self)
 
         def client_cb(loop, err, stream):
-            cb = connect_vars.cb
-            cid = connect_vars.cid
-            ua = connect_vars.ua
+            cb = connect.cb
+            cid = connect.cid
+            ua = connect.ua
 
             # Connection error
             if not ua:
@@ -153,7 +159,7 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
             cb(cid)
 
         cid = self._loop(nb).client(client_cb, **options)
-        connect_vars.cid = cid
+        connect.cid = cid
         return cid
 
     def _connected(self, cid):
@@ -188,12 +194,43 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
 
         return cid
 
+    def _dequeue(self, nb, name, test=False):
+        loop = self._loop(nb)
+        if nb:
+            old = self._nb_queue
+        else:
+            old = self._queue
+
+        found = False
+        new = []
+        for queued in old:
+            if found or name not in queued:
+                new.append(queued)
+                continue
+
+            # Search for id/name and sort out corrupted connections if necessary
+            stream = loop.stream(queued[1])
+            if not stream:
+                continue
+
+            if test and stream.is_readable:
+                stream.close()
+            else:
+                found = queued[1]
+
+        if nb:
+            self._nb_queue = new
+        else:
+            self._queue = new
+
+        return found
+
     def _error(self, cid, err):
         raise Exception(self, cid, err);
 
     def _finish(self, cid, close):
         # Remove request timeout
-        c = self._connections.get('cid')
+        c = self._connections.get(cid)
         if not c:
             return
 
@@ -227,16 +264,12 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
 
     def _read(self, cid, chunk):
         # Corrupted connection
-        if cid not in self._connections:
-            return
-
-        c = self._connections[cid]
-
+        c = self._connections.get(cid)
         if not c:
-            del self._connections[cid]
+            self._connections.pop(cid, None)
             return
 
-        tx = c['tx']
+        tx = c.get('tx', None)
 
         if not tx:
             return self._remove(cid)
@@ -259,9 +292,23 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
         if len(old.redirects) >= self.max_redirects:
             return
 
-        cb = c['cb']
-        del c['cb']
-        return self._start(c['nb'], new, cb)
+        return self._start(c['nb'], new, c.pop('cb', None))
+
+    def _remove(self, cid, close):
+        # Close connection
+        c = self._connections.get(cid)
+        if c is not None:
+            del self._connections[cid]
+        tx = c['tx']
+        if close or not tx or not tx.keep_alive or tx.error:
+            for nb in True, False:
+                self._dequeue(nb, cid)
+                self._loop(nb).remove(cid)
+            return
+
+        # Keep connection alive (CONNECT requests get upgraded)
+        if tx.req.method.upper() != 'CONNECT':
+            self._enqueue(c['nb'], ':'.join(self.transactor.endpoint(tx)), cid)
 
     def _start(self, nb, tx, cb):
         # TODO Application server

@@ -35,6 +35,8 @@ class Pyjo_Transaction_HTTP(Pyjo.Transaction.object):
     :mod:`Pyjo.Transaction` and implements the following new ones.
     """
 
+    previous = None
+
     _delay = False
     _http_state = None
     _offset = None
@@ -67,6 +69,17 @@ class Pyjo_Transaction_HTTP(Pyjo.Transaction.object):
     def keep_alive(self):
         # TODO
         return False
+
+    @property
+    def redirects(self):
+        redirects = []
+        previous = self
+        while True:
+            previous = previous.previous
+            if not previous:
+                break
+            redirects.insert(0, previous)
+        return redirects
 
     def _body(self, msg, finish):
         # TODO

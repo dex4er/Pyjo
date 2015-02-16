@@ -2,7 +2,6 @@
 Pyjo.IOLoop.Client
 """
 
-import select
 import socket
 import weakref
 

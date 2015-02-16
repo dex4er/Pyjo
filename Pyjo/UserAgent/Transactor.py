@@ -62,8 +62,45 @@ class Pyjo_UserAgent_Transactor(Pyjo.Base.object):
         return self._proxy(tx, proto, host, port)
 
     def redirect(self, old):
-        # TODO
-        raise Exception(self, old)
+        # Commonly used codes
+        res = old.res
+        code = res.code or 0
+        if code not in [301, 302, 303, 307, 308]:
+            return
+
+        # Fix location without authority and/or scheme
+        location = res.headers.location
+        if not location:
+            return
+
+        location = Pyjo.URL.new(location)
+        if not location.is_abs():
+            location = location.base(old.req.url).to_abs()
+        proto = location.protocol
+        if proto != 'http' and proto != 'https':
+            return
+
+        # Clone request if necessary
+        new = Pyjo.Transaction.HTTP.new()
+        req = old.req
+        if code == 307 or code == 308:
+            clone = req.clone()
+            if not clone:
+                return
+            new.req = clone
+        else:
+            method = req.method.upper()
+            headers = new.req.set(method='GET' if method == 'POST' else method) \
+                .content.set(headers=req.headers.clone()).headers
+            for n in filter(lambda n: n.lower().startswith('content-'), headers.names):
+                headers.remove(n)
+
+        headers = new.req.set(url=location).headers
+        for n in ['Authorization', 'Cookie', 'Host', 'Referer']:
+            headers.remove(n)
+
+        new.previous = old
+        return new
 
     def tx(self, method, url, headers={}, **kwargs):
         # Method and URL
