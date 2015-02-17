@@ -320,6 +320,18 @@ class Pyjo_Path(Pyjo.Base.object, Pyjo.Mixin.String.object):
         clone.trailing_slash = bool(clone.parts)
         return clone
 
+    def to_json(self):
+        """::
+
+            string = path.to_json()
+
+        Turn path into a JSON representation. The same as :meth:`to_str`. ::
+
+            # "/i/%E2%99%A5/pyjo"
+            Pyjo.Path.new('/i/%E2%99%A5/pyjo').to_json()
+        """
+        return self.to_str()
+
     def to_route(self):
         """::
 
