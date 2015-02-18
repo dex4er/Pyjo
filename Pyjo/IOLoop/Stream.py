@@ -70,8 +70,7 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
         reactor.remove(handle)
         if handle:
             handle.close()
-
-        return self.emit('close')
+            return self.emit('close')
 
     def close_gracefully(self):
         if self.is_writing():
