@@ -13,7 +13,7 @@ import sys
 import unittest
 
 
-dirs = ['t/pyjo', 't/examples', 't/docs']
+dirs = ['t/Pyjo', 't/docs', 't/examples']
 
 
 class TestSuite(unittest.TestSuite):
