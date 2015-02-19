@@ -47,8 +47,10 @@ class Pyjo_Mixin_String(object):
         """
         if hasattr(self, 'to_bytes'):
             return self.to_bytes()
-        else:
+        elif sys.version_info >= (3, 0):
             return bytes(self.to_str(), 'utf-8')
+        else:
+            return self.to_str()
 
     def __complex__(self):
         """::

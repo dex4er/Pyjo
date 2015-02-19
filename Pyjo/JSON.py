@@ -26,7 +26,7 @@ Other charaters will be encoded with ``utf-8`` encoding without escaping. ::
     {'i': u"♥ pyjo"} -> b'{"i": "\\xe2\\x99\\xa5 pyjo"}'
 """
 
-from Pyjo.Util import b, isbytes, isiterable, u
+from Pyjo.Util import b, isbytes, isiterable, isunicode, u
 
 import json
 
@@ -71,7 +71,7 @@ def decode_json(bstring):
 def encode_json(value):
     """::
 
-        bstring = encode_json({'i': '♥ pyjo'})
+        bstring = encode_json({'i': u'♥ pyjo'})
 
     Encode Python value to JSON.
     """
@@ -93,7 +93,7 @@ def j(obj):
     """::
 
         bstring = j([1, 2, 3])
-        bstring = j({'i': '♥ pyjo'})
+        bstring = j({'i': u'♥ pyjo'})
         value = j(bstring)
 
     Encode Python data structure (which may only be :class:`dict` or :class:`list`
@@ -112,11 +112,15 @@ def j(obj):
 def to_json(value):
     """::
 
-        string = to_json({'i': '♥ pyjo'}
+        string = to_json({'i': u'♥ pyjo'}
 
     Encode Python value to JSON text without ``utf-8`` encoding it.
     """
-    return json.dumps(value, ensure_ascii=False, cls=JSONEncoder, separators=(',', ':')) \
-        .replace(u'\u2028', '\\u2028') \
-        .replace(u'\u2029', '\\u2029') \
-        .replace('/', '\\/')
+    string = json.dumps(value, ensure_ascii=False, cls=JSONEncoder, separators=(',', ':')) \
+                 .replace('/', r'\/')
+
+    if isunicode(string):
+        return string.replace(u'\u2028', r'\u2028') \
+                     .replace(u'\u2029', r'\u2029')
+    else:
+        return string

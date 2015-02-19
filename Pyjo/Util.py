@@ -67,8 +67,16 @@ def html_unescape(ustring):
     return ustring
 
 
-def isbytes(obj):
-    return isinstance(obj, bytes) and not isinstance(obj, str)
+if sys.version_info >= (3, 0):
+    def isbytes(obj):
+        return isinstance(obj, bytes)
+else:
+    def isbytes(obj):
+        return isinstance(obj, str)
+
+
+def isiterable(obj):
+    return hasattr(obj, '__iter__') and not isstring(obj)
 
 
 if sys.version_info >= (3, 0):
@@ -79,8 +87,12 @@ else:
         return isinstance(obj, (bytes, str, unicode))
 
 
-def isiterable(obj):
-    return hasattr(obj, '__iter__') and not isstring(obj)
+if sys.version_info >= (3, 0):
+    def isunicode(obj):
+        return isinstance(obj, str)
+else:
+    def isunicode(obj):
+        return isinstance(obj, unicode)
 
 
 def md5_sum(bstring):
