@@ -2,7 +2,7 @@
 Pyjo.Test
 """
 
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 
 import os
 import re
@@ -12,8 +12,9 @@ import traceback
 import unittest
 
 
-__all__ = ['done_testing', 'diag', 'fail', 'is_ok', 'isa_ok', 'is_deeply_ok',
-           'isnt_ok', 'none_ok', 'ok', 'pass_ok', 'plan', 'skip', 'throws_ok']
+__all__ = ['cmp_ok', 'done_testing', 'diag', 'fail', 'is_ok', 'isa_ok',
+           'is_deeply_ok', 'isnt_ok', 'none_ok', 'ok', 'pass_ok', 'plan',
+           'skip', 'throws_ok']
 
 
 test = 0
@@ -49,7 +50,7 @@ def _ok(check, test_name=None):
     message += 'ok {0}'.format(test)
 
     if test_name is not None:
-        if isinstance(test_name, int) or str(test_name).isdigit():
+        if isinstance(test_name, int) or '{0}'.format(test_name).isdigit():
             diag("    You named your test '{0}'.  You shouldn't use numbers for your test names.\n    Very confusing.".format(test_name))
         message += ' - {0}'.format(test_name)
 
@@ -93,6 +94,24 @@ def isnt_ok(got, expected, test_name=None):
     _ok(check, test_name)
     if not check:
         diag("         got: {0}\n    expected: anything else\n".format(repr(got)))
+
+
+def cmp_ok(got, operator, expected, test_name=None):
+    if test_name is None:
+        test_name = 'An object {0}'.format(type(got))
+    test_name = "{0} {1} {2}".format(test_name, operator, repr(expected))
+    methods = {
+        '==': lambda a, b: a == b,
+        '>=': lambda a, b: a >= b,
+        '>': lambda a, b: a > b,
+        '<=': lambda a, b: a <= b,
+        '<': lambda a, b: a < b,
+        '!=': lambda a, b: a != b,
+    }
+    check = methods[operator](got, expected)
+    _ok(check, test_name)
+    if not check:
+        diag("    {0}\n        {1}\n    {2}\n".format(repr(got), operator, repr(expected)))
 
 
 def isa_ok(got, cls, test_name=None):

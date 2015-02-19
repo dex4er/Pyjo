@@ -71,16 +71,16 @@ def isbytes(obj):
     return isinstance(obj, bytes) and not isinstance(obj, str)
 
 
+if sys.version_info >= (3, 0):
+    def isstring(obj):
+        return isinstance(obj, (bytes, str))
+else:
+    def isstring(obj):
+        return isinstance(obj, (bytes, str, unicode))
+
+
 def isiterable(obj):
-    return hasattr(obj, '__iter__')
-
-
-def isstr(obj):
-    return isinstance(obj, str)
-
-
-def isiterable_not_str(obj):
-    return not isstr(obj) and isiterable(obj)
+    return hasattr(obj, '__iter__') and not isstring(obj)
 
 
 def md5_sum(bstring):

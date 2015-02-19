@@ -26,7 +26,7 @@ Other charaters will be encoded with ``utf-8`` encoding without escaping. ::
     {'i': u"♥ pyjo"} -> b'{"i": "\\xe2\\x99\\xa5 pyjo"}'
 """
 
-from Pyjo.Util import b, u
+from Pyjo.Util import b, isbytes, isiterable, u
 
 import json
 
@@ -39,7 +39,7 @@ class JSONEncoder(json.JSONEncoder):
         elif hasattr(obj, 'to_dict'):
             return obj.to_dict()
 
-        elif hasattr(obj, '__iter__'):
+        elif isiterable(obj):
             try:
                 return dict(obj)
             except TypeError:
@@ -51,6 +51,9 @@ class JSONEncoder(json.JSONEncoder):
                 return list(obj)
             except TypeError:
                 pass
+
+        elif isbytes(obj):
+            return u(obj)
 
         return str(obj)
 
@@ -113,7 +116,7 @@ def to_json(value):
 
     Encode Python value to JSON text without ``utf-8`` encoding it.
     """
-    return json.dumps(value, ensure_ascii=False, cls=JSONEncoder) \
+    return json.dumps(value, ensure_ascii=False, cls=JSONEncoder, separators=(',', ':')) \
         .replace(u'\u2028', '\\u2028') \
         .replace(u'\u2029', '\\u2029') \
         .replace('/', '\\/')

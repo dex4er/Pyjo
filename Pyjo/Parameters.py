@@ -25,7 +25,7 @@ import Pyjo.Mixin.String
 
 from Pyjo.Base import lazy
 from Pyjo.Regexp import m, s
-from Pyjo.Util import b, u, isiterable_not_str, url_escape, url_unescape
+from Pyjo.Util import b, u, isiterable, url_escape, url_unescape
 
 
 class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
@@ -118,7 +118,7 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
         """
         params = self.params
         for k, v in list(args) + sorted(kwargs.items()):
-            if isiterable_not_str(v):
+            if isiterable(v):
                 for vv in v:
                     params.append((k, vv),)
             else:
