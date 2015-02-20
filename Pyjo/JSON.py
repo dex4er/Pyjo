@@ -116,7 +116,7 @@ def to_json(value):
 
     Encode Python value to JSON text without ``utf-8`` encoding it.
     """
-    string = json.dumps(value, ensure_ascii=False, cls=JSONEncoder, separators=(',', ':')) \
+    string = json.dumps(value, ensure_ascii=False, allow_nan=False, cls=JSONEncoder, separators=(',', ':')) \
                  .replace('/', r'\/')
 
     if isunicode(string):
