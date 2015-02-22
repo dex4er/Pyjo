@@ -53,6 +53,12 @@ Pyjo API
     :members:
     :special-members:
 
+.. automodule:: Pyjo.JSON.Pointer
+    :members:
+    :special-members:
+
+    .. automethod:: __init__
+
 .. automodule:: Pyjo.Mixin.String
     :members:
     :special-members:
