@@ -32,8 +32,10 @@ import Pyjo.Asset.Memory
 import Pyjo.Content.Single
 import Pyjo.DOM
 import Pyjo.EventEmitter
+import Pyjo.JSON.Pointer
 
 from Pyjo.Base import lazy
+from Pyjo.JSON import j
 from Pyjo.Util import getenv, not_implemented
 
 
@@ -53,6 +55,7 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
     _error = None
     _finished = False
     _fixed = False
+    _json = None
     _raw_size = 0
     _state = None
 
@@ -126,6 +129,19 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
 
     def is_finished(self):
         return self._state == 'finished'
+
+    def json(self, pointer=None):
+        if self.content.is_multipart():
+            return
+
+        if self._json is None:
+            self._json = j(self.body)
+
+        data = self._json
+        if pointer:
+            return Pyjo.JSON.Pointer.new(data).get(pointer)
+        else:
+            return data
 
     def parse(self, chunk=b''):
         if self._error:
