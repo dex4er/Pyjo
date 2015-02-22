@@ -574,7 +574,6 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
     def if_none_match(self, value):
         self.header(b'If-None-Match', value)
 
-    @property
     def is_finished(self):
         """::
 
@@ -584,7 +583,6 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
         """
         return self._state == 'finished'
 
-    @property
     def is_limit_exceeded(self):
         """::
 

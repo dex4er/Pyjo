@@ -230,30 +230,24 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
     def header_size(self):
         return len(self.build_headers())
 
-    @property
     def is_chunked(self):
         return bool(self.headers.transfer_encoding)
 
-    @property
     def is_compressed(self):
         if self.headers.content_encoding is None:
             return False
         else:
             return bool(self.headers.content_encoding == m(r'^gzip$', 'i'))
 
-    @property
     def is_dynamic(self):
         return self._dynamic and self.headers.content_length is None
 
-    @property
     def is_finished(self):
         return self._state == 'finished'
 
-    @property
     def is_limit_exceeded(self):
         return self._limit
 
-    @property
     def is_multipart(self):
         return
 
@@ -264,7 +258,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
             return self
 
         # Chunked content
-        if self.is_chunked and self._state != 'headers':
+        if self.is_chunked() and self._state != 'headers':
             self._parse_chunked()
             if self._chunk_state == 'finished':
                 self._state = 'finished'
@@ -272,7 +266,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
         # Not chunked, pass through to second buffer
         else:
             self._real_size += len(self._pre_buffer)
-            if not (self.is_finished and len(self._buffer) > self.max_leftover_size):
+            if not (self.is_finished() and len(self._buffer) > self.max_leftover_size):
                 self._buffer += self._pre_buffer
             self._pre_buffer = b''
 
@@ -290,7 +284,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
                 self.relaxed = True
 
         # Chunked or relaxed content
-        if self.is_chunked or self.relaxed:
+        if self.is_chunked() or self.relaxed:
             self._decompress(self._buffer)
             self._size += len(self._buffer)
             self._buffer = b''
@@ -341,7 +335,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
 
     def _decompress(self, chunk):
         # No compression
-        if not self.auto_decompress or not self.is_compressed:
+        if not self.auto_decompress or not self.is_compressed():
             return self.emit('read', chunk)
 
         # Decompress
@@ -412,7 +406,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
         pre_buffer = self._pre_buffer
         self._pre_buffer = b''
         headers = self.headers.parse(pre_buffer)
-        if not headers.is_finished:
+        if not headers.is_finished():
             return
         self._state = 'body'
 
@@ -423,7 +417,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
     def _parse_chunked_trailing_headers(self):
         headers = self.headers.parse(self._pre_buffer)
         self._pre_buffer = b''
-        if not headers.is_finished:
+        if not headers.is_finished():
             return
         self._chunk_state = 'finished'
 
