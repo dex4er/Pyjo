@@ -125,19 +125,19 @@ if __name__ == '__main__':
 
     # is_abs
     url = Pyjo.URL.new()
-    boolean = url.is_abs()
+    boolean = url.is_abs
     is_ok(boolean, False, "boolean")
 
-    boolean = Pyjo.URL.new('http://example.com').is_abs()
+    boolean = Pyjo.URL.new('http://example.com').is_abs
     is_ok(boolean, True, "boolean")
-    boolean = Pyjo.URL.new('http://example.com/test/index.html').is_abs()
+    boolean = Pyjo.URL.new('http://example.com/test/index.html').is_abs
     is_ok(boolean, True, "boolean")
 
-    boolean = Pyjo.URL.new('test/index.html').is_abs()
+    boolean = Pyjo.URL.new('test/index.html').is_abs
     is_ok(boolean, False, "boolean")
-    boolean = Pyjo.URL.new('/test/index.html').is_abs()
+    boolean = Pyjo.URL.new('/test/index.html').is_abs
     is_ok(boolean, False, "boolean")
-    boolean = Pyjo.URL.new('//example.com/test/index.html').is_abs()
+    boolean = Pyjo.URL.new('//example.com/test/index.html').is_abs
     is_ok(boolean, False, "boolean")
 
     # parse
