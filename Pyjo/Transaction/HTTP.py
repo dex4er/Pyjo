@@ -157,19 +157,6 @@ class Pyjo_Transaction_HTTP(Pyjo.Transaction.object):
 
         return buf
 
-#         # Delayed
-#         if buf is not None:
-#             self._delay = False
-#         else:
-#             if self._delay:
-#                 self._delay = False
-#                 self._state = 'paused'
-#             else:
-#                 self._delay = True
-#
-#         # Finished
-#         self._state = 'finished' if finish else 'read'
-
     def _write(self, server):
         # Client starts writing right away
         if not server and self._state is None:
