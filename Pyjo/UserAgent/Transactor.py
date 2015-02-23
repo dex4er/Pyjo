@@ -76,7 +76,7 @@ class Pyjo_UserAgent_Transactor(Pyjo.Base.object):
             return
 
         location = Pyjo.URL.new(location)
-        if not location.is_abs():
+        if not location.is_abs:
             location = location.base(old.req.url).to_abs()
         proto = location.protocol
         if proto != 'http' and proto != 'https':
