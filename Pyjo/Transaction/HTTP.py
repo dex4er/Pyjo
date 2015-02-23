@@ -82,8 +82,43 @@ class Pyjo_Transaction_HTTP(Pyjo.Transaction.object):
         return redirects
 
     def _body(self, msg, finish):
-        # TODO
-        return b''
+        # Prepare body chunk
+        buf = msg.get_body_chunk(self._offset)
+
+        if buf is not None:
+            written = len(buf)
+        else:
+            written = 0
+
+        if msg.content.is_dynamic:
+            self._towrite = 1
+        else:
+            self._towrite = self._towrite - written
+
+        self._offset += written
+
+        if buf is not None:
+            self._delay = False
+
+        # Delayed
+        else:
+            if self._delay:
+                self._delay = False
+                self._state = 'paused'
+            else:
+                self._delay = True
+
+        # Finished
+        if self._towrite <= 0 or buf is not None and not len(buf):
+            if finish:
+                self._state = 'finished'
+            else:
+                self._state = 'read'
+
+        if buf is not None:
+            return buf
+        else:
+            return b''
 
     def _headers(self, msg, head):
         # Prepare header chunk
