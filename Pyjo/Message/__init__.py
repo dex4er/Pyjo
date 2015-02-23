@@ -76,7 +76,7 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
         return self._build('get_start_line_chunk')
 
     def dom(self, pattern=None):
-        if self.content.is_multipart():
+        if self.content.is_multipart:
             return
         else:
             if self._dom is None:
@@ -127,6 +127,7 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
     def headers(self):
         return self.content.headers
 
+    @property
     def is_finished(self):
         return self._state == 'finished'
 
@@ -173,11 +174,11 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
             return self._limit('Maximum message size exceeded')
 
         # Check header size
-        if self.headers.is_limit_exceeded():
+        if self.headers.is_limit_exceeded:
             return self._limit('Maximum header size exceeded')
 
         # Check buffer size
-        if self.content.is_limit_exceeded():
+        if self.content.is_limit_exceeded:
             return self._limit('Maximum buffer size exceeded')
 
         if self.emit('progress').content.is_finished:

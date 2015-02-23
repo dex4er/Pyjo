@@ -48,7 +48,7 @@ class Pyjo_Transaction_HTTP(Pyjo.Transaction.object):
         res = self.res
         if self.req.method.upper() == 'HEAD':
             res.content.skip_body = True
-        if not res.parse(chunk).is_finished():
+        if not res.parse(chunk).is_finished:
             return
 
         # Unexpected 1xx response
@@ -103,7 +103,7 @@ class Pyjo_Transaction_HTTP(Pyjo.Transaction.object):
             # Body
             else:
                 self._http_state = 'body'
-                self._towrite = 1 if msg.content.is_dynamic() else msg.body_size
+                self._towrite = 1 if msg.content.is_dynamic else msg.body_size
 
         return buf
 

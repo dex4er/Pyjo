@@ -81,6 +81,7 @@ class Pyjo_Transaction(Pyjo.EventEmitter.object):
         self._connection = value
         self.emit('connection', value)
 
+    @property
     def is_finished(self):
         return self._state == 'finished'
 

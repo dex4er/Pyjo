@@ -304,7 +304,7 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
             warn("-- Client <<< Server ({0})\n{1}\n".format(self._url(tx), str(chunk)))
 
         tx.client_read(chunk)
-        if tx.is_finished():
+        if tx.is_finished:
             self._finish(cid, False)
         elif tx.is_writing:
             self._write(cid)
@@ -379,7 +379,7 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
             warn("-- Client >>> Server ({0})\n{1}\n".format(self._url(tx), str(chunk)))
 
         stream = self._loop(c['nb']).stream(cid).write(chunk)
-        if tx.is_finished():
+        if tx.is_finished:
             self._finish(cid)
 
         # Continue writing

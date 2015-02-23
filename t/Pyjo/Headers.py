@@ -136,7 +136,7 @@ Cache-control: public
 Expires: Thu, 01 Dec 1994 16:00:00 GMT
 
 """), Pyjo.Headers.object, 'right return value')
-    ok(headers.is_finished(), 'parser is_ok.finished')
+    ok(headers.is_finished, 'parser is_ok.finished')
     is_ok(headers.content_type, 'text/plain', 'right value')
     is_ok(headers.expect, '100-continue', 'right value')
     is_ok(headers.cache_control, 'public', 'right value')
@@ -154,7 +154,7 @@ Foo: first again
   second ":again"
 
 """)
-    ok(headers.is_finished(), 'parser is_ok(finished')
+    ok(headers.is_finished, 'parser is_ok(finished')
     d = {
         'Content-Type': ['text/plain'],
         'Foo': ['first second third', 'first again second ":again"'],
@@ -163,7 +163,7 @@ Foo: first again
     is_deeply_ok(headers.to_dict_list(), d, 'right structure')
     is_ok(headers.header('Foo'), 'first second third, first again second ":again"', 'right value')
     headers = Pyjo.Headers.new().parse(headers.to_str())
-    ok(headers.is_finished(), 'parser is_ok(finished')
+    ok(headers.is_finished, 'parser is_ok(finished')
     is_deeply_ok(headers.to_dict_list(), d, 'successful roundtrip')
     d = {
         'Content-Type': 'text/plain',
@@ -212,13 +212,13 @@ Foo: first again
     # Headers in chunks
     headers = Pyjo.Headers.new()
     isa_ok(headers.parse("Content-Type: text/plain\n"), Pyjo.Headers.object, 'right return value')
-    ok(not headers.is_finished(), 'parser is_ok(not finished')
+    ok(not headers.is_finished, 'parser is_ok(not finished')
     ok(headers.content_type is None, 'no value')
     isa_ok(headers.parse("X-Bender: Bite my shiny\n"), Pyjo.Headers.object, 'right return value')
-    ok(not headers.is_finished(), 'parser is_ok(not finished')
+    ok(not headers.is_finished, 'parser is_ok(not finished')
     ok(headers.connection is None, 'no value')
     isa_ok(headers.parse("X-Bender: metal ass!\n\n"), Pyjo.Headers.object, 'right return value')
-    ok(headers.is_finished(), 'parser is_ok(finished')
+    ok(headers.is_finished, 'parser is_ok(finished')
     is_ok(headers.content_type, 'text/plain', 'right value')
     is_ok(headers.header('X-Bender'), 'Bite my shiny, metal ass!', 'right value')
 
