@@ -33,7 +33,9 @@ import Pyjo.Transaction.HTTP
 import Pyjo.URL
 
 from Pyjo.Base import lazy
+from Pyjo.JSON import encode_json
 from Pyjo.Regexp import m
+from Pyjo.Util import b
 
 
 class Pyjo_UserAgent_Transactor(Pyjo.Base.object):
@@ -134,17 +136,23 @@ class Pyjo_UserAgent_Transactor(Pyjo.Base.object):
         return tx
 
     def _data(self, tx, data):
-        tx.req.body = data
+        tx.req.body = b(data)
 
     def _form(self, tx, data):
         raise Exception(self, tx, data);
 
     def _json(self, tx, data):
-        raise Exception(self, tx, data);
+        tx.req.body = encode_json(data)
+        self._type(tx.req.headers, 'application/json')
+        return tx
 
     def _proxy(self, tx, proto, host, port):
         # TODO Update with proxy information
         return proto, host, port
+
+    def _type(self, headers, content_type):
+        if not headers.content_type:
+            headers.content_type = content_type
 
 
 new = Pyjo_UserAgent_Transactor.new

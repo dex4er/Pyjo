@@ -91,6 +91,31 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
         """
         return self.start(self.build_tx('GET', url, **kwargs), kwargs.get('cb'))
 
+    def post(self, url, **kwargs):
+        """::
+
+            tx = ua.post('example.com')
+            tx = ua.post('http://example.com', headers={'Accept': '*/*'}, data='Hi!')
+            tx = ua.post('http://example.com', headers={'Accept': '*/*'},
+                        form={'a': 'b'})
+            tx = ua.post('http://example.com', headers={'Accept': '*/*'},
+                        json={'a': 'b'})
+
+        Perform blocking ``POST`` request and return resulting
+        :mod:`Pyjo.Transaction.HTTP` object, takes the same arguments as
+        :meth:`Pyjo.UserAgent.Transactor.tx` (except for the ``POST`` method, which is
+        implied). You can also append a callback to perform requests non-blocking. ::
+
+            def cb(ua, tx):
+                print(tx.res.body)
+
+            tx = ua.post('http://example.com', cb=cb)
+
+            if not Pyjo.IOLoop.is_running()
+                Pyjo.IOLoop.start()
+        """
+        return self.start(self.build_tx('POST', url, **kwargs), kwargs.get('cb'))
+
     def start(self, tx, cb=None):
         # TODO Pyjo.UserAgent.Server nad fork safety
 
