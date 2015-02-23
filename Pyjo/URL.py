@@ -298,21 +298,22 @@ class Pyjo_URL(Pyjo.Base.object, Pyjo.Mixin.String.object):
         self.host = '.'.join(parts)
         return self
 
+    @property
     def is_abs(self):
         """::
 
-            boolean = url.is_abs()
+            boolean = url.is_abs
 
         Check if URL is absolute. ::
 
             # True
-            Pyjo.URL.new('http://example.com').is_abs()
-            Pyjo.URL.new('http://example.com/test/index.html').is_abs()
+            Pyjo.URL.new('http://example.com').is_abs
+            Pyjo.URL.new('http://example.com/test/index.html').is_abs
 
             # False
-            Pyjo.URL.new('test/index.html').is_abs()
-            Pyjo.URL.new('/test/index.html').is_abs()
-            Pyjo.URL.new('//example.com/test/index.html').is_abs()
+            Pyjo.URL.new('test/index.html').is_abs
+            Pyjo.URL.new('/test/index.html').is_abs
+            Pyjo.URL.new('//example.com/test/index.html').is_abs
         """
         return bool(self.scheme)
 
@@ -523,7 +524,7 @@ class Pyjo_URL(Pyjo.Base.object, Pyjo.Mixin.String.object):
                 .to_abs(Pyjo.URL.new('http://example.com/foo/bar.html'))
         """
         absolute = self.clone()
-        if absolute.is_abs():
+        if absolute.is_abs:
             return absolute
 
         # Scheme
