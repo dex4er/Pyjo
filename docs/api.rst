@@ -45,6 +45,9 @@ Pyjo API
     :members:
     :special-members:
 
+.. automodule:: Pyjo.EventEmitter
+    :members:
+
 .. automodule:: Pyjo.Headers
     :members:
     :special-members:
