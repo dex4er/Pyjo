@@ -54,15 +54,15 @@ Classes
 -------
 """
 
-import weakref
-
 import Pyjo.Base
 
 from Pyjo.Base import lazy
 from Pyjo.Util import getenv, warn
 
+import weakref
 
-DEBUG = getenv('PYJO_EVENTEMITTER_DEBUG', 0)
+
+DEBUG = getenv('PYJO_EVENTEMITTER_DEBUG', False)
 
 
 class Error(Exception):
@@ -118,6 +118,7 @@ class Pyjo_EventEmitter(Pyjo.Base.object):
                 warn("-- Emit {0} in {1} (0)".format(name, self))
             if name == 'error':
                 raise Error(*args)
+
         return self
 
     def has_subscribers(self, name):
@@ -151,6 +152,7 @@ class Pyjo_EventEmitter(Pyjo.Base.object):
             self._events[name].append(cb)
         else:
             self._events[name] = [cb]
+
         return cb
 
     def once(self, cb, name=None):
@@ -176,9 +178,7 @@ class Pyjo_EventEmitter(Pyjo.Base.object):
         wrap_lambda = lambda *args: wrap_cb(self, cb, name, wrap_lambda, *args)
         self.on(wrap_lambda, name)
 
-        # TODO weakref.proxy(wrap_lambda)
-
-        return wrap_lambda
+        return weakref.proxy(wrap_lambda)
 
     def subscribers(self, name):
         """::
