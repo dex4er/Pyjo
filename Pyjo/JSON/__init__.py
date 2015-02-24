@@ -24,6 +24,9 @@ escaped to make JSONP easier, and the character ``/`` to prevent XSS attacks. ::
 Other charaters will be encoded with ``utf-8`` encoding without escaping. ::
 
     {'i': u"♥ pyjo"} -> b'{"i":"\\xe2\\x99\\xa5 pyjo"}'
+
+Classes
+-------
 """
 
 from Pyjo.Util import b, isbytes, isiterable, isunicode, u

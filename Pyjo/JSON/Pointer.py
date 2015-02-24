@@ -14,6 +14,9 @@ Pyjo.JSON.Pointer - JSON Pointers
 
 :mod:`Pyjo.JSON.Pointer` is a relaxed implementation of
 :rfc:`6901`.
+
+Classes
+-------
 """
 
 import Pyjo.Base
