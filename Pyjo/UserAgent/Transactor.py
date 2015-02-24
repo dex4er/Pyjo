@@ -29,13 +29,14 @@ Classes
 """
 
 import Pyjo.Base
+import Pyjo.Parameters
 import Pyjo.Transaction.HTTP
 import Pyjo.URL
 
 from Pyjo.Base import lazy
 from Pyjo.JSON import encode_json
 from Pyjo.Regexp import m
-from Pyjo.Util import b
+from Pyjo.Util import b, nvl
 
 
 class Pyjo_UserAgent_Transactor(Pyjo.Base.object):
@@ -129,22 +130,52 @@ class Pyjo_UserAgent_Transactor(Pyjo.Base.object):
         generators = list(set(self.generators) & set(kwargs))
         if len(generators) == 1:
             g = generators[0]
-            self.generators[g](tx, kwargs[g])
+            self.generators[g](tx, **kwargs)
 
         # TODO Body
 
         return tx
 
-    def _data(self, tx, data):
+    def _data(self, tx, data, **kwargs):
         tx.req.body = b(data)
 
-    def _form(self, tx, data):
-        raise Exception(self, tx, data);
+    def _form(self, tx, form, **kwargs):
+        # Check for uploads and force multipart if necessary
+        req = tx.req
+        headers = req.headers
+        multipart = 'multipart/form-data' in nvl(headers.content_type, '').lower()
+        for value in [v for l in map(lambda v: v if isinstance(v, (list, tuple)) else (v,), form.values()) for v in l]:
+            if isinstance(value, dict):
+                multipart = True
+                break
 
-    def _json(self, tx, data):
-        tx.req.body = encode_json(data)
+        # Multipart
+        if multipart:
+            parts = self._multipart(kwargs['charset'], form)
+            req.content = Pyjo.Content.MultiPart.new(headers=headers, parts=parts)
+            self._type(headers, 'multipart/form-data')
+            return tx
+
+        # Query parameters or urlencoded
+        p = Pyjo.Parameters.new(**form)
+        if 'charset' in kwargs:
+            p.charset = kwargs['charset']
+        method = req.method.upper()
+        if method == 'GET' or method == 'HEAD':
+            req.url.query = p
+        else:
+            req.body = p.to_bytes()
+            self._type(headers, 'application/x-www-form-urlencoded')
+
+        return tx
+
+    def _json(self, tx, json, **kwargs):
+        tx.req.body = encode_json(json)
         self._type(tx.req.headers, 'application/json')
         return tx
+
+    def _multipart(self, charset, form):
+        raise Exception(self, charset, form)
 
     def _proxy(self, tx, proto, host, port):
         # TODO Update with proxy information

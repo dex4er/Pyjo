@@ -112,6 +112,13 @@ def not_implemented(method):
     return stub
 
 
+def nvl(obj, value):
+    if obj is None:
+        return value
+    else:
+        return obj
+
+
 def rand(value=1):
     return random.random() * value
 
