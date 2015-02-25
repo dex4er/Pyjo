@@ -135,11 +135,7 @@ class Pyjo_EventEmitter(Pyjo.Base.object):
 
             cb = e.on(cb, 'foo')
 
-            @e.on
-            def foo():
-                ...
-
-        Subscribe to event. ::
+        Subscribe to event. Can be used as decorator. ::
 
             @e.on
             def foo(e, *args):
@@ -160,7 +156,8 @@ class Pyjo_EventEmitter(Pyjo.Base.object):
 
             cb = e.once(cb, 'foo')
 
-        Subscribe to event and unsubscribe again after it has been emitted once. ::
+        Subscribe to event and unsubscribe again after it has been emitted once.
+        Can be used as decorator. ::
 
             @e.once
             def foo(e, *args):
@@ -178,7 +175,7 @@ class Pyjo_EventEmitter(Pyjo.Base.object):
         wrap_lambda = lambda *args: wrap_cb(self, cb, name, wrap_lambda, *args)
         self.on(wrap_lambda, name)
 
-        return weakref.proxy(wrap_lambda)
+        return wrap_lambda
 
     def subscribers(self, name):
         """::
@@ -190,7 +187,10 @@ class Pyjo_EventEmitter(Pyjo.Base.object):
             # Unsubscribe last subscriber
             e.unsubscribe('foo', e.subscribers('foo')[-1])
         """
-        return self._events[name]
+        if name in self._events:
+            return self._events[name]
+        else:
+            return []
 
     def unsubscribe(self, name, cb=None):
         """::
