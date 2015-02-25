@@ -12,7 +12,7 @@ import traceback
 import unittest
 
 
-__all__ = ['cmp_ok', 'done_testing', 'diag', 'fail', 'is_ok', 'isa_ok',
+__all__ = ['cmp_ok', 'done_testing', 'diag', 'fail_ok', 'is_ok', 'isa_ok',
            'is_deeply_ok', 'isnt_ok', 'none_ok', 'ok', 'pass_ok', 'plan',
            'skip', 'throws_ok']
 
@@ -72,7 +72,7 @@ def pass_ok(test_name=None):
     _ok(True, test_name)
 
 
-def fail(test_name=None):
+def fail_ok(test_name=None):
     _ok(False, test_name)
 
 
