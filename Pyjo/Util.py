@@ -4,13 +4,14 @@ Pyjo.Util
 
 from __future__ import print_function
 
+from Pyjo.Regexp import s
+
+import functools
 import hashlib
 import os
 import random
 import sys
 import time
-
-from Pyjo.Regexp import s
 
 
 class Error(Exception):
@@ -107,6 +108,7 @@ class nonlocals(object):
 
 
 def not_implemented(method):
+    @wraps(method)
     def stub(*args, **kwargs):
         raise Error('Method "{0}" not implemented by subclass'.format(method.__name__))
     return stub
@@ -181,6 +183,22 @@ def url_unescape(bstring):
 
 def warn(*args):
     print(*args, file=sys.stderr)
+
+
+# http://stackoverflow.com/questions/28366818/preserve-default-arguments-of-wrapped-decorated-python-function-in-sphinx-docume
+def wraps(original_func):
+    wrap_decorator = functools.wraps(original_func)
+
+    def re_wrapper(func):
+        wrapper = wrap_decorator(func)
+        poorman_sig = original_func.__code__.co_varnames[:original_func.__code__.co_argcount]
+        wrapper.__doc__ = "{} ({})\n\n{}".format(
+            original_func.__name__, ", ".join(poorman_sig),
+            wrapper.__doc__
+        )
+        return wrapper
+
+    return re_wrapper
 
 
 # Characters that should be escaped in XML

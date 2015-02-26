@@ -61,9 +61,10 @@ this event is unhandled or fails it might kill your program, so you need to be
 careful.
 
 Classes
-~~~~~~~
+-------
 """
 
+import functools
 import os
 import select
 import socket
