@@ -46,6 +46,7 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.object):
         readable, _, _ = select.select([fd], [], [], 0)
         return fd in readable
 
+    @property
     def is_running(self):
         return self._running
 

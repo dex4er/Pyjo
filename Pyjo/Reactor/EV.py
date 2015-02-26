@@ -17,6 +17,7 @@ class Pyjo_Reactor_EV(Pyjo.Reactor.Select.object):
     def again(self, tid):
         self._timers[tid]['watcher'].reset()
 
+    @property
     def is_running(self):
         return self._loop.depth
 

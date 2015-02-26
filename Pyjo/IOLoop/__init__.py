@@ -118,8 +118,9 @@ class Pyjo_IOLoop(Pyjo.Base.object):
         else:
             return delay
 
+    @property
     def is_running(self):
-        return self.reactor.is_running()
+        return self.reactor.is_running
 
     @decoratormethod
     def next_tick(self, cb):
@@ -166,7 +167,7 @@ class Pyjo_IOLoop(Pyjo.Base.object):
         return instance
 
     def start(self):
-        if self.is_running():
+        if self.is_running:
             raise Error('Pyjo.IOLoop already running')
         self.reactor.start()
 
@@ -352,7 +353,7 @@ def delay(*args):
 
 
 def is_running():
-    return instance.is_running()
+    return instance.is_running
 
 
 @decorator

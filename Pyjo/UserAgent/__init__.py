@@ -86,7 +86,7 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
 
             tx = ua.get('http://example.com', cb=cb)
 
-            if not Pyjo.IOLoop.is_running()
+            if not Pyjo.IOLoop.is_running
                 Pyjo.IOLoop.start()
         """
         return self.start(self.build_tx('GET', url, **kwargs), kwargs.get('cb'))
@@ -111,7 +111,7 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
 
             tx = ua.post('http://example.com', cb=cb)
 
-            if not Pyjo.IOLoop.is_running()
+            if not Pyjo.IOLoop.is_running
                 Pyjo.IOLoop.start()
         """
         return self.start(self.build_tx('POST', url, **kwargs), kwargs.get('cb'))
