@@ -256,23 +256,23 @@ class Pyjo_Reactor(Pyjo.EventEmitter.object):
     def watch(self, handle, read, write):
         """::
 
-            reactor = reactor.watch(handle, read, writ)
+            reactor = reactor.watch(handle, read, write)
 
         Change I/O events to watch handle for with true and false values. Meant to be
         overloaded in a subclass. Note that this method requires an active I/O
         watcher.
 
             # Watch only for readable events
-            reactor.watch(handle, read=True, writ=False)
+            reactor.watch(handle, read=True, write=False)
 
             # Watch only for writable events
-            reactor.watch(handle, read=False, writ=True)
+            reactor.watch(handle, read=False, write=True)
 
             # Watch for readable and writable events
-            reactor.watch(handle, read=True, writ=True)
+            reactor.watch(handle, read=True, write=True)
 
             # Pause watching for events
-            reactor.watch(handle, read=False, writ=False)
+            reactor.watch(handle, read=False, write=False)
         """
         pass
 

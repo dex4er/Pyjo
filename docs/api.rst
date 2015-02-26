@@ -77,6 +77,9 @@ Pyjo API
 .. automodule:: Pyjo.Reactor
     :members: 
 
+.. automodule:: Pyjo.Reactor.Select
+    :members: 
+
 .. automodule:: Pyjo.TextStream
     :members:
     :special-members:

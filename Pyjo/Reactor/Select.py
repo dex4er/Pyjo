@@ -1,21 +1,64 @@
 """
-Pyjo.Reactor.Select
-"""
+Pyjo.Reactor.Select - Low-level event reactor with select support
+=================================================================
+::
 
-import select
-import socket
-import time
+    import Pyjo.Reactor.Select
+
+    # Watch if handle becomes readable or writable
+    reactor = Pyjo.Reactor.Select.new()
+
+    def io_cb(reactor, writable):
+        if writable:
+            print('Handle is writable')
+        else:
+            print('Handle is readable')
+
+    reactor.io(io_cb, handle)
+
+    # Change to watching only if handle becomes writable
+    reactor.watch(handle, read=False, write=True)
+
+    # Add a timer
+    def timer_cb(reactor):
+        reactor.remove(handle)
+        print('Timeout!')
+
+    reactor.timer(timer_cb, 15)
+
+    # Start reactor if necessary
+    if not reactor.is_running:
+        reactor.start()
+
+:mod:`Pyjo.Reactor.Poll` is a low-level event reactor based on :mod:`select`.
+
+Events
+------
+
+:mod:`Pyjo.Reactor.Poll` inherits all events from :mod:`Pyjo.Reactor`.
+
+Classes
+-------
+"""
 
 import Pyjo.Reactor
 
 from Pyjo.Base import lazy
 from Pyjo.Util import getenv, md5_sum, rand, steady_time, warn
 
+import select
+import socket
+import time
 
-DEBUG = getenv('PYJO_REACTOR_DEBUG', 0)
+
+DEBUG = getenv('PYJO_REACTOR_DEBUG', False)
 
 
 class Pyjo_Reactor_Select(Pyjo.Reactor.object):
+    """
+    :mod:`Pyjo.Reactor.Select` inherits all attributes and methods from
+    :mod:`Pyjo.Reactor` and implements the following new ones.
+    """
 
     _running = False
     _select_select = None
@@ -26,10 +69,23 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.object):
     _outputs = lazy(lambda self: [])
 
     def again(self, tid):
+        """::
+
+            reactor.again(tid)
+
+        Restart active timer.
+        """
         timer = self._timers[tid]
         timer['time'] = steady_time() + timer['after']
 
     def io(self, cb, handle):
+        """::
+
+            reactor = reactor.io(cb, handle)
+
+        Watch handle for I/O events, invoking the callback whenever handle becomes
+        readable or writable.
+        """
         fd = handle.fileno()
         if fd in self._ios:
             self._ios[fd]['cb'] = cb
@@ -42,15 +98,34 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.object):
         return self.watch(handle, 1, 1)
 
     def is_readable(self, handle):
+        """::
+
+            boolean = reactor.is_readable(handle)
+
+        Quick non-blocking check if a handle is readable.
+        """
         fd = handle.fileno()
         readable, _, _ = select.select([fd], [], [], 0)
         return fd in readable
 
     @property
     def is_running(self):
+        """::
+
+            boolean = reactor.is_running
+
+        Check if reactor is running.
+        """
         return self._running
 
     def one_tick(self):
+        """::
+
+            reactor.one_tick()
+
+        Run reactor until an event occurs. Note that this method can recurse back into
+        the reactor, so you need to be careful. Meant to be overloaded in a subclass.
+        """
         # Remember state for later
         running = self._running
         self._running = True
@@ -116,9 +191,23 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.object):
             self._running = running
 
     def recurring(self, cb, after):
+        """::
+
+            tid = reactor.recurring(cb, 0.25)
+
+        Create a new recurring timer, invoking the callback repeatedly after a given
+        amount of time in seconds.
+        """
         return self._timer(cb, True, after)
 
     def remove(self, remove):
+        """::
+
+            boolean = reactor.remove(handle)
+            boolean = reactor.remove(tid)
+
+        Remove handle or timer.
+        """
         if remove is None:
             if DEBUG:
                 warn("-- Reactor remove None")
@@ -155,23 +244,57 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.object):
         return False
 
     def reset(self):
+        """::
+
+            reactor.reset()
+
+        Remove all handles and timers.
+        """
         self._ios = {}
         self._inputs = []
         self._outputs = []
         self._timers = {}
 
     def start(self):
+        """::
+
+            reactor.start()
+
+        Start watching for I/O and timer events, this will block until :meth:`stop` is
+        called.
+        """
         self._running = True
         while self._running:
             self.one_tick()
 
     def stop(self):
+        """::
+
+            reactor.stop()
+
+        Stop watching for I/O and timer events.
+        """
         self._running = False
 
     def timer(self, cb, after):
+        """::
+
+            tid = reactor.timer(cb, 0.5)
+
+        Create a new timer, invoking the callback after a given amount of time in
+        seconds.
+        """
         return self._timer(cb, False, after)
 
     def watch(self, handle, read, write):
+        """::
+
+            reactor = reactor.watch(handle, read, write)
+
+        Change I/O events to watch handle for with true and false values. Meant to be
+        overloaded in a subclass. Note that this method requires an active I/O
+        watcher.
+        """
         fd = handle.fileno()
         if read and fd not in self._inputs:
             self._inputs.append(fd)
