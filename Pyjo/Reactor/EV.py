@@ -41,12 +41,12 @@ Classes
 -------
 """
 
-import pyev
-import weakref
-
 import Pyjo.Reactor.Select
 
 from Pyjo.Base import lazy
+
+import pyev
+import weakref
 
 
 class Pyjo_Reactor_EV(Pyjo.Reactor.Select.object):
@@ -188,9 +188,9 @@ class Pyjo_Reactor_EV(Pyjo.Reactor.Select.object):
     def _io(self, fd, w, revents):
         io = self._ios[fd]
         if revents & pyev.EV_READ:
-            self._sandbox(io['cb'], 'Read', 0)
+            self._sandbox(io['cb'], 'Read', False)
         if revents & pyev.EV_WRITE:
-            self._sandbox(io['cb'], 'Write', 1)
+            self._sandbox(io['cb'], 'Write', True)
 
     def _timer(self, cb, recurring, after):
         if recurring and not after:

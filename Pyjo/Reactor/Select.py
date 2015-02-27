@@ -131,8 +131,8 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.object):
         self._running = True
 
         # Wait for one event
-        i = 0
-        while not i:
+        last = False
+        while not last:
             # Stop automatically if there is nothing to watch
             if not self._timers and not self._ios:
                 return self.stop()
@@ -153,12 +153,12 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.object):
                 for fd in list(set([item for sublist in (exceptional, readable, writable) for item in sublist])):
                     if fd in readable or fd in exceptional:
                         io = self._ios[fd]
-                        i += 1
-                        self._sandbox(io['cb'], 'Read', 0)
+                        last = True
+                        self._sandbox(io['cb'], 'Read', False)
                     elif fd in writable:
                         io = self._ios[fd]
-                        i += 1
-                        self._sandbox(io['cb'], 'Write', 1)
+                        last = True
+                        self._sandbox(io['cb'], 'Write', True)
 
             # Wait for timeout if poll can't be used
             elif timeout:
@@ -180,7 +180,7 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.object):
                 else:
                     self.remove(tid)
 
-                i += 1
+                last = True
                 if t['cb']:
                     if DEBUG:
                         warn("-- Alarm timer[{0}] = {1}".format(tid, t))
@@ -222,6 +222,7 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.object):
             if remove in self._timers:
                 del self._timers[remove]
                 return True
+
             return False
 
         try:
@@ -236,11 +237,10 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.object):
             if fd in self._ios:
                 del self._ios[fd]
                 return True
-            # remove.close()  # TODO remove?
         except socket.error:
             if DEBUG:
                 warn("-- Reactor remove io {0} already closed".format(remove))
-            pass
+
         return False
 
     def reset(self):
