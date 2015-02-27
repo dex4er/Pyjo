@@ -304,13 +304,10 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.object):
         return self
 
     def _sandbox(self, cb, event, *args):
-        cb(*args)
-        """
         try:
-            cb(*args)
+            cb(self, *args)
         except Exception as e:
-            self.emit('error', "{0} failed: {1}".format(event, e))
-        """
+            self.emit('error', "{0} failed: {1} for {2}".format(event, e, cb.__code__))
 
     def _timer(self, cb, recurring, after):
         tid = None

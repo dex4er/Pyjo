@@ -321,7 +321,7 @@ class Pyjo_IOLoop(Pyjo.Base.object):
 
     def _timer(self, cb, method, after):
         self = weakref.proxy(self)
-        return getattr(self.reactor, method)(lambda: cb(self), after)
+        return getattr(self.reactor, method)(lambda reactor: cb(self), after)
 
 
 def new(*args, **kwargs):
