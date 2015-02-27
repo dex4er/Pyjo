@@ -162,10 +162,6 @@ class Pyjo_IOLoop(Pyjo.Base.object):
 
         return self.acceptor(server)
 
-    @classmethod
-    def singleton(self):
-        return instance
-
     def start(self):
         if self.is_running:
             raise Error('Pyjo.IOLoop already running')
@@ -332,76 +328,72 @@ def new(*args, **kwargs):
     return Pyjo_IOLoop(*args, **kwargs)
 
 
-instance = Pyjo_IOLoop()
+singleton = Pyjo_IOLoop()
 
 
 def acceptor(acceptor):
-    return instance.acceptor(acceptor)
+    return singleton.acceptor(acceptor)
 
 
 def client(cb=None, **kwargs):
     if cb is None:
         def wrap(func):
-            return instance.client(func, **kwargs)
+            return singleton.client(func, **kwargs)
         return wrap
 
-    return instance.client(cb, **kwargs)
+    return singleton.client(cb, **kwargs)
 
 
 def delay(*args):
-    return instance.delay(*args)
+    return singleton.delay(*args)
 
 
 def is_running():
-    return instance.is_running
+    return singleton.is_running
 
 
 @decorator
 def next_tick(cb):
-    return instance.next_tick(cb)
+    return singleton.next_tick(cb)
 
 
 def one_tick():
-    return instance.one_tick()
+    return singleton.one_tick()
 
 
 @decorator
 def recurring(cb, after):
-    return instance.recurring(cb, after)
+    return singleton.recurring(cb, after)
 
 
 def remove(taskid):
-    return instance.remove(taskid)
+    return singleton.remove(taskid)
 
 
 def server(cb=None, **kwargs):
     if cb is None:
         def wrap(func):
-            return instance.server(func, **kwargs)
+            return singleton.server(func, **kwargs)
         return wrap
 
-    return instance.server(cb, **kwargs)
-
-
-def singleton():
-    return instance
+    return singleton.server(cb, **kwargs)
 
 
 def start():
-    return instance.start()
+    return singleton.start()
 
 
 def stop():
-    return instance.stop()
+    return singleton.stop()
 
 
 def stream(stream):
-    return instance.stream(stream)
+    return singleton.stream(stream)
 
 
 @decorator
 def timer(cb, after=None):
-    return instance.timer(cb, after)
+    return singleton.timer(cb, after)
 
 
 new = Pyjo_IOLoop.new

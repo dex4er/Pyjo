@@ -18,7 +18,7 @@ if __name__ == '__main__':
 
     plan(tests=3)
 
-    loop = Pyjo.IOLoop.singleton()
+    loop = Pyjo.IOLoop.singleton
 
     def writer_cb(loop):
         pass_ok("A")

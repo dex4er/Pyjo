@@ -283,7 +283,7 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
 
     def _loop(self, nb):
         if nb:
-            return Pyjo.IOLoop.singleton()
+            return Pyjo.IOLoop.singleton
         else:
             return self.ioloop
 

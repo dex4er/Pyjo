@@ -18,7 +18,7 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
     def __init__(self, **kwargs):
         super(Pyjo_IOLoop_Server, self).__init__(**kwargs)
         if self.reactor is None:
-            self.reactor = Pyjo.IOLoop.singleton().reactor
+            self.reactor = Pyjo.IOLoop.singleton.reactor
 
     def __del__(self):
         if dir(self.handle) and self.handle:

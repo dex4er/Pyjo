@@ -26,7 +26,7 @@ class Pyjo_IOLoop_Delay(Pyjo.EventEmitter.object):
     def __init__(self, **kwargs):
         super(Pyjo_IOLoop_Delay, self).__init__(**kwargs)
         if self.ioloop is None:
-            self.ioloop = Pyjo.IOLoop.singleton()
+            self.ioloop = Pyjo.IOLoop.singleton
 
     def begin(self, offset=1, length=0, *args):
         self._pending += 1

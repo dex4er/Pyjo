@@ -51,7 +51,7 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
     def __init__(self, handle, **kwargs):
         super(Pyjo_IOLoop_Stream, self).__init__(handle=handle, **kwargs)
         if self.reactor is None:
-            self.reactor = Pyjo.IOLoop.singleton().reactor
+            self.reactor = Pyjo.IOLoop.singleton.reactor
 
     def __del__(self):
         self.close()

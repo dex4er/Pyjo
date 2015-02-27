@@ -53,7 +53,7 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
             warn("-- Method {0}.__init__".format(self, kwargs))
         super(Pyjo_IOLoop_Client, self).__init__(**kwargs)
         if self.reactor is None:
-            self.reactor = Pyjo.IOLoop.singleton().reactor
+            self.reactor = Pyjo.IOLoop.singleton.reactor
 
     def __del__(self):
         if DEBUG:

@@ -1,7 +1,7 @@
 import Pyjo.IOLoop
 
 
-loop = Pyjo.IOLoop.singleton()
+loop = Pyjo.IOLoop.singleton
 
 
 @loop.recurring(0)
