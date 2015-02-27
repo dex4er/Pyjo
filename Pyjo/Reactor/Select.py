@@ -30,12 +30,12 @@ Pyjo.Reactor.Select - Low-level event reactor with select support
     if not reactor.is_running:
         reactor.start()
 
-:mod:`Pyjo.Reactor.Poll` is a low-level event reactor based on :mod:`select`.
+:mod:`Pyjo.Reactor.Select` is a low-level event reactor based on :meth:`select.select`.
 
 Events
 ------
 
-:mod:`Pyjo.Reactor.Poll` inherits all events from :mod:`Pyjo.Reactor`.
+:mod:`Pyjo.Reactor.Select` inherits all events from :mod:`Pyjo.Reactor`.
 
 Classes
 -------

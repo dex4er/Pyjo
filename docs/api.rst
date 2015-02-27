@@ -75,10 +75,16 @@ Pyjo API
     :special-members:
 
 .. automodule:: Pyjo.Reactor
-    :members: 
+    :members:
+
+.. automodule:: Pyjo.Reactor.EV
+    :members:
+
+.. automodule:: Pyjo.Reactor.Poll
+    :members:
 
 .. automodule:: Pyjo.Reactor.Select
-    :members: 
+    :members:
 
 .. automodule:: Pyjo.TextStream
     :members:

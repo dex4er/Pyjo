@@ -1,6 +1,50 @@
 """
-Pyjo.Reactor.Poll
+Pyjo.Reactor.Poll - Low-level event reactor with poll support
+=============================================================
+::
+
+    import Pyjo.Reactor.Poll
+
+    # Watch if handle becomes readable or writable
+    reactor = Pyjo.Reactor.Poll.new()
+
+    def io_cb(reactor, writable):
+        if writable:
+            print('Handle is writable')
+        else:
+            print('Handle is readable')
+
+    reactor.io(io_cb, handle)
+
+    # Change to watching only if handle becomes writable
+    reactor.watch(handle, read=False, write=True)
+
+    # Add a timer
+    def timer_cb(reactor):
+        reactor.remove(handle)
+        print('Timeout!')
+
+    reactor.timer(timer_cb, 15)
+
+    # Start reactor if necessary
+    if not reactor.is_running:
+        reactor.start()
+
+:mod:`Pyjo.Reactor.Poll` is a low-level event reactor based on :meth:`select.poll`.
+
+Events
+------
+
+:mod:`Pyjo.Reactor.Poll` inherits all events from :mod:`Pyjo.Reactor.Select`.
+
+Classes
+-------
 """
+
+import Pyjo.Reactor.Select
+
+from Pyjo.Base import lazy
+from Pyjo.Util import getenv, steady_time, warn
 
 import select
 import socket
@@ -8,16 +52,15 @@ import time
 
 from select import POLLERR, POLLHUP, POLLIN, POLLOUT, POLLPRI
 
-import Pyjo.Reactor.Select
 
-from Pyjo.Base import lazy
-from Pyjo.Util import getenv, steady_time, warn
-
-
-DEBUG = getenv('PYJO_REACTOR_DEBUG', 0)
+DEBUG = getenv('PYJO_REACTOR_DEBUG', False)
 
 
 class Pyjo_Reactor_Poll(Pyjo.Reactor.Select.object):
+    """
+    :mod:`Pyjo.Reactor.Poll` inherits all attributes and methods from
+    :mod:`Pyjo.Reactor.Select` and implements the following new ones.
+    """
 
     _running = False
     _select_poll = None
@@ -25,11 +68,24 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.Select.object):
     _ios = lazy(lambda self: {})
 
     def is_readable(self, handle):
+        """::
+
+            boolean = reactor.is_readable(handle)
+
+        Quick non-blocking check if a handle is readable.
+        """
         p = select.poll()
         p.register(handle.fileno(), select.POLLIN | select.POLLPRI)
         return bool(p.poll(0))
 
     def one_tick(self):
+        """::
+
+            reactor.one_tick()
+
+        Run reactor until an event occurs. Note that this method can recurse back into
+        the reactor, so you need to be careful. Meant to be overloaded in a subclass.
+        """
         # Remember state for later
         running = self._running
         self._running = True
@@ -96,6 +152,13 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.Select.object):
             self._running = running
 
     def remove(self, remove):
+        """::
+
+            boolean = reactor.remove(handle)
+            boolean = reactor.remove(tid)
+
+        Remove handle or timer.
+        """
         if remove is None:
             if DEBUG:
                 warn("-- Reactor remove None")
@@ -131,11 +194,25 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.Select.object):
         return False
 
     def reset(self):
+        """::
+
+            reactor.reset()
+
+        Remove all handles and timers.
+        """
         self._ios = {}
         self._select_poll = None
         self._timers = {}
 
     def watch(self, handle, read, write):
+        """::
+
+            reactor = reactor.watch(handle, read, write)
+
+        Change I/O events to watch handle for with true and false values. Meant to be
+        overloaded in a subclass. Note that this method requires an active I/O
+        watcher.
+        """
         mode = 0
         if read:
             mode |= POLLIN | POLLPRI
@@ -151,6 +228,7 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.Select.object):
         if not self._select_poll:
             self._select_poll = select.poll()
         return self._select_poll
+
 
 new = Pyjo_Reactor_Poll.new
 object = Pyjo_Reactor_Poll  # @ReservedAssignment
