@@ -151,14 +151,15 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.object):
             if self._ios:
                 readable, writable, exceptional = select.select(self._inputs, self._outputs, self._inputs, timeout)
                 for fd in list(set([item for sublist in (exceptional, readable, writable) for item in sublist])):
-                    if fd in readable or fd in exceptional:
-                        io = self._ios[fd]
-                        last = True
-                        self._sandbox(io['cb'], 'Read', False)
-                    if fd in writable:
-                        io = self._ios[fd]
-                        last = True
-                        self._sandbox(io['cb'], 'Write', True)
+                    if fd in self._ios:
+                        if fd in readable or fd in exceptional:
+                            io = self._ios[fd]
+                            last = True
+                            self._sandbox(io['cb'], 'Read', False)
+                        if fd in writable:
+                            io = self._ios[fd]
+                            last = True
+                            self._sandbox(io['cb'], 'Write', True)
 
             # Wait for timeout if poll can't be used
             elif timeout:
