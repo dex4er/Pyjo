@@ -118,7 +118,10 @@ def in_ok(got, elem, test_name=None):
     if test_name is None:
         test_name = "an object {0}".format(type(got))
     test_name = "{0} is in {1}".format(repr(elem), test_name)
-    check = elem in got
+    try:
+        check = elem in got
+    except TypeError:
+        check = False
     _ok(check, test_name)
     if not check:
         diag("         got: {0}".format(repr(got)))
@@ -128,7 +131,10 @@ def notin_ok(got, elem, test_name=None):
     if test_name is None:
         test_name = "an object {0}".format(type(got))
     test_name = "{0} is not in {1}".format(repr(elem), test_name)
-    check = elem not in got
+    try:
+        check = elem not in got
+    except TypeError:
+        check = False
     _ok(check, test_name)
     if not check:
         diag("         got: {0}".format(repr(got)))
