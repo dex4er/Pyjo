@@ -12,9 +12,9 @@ import traceback
 import unittest
 
 
-__all__ = ['cmp_ok', 'done_testing', 'diag', 'fail_ok', 'is_ok', 'isa_ok',
-           'is_deeply_ok', 'isnt_ok', 'none_ok', 'ok', 'pass_ok', 'plan',
-           'skip', 'throws_ok']
+__all__ = ['cmp_ok', 'done_testing', 'diag', 'fail_ok', 'in_ok', 'is_ok',
+           'isa_ok', 'is_deeply_ok', 'isnt_ok', 'none_ok', 'notin_ok',
+           'ok', 'pass_ok', 'plan', 'skip', 'throws_ok']
 
 
 test = 0
@@ -112,6 +112,26 @@ def cmp_ok(got, operator, expected, test_name=None):
     _ok(check, test_name)
     if not check:
         diag("    {0}\n        {1}\n    {2}\n".format(repr(got), operator, repr(expected)))
+
+
+def in_ok(got, elem, test_name=None):
+    if test_name is None:
+        test_name = "an object {0}".format(type(got))
+    test_name = "{0} is in {1}".format(repr(elem), test_name)
+    check = elem in got
+    _ok(check, test_name)
+    if not check:
+        diag("         got: {0}".format(repr(got)))
+
+
+def notin_ok(got, elem, test_name=None):
+    if test_name is None:
+        test_name = "an object {0}".format(type(got))
+    test_name = "{0} is not in {1}".format(repr(elem), test_name)
+    check = elem not in got
+    _ok(check, test_name)
+    if not check:
+        diag("         got: {0}".format(repr(got)))
 
 
 def isa_ok(got, cls, test_name=None):
