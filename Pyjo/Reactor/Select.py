@@ -95,7 +95,7 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.object):
             self._ios[fd] = {'cb': cb}
             if DEBUG:
                 warn("-- Reactor adding io[{0}] = {1}".format(fd, self._ios[fd]))
-        return self.watch(handle, 1, 1)
+        return self.watch(handle, True, True)
 
     def is_readable(self, handle):
         """::
@@ -155,7 +155,7 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.object):
                         io = self._ios[fd]
                         last = True
                         self._sandbox(io['cb'], 'Read', False)
-                    elif fd in writable:
+                    if fd in writable:
                         io = self._ios[fd]
                         last = True
                         self._sandbox(io['cb'], 'Write', True)
@@ -296,10 +296,20 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.object):
         watcher.
         """
         fd = handle.fileno()
-        if read and fd not in self._inputs:
-            self._inputs.append(fd)
-        if write and fd not in self._outputs:
-            self._outputs.append(fd)
+
+        if read:
+            if fd not in self._inputs:
+                self._inputs.append(fd)
+        else:
+            if fd in self._inputs:
+                self._inputs.remove(fd)
+
+        if write:
+            if fd not in self._outputs:
+                self._outputs.append(fd)
+        else:
+            if fd in self._outputs:
+                self._outputs.remove(fd)
 
         return self
 
