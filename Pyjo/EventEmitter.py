@@ -200,15 +200,16 @@ class Pyjo_EventEmitter(Pyjo.Base.object):
 
         Unsubscribe from event.
         """
-        # One
-        if cb:
-            self._events[name] = [a for a in self._events[name] if a != cb]
-            if not len(self._events[name]):
-                del self._events[name]
+        if name in self._events:
+            # One
+            if cb:
+                self._events[name] = [a for a in self._events[name] if a != cb]
+                if not len(self._events[name]):
+                    del self._events[name]
 
-        # All
-        else:
-            del self._events[name]
+            # All
+            else:
+                del self._events[name]
 
         return self
 
