@@ -125,6 +125,10 @@ def rand(value=1):
     return random.random() * value
 
 
+def setenv(name, value):
+    return os.environ.update({name: value})
+
+
 def squish(string):
     string = trim(string)
     string -= s(r'\s+', ' ', 'g')
