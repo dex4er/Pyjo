@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='Pyjo',
-    version=__import__('Pyjo').__version__,
+    version='0.0.1',
     description='Mojo clone in Python.',
     long_description=''.join(open('README.md').readlines()[2:]),
     author='Piotr Roszatycki',
@@ -15,7 +15,7 @@ setup(
     license='Artistic',
     include_package_data=True,
     zip_safe=True,
-    keywords='django clean temporary cleanup pyc',
+    keywords='Mojo clone in Python - early dev stage',
     packages=find_packages(),
     classifiers=[
         'Development Status :: 1 - Planning',
@@ -24,7 +24,7 @@ setup(
         'License :: OSI Approved :: Artistic License',
         'Operating System :: POSIX',
         'Programming Language :: Python',
-        'Framework :: Django',
+        'Framework :: Pyjo',
     ],
     test_suite='test.TestSuite',
     install_requires=[

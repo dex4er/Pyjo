@@ -1,6 +1,6 @@
 """
-Pyjo - Duct tape for the HTML5 web!
-===================================
+Pyjo - Namespace package
+========================
 ::
 
     from pkgutil import extend_path
