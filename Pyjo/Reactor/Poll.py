@@ -111,14 +111,15 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.Select.object):
             if self._ios:
                 events = poll.poll(timeout * 1000)
                 for fd, flag in events:
-                    if flag & (select.POLLIN | select.POLLPRI | select.POLLHUP | select.POLLERR):
-                        io = self._ios[fd]
-                        last = True
-                        self._sandbox(io['cb'], 'Read', False)
-                    elif flag & (select.POLLOUT):
-                        io = self._ios[fd]
-                        last = True
-                        self._sandbox(io['cb'], 'Write', True)
+                    if fd in self._ios:
+                        if flag & (select.POLLIN | select.POLLPRI | select.POLLHUP | select.POLLERR):
+                            io = self._ios[fd]
+                            last = True
+                            self._sandbox(io['cb'], 'Read', False)
+                        if flag & (select.POLLOUT):
+                            io = self._ios[fd]
+                            last = True
+                            self._sandbox(io['cb'], 'Write', True)
 
             # Wait for timeout if poll can't be used
             elif timeout:
