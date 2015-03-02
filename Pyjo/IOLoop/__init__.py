@@ -10,7 +10,7 @@ import Pyjo.IOLoop.Client
 import Pyjo.IOLoop.Delay
 import Pyjo.IOLoop.Server
 import Pyjo.IOLoop.Stream
-import Pyjo.Reactor
+import Pyjo.Reactor.Base
 
 from Pyjo.Base import lazy
 from Pyjo.Util import (
@@ -48,7 +48,7 @@ class Pyjo_IOLoop(Pyjo.Base.object):
         super(Pyjo_IOLoop, self).__init__(**kwargs)
 
         # TODO Pyjo.Loader
-        module = importlib.import_module(Pyjo.Reactor.detect())
+        module = importlib.import_module(Pyjo.Reactor.Base.detect())
         module_class_name = module.__name__.replace('.', '_')
         module_class = getattr(module, module_class_name)
         self.reactor = module_class()

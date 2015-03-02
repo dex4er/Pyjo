@@ -35,13 +35,13 @@ Pyjo.Reactor.Select - Low-level event reactor with select support
 Events
 ------
 
-:mod:`Pyjo.Reactor.Select` inherits all events from :mod:`Pyjo.Reactor`.
+:mod:`Pyjo.Reactor.Select` inherits all events from :mod:`Pyjo.Reactor.Base`.
 
 Classes
 -------
 """
 
-import Pyjo.Reactor
+import Pyjo.Reactor.Base
 
 from Pyjo.Base import lazy
 from Pyjo.Util import getenv, md5_sum, rand, steady_time, warn
@@ -54,10 +54,10 @@ import time
 DEBUG = getenv('PYJO_REACTOR_DEBUG', False)
 
 
-class Pyjo_Reactor_Select(Pyjo.Reactor.object):
+class Pyjo_Reactor_Select(Pyjo.Reactor.Base.object):
     """
     :mod:`Pyjo.Reactor.Select` inherits all attributes and methods from
-    :mod:`Pyjo.Reactor` and implements the following new ones.
+    :mod:`Pyjo.Reactor.Base` and implements the following new ones.
     """
 
     _running = False

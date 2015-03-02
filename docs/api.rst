@@ -80,6 +80,9 @@ Pyjo API
 .. automodule:: Pyjo.Reactor
     :members:
 
+.. automodule:: Pyjo.Reactor.Base
+    :members:
+
 .. automodule:: Pyjo.Reactor.Poll
     :members:
 
