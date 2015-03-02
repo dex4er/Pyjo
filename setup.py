@@ -15,7 +15,7 @@ setup(
     license='Artistic',
     include_package_data=True,
     zip_safe=True,
-    keywords='Mojo clone in Python - early dev stage',
+    keywords='mojo pyjo framework http html async',
     packages=find_packages(exclude=['t', 't.*']),
     classifiers=[
         'Development Status :: 1 - Planning',
