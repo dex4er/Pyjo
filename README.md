@@ -28,7 +28,7 @@ Early developement stage. Implemented already:
   * Synchronizer and sequentializer of multiple events
   * Main event loop which handle IO and timer events
   * Event emitter with subscriptions
-  * Low level event reactor based on select(2) and poll(2) or libev (pyev)
+  * Low level event reactor based on select(2) and poll(2)
   * Lazy properties for objects
   * Test units with API based on Perl's Test::More and TAP protocol
   * Regexp objects with overloaded operators

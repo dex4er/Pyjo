@@ -31,6 +31,5 @@ setup(
     ],
     extras_require={
         'regex': ['regex'],
-        'EV': ['pyev'],
     },
 )

@@ -77,9 +77,6 @@ Pyjo API
 .. automodule:: Pyjo.Reactor
     :members:
 
-.. automodule:: Pyjo.Reactor.EV
-    :members:
-
 .. automodule:: Pyjo.Reactor.Poll
     :members:
 

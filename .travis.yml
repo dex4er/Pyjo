@@ -5,9 +5,9 @@ env:
 matrix:
   include:
   - python: "2.7"
-    env: PACKAGES='svn+http://pyev.googlecode.com/svn/tags/pyev-0.8.1-4.04'
+    env: PACKAGES=''
   - python: "3.4"
-    env: PACKAGES='svn+http://pyev.googlecode.com/svn/tags/pyev-0.8.1-4.04'
+    env: PACKAGES=''
   - python: "pypy"
     env: PACKAGES=''
   - python: "pypy3"
@@ -15,7 +15,6 @@ matrix:
 before_install:
   - sudo apt-get update -qq
 install:
-  - sudo apt-get install -qq libev-dev
   - # pip install -q flake8
   - # flake8 --config .flake8 .
   - if [ -n "$PACKAGES" ]; then pip install $PACKAGES; fi
