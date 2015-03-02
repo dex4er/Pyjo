@@ -16,7 +16,7 @@ setup(
     include_package_data=True,
     zip_safe=True,
     keywords='Mojo clone in Python - early dev stage',
-    packages=find_packages(),
+    packages=find_packages(exclude=['t', 't.*']),
     classifiers=[
         'Development Status :: 1 - Planning',
         'Environment :: Web Environment',
