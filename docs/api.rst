@@ -6,6 +6,9 @@ Pyjo API
     :glob:
     :maxdepth: 1
 
+.. automodule:: Pyjo
+    :members:
+
 .. automodule:: Pyjo.Asset
     :members:
 
