@@ -226,21 +226,22 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.Base.object):
 
             return False
 
-        try:
-            fd = remove.fileno()
-            if DEBUG:
+        elif remove is not None:
+            try:
+                fd = remove.fileno()
+                if DEBUG:
+                    if fd in self._ios:
+                        warn("-- Reactor remove io[{0}]".format(fd))
+                if fd in self._inputs:
+                    self._inputs.remove(fd)
+                if fd in self._outputs:
+                    self._outputs.remove(fd)
                 if fd in self._ios:
-                    warn("-- Reactor remove io[{0}]".format(fd))
-            if fd in self._inputs:
-                self._inputs.remove(fd)
-            if fd in self._outputs:
-                self._outputs.remove(fd)
-            if fd in self._ios:
-                del self._ios[fd]
-                return True
-        except socket.error:
-            if DEBUG:
-                warn("-- Reactor remove io {0} already closed".format(remove))
+                    del self._ios[fd]
+                    return True
+            except socket.error:
+                if DEBUG:
+                    warn("-- Reactor remove io {0} already closed".format(remove))
 
         return False
 

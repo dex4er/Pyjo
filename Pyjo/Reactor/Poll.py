@@ -176,22 +176,23 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.Select.object):
 
             return False
 
-        try:
-            fd = remove.fileno()
-            if DEBUG:
+        elif remove is not None:
+            try:
+                fd = remove.fileno()
+                if DEBUG:
+                    if fd in self._ios:
+                        warn("-- Reactor remove io[{0}]".format(fd))
+                poll = self._poll()
+                if poll:
+                    poll.unregister(remove)
                 if fd in self._ios:
-                    warn("-- Reactor remove io[{0}]".format(fd))
-            poll = self._poll()
-            if poll:
-                poll.unregister(remove)
-            if fd in self._ios:
-                del self._ios[fd]
-                return True
-            # remove.close()  # TODO remove?
-        except socket.error:
-            if DEBUG:
-                warn("-- Reactor remove io {0} already closed".format(remove))
-            pass
+                    del self._ios[fd]
+                    return True
+                # remove.close()  # TODO remove?
+            except socket.error:
+                if DEBUG:
+                    warn("-- Reactor remove io {0} already closed".format(remove))
+                pass
 
         return False
 
