@@ -194,11 +194,8 @@ class Pyjo_IOLoop(Pyjo.Base.object):
     def __init__(self, **kwargs):
         super(Pyjo_IOLoop, self).__init__(**kwargs)
 
-        # TODO Pyjo.Loader
         module = importlib.import_module(Pyjo.Reactor.Base.detect())
-        module_class_name = module.__name__.replace('.', '_')
-        module_class = getattr(module, module_class_name)
-        self.reactor = module_class()
+        self.reactor = module.new()
 
         if DEBUG:
             warn("-- Reactor initialized ({0})".format(self.reactor))
