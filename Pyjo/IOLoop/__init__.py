@@ -1,9 +1,55 @@
 """
-Pyjo.IOLoop
-"""
+Pyjo.IOLoop - Minimalistic event loop
+=====================================
+::
 
-import importlib
-import weakref
+    import Pyjo.IOLoop
+
+    # Listen on port 3000
+    @Pyjo.IOLoop.server(port=3000)
+    def server(loop, stream, cid):
+
+        @stream.on
+        def read(stream, chunk):
+            # Process input chunk
+            print("Server: {0}".format(chunk.decode('utf-8')))
+
+            # Write response
+            stream.write(b"HTTP/1.1 200 OK\x0d\x0a\x0d\x0a")
+
+            # Disconnect client
+            stream.close_gracefully()
+
+    # Connect to port 3000
+    @Pyjo.IOLoop.client(port=3000)
+    def client(loop, err, stream):
+
+        @stream.on
+        def read(stream, chunk):
+            # Process input
+            print("Client: {0}".format(chunk.decode('utf-8')))
+
+        # Write request
+        stream.write(b"GET / HTTP/1.1\x0d\x0a\x0d\x0a")
+
+    # Add a timer
+    @Pyjo.IOLoop.timer(3)
+    def timeouter(loop):
+        print("Timeout")
+        # Shutdown server
+        loop.remove(server)
+
+    # Start event loop if necessary
+    if not Pyjo.IOLoop.is_running():
+        Pyjo.IOLoop.start()
+
+:mod:`Pyjo.IOLoop` is a very minimalistic event loop based on :mod:`Pyjo.Reactor`,
+it has been reduced to the absolute minimal feature set required to build
+solid and scalable non-blocking TCP clients and servers.
+
+Classes
+-------
+"""
 
 import Pyjo.Base
 import Pyjo.IOLoop.Client
@@ -18,23 +64,124 @@ from Pyjo.Util import (
     warn
 )
 
+import importlib
+import weakref
 
-DEBUG = getenv('PYJO_IOLOOP_DEBUG', 0)
+
+DEBUG = getenv('PYJO_IOLOOP_DEBUG', False)
 
 
 class Error(Exception):
+    """
+    Exception raised on unhandled error event.
+    """
     pass
 
 
 class Pyjo_IOLoop(Pyjo.Base.object):
+    """
+    :mod:`Pyjo.IOLoop` inherits all attributes and methods from
+    :mod:`Pyjo.Base` and implements the following new ones.
+    """
 
     accept_interval = 0.025
+    """::
+
+        interval = loop.accept_interval
+        loop.accept_interval = 0.5
+
+    Interval in seconds for trying to reacquire the accept mutex, defaults to
+    ``0.025``. Note that changing this value can affect performance and idle CPU
+    usage.
+    """
+
     lock = None
-    unlock = None
+    """::
+
+        cb = loop.lock
+        loop.lock = cb
+
+    A callback for acquiring the accept mutex, used to sync multiple server
+    processes. The callback should return true or false. Note that exceptions in
+    this callback are not captured. ::
+
+        def lock_cb(blocking):
+            # Got the accept mutex, start accepting new connections
+            return True
+
+        loop.lock = lock_cb
+    """
+
     max_accepts = 0
+    """::
+
+        max_accepts = loop.max_accepts
+        loop.max_accepts = 1000
+
+    The maximum number of connections this event loop is allowed to accept before
+    shutting down gracefully without interrupting existing connections, defaults
+    to ``0``. Setting the value to ``0`` will allow this event loop to accept new
+    connections indefinitely. Note that up to half of this value can be subtracted
+    randomly to improve load balancing between multiple server processes.
+    """
+
     max_connections = 1000
+    """::
+
+        max_connections = loop.max_connections
+        loop.max_connections = 1000
+
+    The maximum number of concurrent connections this event loop is allowed to
+    handle before stopping to accept new incoming connections, defaults to
+    ``1000``. Setting the value to ``0`` will make this event loop stop accepting
+    new connections and allow it to shut down gracefully without interrupting
+    existing connections.
+    """
+
     multi_accept = 50
+    """::
+
+        multi = loop.multi_accept
+        loop.multi_accept = 100
+
+    Number of connections to accept at once, defaults to ``50``.
+    """
+
     reactor = None
+    """::
+
+        reactor = loop.reactor
+        loop.reactor = Pyjo.Reactor.new()
+
+    Low-level event reactor, usually a :mod:`Pyjo.Reactor.Poll` or
+    :mod:`Pyjo.Reactor.Select` object with a default subscriber to the event
+    ``error``. ::
+
+        # Watch if handle becomes readable or writable
+        def io_cb(reactor, writable):
+            if writable:
+                print('Handle is writable')
+            else:
+                print('Handle is readable')
+
+        loop.reactor.io(io_cb, handle)
+
+        # Change to watching only if handle becomes writable
+        loop.reactor.watch(handle, read=False, write=True)
+
+        # Remove handle again
+        loop.reactor.remove(handle)
+    """
+
+    unlock = None
+    """::
+
+        cb = loop.unlock
+        loop.unlock = cb
+
+    A callback for releasing the accept mutex, used to sync multiple server
+    processes. Note that exceptions in this callback are not captured.
+    """
 
     _acceptors = lazy(lambda self: {})
     _connections = lazy(lambda self: {})
