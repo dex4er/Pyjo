@@ -59,12 +59,16 @@ class Pyjo_IOLoop_Delay(Pyjo.EventEmitter.object):
         REMAINING[self] = list(args)
         return self
 
-    def steps(self, *args):
-        self = self.remaining(*args)
-        self.ioloop.next_tick(self.begin())
+    def step(self, cb):
+        remaining = self.remaining()
+        remaining.append(cb)
         return self
 
+    def steps(self, *args):
+        return self.remaining(*args)
+
     def wait(self):
+        self.ioloop.next_tick(self.begin())
         if self.ioloop.is_running:
             return
         # TODO once error
