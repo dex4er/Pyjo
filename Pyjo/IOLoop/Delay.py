@@ -63,6 +63,41 @@ Pyjo.IOLoop.Delay - Manage callbacks and control the flow of events
         print("Something went wrong: {0}".format(err))
 
     delay.wait()
+
+:mod:`Pyjo.IOLoop.Delay` manages callbacks and controls the flow of events for
+:mod:`Pyjo.IOLoop`, which can help you avoid deep nested closures and memory
+leaks that often result from continuation-passing style.
+
+Events
+------
+
+:mod:`Pyjo.IOLoop.Delay` inherits all events from :mod:`Pyjo.EventEmitter` and can
+emit the following new ones.
+
+error
+~~~~~
+::
+
+    @delay.on
+    def error(delay, err):
+        ...
+
+Emitted if an exception gets thrown in one of the steps, breaking the chain,
+fatal if unhandled.
+
+finish
+~~~~~~
+::
+
+    @delay.on
+    def finish(delay, *args):
+        ...
+
+Emitted once the active event counter reaches zero and there are no more
+steps.
+
+Classes
+-------
 """
 
 import Pyjo.EventEmitter
@@ -75,8 +110,20 @@ REMAINING = {}
 
 
 class Pyjo_IOLoop_Delay(Pyjo.EventEmitter.object):
+    """
+    :mod:`Pyjo.IOLoop.Delay` inherits all attributes and methods from
+    :mod:`Pyjo.EventEmitter` and implements the following new ones.
+    """
 
-    ioloop = None
+    ioloop = lazy(lambda self: Pyjo.IOLoop.singleton)
+    """::
+
+        ioloop = delay.ioloop
+        delay.ioloop = Pyjo.IOLoop.new()
+
+    Event loop object to control, defaults to the global :mod:`Pyjo.IOLoop`
+    singleton.
+    """
 
     _counter = 0
     _pending = 0
@@ -86,12 +133,64 @@ class Pyjo_IOLoop_Delay(Pyjo.EventEmitter.object):
     _data = lazy(lambda self: {})
     _args = lazy(lambda self: [])
 
-    def __init__(self, **kwargs):
-        super(Pyjo_IOLoop_Delay, self).__init__(**kwargs)
-        if self.ioloop is None:
-            self.ioloop = Pyjo.IOLoop.singleton
-
     def begin(self, offset=1, length=0, *args):
+        """::
+
+            cb = delay.begin
+            cb = delay.begin(offset)
+            cb = delay.begin(offset, length)
+
+        Indicate an active event by incrementing the active event counter, the
+        returned callback needs to be called when the event has completed, to
+        decrement the active event counter again. When all callbacks have been called
+        and the active event counter reached zero, :meth:`steps` will continue. ::
+
+            # Capture all arguments except for the first one (invocant)
+            delay = Pyjo.IOLoop.delay()
+
+            @delay.step
+            def step1(delay, err, stream):
+                ...
+
+            Pyjo.IOLoop.client(delay.begin(), port=3000)
+            delay.wait()
+
+        Arguments passed to the returned callback are sliced with the given offset
+        and length, defaulting to an offset of ``1`` with no default length. The
+        arguments are then combined in the same order :meth:`begin` was called, and
+        passed together to the next step or ``finish`` event. ::
+
+            # Capture all arguments
+            delay = Pyjo.IOLoop.delay()
+
+            @delay.step
+            def step2(delay, loop, err, stream):
+                ...
+
+            Pyjo.IOLoop.client(delay.begin(0), port=3000)
+            delay.wait()
+
+            # Capture only the second argument
+            delay = Pyjo.IOLoop.delay()
+
+            @delay.step
+            def step3(delay, err):
+                ...
+
+            Pyjo.IOLoop.client(delay.begin(1, 1), port=3000)
+            delay.wait()
+
+            # Capture and combine arguments
+            delay = Pyjo.IOLoop.delay()
+
+            @delay.step
+            def step4(delay, three_err, three_stream, four_err, four_stream):
+                ...
+
+            Pyjo.IOLoop.client(delay.begin(), port=3000)
+            Pyjo.IOLoop.client(delay.begin(), port=4000)
+            delay.wait()
+        """
         self._pending += 1
         self._counter += 1
         sid = self._counter
