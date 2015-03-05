@@ -55,6 +55,9 @@ Pyjo API
     :members:
     :special-members:
 
+.. automodule:: Pyjo.IOLoop
+    :members:
+
 .. automodule:: Pyjo.JSON
     :members:
     :special-members:

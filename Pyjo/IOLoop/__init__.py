@@ -469,6 +469,33 @@ class Pyjo_IOLoop(Pyjo.Base.object):
 
     def server(self, cb=None, **kwargs):
         """::
+
+            cid = Pyjo.IOLoop.server(cb, port=3000)
+
+            @Pyjo.IOLoop.server(port=3000)
+            def server(loop, stream, cid):
+                ...
+
+            cid = loop.server(cb, port=3000)
+
+            @loop.server(port=3000)
+            def server(loop, stream, cid):
+                ...
+
+        Accept TCP connections with :mod:`Pyjo.IOLoop.Server`, takes the same arguments
+        as :meth:`Pyjo.IOLoop.Server.listen`. ::
+
+            # Listen on port 3000
+            @Pyjo.IOLoop.server(port=3000)
+            def server(loop, stream, cid):
+                ...
+
+            # Listen on random port
+            @Pyjo.IOLoop.server(address='127.0.0.1')
+            def server(loop, stream, cid):
+                ...
+
+            port = Pyjo.IOLoop.acceptor(server).port
         """
         if cb is None:
             def wrap(func):
@@ -487,14 +514,45 @@ class Pyjo_IOLoop(Pyjo.Base.object):
         return self.acceptor(server)
 
     def start(self):
+        """::
+
+            Pyjo.IOLoop.start()
+            loop.start()
+
+        Start the event loop, this will block until :meth:`stop` is called. Note that
+        some reactors stop automatically if there are no events being watched anymore. ::
+
+            # Start event loop only if it is not running already
+            if not Pyjo.IOLoop.is_running():
+                Pyjo.IOLoop.start()
+        """
         if self.is_running:
             raise Error('Pyjo.IOLoop already running')
         self.reactor.start()
 
     def stop(self):
+        """::
+
+            Pyjo.IOLoop.stop()
+            loop.stop()
+
+        Stop the event loop, this will not interrupt any existing connections and the
+        event loop can be restarted by running :meth:`start` again.
+        """
         self.reactor.stop()
 
     def stream(self, stream):
+        """::
+
+            stream = Pyjo.IOLoop.stream(cid)
+            stream = loop.stream(cid)
+            cid = loop.stream(Pyjo.IOLoop.Stream.new())
+
+        Get :mod:`Pyjo.IOLoop.Stream` object for id or turn object into a connection. ::
+
+            # Increase inactivity timeout for connection to 300 seconds
+            Pyjo.IOLoop.stream(cid).timeout = 300
+        """
         # Find stream for id
         if isinstance(stream, str):
             return self._connections[stream]['stream']
@@ -512,6 +570,20 @@ class Pyjo_IOLoop(Pyjo.Base.object):
 
     @decoratormethod
     def timer(self, cb, after):
+        """::
+
+            tid = Pyjo.IOLoop.timer(cb, 3)
+            tid = loop.timer(cb, 0)
+            tid = loop.timer(cb, 0.25)
+
+        Create a new timer, invoking the callback after a given amount of time in
+        seconds. ::
+
+            # Perform operation in 5 seconds
+            @Pyjo.IOLoop.timer(5)
+            def timer_cb(loop):
+                ...
+        """
         if DEBUG:
             warn("-- Timer after {0} cb {1}".format(after, cb))
         return self._timer(cb, 'timer', after)
@@ -653,6 +725,24 @@ def new(*args, **kwargs):
 
 
 singleton = Pyjo_IOLoop()
+"""::
+
+    loop = PYJO.IOLoop.singleton
+
+The global :mod:`Pyjo.IOLoop` singleton, used to access a single shared event
+loop object from everywhere inside the process. ::
+
+    # Many methods also allow you to take shortcuts
+    Pyjo.IOLoop.timer(lambda loop: Pyjo.IOLoop.stop(), 2)
+    Pyjo.IOLoop.start()
+
+    # Restart active timer
+    @Pyjo.IOLoop.timer(3)
+    def timeouter(loop):
+        print('Timeout!')
+
+    Pyjo.IOLoop.singleton.reactor.again(timeouter)
+"""
 
 
 def acceptor(acceptor):
