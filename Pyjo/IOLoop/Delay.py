@@ -119,8 +119,12 @@ class Pyjo_IOLoop_Delay(Pyjo.EventEmitter.object):
             if self not in REMAINING:
                 REMAINING[self] = []
             return REMAINING[self]
-        REMAINING[self] = list(args)
-        return self
+        else:
+            if len(args):
+                REMAINING[self] = list(args)
+            elif self in REMAINING:
+                del REMAINING[self]
+            return self
 
     def step(self, cb):
         remaining = self.remaining()
