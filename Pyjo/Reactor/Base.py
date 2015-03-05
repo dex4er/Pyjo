@@ -64,15 +64,11 @@ Classes
 -------
 """
 
-import functools
-import os
-import select
-import socket
-
-import Pyjo.Base
 import Pyjo.EventEmitter
 
 from Pyjo.Util import getenv, not_implemented
+
+import os
 
 
 class Error(Exception):
