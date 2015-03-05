@@ -134,9 +134,15 @@ class Pyjo_IOLoop_Delay(Pyjo.EventEmitter.object):
         self.ioloop.next_tick(self.begin())
         if self.ioloop.is_running:
             return
-        # TODO once error
-        self.once(lambda e, *args: self.ioloop.stop(), 'finish')
+        self.once(lambda self, *args: self._die(*args), 'error')
+        self.once(lambda self, *args: self.ioloop.stop(), 'finish')
         self.ioloop.start()
+
+    def _die(self, err):
+        if self.has_subscribers('error'):
+            self.ioloop.stop()
+        else:
+            raise Exception(err)
 
     def _step(self, sid, offset=1, length=0, *args):
         if args:
@@ -144,6 +150,7 @@ class Pyjo_IOLoop_Delay(Pyjo.EventEmitter.object):
                 args = args[offset: offset + length]
             else:
                 args = args[offset:]
+
         if sid >= len(self._args):
             self._args.append(args)
         else:
@@ -151,9 +158,12 @@ class Pyjo_IOLoop_Delay(Pyjo.EventEmitter.object):
 
         if self._fail:
             return self
+
         self._pending -= 1
+
         if self._pending:
             return self
+
         if self._lock:
             return self
 
@@ -164,13 +174,18 @@ class Pyjo_IOLoop_Delay(Pyjo.EventEmitter.object):
         remaining = self.remaining()
         if len(remaining):
             cb = remaining.pop(0)
-            # TODO try
-            cb(self, *args)
-            # TODO catch e: self._fail += 1; self.remaining([]).emit('error', e)
+            try:
+                cb(self, *args)
+            except Exception as ex:
+                self._fail = True
+                self.remaining([]).emit('error', ex)
+
         if not self._counter:
             return self.remaining([]).emit('finish', *args)
+
         if not self._pending:
             self.ioloop.next_tick(self.begin())
+
         return self
 
 

@@ -208,11 +208,7 @@ class Pyjo_IOLoop(Pyjo.Base.object):
         if DEBUG:
             warn("-- Reactor initialized ({0})".format(self.reactor))
 
-        def error_cb(reactor, *args):
-            raise Error(args)  # TODO debug
-            warn("{0}: {1}".format(reactor, ": ".join(args)))
-
-        # self.reactor.catch(error_cb)  # TODO
+        self.reactor.catch(lambda reactor, *args: warn("{0}: {1}".format(reactor, ": ".join(args))))
 
         return None
 
