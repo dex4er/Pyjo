@@ -15,7 +15,7 @@ Pyjo.IOLoop - Minimalistic event loop
             print("Server: {0}".format(chunk.decode('utf-8')))
 
             # Write response
-            stream.write(b"HTTP/1.1 200 OK\x0d\x0a\x0d\x0a")
+            stream.write(b"HTTP/1.1 200 OK\\x0d\\x0a\\x0d\\x0a")
 
             # Disconnect client
             stream.close_gracefully()
@@ -30,7 +30,7 @@ Pyjo.IOLoop - Minimalistic event loop
             print("Client: {0}".format(chunk.decode('utf-8')))
 
         # Write request
-        stream.write(b"GET / HTTP/1.1\x0d\x0a\x0d\x0a")
+        stream.write(b"GET / HTTP/1.1\\x0d\\x0a\\x0d\\x0a")
 
     # Add a timer
     @Pyjo.IOLoop.timer(3)
@@ -46,6 +46,14 @@ Pyjo.IOLoop - Minimalistic event loop
 :mod:`Pyjo.IOLoop` is a very minimalistic event loop based on :mod:`Pyjo.Reactor`,
 it has been reduced to the absolute minimal feature set required to build
 solid and scalable non-blocking TCP clients and servers.
+
+Debugging
+---------
+
+You can set the ``PYJO_IOLOOP_DEBUG`` environment variable to get some
+advanced diagnostics information printed to ``stderr``. ::
+
+    PYJO_IOLOOP_DEBUG=1
 
 Classes
 -------
@@ -209,6 +217,14 @@ class Pyjo_IOLoop(Pyjo.Base.object):
         return None
 
     def acceptor(self, acceptor):
+        """::
+
+            server = Pyjo.IOLoop.acceptor(cid)
+            server = loop.acceptor(cid)
+            cid = loop.acceptor(Pyjo.IOLoop.Server.new())
+
+        Get :mod:`Pyjo.IOLoop.Server` object for id or turn object into an acceptor.
+        """
         # Find acceptor for id
         if isinstance(acceptor, str):
             return self._acceptors[acceptor]
@@ -225,6 +241,23 @@ class Pyjo_IOLoop(Pyjo.Base.object):
         return cid
 
     def client(self, cb=None, **kwargs):
+        """::
+
+            cid = Pyjo.IOLoop.client(cb, address='127.0.0.1', port=3000)
+
+            @Pyjo.IOLoop.client(address='127.0.0.1', port=3000)
+            def cid(loop, err, stream):
+                ...
+
+            cid = loop.client(cb, address='127.0.0.1', port=3000)
+
+            @loop.client(cb, address='127.0.0.1', port=3000)
+            def cid(loop, err, stream):
+                ...
+
+        Open TCP connection with :mod:`Pyjo.IOLoop.Client`, takes the same arguments as
+        :meth:`Pyjo.IOLoop.Client.connect`.
+        """
         if cb is None:
             def wrap(func):
                 return self.client(func, **kwargs)
@@ -255,6 +288,78 @@ class Pyjo_IOLoop(Pyjo.Base.object):
         return cid
 
     def delay(self, *args):
+        """::
+
+            delay = Pyjo.IOLoop.delay()
+            delay = loop.delay()
+            delay = loop.delay(cb)
+            delay = loop.delay(cb1, cb2)
+
+        Build :mod:`Pyjo.IOLoop.Delay` object to manage callbacks and control the flow
+        of events for this event loop, which can help you avoid deep nested closures
+        and memory leaks that often result from continuation-passing style. Callbacks
+        will be passed along to :meth:`Pyjo.IOLoop.Delay.steps`. ::
+
+            # Synchronize multiple events
+            delay = Pyjo.IOLoop.delay()
+
+            @delay.step
+            def step(delay):
+                print('BOOM!')
+
+            for i in range(10):
+                end = delay.begin()
+
+                def timer_wrap(i):
+                    def timer_cb(loop):
+                        print(10 - i)
+                        end()
+                    return timer_cb
+
+                Pyjo.IOLoop.timer(timer_wrap(i), i)
+
+            delay.wait()
+
+            # Sequentialize multiple events
+            delay = Pyjo.IOLoop.delay()
+
+            # First step (simple timer)
+            @delay.step
+            def step1(delay):
+                Pyjo.IOLoop.timer(delay.begin(), 2)
+                print('Second step in 2 seconds.')
+
+            # Second step (concurrent timers)
+            @delay.step
+            def step2(delay):
+                Pyjo.IOLoop.timer(delay.begin(), 1)
+                Pyjo.IOLoop.timer(delay.begin(), 3)
+                print('Third step in 3 seconds.')
+
+            # Third step (the end)
+            @delay.step
+            def step3(delay):
+                print('And done after 5 seconds total.')
+
+            delay.wait()
+
+            # Handle exceptions in all steps
+            delay = Pyjo.IOLoop.delay()
+
+            @delay.step
+            def step1(delay):
+                raise Exception('Intentional error')
+
+            @delay.step
+            def step2(delay, *args):
+                say('Never actually reached.')
+
+            @delay.catch
+            def catch(delay, err):
+                print("Something went wrong: " + err)
+
+            delay.wait()
+        """
         delay = Pyjo.IOLoop.Delay.new()
         delay.ioloop = weakref.proxy(self)
         if args:
@@ -264,22 +369,79 @@ class Pyjo_IOLoop(Pyjo.Base.object):
 
     @property
     def is_running(self):
+        """::
+
+            boolean = Pyjo.IOLoop.is_running()
+            boolean = loop.is_running
+
+        Check if event loop is running. ::
+
+            if not Pyjo.IOLoop.is_running():
+                Pyjo.IOLoop.start()
+        """
         return self.reactor.is_running
 
     @decoratormethod
     def next_tick(self, cb):
+        """::
+
+            Pyjo.IOLoop.next_tick(cb)
+            loop.next_tick(cb)
+
+        Invoke callback as soon as possible, but not before returning, always returns
+        ``None``. ::
+
+            # Perform operation on next reactor tick
+            @Pyjo.IOLoop.next_tick
+            def do_something(loop):
+                ...
+        """
         return self.reactor.next_tick(cb)
 
     def one_tick(self):
+        """::
+
+            Pyjo.IOLoop.one_tick()
+            loop.one_tick()
+
+        Run event loop until an event occurs. Note that this method can recurse back
+        into the reactor, so you need to be careful. ::
+
+            # Don't block longer than 0.5 seconds
+            tid = Pyjo.IOLoop.timer(lambda loop: None, 0.5)
+            Pyjo.IOLoop.one_tick()
+            Pyjo.IOLoop.remove(tid)
+        """
         return self.reactor.one_tick()
 
     @decoratormethod
     def recurring(self, cb, after):
+        """::
+
+            tid = Pyjo.IOLoop.recurring(cb, 3)
+            tid = loop.recurring(cb, 0)
+            tid = loop.recurring(cb, 0.25)
+
+        Create a new recurring timer, invoking the callback repeatedly after a given
+        amount of time in seconds. ::
+
+            @Pyjo.IOLoop.recurring(5)
+            def do_something(loop):
+                ...
+        """
         if DEBUG:
             warn("-- Recurring after {0} cb {1}".format(after, cb))
         return self._timer(cb, 'recurring', after)
 
     def remove(self, taskid):
+        """::
+
+            Pyjo.IOLoop.remove(taskid)
+            loop.remove(taskid)
+
+        Remove anything with an id, connections will be dropped gracefully by allowing
+        them to finish writing all data in their write buffers.
+        """
         if taskid in self._connections:
             c = self._connections[taskid]
             if c:
@@ -290,6 +452,8 @@ class Pyjo_IOLoop(Pyjo.Base.object):
         self._remove(taskid)
 
     def server(self, cb=None, **kwargs):
+        """::
+        """
         if cb is None:
             def wrap(func):
                 return self.server(func, **kwargs)
