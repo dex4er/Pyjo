@@ -42,7 +42,7 @@ if __name__ == '__main__':
             step2_1,
             step2_2,
             delay.begin()
-        )
+        ).wait()
 
     def step3(delay):
         pass_ok("Step 3")
