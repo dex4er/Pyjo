@@ -36,6 +36,7 @@ else:
 
 
 def decorator(func):
+    @functools.wraps(func)
     def wrap(*args):
         if not callable(args[0]):
             def wrap2(func2):
@@ -46,6 +47,7 @@ def decorator(func):
 
 
 def decoratormethod(func):
+    @functools.wraps(func)
     def wrap(self, *args):
         if not callable(args[0]):
             def wrap2(func2):
