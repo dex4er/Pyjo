@@ -1,5 +1,68 @@
 """
-Pyjo.IOLoop.Delay
+Pyjo.IOLoop.Delay - Manage callbacks and control the flow of events
+===================================================================
+::
+
+    import Pyjo.IOLoop
+
+    # Synchronize multiple events
+    delay = Pyjo.IOLoop.delay()
+
+    @delay.step
+    def step(delay):
+        print('BOOM!')
+
+    for i in range(10):
+        end = delay.begin()
+
+        def timer_wrap(i):
+            def timer_cb(loop):
+                print(10 - i)
+                end()
+            return timer_cb
+
+        Pyjo.IOLoop.timer(timer_wrap(i), i)
+
+    delay.wait()
+
+    # Sequentialize multiple events
+    delay = Pyjo.IOLoop.delay()
+
+    @delay.step
+    def step1(delay):
+        # First step (simple timer)
+        Pyjo.IOLoop.timer(delay.begin(), 2)
+        print('Second step in 2 seconds.')
+
+    @delay.step
+    def step2(delay):
+        # Second step (concurrent timers)
+        Pyjo.IOLoop.timer(delay.begin(), 1)
+        Pyjo.IOLoop.timer(delay.begin(), 3)
+        print('Third step in 3 seconds.')
+
+    @delay.step
+    def step3(delay):
+        print('And done after 5 seconds total.')
+
+    delay.wait()
+
+    # Handle exceptions in all steps
+    delay = Pyjo.IOLoop.delay()
+
+    @delay.step
+    def step1(delay):
+        raise Exception('Intentional error')
+
+    @delay.step
+    def step2(delay):
+        print('Never actually reached.')
+
+    @delay.catch
+    def step3(delay, err):
+        print("Something went wrong: {0}".format(err))
+
+    delay.wait()
 """
 
 import Pyjo.EventEmitter

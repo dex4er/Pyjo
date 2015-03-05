@@ -1,7 +1,5 @@
 import Pyjo.IOLoop
 
-from Pyjo.Util import nonlocals
-
 
 # Synchronize multiple events
 delay = Pyjo.IOLoop.delay()

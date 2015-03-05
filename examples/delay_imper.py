@@ -2,42 +2,23 @@ import Pyjo.IOLoop
 
 
 def step1(delay):
-    print("Step 1")
+    # First step (simple timer)
     Pyjo.IOLoop.timer(delay.begin(), 2)
-    Pyjo.IOLoop.timer(delay.begin(), 1)
-    print('Wait 2 seconds for step 2.')
+    print('Second step in 2 seconds.')
 
 
 def step2(delay):
-    print("Step 2")
-
-    def step2_1(delay2):
-        print("Step 2.1")
-        end = delay2.begin()
-        Pyjo.IOLoop.timer(lambda loop: end('', 'OK'), 1)
-        print('Wait 1 second for step 2.2.')
-
-    def step2_2(delay2, *args):
-        print("Step 2.2 got {0}".format(args))
-        Pyjo.IOLoop.timer(delay2.begin(), 3)
-        print('Wait 3 seconds for step 3.')
-
-    Pyjo.IOLoop.delay().steps(
-        step2_1,
-        step2_2,
-        delay.begin()
-    )
+    # Second step (concurrent timers)
+    Pyjo.IOLoop.timer(delay.begin(), 1)
+    Pyjo.IOLoop.timer(delay.begin(), 3)
+    print('Third step in 3 seconds.')
 
 
 def step3(delay):
-    print("Step 3")
-    print('And done.')
+    print('And done after 5 seconds total.')
 
 
-Pyjo.IOLoop.delay().steps(
-    step1,
-    step2,
-    step3
-).wait()
+# Sequentialize multiple events
+Pyjo.IOLoop.delay().steps(step1, step2, step3).wait()
 
 print("END")

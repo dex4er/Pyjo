@@ -58,6 +58,10 @@ Pyjo API
 .. automodule:: Pyjo.IOLoop
     :members:
 
+.. automodule:: Pyjo.IOLoop.Delay
+    :members:
+    :special-members:
+
 .. automodule:: Pyjo.JSON
     :members:
     :special-members:
