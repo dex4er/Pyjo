@@ -125,7 +125,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
     def append(self, string):
         """::
 
-            dom = dom.append(u'<p>I ♥ Mojolicious!</p>')
+            dom = dom.append(u'<p>I ♥ Pyjo!</p>')
 
         Append HTML/XML fragment to this node. ::
 
@@ -141,7 +141,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
     def append_content(self, string):
         """::
 
-            dom = dom.append_content(u'<p>I ♥ Mojolicious!</p>')
+            dom = dom.append_content(u'<p>I ♥ Pyjo!</p>')
 
         Append HTML/XML fragment (for ``root`` and ``tag`` nodes) or raw content to this
         node's content. ::
@@ -243,7 +243,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         """::
 
             string = dom.content
-            dom.content = u'<p>I ♥ Mojolicious!</p>'
+            dom.content = u'<p>I ♥ Pyjo!</p>'
 
         Return this node's content or replace it with HTML/XML fragment (for ``root``
         and ``tag`` nodes) or raw content. ::
@@ -471,7 +471,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
     def parse(self, html):
         """::
 
-            dom = dom.parse(u'<foo bar="baz">I ♥ Mojolicious!</foo>')
+            dom = dom.parse(u'<foo bar="baz">I ♥ Pyjo!</foo>')
 
         Parse HTML/XML fragment with :mod:`Pyjo.DOM.HTML`. ::
 
@@ -512,7 +512,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
     def prepend(self, string):
         """::
 
-            dom = dom.prepend(u'<p>I ♥ Mojolicious!</p>')
+            dom = dom.prepend(u'<p>I ♥ Pyjo!</p>')
 
         Prepend HTML/XML fragment to this node. ::
 
@@ -528,7 +528,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
     def prepend_content(self, string):
         """::
 
-            dom = dom.prepend_content(u'<p>I ♥ Mojolicious!</p>')
+            dom = dom.prepend_content(u'<p>I ♥ Pyjo!</p>')
 
         Prepend HTML/XML fragment (for ``root`` and ``tag`` nodes) or raw content to this
         node's content. ::
@@ -611,7 +611,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
     def replace(self, new):
         """::
 
-            parent = dom.replace(u'<div>I ♥ Mojolicious!</div>')
+            parent = dom.replace(u'<div>I ♥ Pyjo!</div>')
 
         Replace this node with HTML/XML fragment and return :meth:`parent`. ::
 

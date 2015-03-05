@@ -174,7 +174,7 @@ class Pyjo_DOM_HTML(Pyjo.Base.object):
     def parse(self, html):
         """::
 
-            html = html.parse(u'<foo bar="baz">I ♥ Mojolicious!</foo>')
+            html = html.parse(u'<foo bar="baz">I ♥ Pyjo!</foo>')
 
         Parse HTML/XML fragment.
         """
