@@ -451,6 +451,22 @@ class Pyjo_IOLoop(Pyjo.Base.object):
 
         self._remove(taskid)
 
+    def reset(self):
+        """::
+
+            Pyjo.IOLoop.reset()
+            loop.reset()
+
+        Remove everything and stop the event loop.
+        """
+        for tasks in self._acceptors, self._connections:
+            for taskid in tasks:
+                self._remove(taskid)
+
+        self.reactor.reset()
+        self._stop()
+        self.stop()
+
     def server(self, cb=None, **kwargs):
         """::
         """
@@ -676,6 +692,10 @@ def recurring(cb, after):
 
 def remove(taskid):
     return singleton.remove(taskid)
+
+
+def reset():
+    return singleton.reset()
 
 
 def server(cb=None, **kwargs):
