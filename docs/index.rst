@@ -7,6 +7,11 @@ A next generation web framework for the Python programming language.
 Based on Mojo.
 
 
-.. include:: intro.rst
-.. include:: examples.rst
-.. include:: api.rst
+Contents:
+
+.. toctree::
+    :maxdepth: 2
+
+    intro
+    examples
+    api/index
