@@ -102,6 +102,7 @@ Classes
 
 import Pyjo.EventEmitter
 import Pyjo.IOLoop
+import Pyjo.Util
 
 from Pyjo.Base import lazy
 
@@ -197,18 +198,21 @@ class Pyjo_IOLoop_Delay(Pyjo.EventEmitter.object):
         return lambda *args: self._step(sid, offset, length, *args)
 
     def data(self, *args, **kwargs):
-        if len(args) == 1 and isinstance(args[0], dict):
-            self._data = args[0]
-            return self._data
-        if kwargs:
-            self._data = kwargs
-            return self._data
-        if len(args) == 2:
-            self._data[args[0]] = self._data[args[1]]
-            return self
-        if len(args) == 1:
-            return self._data[args[0]]
-        return self._data
+        """::
+
+            data = delay.data()
+            foo  = delay.data('foo')
+            delay = delay.data(foo='bar')
+
+        Data shared between all :meth:`steps`. ::
+
+            # Remove value
+            del delay.data()['foo']
+
+            # Assign multiple values at once
+            delay.data(foo='test', bar=23)
+        """
+        return Pyjo.Util._stash(self, self._data, *args, **kwargs)
 
     def next(self, *args):
         self.begin()(self, *args)

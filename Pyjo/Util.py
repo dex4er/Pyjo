@@ -2459,3 +2459,15 @@ def _decode(point, name):
         name = name[:-1]
 
     return u'&' + rest
+
+
+def _stash(obj, stash, *args, **kwargs):
+    if kwargs:
+        stash.update(kwargs)
+        return obj
+    elif len(args) == 1:
+        return stash[args[0]]
+    elif len(args) > 1:
+        return tuple(map(lambda k: stash[k], args))
+    else:
+        return stash
