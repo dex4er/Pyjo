@@ -214,10 +214,17 @@ class Pyjo_IOLoop_Delay(Pyjo.EventEmitter.object):
         """
         return Pyjo.Util._stash(self, self._data, *args, **kwargs)
 
-    def next(self, *args):
-        self.begin()(self, *args)
-
     def remaining(self, steps=None):
+        """::
+
+            remaining = delay.remaining()
+            delay = delay.remaining([])
+
+        Remaining steps in chain, stored outside the object to protect from
+        circular references.
+
+        The first step runs during next reactor tick after :meth:`wait` method is called.
+        """
         if steps is None:
             if self not in REMAINING:
                 REMAINING[self] = []
@@ -230,16 +237,46 @@ class Pyjo_IOLoop_Delay(Pyjo.EventEmitter.object):
             return self
 
     def step(self, cb):
+        """::
+
+            delay = delay.step(cb)
+
+        Add another step to :meth:`remaining` steps in chain. ::
+
+            @delay.step
+            def step1(delay, args*)
+                ...
+        """
         remaining = self.remaining()
         remaining.append(cb)
         return self
 
     def steps(self, *args):
+        """::
+
+            delay = delay.steps(cb, cb)
+
+        Add another steps to :meth:`remaining` steps in chain.
+        """
         remaining = self.remaining()
         remaining.extend(args)
         return self
 
     def wait(self):
+        """::
+
+            delay.wait()
+
+        This sequentialize multiple events, every time the active event counter reaches
+        zero a callback will run, the first one automatically runs during the next
+        reactor tick unless it is delayed by incrementing the active event counter.
+        This chain will continue until there are no more callbacks, a callback does
+        not increment the active event counter or an exception gets thrown in a
+        callback.
+
+        Also start :attr:`ioloop` and stop it again once an ``error`` or ``finish`` event
+        gets emitted.
+        """
         self.ioloop.next_tick(self.begin())
         if self.ioloop.is_running:
             return
