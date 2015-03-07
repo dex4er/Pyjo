@@ -65,17 +65,6 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.Select.object):
     _timers = lazy(lambda self: {})
     _ios = lazy(lambda self: {})
 
-    def is_readable(self, handle):
-        """::
-
-            boolean = reactor.is_readable(handle)
-
-        Quick non-blocking check if a handle is readable.
-        """
-        p = select.poll()
-        p.register(handle.fileno(), select.POLLIN | select.POLLPRI)
-        return bool(p.poll(0))
-
     def one_tick(self):
         """::
 

@@ -134,17 +134,6 @@ class Pyjo_Reactor_Base(Pyjo.EventEmitter.object):
         pass
 
     @not_implemented
-    def is_readable(self, handle):
-        """::
-
-            boolean = reactor.is_readable(handle)
-
-        Quick non-blocking check if a handle is readable. Meant to be
-        overloaded in a subclass.
-        """
-        pass
-
-    @not_implemented
     def is_running(self):
         """::
 

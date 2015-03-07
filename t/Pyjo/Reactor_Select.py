@@ -75,7 +75,6 @@ if __name__ == '__main__':
     reactor.start()
     ok(not readable.get(), 'handle is not readable')
     ok(not writable.get(), 'handle is not writable')
-    ok(not reactor.is_readable(listen), 'handle is not readable')
 
     # Connect
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -84,7 +83,6 @@ if __name__ == '__main__':
     reactor.start()
     ok(readable.get(), 'handle is readable')
     ok(not writable.get(), 'handle is not writable')
-    ok(reactor.is_readable(listen), 'handle is readable')
 
     # Accept
     server, addr = listen.accept()

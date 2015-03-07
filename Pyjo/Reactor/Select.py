@@ -111,17 +111,6 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.Base.object):
                 warn("-- Reactor adding io[{0}] = {1}".format(fd, self._ios[fd]))
         return self.watch(handle, True, True)
 
-    def is_readable(self, handle):
-        """::
-
-            boolean = reactor.is_readable(handle)
-
-        Quick non-blocking check if a handle is readable.
-        """
-        fd = handle.fileno()
-        readable, _, _ = select.select([fd], [], [], 0)
-        return fd in readable
-
     @property
     def is_running(self):
         """::
