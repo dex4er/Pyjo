@@ -37,6 +37,19 @@ Events
 
 :mod:`Pyjo.Reactor.Select` inherits all events from :mod:`Pyjo.Reactor.Base`.
 
+Debugging
+---------
+
+You can set the ``PYJO_REACTOR_DEBUG`` environment variable to get some
+advanced diagnostics information printed to ``stderr``. ::
+
+    PYJO_REACTOR_DEBUG=1
+
+You can set the ``PYJO_REACTOR_DIE`` environment variable to make reactor die if task
+dies with exception.
+
+    PYJO_REACTOR_DIE=1
+
 Classes
 -------
 """
@@ -52,6 +65,7 @@ import time
 
 
 DEBUG = getenv('PYJO_REACTOR_DEBUG', False)
+DIE = getenv('PYJO_REACTOR_DIE', False)
 
 
 class Pyjo_Reactor_Select(Pyjo.Reactor.Base.object):
@@ -316,10 +330,13 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.Base.object):
         return self
 
     def _sandbox(self, cb, event, *args):
-        try:
+        if DIE:
             cb(self, *args)
-        except Exception as e:
-            self.emit('error', "{0} failed: {1} for {2}".format(event, e, cb.__code__))
+        else:
+            try:
+                cb(self, *args)
+            except Exception as e:
+                self.emit('error', "{0} failed: {1} for {2}".format(event, e, cb.__code__))
 
     def _timer(self, cb, recurring, after):
         tid = None

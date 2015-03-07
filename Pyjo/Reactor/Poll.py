@@ -189,6 +189,9 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.Select.object):
                     del self._ios[fd]
                     return True
                 # remove.close()  # TODO remove?
+            except KeyError:
+                if DEBUG:
+                    warn("-- Reactor remove io {0} already closed".format(remove))
             except socket.error:
                 if DEBUG:
                     warn("-- Reactor remove io {0} already closed".format(remove))
