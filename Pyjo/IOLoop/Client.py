@@ -2,15 +2,16 @@
 Pyjo.IOLoop.Client
 """
 
+import Pyjo.EventEmitter
+import Pyjo.IOLoop
+
+from Pyjo.Base import lazy
+from Pyjo.Util import getenv, warn
+
 import socket
 import weakref
 
 from socket import AF_INET, IPPROTO_TCP, TCP_NODELAY, SOCK_STREAM
-
-import Pyjo.EventEmitter
-import Pyjo.IOLoop
-
-from Pyjo.Util import getenv, warn
 
 
 NoneType = None.__class__
@@ -43,17 +44,10 @@ DEBUG = getenv('PYJO_IOLOOP_CLIENT_DEBUG', 0)
 
 class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
 
-    reactor = None
+    reactor = lazy(lambda self: Pyjo.IOLoop.singleton.reactor)
     handle = None
 
     _timer = None
-
-    def __init__(self, **kwargs):
-        if DEBUG:
-            warn("-- Method {0}.__init__".format(self, kwargs))
-        super(Pyjo_IOLoop_Client, self).__init__(**kwargs)
-        if self.reactor is None:
-            self.reactor = Pyjo.IOLoop.singleton.reactor
 
     def __del__(self):
         if DEBUG:
@@ -132,7 +126,7 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
 
             handle = socket.socket(AF_INET, SOCK_STREAM)
             handle.connect((address, port))
-            # return self.emit('error', "Can't connect: " + str(e))
+            # TODO return self.emit('error', "Can't connect: " + str(e))
             self.handle = handle
 
         handle.setblocking(0)

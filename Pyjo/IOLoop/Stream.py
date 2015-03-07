@@ -5,6 +5,7 @@ Pyjo.IOLoop.Stream
 import Pyjo.EventEmitter
 import Pyjo.IOLoop
 
+from Pyjo.Base import lazy
 from Pyjo.Util import getenv
 
 import socket
@@ -39,7 +40,7 @@ if not TLS_WANT_ERROR:
 
 class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
 
-    reactor = None
+    reactor = lazy(lambda self: Pyjo.IOLoop.singleton.reactor)
     handle = None
 
     _graceful = False
@@ -50,8 +51,6 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
 
     def __init__(self, handle, **kwargs):
         super(Pyjo_IOLoop_Stream, self).__init__(handle=handle, **kwargs)
-        if self.reactor is None:
-            self.reactor = Pyjo.IOLoop.singleton.reactor
 
     def __del__(self):
         self.close()
@@ -94,7 +93,7 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
         reactor = self.reactor
         if self._paused:
             self._paused = False
-            return reactor.watch(self.handle, 1, self.is_writting())
+            return reactor.watch(self.handle, True, self.is_writting())
 
         self = weakref.proxy(self)
 
@@ -109,8 +108,10 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
 
     def stop(self):
         if not self._paused:
-            self.reactor.watch(self.handle, 0, self.is_writing())
+            self.reactor.watch(self.handle, False, self.is_writing())
         self._paused = True
+
+    # TODO steal_handle
 
     @property
     def timeout(self):

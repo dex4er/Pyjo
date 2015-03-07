@@ -2,35 +2,45 @@
 Pyjo.IOLoop.Server
 """
 
-import socket
-
 import Pyjo.EventEmitter
 import Pyjo.IOLoop
+
+from Pyjo.Base import lazy
+
+import socket
+import weakref
 
 
 class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
 
-    reactor = None
+    reactor = lazy(lambda self: Pyjo.IOLoop.singleton.reactor)
     multi_accept = 50
-    reactor = None
     handle = None
 
-    def __init__(self, **kwargs):
-        super(Pyjo_IOLoop_Server, self).__init__(**kwargs)
-        if self.reactor is None:
-            self.reactor = Pyjo.IOLoop.singleton.reactor
+    _handles = lazy(lambda self: {})
 
     def __del__(self):
-        if dir(self.handle) and self.handle:
-            self.stop()
+        if dir(self.reactor):
+            if dir(self.handle) and self.handle:
+                self.stop()
+            for handle in self._handles.values():
+                self.reactor.remove(handle)
+
+    def generate_port(self):
+        listen = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        listen.bind(('127.0.0.1', 0))
+        listen.listen(5)
+        return listen.getsockname()[1]
 
     def listen(self, **kwargs):
         address = kwargs.get('address', '127.0.0.1')
         port = kwargs.get('port', 0)
         backlog = kwargs.get('backlog', socket.SOMAXCONN)
 
-        # TODO MOJO_REUSE
+        # TODO Allow file descriptor inheritance
+        # TODO Reuse file descriptor
 
+        # New socket
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind((address, port))
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -45,6 +55,7 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
     def start(self):
         def ready_cb(self, unused):
             self._accept()
+        self = weakref.proxy(self)
         self.reactor.io(lambda reactor, write: ready_cb(self, reactor), self.handle)
 
     def stop(self):

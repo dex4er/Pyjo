@@ -73,6 +73,7 @@ from Pyjo.Util import (
 )
 
 import importlib
+import os
 import weakref
 
 
@@ -90,34 +91,6 @@ class Pyjo_IOLoop(Pyjo.Base.object):
     """
     :mod:`Pyjo.IOLoop` inherits all attributes and methods from
     :mod:`Pyjo.Base` and implements the following new ones.
-    """
-
-    accept_interval = 0.025
-    """::
-
-        interval = loop.accept_interval
-        loop.accept_interval = 0.5
-
-    Interval in seconds for trying to reacquire the accept mutex, defaults to
-    ``0.025``. Note that changing this value can affect performance and idle CPU
-    usage.
-    """
-
-    lock = None
-    """::
-
-        cb = loop.lock
-        loop.lock = cb
-
-    A callback for acquiring the accept mutex, used to sync multiple server
-    processes. The callback should return true or false. Note that exceptions in
-    this callback are not captured. ::
-
-        def lock_cb(blocking):
-            # Got the accept mutex, start accepting new connections
-            return True
-
-        loop.lock = lock_cb
     """
 
     max_accepts = 0
@@ -140,19 +113,17 @@ class Pyjo_IOLoop(Pyjo.Base.object):
         loop.max_connections = 1000
 
     The maximum number of concurrent connections this event loop is allowed to
-    handle before stopping to accept new incoming connections, defaults to
-    ``1000``. Setting the value to ``0`` will make this event loop stop accepting
-    new connections and allow it to shut down gracefully without interrupting
-    existing connections.
+    handle before stopping to accept new incoming connections, defaults to ``1000``.
     """
 
-    multi_accept = 50
+    multi_accept = lazy(lambda self: 50 if self.max_connections > 50 else 1)
     """::
 
         multi = loop.multi_accept
         loop.multi_accept = 100
 
-    Number of connections to accept at once, defaults to ``50``.
+    Number of connections to accept at once, defaults to ``50`` or ``1``, depending
+    on if the value of :attr:`max_connections` is smaller than ``50``.
     """
 
     reactor = None
@@ -181,23 +152,13 @@ class Pyjo_IOLoop(Pyjo.Base.object):
         loop.reactor.remove(handle)
     """
 
-    unlock = None
-    """::
-
-        cb = loop.unlock
-        loop.unlock = cb
-
-    A callback for releasing the accept mutex, used to sync multiple server
-    processes. Note that exceptions in this callback are not captured.
-    """
-
     _acceptors = lazy(lambda self: {})
     _connections = lazy(lambda self: {})
 
-    _accepts = 0
+    _accepts = None
     _accept_timer = None
+    _accepting_timer = False
     _stop_timer = None
-    _accepting_timer = None
 
     def __init__(self, **kwargs):
         super(Pyjo_IOLoop, self).__init__(**kwargs)
@@ -227,12 +188,12 @@ class Pyjo_IOLoop(Pyjo.Base.object):
 
         # Connect acceptor with reactor
         cid = self._id()
+        acceptor.multi_accept = self.multi_accept
         self._acceptors[cid] = acceptor
-        if self.max_accepts:
-            self._accepts = self.max_accepts
+        acceptor.reactor = weakref.proxy(self.reactor)
 
         # Allow new acceptor to get picked up
-        self._not_accepting()
+        self._not_accepting()._maybe_accepting()
 
         return cid
 
@@ -258,9 +219,6 @@ class Pyjo_IOLoop(Pyjo.Base.object):
             def wrap(func):
                 return self.client(func, **kwargs)
             return wrap
-
-        # Make sure timers are running
-        self._recurring()
 
         cid = self._id()
         client = Pyjo.IOLoop.Client.new()
@@ -455,12 +413,12 @@ class Pyjo_IOLoop(Pyjo.Base.object):
 
         Remove everything and stop the event loop.
         """
-        for tasks in self._acceptors, self._connections:
-            for taskid in tasks:
-                self._remove(taskid)
+        self._acceptors = {}
+        self._connections = {}
+        self._accepting_timer = False
+        self._stop_timer = None
 
         self.reactor.reset()
-        self._stop()
         self.stop()
 
     def server(self, cb=None, **kwargs):
@@ -501,8 +459,21 @@ class Pyjo_IOLoop(Pyjo.Base.object):
         server = Pyjo.IOLoop.Server.new()
 
         def accept_cb(self, server, handle):
+            # Enforce connection limit (randomize to improve load balancing)
+            max_accepts = self.max_accepts
+            if max_accepts:
+                if self._accepts is None:
+                    self._accepts = max_accepts - int(rand(max_accepts / 2))
+                self._accepts -= 1
+                if self._accepts <= 0:
+                    self.stop_gracefully()
+
             stream = Pyjo.IOLoop.Stream.new(handle)
             cb(self, stream, self.stream(stream))
+
+            # Stop accepting if connection limit has been reached
+            if self._limit():
+                self._not_accepting()
 
         server.on(lambda server, handle: accept_cb(self, server, handle), 'accept')
         server.listen(**kwargs)
@@ -537,6 +508,11 @@ class Pyjo_IOLoop(Pyjo.Base.object):
         """
         self.reactor.stop()
 
+    def stop_gracefully(self):
+        self._not_accepting()
+        if self._stop_timer is None:
+            self._stop_timer = self.emit('finish').recurring(lambda self: self._stop(), 1)
+
     def stream(self, stream):
         """::
 
@@ -551,16 +527,7 @@ class Pyjo_IOLoop(Pyjo.Base.object):
         """
         # Find stream for id
         if isinstance(stream, str):
-            return self._connections[stream]['stream']
-
-        # Release accept mutex
-        self._not_accepting()
-
-        # Enforce connection limit (randomize to improve load balancing)
-        if self._accepts:
-            self._accepts -= int(rand(2) + 1)
-            if self._accepts <= 0:
-                self.max_connections = 0
+            return self._connections[stream]
 
         return self._stream(stream, self._id())
 
@@ -584,34 +551,6 @@ class Pyjo_IOLoop(Pyjo.Base.object):
             warn("-- Timer after {0} cb {1}".format(after, cb))
         return self._timer(cb, 'timer', after)
 
-    def _accepting(self):
-        # Check if we have acceptors
-        if not self._acceptors:
-            a = self._accept_timer
-            self._accept_timer = None
-            return self._remove(a)
-
-        # Check connection limit
-        i = len(self._connections)
-        max_conns = self.max_connections
-        if i >= max_conns:
-            return
-
-        # Acquire accept mutex
-        if self.lock:
-            self.lock(not i)
-
-        a = self._accept_timer
-        self._accept_timer = None
-        self._remove(a)
-
-        # Check if multi-accept is desirable
-        multi = self.multi_accept
-        for a in self._acceptors.values():
-            a.multi_accept = 1 if max_conns < multi else multi
-            a.start()
-        self._accepting_timer = True
-
     def _id(self):
         taskid = None
         while True:
@@ -620,39 +559,29 @@ class Pyjo_IOLoop(Pyjo.Base.object):
                 break
         return taskid
 
-    def _not_accepting(self):
-        # Make sure timers are running
-        self._recurring()
-
-        # Release accept mutex
-        if self._accepting_timer:
-            self._accepting_timer = False
+    def _limit(self):
+        if self._stop_timer:
+            return True
         else:
+            return len(self._connections) >= self.max_connections
+
+    def _maybe_accepting(self):
+        if self._accepting_timer or self._limit():
             return
+        else:
+            for acceptor in self._acceptors.values():
+                acceptor.start()
+            self._accepting_timer = True
 
-        cb = self.unlock
-        if not cb:
-            return
-
-        cb()
-
-        for a in self._acceptors.itervalues():
-            a.stop()
-
-    def _recurring(self):
-        if not self._accept_timer:
-
-            def accept_timer_cb(loop):
-                loop._accepting()
-
-            self._accept_timer = self.recurring(accept_timer_cb, self.accept_interval)
-
-        if not self._stop_timer:
-
-            def stop_timer_cb(loop):
-                loop._stop()
-
-            self._stop_timer = self.recurring(stop_timer_cb, 1)
+    def _not_accepting(self):
+        accepting = self._accepting_timer
+        self._accepting_timer = False
+        if not accepting:
+            return self
+        else:
+            for acceptor in self._acceptors.values():
+                acceptor.stop()
+            return self
 
     def _remove(self, taskid):
         # Timer
@@ -666,39 +595,31 @@ class Pyjo_IOLoop(Pyjo.Base.object):
 
         # Acceptor
         if taskid in self._acceptors:
-            self._acceptors[taskid].stop()
             del self._acceptors[taskid]
-            self._not_accepting()
+            return self._not_accepting()._maybe_accepting()
 
         # Connections
-        else:
-            if taskid in self._connections:
-                del self._connections[taskid]
+        if taskid in self._connections:
+            del self._connections[taskid]
+            self._maybe_accepting()
+            if DEBUG:
+                warn("-- {0} <<< {1} ({2})".format(taskid, os.getpid(), len(self._connections)))
 
     def _stop(self):
         if self._connections:
             return
 
-        if self.max_connections == 0:
-            self.stop()
-
-        if self._acceptors:
-            return
-
-        if self._accept_timer:
-            self._remove(self._accept_timer)
-            self._accept_timer = None
-
-        if self._stop_timer:
-            self._remove(self._stop_timer)
-            self._stop_timer = None
+        self._remove(self._stop_timer)
+        self._stop_timer = None
+        self.stop()
 
     def _stream(self, stream, cid):
-        # Make sure timers are running
-        self._recurring()
-
         # Connect stream with reactor
         self._connections[cid] = {'stream': stream}
+
+        if DEBUG:
+            warn("-- {0} >>> {1} ({2})".format(cid, os.getpid(), len(self._connections)))
+
         stream.reactor = weakref.proxy(self.reactor)
         self = weakref.proxy(self)
 
@@ -719,6 +640,8 @@ class Pyjo_IOLoop(Pyjo.Base.object):
 def new(*args, **kwargs):
     return Pyjo_IOLoop(*args, **kwargs)
 
+
+# TODO SIGPIPE ignore
 
 singleton = Pyjo_IOLoop()
 """::
