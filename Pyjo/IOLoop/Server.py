@@ -6,9 +6,13 @@ import Pyjo.EventEmitter
 import Pyjo.IOLoop
 
 from Pyjo.Base import lazy
+from Pyjo.Util import getenv, warn
 
 import socket
 import weakref
+
+
+DEBUG = getenv('PYJO_IOLOOP_DEBUG', False)
 
 
 class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
@@ -20,6 +24,9 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
     _handles = lazy(lambda self: {})
 
     def __del__(self):
+        if DEBUG:
+            warn("-- Method {0}.__del__".format(self))
+
         if dir(self.reactor):
             if dir(self.handle) and self.handle:
                 self.stop()

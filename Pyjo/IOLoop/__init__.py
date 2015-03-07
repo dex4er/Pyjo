@@ -595,6 +595,7 @@ class Pyjo_IOLoop(Pyjo.Base.object):
 
         # Acceptor
         if taskid in self._acceptors:
+            self._acceptors[taskid].stop()
             del self._acceptors[taskid]
             return self._not_accepting()._maybe_accepting()
 

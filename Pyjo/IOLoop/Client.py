@@ -39,7 +39,7 @@ if not TLS_WANT_ERROR:
     SSLWantReadError = SSLWantWriteError = NoneType
 
 
-DEBUG = getenv('PYJO_IOLOOP_CLIENT_DEBUG', 0)
+DEBUG = getenv('PYJO_IOLOOP_DEBUG', False)
 
 
 class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
