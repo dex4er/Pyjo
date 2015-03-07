@@ -81,7 +81,7 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.Select.object):
 
         # Wait for one event
         last = False
-        while not last:
+        while not last and self._running:
             # Stop automatically if there is nothing to watch
             if not self._timers and not self._ios:
                 return self.stop()
@@ -93,15 +93,17 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.Select.object):
             else:
                 timeout = 0.5
 
-            if timeout < 0:
+            if timeout <= 0:
                 timeout = 0
+            else:
+                timeout = int(timeout * 1000) + 1
 
             # I/O
             if self._ios:
-                events = poll.poll(timeout * 1000)
+                events = poll.poll(timeout)
                 for fd, flag in events:
                     if fd in self._ios:
-                        if flag & (select.POLLIN | select.POLLPRI | select.POLLHUP | select.POLLERR):
+                        if flag & (select.POLLIN | select.POLLPRI | select.POLLNVAL | select.POLLHUP | select.POLLERR):
                             io = self._ios[fd]
                             last = True
                             self._sandbox(io['cb'], 'Read', False)
@@ -112,7 +114,7 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.Select.object):
 
             # Wait for timeout if poll can't be used
             elif timeout:
-                time.sleep(timeout)
+                time.sleep(timeout / 1000)
 
             # Timers (time should not change in between timers)
             now = steady_time()

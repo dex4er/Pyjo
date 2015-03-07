@@ -135,7 +135,7 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.Base.object):
 
         # Wait for one event
         last = False
-        while not last:
+        while not last and self._running:
             # Stop automatically if there is nothing to watch
             if not self._timers and not self._ios:
                 return self.stop()
