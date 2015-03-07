@@ -10,6 +10,7 @@ import functools
 import hashlib
 import os
 import random
+import select
 import sys
 import time
 
@@ -2459,6 +2460,11 @@ def _decode(point, name):
         name = name[:-1]
 
     return u'&' + rest
+
+
+def _readable(fd):
+    readable, _, _ = select.select([fd], [], [], 0)
+    return fd in readable
 
 
 def _stash(obj, stash, *args, **kwargs):

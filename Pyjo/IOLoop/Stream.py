@@ -53,7 +53,8 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
         super(Pyjo_IOLoop_Stream, self).__init__(handle=handle, **kwargs)
 
     def __del__(self):
-        self.close()
+        if dir(self.reactor) and dir(self.handle) and self.handle:
+            self.close()
 
     def close(self):
         reactor = self.reactor
@@ -81,7 +82,7 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
         self._again()
         if not self.handle:
             return None
-        return self.handle and self.reactor.is_readable(self.handle)
+        return self.handle and Pyjo.Util._readable(self.handle.fileno())
 
     def is_writing(self):
         if not self.handle:
