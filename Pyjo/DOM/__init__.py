@@ -670,34 +670,6 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         else:
             return self._build(tree, self.xml)
 
-    def to_dict(self):
-        return self.attr()
-
-    def to_str(self):
-        return self.html.render()
-
-    @property
-    def text(self):
-        """::
-
-            trimmed = dom.text
-
-        Extract text content from this element only (not including child elements),
-        smart whitespace trimming is enabled. ::
-
-            # "foo baz"
-            dom.parse("<div>foo\\n<p>bar</p>baz\\n</div>").at('div').text
-        """
-        return self._all_text(False, True)
-
-    @property
-    def tree(self):
-        return self.html.tree
-
-    @tree.setter
-    def tree(self, value):
-        self.html.tree = value
-
     @property
     def tag(self):
         """::
@@ -721,6 +693,34 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         tree = self.tree
         if tree[0] == 'tag':
             tree[1] = value
+
+    @property
+    def text(self):
+        """::
+
+            trimmed = dom.text
+
+        Extract text content from this element only (not including child elements),
+        smart whitespace trimming is enabled. ::
+
+            # "foo baz"
+            dom.parse("<div>foo\\n<p>bar</p>baz\\n</div>").at('div').text
+        """
+        return self._all_text(False, True)
+
+    def to_dict(self):
+        return self.attr()
+
+    def to_str(self):
+        return self.html.render()
+
+    @property
+    def tree(self):
+        return self.html.tree
+
+    @tree.setter
+    def tree(self, value):
+        self.html.tree = value
 
     def wrap(self, string):
         """::
