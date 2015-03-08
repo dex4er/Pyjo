@@ -268,7 +268,7 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
             self._handle = ssl_handle
         except SSLError:
             return self.emit('error', 'TLS upgrade failed')
-        reactor.io(lambda reactor: self._tls(), ssl_handle).watch(ssl_handle, False, True)
+        reactor.io(lambda reactor, write: self._tls(), ssl_handle).watch(ssl_handle, False, True)
 
 
 new = Pyjo_IOLoop_Client.new
