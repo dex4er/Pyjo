@@ -69,22 +69,6 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             self.parse(html)
 
     @property
-    def all_contents(self):
-        """::
-
-            collection = dom.all_contents
-
-        Return a :mod:`Pyjo.Collection` object containing all nodes in DOM structure as
-        :mod:`Pyjo.DOM` objects. ::
-
-            # "<p><b>123</b></p>"
-            dom.parse('<p><!-- Test --><b>123<!-- 456 --></b></p>') \\
-               .all_contents \\
-               .grep(lambda i: i.node == 'comment').map('remove').first()
-        """
-        return self._collect(self._all(self._nodes(self.tree)))
-
-    @property
     def all_text(self, trim=True):
         """::
 
@@ -325,6 +309,22 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             divs = dom.find('div.foo\.bar').to_list()
         """
         return self._collect(self._css.select(pattern))
+
+    @property
+    def descendant_nodes(self):
+        """::
+
+            collection = dom.descendant_nodes
+
+        Return a :mod:`Pyjo.Collection` object containing all descendant nodes of this
+        element as :mod:`Pyjo.DOM` objects. ::
+
+            # "<p><b>123</b></p>"
+            dom.parse('<p><!-- Test --><b>123<!-- 456 --></b></p>') \\
+               .descendant_nodes \\
+               .grep(lambda i: i.node == 'comment').map('remove').first()
+        """
+        return self._collect(self._all(self._nodes(self.tree)))
 
     def following(self, pattern=None):
         """::

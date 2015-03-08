@@ -51,12 +51,6 @@ if __name__ == '__main__':
     isa_ok(dom.html, Pyjo.DOM.HTML.object, "dom.html")
     is_ok(dom.html.render(), "", "dom.html.render()")
 
-    # all_contents
-    is_ok(dom.parse('<p><!-- Test --><b>123<!-- 456 --></b></p>')
-          .all_contents
-          .grep(lambda i: i.node == 'comment').map('remove').first(),
-          "<p><b>123</b></p>", 'all_contents result')
-
     # all_text
     is_ok(dom.parse("<div>foo\n<p>bar</p>baz\n</div>").at('div').all_text,
           "foo bar baz", 'all_text result')
@@ -131,6 +125,12 @@ if __name__ == '__main__':
     is_ok(dom.parse('<div><!-- Test -->456</div>')
           .at('div').child_nodes.first().set(content=' 123 ').root,
           "<div><!-- 123 -->456</div>", 'content result')
+
+    # descendant_nodes
+    is_ok(dom.parse('<p><!-- Test --><b>123<!-- 456 --></b></p>')
+          .descendant_nodes
+          .grep(lambda i: i.node == 'comment').map('remove').first(),
+          "<p><b>123</b></p>", 'descendant_nodes result')
 
     # find
     is_ok(dom.parse('<div id="a"></div><div id="b"></div><div id="c"></div>')
