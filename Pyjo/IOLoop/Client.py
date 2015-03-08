@@ -1,5 +1,56 @@
 """
-Pyjo.IOLoop.Client
+Pyjo.IOLoop.Client - Non-blocking TCP client
+::
+
+    import Pyjo.IOLoop.Client
+
+    # Create socket connection
+    client = Pyjo.IOLoop.Client.new()
+
+    @client.on
+    def connect(client, handle):
+        ...
+
+    @client.on
+    def error(client, err):
+        ...
+
+    client.connect(address='example.com', port=80)
+
+    # Start reactor if necessary
+    if not client.reactor.is_running:
+        client.reactor.start()
+
+:mod:`Pyjo.IOLoop.Client` opens TCP connections for :mod:`Pyjo.IOLoop`.
+
+Events
+------
+
+:mod:`Pyjo.IOLoop.Client` inherits all events from :mod:`Pyjo.EventEmitter` and can
+emit the following new ones.
+
+connect
+~~~~~~~
+::
+
+    @client.on
+    def connect(client, handle):
+        ...
+
+Emitted once the connection is established.
+
+error
+~~~~~
+::
+
+    @client.on
+    def error(client, err):
+        ...
+
+Emitted if an error occurs on the connection, fatal if unhandled.
+
+Classes
+-------
 """
 
 import Pyjo.EventEmitter
@@ -41,10 +92,22 @@ DEBUG = getenv('PYJO_IOLOOP_DEBUG', False)
 
 
 class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
+    """
+    :mod:`Pyjo.IOLoop.Client` inherits all attributes and methods from
+    :mod:`Pyjo.EventEmitter` and implements the following new ones.
+    """
 
     reactor = lazy(lambda self: Pyjo.IOLoop.singleton.reactor)
-    handle = None
+    """::
 
+        reactor = client.reactor
+        client.reactor = Pyjo.Reactor.Poll.new()
+
+    Low-level event reactor, defaults to the :attr:`reactor` attribute value of the
+    global :mod:`Pyjo.IOLoop` singleton.
+    """
+
+    _handle = None
     _timer = None
 
     def __del__(self):
@@ -54,6 +117,88 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
         self._cleanup()
 
     def connect(self, **kwargs):
+        """::
+
+            client.connect(address='127.0.0.1', port=3000)
+
+        Open a socket connection to a remote host.
+
+        These options are currently available:
+
+        address
+        ~~~~~~~
+        ::
+
+            address='mojolicio.us'
+
+        Address or host name of the peer to connect to, defaults to ``127.0.0.1``.
+
+        handle
+        ~~~~~~
+        ::
+
+            handle=handle
+
+        Use an already prepared handle.
+
+        local_address
+        ~~~~~~~~~~~~~
+        ::
+
+            local_address='127.0.0.1'
+
+        Local address to bind to.
+
+        port
+        ~~~~
+        ::
+
+            port=80
+
+        Port to connect to, defaults to ``80`` or ``443`` with ``tls`` option.
+
+        timeout
+        ~~~~~~~
+        ::
+
+            timeout=15
+
+        Maximum amount of time in seconds establishing connection may take before
+        getting canceled, defaults to ``10``.
+
+        tls
+        ~~~
+        ::
+
+            tls=True
+
+        Enable TLS.
+
+        tls_ca
+        ~~~~~~
+        ::
+
+            tls_ca='/etc/tls/ca.crt'
+
+        Path to TLS certificate authority file. Also activates hostname verification.
+
+        tls_cert
+        ~~~~~~~~
+        ::
+
+            tls_cert='/etc/tls/client.crt'
+
+        Path to the TLS certificate file.
+
+        tls_key
+        ~~~~~~~
+        ::
+
+            tls_key='/etc/tls/client.key'
+
+        Path to the TLS key file.
+        """
+
         reactor = self.reactor
         timeout = kwargs.get('timeout', 10)
 
@@ -73,31 +218,6 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
 
         return reactor.next_tick(lambda reactor: resolved_cb(self))
 
-    def start(self):
-        def ready_cb(self):
-            self._accept()
-        self.reactor.io(lambda reactor: ready_cb(self), self.handle)
-
-    def stop(self):
-        self.reactor.remove(self.handle)
-
-    def _accept(self):
-        # Greedy accept
-        for _ in range(0, self.multi_accept):
-            try:
-                (handle, unused) = self.handle.accept()
-            except:
-                return  # TODO EAGAIN because non-blocking mode
-            if not handle:
-                return
-            handle.setblocking(0)
-
-            # Disable Nagle's algorithm
-            handle.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-
-            self.emit('accept', handle)
-            # TODO TLS
-
     def _cleanup(self):
         reactor = self.reactor
 
@@ -108,16 +228,16 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
             reactor.remove(self._timer)
             self._timer = None
 
-        if self.handle:
-            reactor.remove(self.handle)
-            self.handle = None
+        if self._handle:
+            reactor.remove(self._handle)
+            self._handle = None
 
         return self
 
     def _connect(self, **kwargs):
         handle = kwargs.get('handle')
         if not handle:
-            handle = self.handle
+            handle = self._handle
         if not handle:
             address = kwargs.get('address', 'localhost')
             port = self._port(**kwargs)
@@ -125,7 +245,7 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
             handle = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             handle.connect((address, port))
             # TODO return self.emit('error', "Can't connect: " + str(e))
-            self.handle = handle
+            self._handle = handle
 
         handle.setblocking(0)
 
@@ -138,9 +258,15 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
 
         self.reactor.io(lambda reactor, write: ready_cb(self, reactor, **kwargs), handle).watch(handle, False, True)
 
+    def _port(self, **kwargs):
+        port = kwargs.get('port')
+        if not port:
+            port = 80
+        return port
+
     def _ready(self, **kwargs):
         # Retry or handle exceptions
-        handle = self.handle
+        handle = self._handle
 
         # Disable Nagle's algorithm
         handle.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
@@ -148,14 +274,8 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
         # TODO TLS, Socks
         return self._try_tls(**kwargs)
 
-    def _port(self, **kwargs):
-        port = kwargs.get('port')
-        if not port:
-            port = 80
-        return port
-
     def _tls(self):
-        handle = self.handle
+        handle = self._handle
         while True:
             try:
                 handle.do_handshake()
@@ -170,7 +290,7 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
         return self.emit('error', 'TLS upgrade failed')
 
     def _try_tls(self, **kwargs):
-        handle = self.handle
+        handle = self._handle
         if not kwargs.get('tls', False) or (TLS and isinstance(handle, ssl.SSLSocket)):
             return self._cleanup().emit('connect', handle)
         if not TLS:
@@ -180,7 +300,7 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
         reactor.remove(handle)
         try:
             ssl_handle = ssl.wrap_socket(handle, do_handshake_on_connect=False) # TODO options
-            self.handle = ssl_handle
+            self._handle = ssl_handle
         except SSLError:
             return self.emit('error', 'TLS upgrade failed')
         reactor.io(lambda reactor: self._tls(), ssl_handle).watch(ssl_handle, False, True)
