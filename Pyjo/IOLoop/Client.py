@@ -11,8 +11,6 @@ from Pyjo.Util import getenv, warn
 import socket
 import weakref
 
-from socket import AF_INET, IPPROTO_TCP, TCP_NODELAY, SOCK_STREAM
-
 
 NoneType = None.__class__
 
@@ -95,7 +93,7 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
             handle.setblocking(0)
 
             # Disable Nagle's algorithm
-            handle.setsockopt(IPPROTO_TCP, TCP_NODELAY, 1)
+            handle.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 
             self.emit('accept', handle)
             # TODO TLS
@@ -124,7 +122,7 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
             address = kwargs.get('address', 'localhost')
             port = self._port(**kwargs)
 
-            handle = socket.socket(AF_INET, SOCK_STREAM)
+            handle = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             handle.connect((address, port))
             # TODO return self.emit('error', "Can't connect: " + str(e))
             self.handle = handle
@@ -145,7 +143,7 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
         handle = self.handle
 
         # Disable Nagle's algorithm
-        handle.setsockopt(IPPROTO_TCP, TCP_NODELAY, 1)
+        handle.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 
         # TODO TLS, Socks
         return self._try_tls(**kwargs)
