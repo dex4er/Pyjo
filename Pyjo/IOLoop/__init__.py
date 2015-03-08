@@ -639,8 +639,6 @@ def new(*args, **kwargs):
     return Pyjo_IOLoop(*args, **kwargs)
 
 
-# TODO SIGPIPE ignore
-
 singleton = Pyjo_IOLoop()
 """::
 
