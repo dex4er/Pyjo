@@ -18,6 +18,9 @@ Pyjo.Parameters - Parameters
 
 :mod:`Pyjo.Parameters` is a container for form parameters used by :mod:`Pyjo.URL`
 and based on :rfc:`3986` as well as `the HTML Living Standard <https://html.spec.whatwg.org>`_.
+
+Classes
+-------
 """
 
 import Pyjo.Base
@@ -29,16 +32,9 @@ from Pyjo.Util import b, u, isiterable, url_escape, url_unescape
 
 
 class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
-    """::
-
-        params = Pyjo.Parameters.new()
-        params = Pyjo.Parameters.new('foo=b%3Bar&baz=23')
-        params = Pyjo.Parameters.new(foo='b&ar')
-        params = Pyjo.Parameters.new(foo=['ba&r', 'baz'])
-        params = Pyjo.Parameters.new(foo=['bar', 'baz'], bar=23)
-
-    Construct a new :mod:`Pyjo.Parameters` object and :meth:`parse` parameters if
-    necessary.
+    """
+    :mod:`Pyjo.Parameters` inherits all attributes and methods from
+    :mod:`Pyjo.Base` and :mod:`Pyjo.Mixin.String` and implements the following new ones.
     """
 
     charset = 'utf-8'
@@ -57,6 +53,17 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
     _string = None
 
     def __init__(self, *args, **kwargs):
+        """::
+
+            params = Pyjo.Parameters.new()
+            params = Pyjo.Parameters.new('foo=b%3Bar&baz=23')
+            params = Pyjo.Parameters.new(foo='b&ar')
+            params = Pyjo.Parameters.new(foo=['ba&r', 'baz'])
+            params = Pyjo.Parameters.new(foo=['bar', 'baz'], bar=23)
+
+        Construct a new :mod:`Pyjo.Parameters` object and :meth:`parse` parameters if
+        necessary.
+        """
         super(Pyjo_Parameters, self).__init__()
         self.parse(*args, **kwargs)
 

@@ -33,6 +33,9 @@ Pyjo.URL- Uniform Resource Locator
 :rfc:`3987` and the
 `URL Living Standard <https://url.spec.whatwg.org>`_ for Uniform Resource
 Locators with support for IDNA and IRIs.
+
+Classes
+-------
 """
 
 import Pyjo.Base
@@ -45,12 +48,9 @@ from Pyjo.Util import b, u, url_escape, url_unescape
 
 
 class Pyjo_URL(Pyjo.Base.object, Pyjo.Mixin.String.object):
-    """::
-
-        url = Pyjo.URL.new()
-        url = Pyjo.URL.new('http://127.0.0.1:3000/foo?f=b&baz=2#foo')
-
-    Construct a new :mod:`Pyjo.URL` object and :meth:`parse` URL if necessary.
+    """
+    :mod:`Pyjo.URL` inherits all attributes and methods from
+    :mod:`Pyjo.Base` and :mod:`Pyjo.Mixin.String` and implements the following new ones.
     """
 
     fragment = None

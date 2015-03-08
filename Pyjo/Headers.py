@@ -23,6 +23,9 @@ Pyjo.Headers - Headers
 :mod:`Pyjo.Headers` is a container for HTTP headers based on
 :rfc:`7230` and
 :rfc:`7231`.
+
+Classes
+-------
 """
 
 import Pyjo.Base
@@ -50,12 +53,9 @@ NORMALCASE = dict(map(lambda i: (b(i.lower()), b(i)), [
 
 
 class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
-    """::
-
-        headers = Pyjo.Headers.new()
-        headers = Pyjo.Headers.new(b"Content-Type: text/plain\\x0d\\x0a\\x0d\\x0a")
-
-    Construct a new :mod`Pyjo.Headers` object and :meth:`parse` headers if necessary.
+    """
+    :mod:`Pyjo.Heaaders` inherits all attributes and methods from
+    :mod:`Pyjo.Base` and :mod:`Pyjo.Mixin.String` and implements the following new ones.
     """
 
     max_line_size = int(getenv('PYJO_MAX_LINE_SIZE', 0)) or 10240
@@ -86,6 +86,13 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
     _state = None
 
     def __init__(self, path=None):
+        """::
+
+            headers = Pyjo.Headers.new()
+            headers = Pyjo.Headers.new(b"Content-Type: text/plain\\x0d\\x0a\\x0d\\x0a")
+
+        Construct a new :mod`Pyjo.Headers` object and :meth:`parse` headers if necessary.
+        """
         super(Pyjo_Headers, self).__init__()
         if path is not None:
             self.parse(path)

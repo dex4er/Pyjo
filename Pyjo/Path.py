@@ -18,6 +18,9 @@ Pyjo.Path - Path
 
 :mod:`Pyjo.Path` is a container for paths used by :mod:`Pyjo.URL` and based on
 :rfc:`3986`.
+
+Classes
+-------
 """
 
 import Pyjo.Base
@@ -27,12 +30,9 @@ from Pyjo.Util import b, u, url_escape, url_unescape
 
 
 class Pyjo_Path(Pyjo.Base.object, Pyjo.Mixin.String.object):
-    """::
-
-        path = Pyjo.Path.new()
-        path = Pyjo.Path.new('/foo%2Fbar%3B/baz.html')
-
-    Construct a new :mod`Pyjo.Path` object and :meth:`parse` path if necessary.
+    """
+    :mod:`Pyjo.Path` inherits all attributes and methods from
+    :mod:`Pyjo.Base` and :mod:`Pyjo.Mixin.String` and implements the following new ones.
     """
 
     charset = 'utf-8'
@@ -53,6 +53,13 @@ class Pyjo_Path(Pyjo.Base.object, Pyjo.Mixin.String.object):
     _trailing_slash = False
 
     def __init__(self, path=None):
+        """::
+
+            path = Pyjo.Path.new()
+            path = Pyjo.Path.new('/foo%2Fbar%3B/baz.html')
+
+        Construct a new :mod`Pyjo.Path` object and :meth:`parse` path if necessary.
+        """
         super(Pyjo_Path, self).__init__()
         if path is not None:
             self.parse(path)
