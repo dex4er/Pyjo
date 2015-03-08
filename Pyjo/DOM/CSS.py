@@ -543,15 +543,15 @@ class Pyjo_DOM_CSS(Pyjo.Base.object):
                 args = [-1, 1]
 
         # ":nth-*"
-        if pclass == m(r'^nth-'):
-            if pclass == m(r'of-type$'):
+        if pclass.startswith('nth-'):
+            if pclass.endswith('of-type'):
                 ptype = current[1]
             else:
                 ptype = None
             siblings = list(self._siblings(current, ptype))
 
             # ":nth-last-*"
-            if pclass == m(r'^nth-last'):
+            if pclass.startswith('nth-last'):
                 siblings.reverse()
 
             for i in range(len(siblings)):
@@ -649,15 +649,14 @@ class Pyjo_DOM_CSS(Pyjo.Base.object):
         return siblings
 
     def _unescape(self, value):
-
         # Remove escaped newlines
-        value -= s(r'\\\n', '', 'g')
+        value = value.replace('\\\n', '')
 
         # Unescape Unicode characters
         value -= s(r'\\([0-9a-fA-F]{1,6})\s?', lambda g: uchr(int(g[1], 16)), 'g')
 
         # Remove backslash
-        value -= s(r'\\', '', 'g')
+        value = value.replace('\\', '')
 
         return value
 

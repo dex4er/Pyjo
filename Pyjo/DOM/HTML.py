@@ -210,7 +210,7 @@ class Pyjo_DOM_HTML(Pyjo.Base.object):
                     text = '<'
 
             if text is not None:
-                node = _node(current, 'text', html_unescape(text))
+                node = self._node(current, 'text', html_unescape(text))
                 if node:
                     current = node
 
@@ -220,7 +220,7 @@ class Pyjo_DOM_HTML(Pyjo.Base.object):
                 # End
                 g = tag == m(r'^\/\s*(\S+)')
                 if g:
-                    node = _end(g[1] if xml else g[1].lower(), xml, current)
+                    node = self._end(g[1] if xml else g[1].lower(), xml, current)
                     if node:
                         current = node
 
@@ -263,43 +263,43 @@ class Pyjo_DOM_HTML(Pyjo.Base.object):
                         if not xml and start == 'image':
                             start = 'img'
 
-                        current = _start(start, attrs, xml, current)
+                        current = self._start(start, attrs, xml, current)
 
                         # Element without end tag (self-closing)
                         if not xml and start in EMPTY or (xml or start not in BLOCK) and closing:
-                            current = _end(start, xml, current)
+                            current = self._end(start, xml, current)
 
                         # Raw text elements
                         if xml or start not in RAW and start not in RCDATA:
                             continue
                         if rawtag is None:
                             continue
-                        current = _node(current, 'raw', html_unescape(raw) if start in RCDATA else raw)
-                        node = _end(start, 0, current)
+                        current = self._node(current, 'raw', html_unescape(raw) if start in RCDATA else raw)
+                        node = self._end(start, 0, current)
                         if node:
                             current = node
 
             # DOCTYPE
             elif doctype is not None:
-                node = _node(current, 'doctype', doctype)
+                node = self._node(current, 'doctype', doctype)
                 if node:
                     current = node
 
             # Comment
             elif comment is not None:
-                node = _node(current, 'comment', comment)
+                node = self._node(current, 'comment', comment)
                 if node:
                     current = node
 
             # CDATA
             elif cdata is not None:
-                node = _node(current, 'cdata', cdata)
+                node = self._node(current, 'cdata', cdata)
                 if node:
                     current = node
 
             # Processing instruction
             elif pi is not None:
-                node = _node(current, 'pi', pi)
+                node = self._node(current, 'pi', pi)
                 if node:
                     current = node
 
@@ -313,135 +313,131 @@ class Pyjo_DOM_HTML(Pyjo.Base.object):
 
         Render DOM to HTML/XML.
         """
-        return _render(self.tree, self.xml)
+        return self._render(self.tree, self.xml)
 
+    def _end(self, end, xml, current):
 
-def _end(end, xml, current):
+        # Search stack for start tag
+        nextnode = current
+        while nextnode is not None:
+            # Ignore useless end tag
+            if nextnode[0] == 'root':
+                return
 
-    # Search stack for start tag
-    nextnode = current
-    while nextnode is not None:
-        # Ignore useless end tag
-        if nextnode[0] == 'root':
-            return
+            # Right tag
+            if nextnode[1] == end:
+                return nextnode[3]
 
-        # Right tag
-        if nextnode[1] == end:
-            return nextnode[3]
+            # Phrasing content can only cross phrasing content
+            if not xml and end in PHRASING and nextnode[1] not in PHRASING:
+                return
 
-        # Phrasing content can only cross phrasing content
-        if not xml and end in PHRASING and nextnode[1] not in PHRASING:
-            return
+            nextnode = nextnode[3]
+            if nextnode is None:
+                break
 
-        nextnode = nextnode[3]
-        if nextnode is None:
-            break
+    def _node(self, current, nodetype, content):
+        new = [nodetype, content, current]  # TODO weakref new[2]
+        current.append(new)
+        return current
 
+    def _render(self, tree, xml):
+        nodetype = tree[0]
 
-def _node(current, nodetype, content):
-    new = [nodetype, content, current]  # TODO weakref new[2]
-    current.append(new)
-    return current
+        # Text (escaped)
+        if nodetype == 'text':
+            return xml_escape(tree[1])
 
+        # Raw text
+        if nodetype == 'raw':
+            return tree[1]
 
-def _render(tree, xml):
-    nodetype = tree[0]
+        # DOCTYPE
+        if nodetype == 'doctype':
+            return '<!DOCTYPE' + tree[1] + '>'
 
-    # Text (escaped)
-    if nodetype == 'text':
-        return xml_escape(tree[1])
+        # Comment
+        if nodetype == 'comment':
+            return '<!--' + tree[1] + '-->'
 
-    # Raw text
-    if nodetype == 'raw':
-        return tree[1]
+        # CDATA
+        if nodetype == 'cdata':
+            return '<![CDATA[' + tree[1] + ']]>'
 
-    # DOCTYPE
-    if nodetype == 'doctype':
-        return '<!DOCTYPE' + tree[1] + '>'
+        # Processing instruction
+        if nodetype == 'pi':
+            return '<?' + tree[1] + '?>'
 
-    # Comment
-    if nodetype == 'comment':
-        return '<!--' + tree[1] + '-->'
+        # Start tag
+        result = ''
+        if nodetype == 'tag':
+            # Open tag
+            tag = tree[1]
+            result += '<' + tag
 
-    # CDATA
-    if nodetype == 'cdata':
-        return '<![CDATA[' + tree[1] + ']]>'
+            # Attributes
+            attrs = []
 
-    # Processing instruction
-    if nodetype == 'pi':
-        return '<?' + tree[1] + '?>'
+            for key in sorted(tree[2].keys()):
+                # No value
+                if key not in tree[2] or tree[2][key] is None:
+                    attrs.append(key)
+                else:
+                    value = tree[2][key]
+                    attrs.append(key + '="' + xml_escape(value) + '"')
 
-    # Start tag
-    result = ''
-    if nodetype == 'tag':
-        # Open tag
-        tag = tree[1]
-        result += '<' + tag
+            if attrs:
+                result += ' ' + ' '.join(attrs)
 
-        # Attributes
-        attrs = []
+            # Element without end tag
+            if len(tree) <= 4:
+                if xml:
+                    return result + ' />'
+                elif tag in EMPTY:
+                    return result + '>'
+                else:
+                    return result + '></' + tag + '>'
 
-        for key in sorted(tree[2].keys()):
-            # No value
-            if key not in tree[2] or tree[2][key] is None:
-                attrs.append(key)
-            else:
-                value = tree[2][key]
-                attrs.append(key + '="' + xml_escape(value) + '"')
+            # Close tag
+            result += '>'
 
-        if attrs:
-            result += ' ' + ' '.join(attrs)
+        # Render whole tree
+        if nodetype == 'root':
+            start = 1
+        else:
+            start = 4
+        for t in tree[start:]:
+            result += self._render(t, xml)
 
-        # Element without end tag
-        if len(tree) <= 4:
-            if xml:
-                return result + ' />'
-            elif tag in EMPTY:
-                return result + '>'
-            else:
-                return result + '></' + tag + '>'
+        # End tag
+        if nodetype == 'tag':
+            result += '</' + tree[1] + '>'
 
-        # Close tag
-        result += '>'
+        return result
 
-    # Render whole tree
-    if nodetype == 'root':
-        start = 1
-    else:
-        start = 4
-    for t in tree[start:]:
-        result += _render(t, xml)
+    def _start(self, start, attrs, xml, current):
+        # Autoclose optional HTML elements
+        if not xml and current[0] != 'root':
+            if start in END:
+                node = self._end(END[start], 0, current)
+                if node:
+                    current = node
+            elif start in CLOSE:
+                allowed, scope = CLOSE[start]
 
-    # End tag
-    if nodetype == 'tag':
-        result += '</' + tree[1] + '>'
+                # Close allowed parent elements in scope
+                parent = current
+                while parent[0] != 'root' and parent[1] not in scope:
+                    if parent[1] in allowed:
+                        node = self._end(parent[1], 0, current)
+                        if node:
+                            current = node
+                    parent = parent[3]
 
-    return result
-
-
-def _start(start, attrs, xml, current):
-    # Autoclose optional HTML elements
-    if not xml and current[0] != 'root':
-        if start in END:
-            node = _end(END[start], 0, current)
-            if node:
-                current = node
-        elif start in CLOSE:
-            allowed, scope = CLOSE[start]
-
-            # Close allowed parent elements in scope
-            parent = current
-            while parent[0] != 'root' and parent[1] not in scope:
-                if parent[1] in allowed:
-                    node = _end(parent[1], 0, current)
-                    if node:
-                        current = node
-                parent = parent[3]
-
-    # New tag
-    new = ['tag', start, attrs, current]
-    current.append(new)
-    return new
+        # New tag
+        new = ['tag', start, attrs, current]
+        current.append(new)
+        return new
 
 
 new = Pyjo_DOM_HTML.new
