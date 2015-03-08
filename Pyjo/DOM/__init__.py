@@ -342,16 +342,16 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         """
         return self._select(self._collect(self._siblings(True)[1]), pattern)
 
-    def following_siblings(self):
+    def following_nodes(self):
         """::
-            collection = dom.following_siblings()
+            collection = dom.following_nodes()
 
-        Return a :mod:`Pyjo.Collection` object containing the sibling nodes after this
+        Return a :mod:`Pyjo.Collection` object containing all sibling nodes after this
         node as :mod:`Pyjo.DOM` objects. ::
 
             # "C"
             dom.parse('<p>A</p><!-- B -->C')
-               .at('p').following_siblings().last().content
+               .at('p').following_nodes().last().content
         """
         return self._collect(self._siblings(False)[1])
 

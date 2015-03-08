@@ -150,10 +150,10 @@ if __name__ == '__main__':
           .following().map('type').join("\n"),
           "i\np", 'following result')
 
-    # following_siblings
+    # following_nodes
     is_ok(dom.parse('<p>A</p><!-- B -->C')
-          .at('p').following_siblings().last().content,
-          "C", 'following_siblings')
+          .at('p').following_nodes().last().content,
+          "C", 'following_nodes')
 
     # match
     ok(dom.parse('<p class="a">A</p>').at('p').match('.a'), 'match result is True')
