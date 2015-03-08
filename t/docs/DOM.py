@@ -175,14 +175,14 @@ if __name__ == '__main__':
     is_ok(dom.parse('<div><h1>Test</h1><h2>123</h2></div>').at('h1').next,
           "<h2>123</h2>", 'next result')
 
-    # next_sibling
+    # next_node
     is_ok(dom.parse('<p><b>123</b><!-- Test -->456</p>')
-          .at('b').next_sibling.next_sibling,
-          "456", 'next_sibling')
+          .at('b').next_node.next_node,
+          "456", 'next_node')
 
     is_ok(dom.parse('<p><b>123</b><!-- Test -->456</p>')
-          .at('b').next_sibling.content,
-          " Test ", 'next_sibling')
+          .at('b').next_node.content,
+          " Test ", 'next_node')
 
     # preceding
     is_ok(dom.parse('<b>foo</b><i>bar</i><p>baz</p>').at('p')
@@ -218,14 +218,14 @@ if __name__ == '__main__':
     is_ok(dom.parse('<div><h1>Test</h1><h2>123</h2></div>').at('h2').previous,
           "<h1>Test</h1>", 'previous result')
 
-    # previous_sibling
+    # previous_node
     is_ok(dom.parse('<p>123<!-- Test --><b>456</b></p>')
-          .at('b').previous_sibling.previous_sibling,
-          "123", 'previous_sibling result')
+          .at('b').previous_node.previous_node,
+          "123", 'previous_node result')
 
     is_ok(dom.parse('<p>123<!-- Test --><b>456</b></p>')
-          .at('b').previous_sibling.content,
-          " Test ", 'previous_sibling result')
+          .at('b').previous_node.content,
+          " Test ", 'previous_node result')
 
     # raw_text
     is_ok(dom.parse("<div>foo\n<p>bar</p>baz\n</div>").at('div').raw_text,

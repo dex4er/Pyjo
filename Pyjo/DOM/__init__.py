@@ -432,21 +432,21 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         return self._maybe(self._siblings(True, 0)[1])
 
     @property
-    def next_sibling(self):
+    def next_node(self):
         """::
 
-            sibling = dom.next_sibling
+            sibling = dom.next_node
 
         Return :mod:`Pyjo.DOM` object for next sibling node or :class:`None` if there are
         no more siblings. ::
 
             # "456"
             dom.parse('<p><b>123</b><!-- Test -->456</p>') \\
-               .at('b').next_sibling.next_sibling
+               .at('b').next_node.next_node
 
             # " Test "
             dom.parse('<p><b>123</b><!-- Test -->456</p>') \\
-               .at('b').next_sibling.content
+               .at('b').next_node.content
         """
         return self._maybe(self._siblings(False, 0)[1])
 
@@ -568,21 +568,21 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         return self._maybe(self._siblings(True, -1)[0])
 
     @property
-    def previous_sibling(self):
+    def previous_node(self):
         """::
 
-            sibling = dom.previous_sibling
+            sibling = dom.previous_node
 
         Return :mod:`Pyjo.DOM` object for previous sibling node or :class:`None` if there
         are no more siblings. ::
 
             # "123"
             dom.parse('<p>123<!-- Test --><b>456</b></p>') \\
-               .at('b').previous_sibling.previous_sibling
+               .at('b').previous_node.previous_node
 
             # " Test "
             dom.parse('<p>123<!-- Test --><b>456</b></p>') \\
-               .at('b').previous_sibling.content
+               .at('b').previous_node.content
         """
         return self._maybe(self._siblings(False, -1)[0])
 
