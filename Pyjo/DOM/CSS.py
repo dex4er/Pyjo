@@ -264,6 +264,9 @@ E[foo=bar][bar=baz]
 An ``E`` element whose attributes match all following attribute selectors. ::
 
     links = css.select('a[foo^=b][foo$=ar]')
+
+Classes
+-------
 """
 
 
@@ -295,11 +298,9 @@ TOKEN_RE = r'''
 
 
 class Pyjo_DOM_CSS(Pyjo.Base.object):
-    """::
-
-        html = Pyjo.DOM.CSS.new()
-
-    Construct a new :mod:`Pyjo.DOM.CSS` object.
+    """
+    :mod:`Pyjo.DOM.CSS` inherits all attributes and methods from
+    :mod:`Pyjo.Base` and implements the following new ones.
     """
 
     tree = None

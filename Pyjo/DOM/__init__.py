@@ -32,6 +32,9 @@ Pyjo.DOM - Minimalistic HTML/XML DOM parser with CSS selectors
 :mod:`Pyjo.DOM` is a minimalistic and relaxed HTML/XML DOM parser with CSS
 selector support. It will even try to interpret broken HTML and XML, so you
 should not use it for validation.
+
+Classes
+-------
 """
 
 
@@ -48,16 +51,20 @@ from Pyjo.Util import squish, u
 
 
 class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
-    """::
-
-        dom = Pyjo.DOM.new()
-
-    Construct a new :mod:`Pyjo.DOM` object.
+    """
+    :mod:`Pyjo.DOM` inherits all attributes and methods from
+    :mod:`Pyjo.Base` and :mod:`Pyjo.Mixin.String` and implements the following new ones.
     """
 
     html = lazy(lambda self: Pyjo.DOM.HTML.new())
 
     def __init__(self, html=None):
+        """::
+
+            dom = Pyjo.DOM.new()
+
+        Construct a new :mod:`Pyjo.DOM` object.
+        """
         if html is not None:
             self.parse(html)
 

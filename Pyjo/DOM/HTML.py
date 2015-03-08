@@ -10,6 +10,9 @@ Pyjo.DOM.HTML - HTML/XML engine
     html = Pyjo.DOM.HTML.new()
     html.parse('<div><p id="a">Test</p><p id="b">123</p></div>')
     tree = html.tree
+
+Classes
+-------
 """
 
 
@@ -144,11 +147,9 @@ HTML_TOKEN_RE = TOKEN_1_RE + RAW_RE + TOKEN_2_RE
 
 
 class Pyjo_DOM_HTML(Pyjo.Base.object):
-    """::
-
-        html = Pyjo.DOM.HTML.new()
-
-    Construct a new :mod:`Pyjo.DOM.HTML` object.
+    """
+    :mod:`Pyjo.DOM.HTML` inherits all attributes and methods from
+    :mod:`Pyjo.Base` and implements the following new ones.
     """
 
     tree = lazy(lambda self: ['root'])

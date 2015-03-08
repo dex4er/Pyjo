@@ -55,7 +55,7 @@ NORMALCASE = dict(map(lambda i: (b(i.lower()), b(i)), [
 
 class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
     """
-    :mod:`Pyjo.Heaaders` inherits all attributes and methods from
+    :mod:`Pyjo.Headers` inherits all attributes and methods from
     :mod:`Pyjo.Base` and :mod:`Pyjo.Mixin.String` and implements the following new ones.
     """
 
