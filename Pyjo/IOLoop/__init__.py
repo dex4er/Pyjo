@@ -523,7 +523,7 @@ class Pyjo_IOLoop(Pyjo.Base.object):
         """
         # Find stream for id
         if isinstance(stream, str):
-            return self._connections[stream]
+            return self._connections[stream]['stream']
 
         return self._stream(stream, self._id())
 
