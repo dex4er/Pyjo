@@ -49,7 +49,7 @@ class Pyjo_Message_Response(Pyjo.Message.object):
 
     def extract_start_line(self):
         # We have a full response line
-        self._buffer, g = self._buffer == s(br'^(.*?)\x0d?\x0a', '')
+        self._buffer, g = self._buffer == s(br'^(.*?)\x0d?\x0a', b'')
         if not g:
             return
         g = g[1] == m(br'^\s*HTTP/(\d\.\d)\s+(\d\d\d)\s*(.+)?$')
