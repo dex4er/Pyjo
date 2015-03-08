@@ -635,6 +635,23 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         else:
             return self._replace(self._parent(), tree, self._parse(new))
 
+    @property
+    def root(self):
+        """::
+
+            root = dom.root
+
+        Return :mod:`Pyjo.DOM` object for root node.
+        """
+        tree = None
+        for tree in self._ancestors(True):
+            break
+
+        if not tree:
+            return self
+        else:
+            return self._build(tree, self.xml)
+
     def strip(self):
         """::
 
@@ -652,23 +669,6 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             new = list(self._nodes(tree))
             new.insert(0, 'root')
             return self._replace(tree[3], tree, new)
-
-    @property
-    def root(self):
-        """::
-
-            root = dom.root
-
-        Return :mod:`Pyjo.DOM` object for root node.
-        """
-        tree = None
-        for tree in self._ancestors(True):
-            break
-
-        if not tree:
-            return self
-        else:
-            return self._build(tree, self.xml)
 
     @property
     def tag(self):
