@@ -48,6 +48,9 @@ if __name__ == '__main__':
     path = Pyjo.Path.new('/foo/../bar/../../baz').canonicalize()
     is_ok(str(path), "/../baz", "path")
 
+    path = Pyjo.Path.new('/foo/.../bar').canonicalize()
+    is_ok(str(path), "/foo/bar", "path")
+
     # clone
     path = Pyjo.Path.new('/foo%2Fbar%3B/baz.html')
     path2 = path.clone()
