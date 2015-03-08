@@ -62,7 +62,7 @@ if __name__ == '__main__':
     # ancestors
     is_ok(dom.parse("<div><p><i>bar</i></p></div>").at('i').child_nodes[0]
           .ancestors()
-          .reverse().map('type').join(" > "),
+          .reverse().map('tag').join(" > "),
           "div > p > i", 'ancestors result')
 
     # append
@@ -103,7 +103,7 @@ if __name__ == '__main__':
           "<!-- Test -->", 'child_nodes result')
 
     # children
-    is_ok(dom.parse('<b>foo</b><i>bar</i><p>baz</p>').children().first().type,
+    is_ok(dom.parse('<b>foo</b><i>bar</i><p>baz</p>').children().first().tag,
           "b", 'children result')
 
     # content
@@ -147,7 +147,7 @@ if __name__ == '__main__':
 
     # following
     is_ok(dom.parse('<b>foo</b><i>bar</i><p>baz</p>').at('b')
-          .following().map('type').join("\n"),
+          .following().map('tag').join("\n"),
           "i\np", 'following result')
 
     # following_nodes
@@ -186,7 +186,7 @@ if __name__ == '__main__':
 
     # preceding
     is_ok(dom.parse('<b>foo</b><i>bar</i><p>baz</p>').at('p')
-          .preceding().map('type').join("\n"),
+          .preceding().map('tag').join("\n"),
           "b\ni", 'preceding result')
 
     # preceding_nodes
@@ -250,13 +250,13 @@ if __name__ == '__main__':
     is_ok(dom.parse('<div><h1>Test</h1></div>').at('h1').strip(),
           "<div>Test</div>", 'strip result')
 
+    # tag
+    is_ok(dom.parse('<b>foo</b><i>bar</i><p>baz</p>').children().map('tag').join(","),
+          "b,i,p", 'tag result')
+
     # text
     is_ok(dom.parse("<div>foo\n<p>bar</p>baz\n</div>").at('div').text,
           "foo baz", 'text result')
-
-    # type
-    is_ok(dom.parse('<b>foo</b><i>bar</i><p>baz</p>').children().map('type').join(","),
-          "b,i,p", 'type result')
 
     # wrap
     is_ok(dom.parse('<b>Test</b>').at('b').wrap('<p>123</p>').root,

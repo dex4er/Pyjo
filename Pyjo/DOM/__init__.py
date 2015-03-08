@@ -109,7 +109,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             # "div > p > i"
             dom.parse('<div><p><i>bar</i></p></div>').at('i').child_nodes[0] \\
                .ancestors() \\
-               .map('type').reverse().join(" > ").say()
+               .map('tag').reverse().join(" > ").say()
         """
         return self._select(self._collect(self._ancestors()), pattern)
 
@@ -338,7 +338,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
             # List types of sibling elements before this node
             dom.parse('<b>foo</b><i>bar</i><p>baz</p>').at('b') \\
-               .following().map('type').join("\\n").say()
+               .following().map('tag').join("\\n").say()
         """
         return self._select(self._collect(self._siblings(True)[1]), pattern)
 
@@ -499,7 +499,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         objects. All selectors from :mod:`Pyjo.DOM.CSS` are supported. ::
 
             # List types of sibling elements before this node
-            dom.preceding().map('type').join("\\n").say()
+            dom.preceding().map('tag').join("\\n").say()
         """
         return self._select(self._collect(self._siblings(True)[0]), pattern)
 
@@ -699,16 +699,16 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         self.html.tree = value
 
     @property
-    def type(self):
+    def tag(self):
         """::
 
-            elemtype = dom.type
-            dom.type = 'div'
+            tag = dom.tag
+            dom.tag = 'div'
 
-        This element's type. ::
+        This element's tag name. ::
 
-            # List types of child elements
-            dom.children().map('type').join("\\n").say()
+            # List tag names of child elements
+            dom.children().map('tag').join("\\n").say()
         """
         tree = self.tree
         if tree[0] != 'tag':
@@ -716,8 +716,8 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         else:
             return tree[1]
 
-    @type.setter
-    def type(self, value):
+    @tag.setter
+    def tag(self, value):
         tree = self.tree
         if tree[0] == 'tag':
             tree[1] = value
