@@ -67,10 +67,7 @@ import Pyjo.IOLoop.Stream
 import Pyjo.Reactor.Base
 
 from Pyjo.Base import lazy
-from Pyjo.Util import (
-    decorator, decoratormethod, getenv, md5_sum, steady_time, rand,
-    warn
-)
+from Pyjo.Util import decorator, decoratormethod, getenv, md5_sum, steady_time, rand, warn
 
 import importlib
 import os
