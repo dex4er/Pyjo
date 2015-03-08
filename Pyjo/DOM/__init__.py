@@ -123,7 +123,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         All selectors from :mod:`Pyjo.DOM.CSS` are supported. ::
 
             # "div > p > i"
-            dom.parse('<div><p><i>bar</i></p></div>').at('i').contents[0] \\
+            dom.parse('<div><p><i>bar</i></p></div>').at('i').child_nodes[0] \\
                .ancestors() \\
                .map('type').reverse().join(" > ").say()
         """
@@ -141,7 +141,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
                .at('h1').append('<h2>123</h2>').root
 
             # "<p>Test 123</p>"
-            dom.parse('<p>Test</p>').at('p').contents.first().append(' 123').root
+            dom.parse('<p>Test</p>').at('p').child_nodes.first().append(' 123').root
         """
         return self._add(1, string)
 
@@ -159,7 +159,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
             # "<!-- Test 123 --><br>"
             dom.parse('<!-- Test --><br>')
-               .contents.first().append_content('123 ').root
+               .child_nodes.first().append_content('123 ').root
 
             # "<p>Test<i>123</i></p>"
             dom.parse('<p>Test</p>').at('p').append_content('<i>123</i>').root
@@ -229,6 +229,23 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
         return self
 
+    @property
+    def child_nodes(self):
+        """::
+
+            collection = dom.child_nodes
+
+        Return a :mod:`Pyjo.Collection` object containing the child nodes of this element
+        as :mod:`Pyjo.DOM` objects. ::
+
+            # "<p><b>123</b></p>"
+            dom.parse('<p>Test<b>123</b></p>').at('p').child_nodes.first().remove()
+
+            # "<!-- Test -->"
+            dom.parse('<!-- Test --><b>123</b>').child_nodes.first()
+        """
+        return self._collect(self._nodes(self.tree))
+
     def children(self, pattern=None):
         """::
 
@@ -268,11 +285,11 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             dom.parse('<div><h1>Test</h1></div>').at('h1').set(content='').root
 
             # " Test "
-            dom.parse('<!-- Test --><br>').contents.first().content
+            dom.parse('<!-- Test --><br>').child_nodes.first().content
 
             # "<div><!-- 123 -->456</div>"
             dom.parse('<div><!-- Test -->456</div>')
-               .at('div').contents.first().set(content=' 123 ').root
+               .at('div').child_nodes.first().set(content=' 123 ').root
         """
         nodetype = self.node
         if nodetype == 'root' or nodetype == 'tag':
@@ -288,23 +305,6 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             self._content(0, 1, value)
         else:
             self.tree[1] = value
-
-    @property
-    def contents(self):
-        """::
-
-            collection = dom.contents
-
-        Return a :mod:`Pyjo.Collection` object containing the child nodes of this element
-        as :mod:`Pyjo.DOM` objects. ::
-
-            # "<p><b>123</b></p>"
-            dom.parse('<p>Test<b>123</b></p>').at('p').contents.first().remove()
-
-            # "<!-- Test -->"
-            dom.parse('<!-- Test --><b>123</b>').contents.first()
-        """
-        return self._collect(self._nodes(self.tree))
 
     def find(self, pattern):
         """::
@@ -528,7 +528,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
                .at('h2').prepend('<h1>123</h1>').root
 
             # "<p>Test 123</p>"
-            dom.parse('<p>123</p>').at('p').contents.first().prepend('Test ').root
+            dom.parse('<p>123</p>').at('p').child_nodes.first().prepend('Test ').root
         """
         return self._add(0, string)
 
@@ -546,7 +546,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
             # "<!-- Test 123 --><br>"
             dom.parse('<!-- 123 --><br>') \\
-               .contents.first().prepend_content(' Test').root
+               .child_nodes.first().prepend_content(' Test').root
 
             # "<p><i>123</i>Test</p>"
             dom.parse('<p>Test</p>').at('p').prepend_content('<i>123</i>').root
@@ -611,7 +611,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             dom.parse('<div><h1>Test</h1></div>').at('h1').remove()
 
             # "<p><b>456</b></p>"
-            dom.parse('<p>123<b>456</b></p>').at('p').contents.first().remove().root
+            dom.parse('<p>123<b>456</b></p>').at('p').child_nodes.first().remove().root
         """
         return self.replace('')
 
@@ -627,7 +627,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
             # "<p><b>123</b></p>"
             dom.parse('<p>Test</p>') \\
-               .at('p').contents.item(0).replace('<b>123</b>').root
+               .at('p').child_nodes.item(0).replace('<b>123</b>').root
         """
         tree = self.tree
         if tree[0] == 'root':
@@ -740,7 +740,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             dom.parse('<b>Test</b>').at('b').wrap('<p></p><p>123</p>').root
 
             # "<p><b>Test</b></p>"
-            dom.parse('<p>Test</p>').at('p').contents.first().wrap('<b>').root
+            dom.parse('<p>Test</p>').at('p').child_nodes.first().wrap('<b>').root
         """
         return self._wrap(False, string)
 

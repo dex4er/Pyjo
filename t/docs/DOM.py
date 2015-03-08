@@ -66,7 +66,7 @@ if __name__ == '__main__':
           "foo\nbar baz\n", 'all_raw_text result')
 
     # ancestors
-    is_ok(dom.parse("<div><p><i>bar</i></p></div>").at('i').contents[0]
+    is_ok(dom.parse("<div><p><i>bar</i></p></div>").at('i').child_nodes[0]
           .ancestors()
           .reverse().map('type').join(" > "),
           "div > p > i", 'ancestors result')
@@ -76,7 +76,7 @@ if __name__ == '__main__':
           .at('h1').append('<h2>123</h2>').root,
           "<div><h1>Test</h1><h2>123</h2></div>", 'append result')
 
-    is_ok(dom.parse('<p>Test</p>').at('p').contents.first().append(' 123').root,
+    is_ok(dom.parse('<p>Test</p>').at('p').child_nodes.first().append(' 123').root,
           "<p>Test 123</p>", 'append result')
 
     # append_content
@@ -85,7 +85,7 @@ if __name__ == '__main__':
           "<div><h1>Test123</h1></div>", 'append_content result')
 
     is_ok(dom.parse('<!-- Test --><br>')
-          .contents.first().append_content('123 ').root,
+          .child_nodes.first().append_content('123 ').root,
           "<!-- Test 123 --><br>", 'append_content result')
 
     is_ok(dom.parse('<p>Test</p>').at('p').append_content('<i>123</i>').root,
@@ -100,6 +100,13 @@ if __name__ == '__main__':
     is_ok(dom.parse('<div id="a">foo</div><p>bar</p><div id="b">baz</div>')
           .find('*').map('attr', 'id').compact().join("\n"),
           "a\nb", 'attr result')
+
+    # child_nodes
+    is_ok(dom.parse('<p>Test<b>123</b></p>').at('p').child_nodes.first().remove(),
+          "<p><b>123</b></p>", 'child_nodes result')
+
+    is_ok(dom.parse('<!-- Test --><b>123</b>').child_nodes.first(),
+          "<!-- Test -->", 'child_nodes result')
 
     # children
     is_ok(dom.parse('<b>foo</b><i>bar</i><p>baz</p>').children().first().type,
@@ -118,19 +125,12 @@ if __name__ == '__main__':
     is_ok(dom.parse('<div><h1>Test</h1></div>').at('h1').set(content='').root,
           "<div><h1></h1></div>", 'content result')
 
-    is_ok(dom.parse('<!-- Test --><br>').contents.first().content,
+    is_ok(dom.parse('<!-- Test --><br>').child_nodes.first().content,
           " Test ", 'content result')
 
     is_ok(dom.parse('<div><!-- Test -->456</div>')
-          .at('div').contents.first().set(content=' 123 ').root,
+          .at('div').child_nodes.first().set(content=' 123 ').root,
           "<div><!-- 123 -->456</div>", 'content result')
-
-    # contents
-    is_ok(dom.parse('<p>Test<b>123</b></p>').at('p').contents.first().remove(),
-          "<p><b>123</b></p>", 'contents result')
-
-    is_ok(dom.parse('<!-- Test --><b>123</b>').contents.first(),
-          "<!-- Test -->", 'contents result')
 
     # find
     is_ok(dom.parse('<div id="a"></div><div id="b"></div><div id="c"></div>')
@@ -199,7 +199,7 @@ if __name__ == '__main__':
           .at('h2').prepend('<h1>123</h1>').root,
           "<div><h1>123</h1><h2>Test</h2></div>", 'prepend result')
 
-    is_ok(dom.parse('<p>123</p>').at('p').contents.first().prepend('Test ').root,
+    is_ok(dom.parse('<p>123</p>').at('p').child_nodes.first().prepend('Test ').root,
           "<p>Test 123</p>", 'prepend result')
 
     # prepend_content
@@ -208,7 +208,7 @@ if __name__ == '__main__':
           "<div><h2>Test 123</h2></div>", 'prepend_content result')
 
     is_ok(dom.parse('<!-- 123 --><br>')
-          .contents.first().prepend_content(' Test').root,
+          .child_nodes.first().prepend_content(' Test').root,
           "<!-- Test 123 --><br>", 'prepend_content result')
 
     is_ok(dom.parse('<p>Test</p>').at('p').prepend_content('<i>123</i>').root,
@@ -235,7 +235,7 @@ if __name__ == '__main__':
     is_ok(dom.parse('<div><h1>Test</h1></div>').at('h1').remove(),
           "<div></div>", 'remove result')
 
-    is_ok(dom.parse('<p>123<b>456</b></p>').at('p').contents.first().remove().root,
+    is_ok(dom.parse('<p>123<b>456</b></p>').at('p').child_nodes.first().remove().root,
           "<p><b>456</b></p>", 'remove result')
 
     # replace
@@ -243,7 +243,7 @@ if __name__ == '__main__':
           "<div><h2>123</h2></div>", 'replace result')
 
     is_ok(dom.parse('<p>Test</p>')
-          .at('p').contents.item(0).replace('<b>123</b>').root,
+          .at('p').child_nodes.item(0).replace('<b>123</b>').root,
           "<p><b>123</b></p>", 'replace result')
 
     # strip
@@ -268,7 +268,7 @@ if __name__ == '__main__':
     is_ok(dom.parse('<b>Test</b>').at('b').wrap('<p></p><p>123</p>').root,
           "<p><b>Test</b></p><p>123</p>", 'wrap result')
 
-    is_ok(dom.parse('<p>Test</p>').at('p').contents.first().wrap('<b>').root,
+    is_ok(dom.parse('<p>Test</p>').at('p').child_nodes.first().wrap('<b>').root,
           "<p><b>Test</b></p>", 'wrap result')
 
     # wrap_content
