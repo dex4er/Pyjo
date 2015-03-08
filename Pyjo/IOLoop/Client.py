@@ -1,5 +1,6 @@
 """
 Pyjo.IOLoop.Client - Non-blocking TCP client
+============================================
 ::
 
     import Pyjo.IOLoop.Client
@@ -123,76 +124,40 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
 
         Open a socket connection to a remote host.
 
-        These options are currently available:
-
-        address
-        ~~~~~~~
-        ::
+        These options are currently available: ::
 
             address='mojolicio.us'
 
-        Address or host name of the peer to connect to, defaults to ``127.0.0.1``.
-
-        handle
-        ~~~~~~
-        ::
+        Address or host name of the peer to connect to, defaults to ``127.0.0.1``. ::
 
             handle=handle
 
-        Use an already prepared handle.
-
-        local_address
-        ~~~~~~~~~~~~~
-        ::
+        Use an already prepared handle. ::
 
             local_address='127.0.0.1'
 
-        Local address to bind to.
-
-        port
-        ~~~~
-        ::
+        Local address to bind to. ::
 
             port=80
 
-        Port to connect to, defaults to ``80`` or ``443`` with ``tls`` option.
-
-        timeout
-        ~~~~~~~
-        ::
+        Port to connect to, defaults to ``80`` or ``443`` with ``tls`` option. ::
 
             timeout=15
 
         Maximum amount of time in seconds establishing connection may take before
-        getting canceled, defaults to ``10``.
-
-        tls
-        ~~~
-        ::
+        getting canceled, defaults to ``10``. ::
 
             tls=True
 
-        Enable TLS.
-
-        tls_ca
-        ~~~~~~
-        ::
+        Enable TLS. ::
 
             tls_ca='/etc/tls/ca.crt'
 
-        Path to TLS certificate authority file. Also activates hostname verification.
-
-        tls_cert
-        ~~~~~~~~
-        ::
+        Path to TLS certificate authority file. Also activates hostname verification. ::
 
             tls_cert='/etc/tls/client.crt'
 
-        Path to the TLS certificate file.
-
-        tls_key
-        ~~~~~~~
-        ::
+        Path to the TLS certificate file. ::
 
             tls_key='/etc/tls/client.key'
 
