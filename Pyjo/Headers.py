@@ -43,7 +43,8 @@ NORMALCASE = dict(map(lambda i: (b(i.lower()), b(i)), [
     'Accept', 'Accept-Charset', 'Accept-Encoding', 'Accept-Language', 'Accept-Ranges',
     'Access-Control-Allow-Origin', 'Allow', 'Authorization', 'Cache-Control', 'Connection',
     'Content-Disposition', 'Content-Encoding', 'Content-Language', 'Content-Length',
-    'Content-Location', 'Content-Range', 'Content-Type', 'Cookie', 'DNT', 'Date', 'ETag', 'Expect',
+    'Content-Location', 'Content-Range', 'Content-Security-Policy', 'Content-Type',
+    'Cookie', 'DNT', 'Date', 'ETag', 'Expect',
     'Expires', 'Host', 'If-Modified-Since', 'If-None-Match', 'Last-Modified', 'Link', 'Location',
     'Origin', 'Proxy-Authenticate', 'Proxy-Authorization', 'Range', 'Sec-WebSocket-Accept',
     'Sec-WebSocket-Extensions', 'Sec-WebSocket-Key', 'Sec-WebSocket-Protocol',
@@ -58,14 +59,14 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
     :mod:`Pyjo.Base` and :mod:`Pyjo.Mixin.String` and implements the following new ones.
     """
 
-    max_line_size = int(getenv('PYJO_MAX_LINE_SIZE', 0)) or 10240
+    max_line_size = int(getenv('PYJO_MAX_LINE_SIZE', 0)) or 8192
     """::
 
         size = headers.max_line_size
         headers.max_line_size = 1024
 
     Maximum header line size in bytes, defaults to the value of the
-    ``MOJO_MAX_LINE_SIZE`` environment variable or ``10240`` (10KB).
+    ``MOJO_MAX_LINE_SIZE`` environment variable or ``8192`` (8KB).
     """
 
     max_lines = int(getenv('PYJO_MAX_LINES', 0)) or 100
@@ -388,6 +389,22 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
         self.header(b'Content-Range', value)
 
     @property
+    def content_security_policy(self):
+        """::
+
+            policy = headers.content_security_policy
+            headers.content_security_policy = 'default-src https:'
+
+        Shortcut for the ``Content-Security-Policy`` header from
+        `Content Security Policy 1.0 <http://www.w3.org/TR/CSP/>`_.
+        """
+        return self.header(b'Content-Security-Policy')
+
+    @content_security_policy.setter
+    def content_security_policy(self, value):
+        self.header(b'Content-Security-Policy', value)
+
+    @property
     def content_type(self):
         """::
 
@@ -622,7 +639,7 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
           bstring = headers.leftovers
 
-        Get leftover data from header parser.
+        Get and remove leftover data from header parser.
         """
         buf = self._buffer
         self._buffer = b''

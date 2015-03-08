@@ -75,6 +75,7 @@ if __name__ == '__main__':
     is_ok(headers.set(content_length='foo').content_length, 'foo', 'right value')
     is_ok(headers.set(content_location='foo').content_location, 'foo', 'right value')
     is_ok(headers.set(content_range='foo').content_range, 'foo', 'right value')
+    is_ok(headers.set(content_security_policy='foo').content_security_policy, 'foo', 'right value')
     is_ok(headers.set(content_type='foo').content_type, 'foo', 'right value')
     is_ok(headers.set(cookie='foo').cookie, 'foo', 'right value')
     is_ok(headers.set(dnt='foo').dnt, 'foo', 'right value')
