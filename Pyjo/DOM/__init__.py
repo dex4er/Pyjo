@@ -275,7 +275,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             dom.parse('<div><!-- Test -->456</div>')
                .at('div').child_nodes.first().set(content=' 123 ').root
         """
-        nodetype = self.node
+        nodetype = self.type
         if nodetype == 'root' or nodetype == 'tag':
             html = Pyjo.DOM.HTML.new(xml=self.xml)
             return u''.join(map(lambda i: html.set(tree=i).render(), self._nodes(self.tree)))
@@ -284,7 +284,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
     @content.setter
     def content(self, value):
-        nodetype = self.node
+        nodetype = self.type
         if nodetype == 'root' or nodetype == 'tag':
             self._content(0, 1, value)
         else:
@@ -322,7 +322,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
             # "<p><b>123</b></p>"
             dom.parse('<p><!-- Test --><b>123<!-- 456 --></b></p>') \\
                .descendant_nodes \\
-               .grep(lambda i: i.node == 'comment').map('remove').first()
+               .grep(lambda i: i.type == 'comment').map('remove').first()
         """
         return self._collect(self._all(self._nodes(self.tree)))
 
@@ -449,17 +449,6 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
                .at('b').next_node.content
         """
         return self._maybe(self._siblings(False, 0)[1])
-
-    @property
-    def node(self):
-        """::
-
-            nodetype = dom.node
-
-        This node's type, usually ``cdata``, ``comment``, ``doctype``, ``pi``, ``raw``,
-        ``root``, ``tag`` or ``text``.
-        """
-        return self.tree[0]
 
     @property
     def parent(self):
@@ -722,6 +711,17 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
     def tree(self, value):
         self.html.tree = value
 
+    @property
+    def type(self):
+        """::
+
+            nodetype = dom.type
+
+        This node's type, usually ``cdata``, ``comment``, ``doctype``, ``pi``, ``raw``,
+        ``root``, ``tag`` or ``text``.
+        """
+        return self.tree[0]
+
     def wrap(self, string):
         """::
 
@@ -803,7 +803,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         return self._text(self._nodes(tree), recurse, trim)
 
     def _ancestors(self, isroot=False):
-        if self.node == 'root':
+        if self.type == 'root':
             return
 
         ancestors = []
@@ -892,7 +892,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         return i
 
     def _parent(self):
-        return self.tree[3 if self.node == 'tag' else 2]
+        return self.tree[3 if self.type == 'tag' else 2]
 
     def _parse(self, new):
         return Pyjo.DOM.HTML.new(xml=self.xml).parse(new).tree
