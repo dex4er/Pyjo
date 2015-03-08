@@ -106,10 +106,20 @@ if __name__ == '__main__':
     params = Pyjo.Parameters.new('foo=bar&yada=yada').merge(foo=None)
     is_ok(str(params), "yada=yada", "params")
 
+    # names
+    params = Pyjo.Parameters.new('foo=bar&baz=23')
+    names = params.names
+    is_deeply_ok(names, ['baz', 'foo'], "params.param()")
+
+    # pairs
+    pairs = Pyjo.Parameters.new('foo=bar&baz=23')
+    array = params.pairs
+    is_deeply_ok(array, [('foo', 'bar'), ('baz', '23')], "params.pairs")
+    params.pairs = [('foo', 'b&ar'), ('baz', 23)]
+    is_ok(str(params), 'foo=b%26ar&baz=23', "pairs")
+
     # param
     params = Pyjo.Parameters.new('foo=bar&baz=23')
-    names = params.param()
-    is_deeply_ok(names, ['baz', 'foo'], "params.param()")
     value = params.param('foo')
     is_ok(value, 'bar', "params.param('foo')")
     foo, baz = params.param(['foo', 'baz'])
@@ -119,13 +129,6 @@ if __name__ == '__main__':
     is_ok(str(params), 'foo=ba%26r&baz=23', "params.param('foo', 'ba&r')")
     params = params.param('foo', ['ba;r', 'baz'])
     is_ok(str(params), 'foo=ba%3Br&baz=23&foo=baz', "params.param('foo', ['ba;r', 'baz'])")
-
-    # params
-    params = Pyjo.Parameters.new('foo=bar&baz=23')
-    array = params.pairs
-    is_deeply_ok(array, [('foo', 'bar'), ('baz', '23')], "params.pairs")
-    params.pairs = [('foo', 'b&ar'), ('baz', 23)]
-    is_ok(str(params), 'foo=b%26ar&baz=23', "params")
 
     # parse
     params = Pyjo.Parameters.new()

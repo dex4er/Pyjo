@@ -151,7 +151,13 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
             # Get first value
             print(params.every_param('foo')[0])
         """
-        return self._param(name)
+        values = []
+        pairs = self.pairs
+        for k, v in pairs:
+            if k == name:
+                values.append(v)
+
+        return values
 
     def merge(self, *args, **kwargs):
         """::
@@ -183,6 +189,20 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
             else:
                 self.param(k, v)
         return self
+
+    @property
+    def names(self):
+        """::
+
+            names = params.names
+
+        Return a list of all parameter names. ::
+
+          # Names of all parameters
+          for n in params.names:
+              print(n)
+        """
+        return sorted(self.to_dict().keys())
 
     @property
     def pairs(self):
@@ -235,10 +255,9 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
         self._string = None
         return self
 
-    def param(self, name=None, value=None):
+    def param(self, name, value=None):
         """::
 
-            names = params.param()
             value = params.param('foo')
             foo, baz = params.param(['foo', 'baz'])
             params = params.param('foo', 'ba&r')
@@ -248,19 +267,15 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
         and you want to access more than just the last one, you can use
         :meth:`every_param`. Note that this method will normalize the parameters.
         """
-        # List names
-        if not name:
-            return sorted(self.to_dict().keys())
-
         # Multiple names
         if name is not None and isinstance(name, (list, tuple,)):
             return [self.param(n) for n in name]
 
         # Last value
         if value is None:
-            param = self._param(name)
+            param = self.every_param(name)
             if param:
-                return self._param(name)[-1]
+                return self.every_param(name)[-1]
             else:
                 return
 
@@ -365,15 +380,6 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
         Turn parameters into a string.
         """
         return self.to_bytes().decode('ascii')
-
-    def _param(self, name):
-        values = []
-        pairs = self.pairs
-        for k, v in pairs:
-            if k == name:
-                values.append(v)
-
-        return values
 
     def _replace(self, name, value):
         pairs = self.pairs

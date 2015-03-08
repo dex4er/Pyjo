@@ -69,7 +69,7 @@ if __name__ == '__main__':
     is_deeply_ok(params.to_dict(), {'q': '1', 'w': '2', 't': '7'}, 'right structure')
 
     # List names
-    is_deeply_ok(params.param(), ['q', 't', 'w'], 'right structure')
+    is_deeply_ok(params.names, ['q', 't', 'w'], 'right structure')
 
     # Append
     params.append(('a', 4), ('a', 5), ('b', 6), ('b', 7))
