@@ -153,7 +153,6 @@ class Pyjo_IOLoop(Pyjo.Base.object):
     _connections = lazy(lambda self: {})
 
     _accepts = None
-    _accept_timer = None
     _accepting_timer = False
     _stop_timer = None
 
