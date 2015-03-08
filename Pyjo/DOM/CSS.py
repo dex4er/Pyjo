@@ -313,12 +313,12 @@ class Pyjo_DOM_CSS(Pyjo.Base.object):
     carefully since it is very dynamic.
     """
 
-    def match(self, pattern):
+    def matches(self, pattern):
         """::
 
-            bool = css.match('head > title')
+            bool = css.matches('head > title')
 
-        Match CSS selector against first node in :attr:`tree`.
+        Check if first node in :attr:`tree` matches the CSS selector.
         """
         tree = self.tree
         if tree[0] == 'tag':

@@ -25,8 +25,8 @@ if __name__ == '__main__':
     tree = css.tree
     is_ok(tree[0], 'root', "tree")
 
-    # match
-    ok(Pyjo.DOM.CSS.new(tree=html.tree[1]).match('html'), "css.match()")
+    # matches
+    ok(Pyjo.DOM.CSS.new(tree=html.tree[1]).matches('html'), "css.matches()")
 
     # select
     elements = css.select('head > title')

@@ -129,7 +129,7 @@ if __name__ == '__main__':
     # descendant_nodes
     is_ok(dom.parse('<p><!-- Test --><b>123<!-- 456 --></b></p>')
           .descendant_nodes
-          .grep(lambda i: i.node == 'comment').map('remove').first(),
+          .grep(lambda i: i.type == 'comment').map('remove').first(),
           "<p><b>123</b></p>", 'descendant_nodes result')
 
     # find
@@ -155,12 +155,12 @@ if __name__ == '__main__':
           .at('p').following_nodes().last().content,
           "C", 'following_nodes')
 
-    # match
-    ok(dom.parse('<p class="a">A</p>').at('p').match('.a'), 'match result is True')
-    ok(dom.parse('<p class="a">A</p>').at('p').match('p[class]'), 'match result is True')
+    # matches
+    ok(dom.parse('<p class="a">A</p>').at('p').matches('.a'), 'matches result is True')
+    ok(dom.parse('<p class="a">A</p>').at('p').matches('p[class]'), 'matches result is True')
 
-    ok(not dom.parse('<p class="a">A</p>').at('p').match('.b'), 'match result is False')
-    ok(not dom.parse('<p class="a">A</p>').at('p').match('p[id]'), 'match result is False')
+    ok(not dom.parse('<p class="a">A</p>').at('p').matches('.b'), 'matches result is False')
+    ok(not dom.parse('<p class="a">A</p>').at('p').matches('p[id]'), 'matches result is False')
 
     # namespace
     is_ok(dom.parse('<svg xmlns:svg="http://www.w3.org/2000/svg"><svg:circle cx="1" cy="2" r="3"/></svg>')

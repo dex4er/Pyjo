@@ -355,24 +355,23 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         """
         return self._collect(self._siblings(False)[1])
 
-    def match(self, pattern):
+    def matches(self, pattern):
         """::
 
-            result = dom.match('div > p')
+            result = dom.matches('div > p')
 
-        Match the CSS selector against this element and return the :mod:`Pyjo.DOM` object
-        or return :class:`None` if it didn't match. All selectors from
+        Check if this element matches the CSS selector. All selectors from
         :mod:`Pyjo.DOM.CSS` are supported. ::
 
             # True
-            bool(dom.parse('<p class="a">A</p>').at('p').match('.a'))
-            bool(dom.parse('<p class="a">A</p>').at('p').match('p[class]'))
+            bool(dom.parse('<p class="a">A</p>').at('p').matches('.a'))
+            bool(dom.parse('<p class="a">A</p>').at('p').matches('p[class]'))
 
             # False
-            bool(dom.parse('<p class="a">A</p>').at('p').match('.b'))
-            bool(dom.parse('<p class="a">A</p>').at('p').match('p[id]'))
+            bool(dom.parse('<p class="a">A</p>').at('p').matches('.b'))
+            bool(dom.parse('<p class="a">A</p>').at('p').matches('p[id]'))
         """
-        if self._css.match(pattern):
+        if self._css.matches(pattern):
             return self
         else:
             return None
@@ -909,7 +908,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         if selector is None:
             return collection
         else:
-            return collection.new(filter(lambda i: i.match(selector), collection))
+            return collection.new(filter(lambda i: i.matches(selector), collection))
 
     def _siblings(self, tags, i=None):
         parent = self.parent
