@@ -94,7 +94,7 @@ if __name__ == '__main__':
     is_ok(url.port, 8080, 'right port')
     is_ok(str(url.path), '', 'no path')
     is_ok(str(url.query), '_monkeybiz%3B&_monkey;23', 'right query')
-    is_deeply_ok(url.query.params, [('_monkeybiz;', ''), ('_monkey;23', '')], 'right structure')
+    is_deeply_ok(url.query.pairs, [('_monkeybiz;', ''), ('_monkey;23', '')], 'right structure')
     is_ok(str(url.query), '_monkeybiz%3B=&_monkey%3B23=', 'right query')
     is_ok(url.fragment, '23', 'right fragment')
     is_ok(str(url), 'wss://sri:foobar@example.com:8080?_monkeybiz%3B=&_monkey%3B23=#23', 'right format')

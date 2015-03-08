@@ -53,7 +53,7 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
         params.charset = None
     """
 
-    _params = lazy(lambda self: [])
+    _pairs = lazy(lambda self: [])
     _string = None
 
     def __init__(self, *args, **kwargs):
@@ -85,7 +85,7 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
         Iterator based on :attr:`params`. Note that this will normalize the parameters.
         """
-        return iter(self.params)
+        return iter(self.pairs)
 
     def __nonzero__(self):
         """::
@@ -116,13 +116,13 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
             # "foo=bar&foo=baz&foo=yada&bar=23"
             Pyjo.Parameters.new('foo=bar').append(('foo', ['baz', 'yada']), ('bar', 23))
         """
-        params = self.params
+        pairs = self.pairs
         for k, v in list(args) + sorted(kwargs.items()):
             if isiterable(v):
                 for vv in v:
-                    params.append((k, vv),)
+                    pairs.append((k, vv),)
             else:
-                params.append((k, v),)
+                pairs.append((k, v),)
         return self
 
     def clone(self):
@@ -137,7 +137,7 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
         if self._string is not None:
             new_obj._string = self._string
         else:
-            new_obj._params = list(self._params)
+            new_obj._pairs = list(self._pairs)
         return new_obj
 
     def every_param(self, name):
@@ -173,15 +173,66 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
             # "yada=yada"
             Pyjo.Parameters.new('foo=bar&yada=yada').merge(foo=None)
         """
-        if len(args) == 1 and hasattr(args[0], 'params'):
-            params = args[0].params
+        if len(args) == 1 and hasattr(args[0], 'pairs'):
+            pairs = args[0].pairs
         else:
-            params = list(args) + sorted(kwargs.items())
-        for k, v in params:
+            pairs = list(args) + sorted(kwargs.items())
+        for k, v in pairs:
             if v is None:
                 self.remove(k)
             else:
                 self.param(k, v)
+        return self
+
+    @property
+    def pairs(self):
+        """::
+
+            array = params.pairs
+            params.pairs = [('foo', 'b&ar'), ('baz', 23)]
+
+        Parsed parameters. Note that setting this property will normalize the parameters.
+        """
+        # Parse string
+        if self._string is not None:
+            string = self._string
+            self._string = None
+            self._pairs = []
+
+            if not len(string):
+                return self._pairs
+
+            charset = self.charset
+
+            for pair in string.split(b'&'):
+                g = pair == m(br'^([^=]+)(?:=(.*))?$')
+
+                if not g:
+                    continue
+
+                name = g[1]
+                value = g[2] if g[2] is not None else b''
+
+                # Replace "+" with whitespace, unescape and decode
+                name -= s(br'\+', b' ', 'g')
+                value -= s(br'\+', b' ', 'g')
+
+                name = url_unescape(name)
+                value = url_unescape(value)
+
+                if charset:
+                    name = u(name, charset)
+                    value = u(value, charset)
+
+                self._pairs.append((name, value),)
+
+        return self._pairs
+
+    @pairs.setter
+    def pairs(self, value=None):
+        # Replace parameters
+        self._pairs = value
+        self._string = None
         return self
 
     def param(self, name=None, value=None):
@@ -216,57 +267,6 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
         # Replace values
         return self._replace(name, value)
 
-    @property
-    def params(self):
-        """::
-
-            array = params.params
-            params.params = [('foo', 'b&ar'), ('baz', 23)]
-
-        Parsed parameters. Note that setting this property will normalize the parameters.
-        """
-        # Parse string
-        if self._string is not None:
-            string = self._string
-            self._string = None
-            self._params = []
-
-            if not len(string):
-                return self._params
-
-            charset = self.charset
-
-            for pair in string.split(b'&'):
-                g = pair == m(br'^([^=]+)(?:=(.*))?$')
-
-                if not g:
-                    continue
-
-                name = g[1]
-                value = g[2] if g[2] is not None else b''
-
-                # Replace "+" with whitespace, unescape and decode
-                name -= s(br'\+', b' ', 'g')
-                value -= s(br'\+', b' ', 'g')
-
-                name = url_unescape(name)
-                value = url_unescape(value)
-
-                if charset:
-                    name = u(name, charset)
-                    value = u(value, charset)
-
-                self._params.append((name, value),)
-
-        return self._params
-
-    @params.setter
-    def params(self, value=None):
-        # Replace parameters
-        self._params = value
-        self._string = None
-        return self
-
     def parse(self, *args, **kwargs):
         """::
 
@@ -292,11 +292,11 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
             # "bar=yada"
             Pyjo.Parameters.new('foo=bar&foo=baz&bar=yada').remove('foo')
         """
-        params = self.params
+        pairs = self.pairs
         i = 0
-        while i < len(params):
-            if params[i][0] == name:
-                params.pop(i)
+        while i < len(pairs):
+            if pairs[i][0] == name:
+                pairs.pop(i)
             else:
                 i += 1
         return self
@@ -315,12 +315,12 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
             return url_escape(self._string, br'^A-Za-z0-9\-._~!$&\'()*+,;=%:@/?')
 
         # Build pairs
-        params = self.params
-        if not params:
+        pairs = self.pairs
+        if not pairs:
             return b''
 
-        pairs = []
-        for name, value in params:
+        strpairs = []
+        for name, value in pairs:
             if charset:
                 name = b(name, charset)
                 value = b(value, charset)
@@ -331,9 +331,9 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
             name -= s(br'%20', b'+', 'g')
             value -= s(br'%20', b'+', 'g')
 
-            pairs.append(name + b'=' + value)
+            strpairs.append(name + b'=' + value)
 
-        return b'&'.join(pairs)
+        return b'&'.join(strpairs)
 
     def to_dict(self):
         """::
@@ -347,8 +347,8 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
             Pyjo.Parameters.new('foo=bar&foo=baz').to_dict()['foo'][1]
         """
         d = {}
-        params = self.params
-        for k, v in params:
+        pairs = self.pairs
+        for k, v in pairs:
             if k in d:
                 if not isinstance(d[k], list):
                     d[k] = [d[k]]
@@ -368,15 +368,15 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
     def _param(self, name):
         values = []
-        params = self.params
-        for k, v in params:
+        pairs = self.pairs
+        for k, v in pairs:
             if k == name:
                 values.append(v)
 
         return values
 
     def _replace(self, name, value):
-        params = self.params
+        pairs = self.pairs
 
         if isinstance(value, (list, tuple,)):
             values = value
@@ -385,14 +385,14 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
 
         i = 0
 
-        while i < len(params) and len(values):
-            if params[i][0] == name:
-                params[i] = (name, values.pop(0),)
+        while i < len(pairs) and len(values):
+            if pairs[i][0] == name:
+                pairs[i] = (name, values.pop(0),)
             i += 1
 
-        while i < len(params):
-            if params[i] == name:
-                params.pop(i)
+        while i < len(pairs):
+            if pairs[i] == name:
+                pairs.pop(i)
             else:
                 i += 1
 

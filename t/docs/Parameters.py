@@ -122,15 +122,15 @@ if __name__ == '__main__':
 
     # params
     params = Pyjo.Parameters.new('foo=bar&baz=23')
-    array = params.params
-    is_deeply_ok(array, [('foo', 'bar'), ('baz', '23')], "params.params")
-    params.params = [('foo', 'b&ar'), ('baz', 23)]
+    array = params.pairs
+    is_deeply_ok(array, [('foo', 'bar'), ('baz', '23')], "params.pairs")
+    params.pairs = [('foo', 'b&ar'), ('baz', 23)]
     is_ok(str(params), 'foo=b%26ar&baz=23', "params")
 
     # parse
     params = Pyjo.Parameters.new()
     params = params.parse('foo=b%3Bar&baz=23')
-    is_deeply_ok(params.params, [('foo', 'b;ar'), ('baz', '23')], "params.parse('foo=b%3Bar&baz=23')")
+    is_deeply_ok(params.pairs, [('foo', 'b;ar'), ('baz', '23')], "params.parse('foo=b%3Bar&baz=23')")
 
     # remove
     params = Pyjo.Parameters.new('foo=bar&foo=baz&bar=yada').remove('foo')

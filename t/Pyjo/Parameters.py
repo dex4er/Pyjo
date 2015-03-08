@@ -26,7 +26,7 @@ if __name__ == '__main__':
     is_ok(str(params2), 'x=1&y=2', 'right format')
     is_ok(str(params3), 'a=1&b=2&c=3&d=4', 'right format')
     is_ok(str(params), 'foo=b%3Bar&baz=23', 'right format')
-    is_deeply_ok(params.params, [('foo', 'b;ar'), ('baz', '23')], 'right structure')
+    is_deeply_ok(params.pairs, [('foo', 'b;ar'), ('baz', '23')], 'right structure')
 
     # Append
     params.append(('a', 4), ('a', 5), ('b', 6), ('b', 7))
@@ -95,11 +95,11 @@ if __name__ == '__main__':
     # Semicolon
     params = Pyjo.Parameters.new('foo=bar;baz')
     is_ok(str(params), 'foo=bar;baz', 'right format')
-    is_deeply_ok(params.params, [('foo', 'bar;baz')], 'right structure')
+    is_deeply_ok(params.pairs, [('foo', 'bar;baz')], 'right structure')
     is_deeply_ok(params.to_dict(), {'foo': 'bar;baz'}, 'right structure')
     is_ok(str(params), 'foo=bar%3Bbaz', 'right format')
     params = Pyjo.Parameters.new(params)
-    is_deeply_ok(params.params, [('foo', 'bar;baz')], 'right structure')
+    is_deeply_ok(params.pairs, [('foo', 'bar;baz')], 'right structure')
     is_deeply_ok(params.to_dict(), {'foo': 'bar;baz'}, 'right structure')
     is_ok(str(params), 'foo=bar%3Bbaz', 'right format')
 
@@ -163,15 +163,15 @@ if __name__ == '__main__':
     # Unicode
     params = Pyjo.Parameters.new()
     params.parse('input=say%20%22%C2%AB~%22;')
-    is_deeply_ok(params.params, [('input', u'say "«~";')], 'right structure')
+    is_deeply_ok(params.pairs, [('input', u'say "«~";')], 'right structure')
     is_ok(params.param('input'), u'say "«~";', 'right value')
     is_ok(str(params), 'input=say+%22%C2%AB~%22%3B', 'right result')
     params = Pyjo.Parameters.new(u'♥=☃')
-    is_deeply_ok(params.params, [(u'♥', u'☃')], 'right structure')
+    is_deeply_ok(params.pairs, [(u'♥', u'☃')], 'right structure')
     is_ok(params.param(u'♥'), u'☃', 'right value')
     is_ok(str(params), '%E2%99%A5=%E2%98%83', 'right result')
     params = Pyjo.Parameters.new('%E2%99%A5=%E2%98%83')
-    is_deeply_ok(params.params, [(u'♥', u'☃')], 'right structure')
+    is_deeply_ok(params.pairs, [(u'♥', u'☃')], 'right structure')
     is_ok(params.param(u'♥'), u'☃', 'right value')
     is_ok(str(params), '%E2%99%A5=%E2%98%83', 'right result')
 
@@ -182,7 +182,7 @@ if __name__ == '__main__':
 
     # Replace
     params = Pyjo.Parameters.new('a=1&b=2')
-    params.params = [('a', 2), ('b', 3)]
+    params.pairs = [('a', 2), ('b', 3)]
     is_ok(str(params), 'a=2&b=3', 'right result')
 
     # Query string
