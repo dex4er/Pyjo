@@ -189,10 +189,10 @@ if __name__ == '__main__':
           .preceding().map('type').join("\n"),
           "b\ni", 'preceding result')
 
-    # preceding_siblings
+    # preceding_nodes
     is_ok(dom.parse('A<!-- B --><p>C</p>')
-          .at('p').preceding_siblings().first().content,
-          "A", 'preceding_siblings')
+          .at('p').preceding_nodes().first().content,
+          "A", 'preceding_nodes')
 
     # prepend
     is_ok(dom.parse('<div><h2>Test</h2></div>')

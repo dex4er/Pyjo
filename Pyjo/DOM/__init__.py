@@ -503,16 +503,16 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
         """
         return self._select(self._collect(self._siblings(True)[0]), pattern)
 
-    def preceding_siblings(self):
+    def preceding_nodes(self):
         """::
-            collection = dom.preceding_siblings()
+            collection = dom.preceding_nodes()
 
-        Return a :mod:`Pyjo.Collection` object containing the sibling nodes before this
+        Return a :mod:`Pyjo.Collection` object containing all sibling nodes before this
         node as :mod:`Pyjo.DOM` objects. ::
 
             # "A"
             dom.parse('A<!-- B --><p>C</p>') \\
-               .at('p').preceding_siblings().first().content
+               .at('p').preceding_nodes().first().content
         """
         return self._collect(self._siblings(False)[0])
 
