@@ -64,9 +64,13 @@ import socket
 import weakref
 
 
+DEBUG = getenv('PYJO_IOLOOP_DEBUG', False)
+DIE = getenv('PYJO_IOLOOP_DIE', False)
+
+
 NoneType = None.__class__
 
-if getenv('PYJO_NO_TLS', 0):
+if getenv('PYJO_NO_TLS', False):
     TLS = False
     TLS_WANT_ERROR = None
 else:
@@ -87,9 +91,6 @@ if not TLS:
     SSLError = NoneType
 if not TLS_WANT_ERROR:
     SSLWantReadError = SSLWantWriteError = NoneType
-
-
-DEBUG = getenv('PYJO_IOLOOP_DEBUG', False)
 
 
 class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
@@ -151,15 +152,15 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
 
         Enable TLS. ::
 
-            tls_ca='/etc/tls/ca.crt'
+            tls_ca='/etc/ssl/certs/ca-certificates.crt'
 
         Path to TLS certificate authority file. Also activates hostname verification. ::
 
-            tls_cert='/etc/tls/client.crt'
+            tls_cert='/etc/ssl/certs/ssl-cert-snakeoil.pem'
 
         Path to the TLS certificate file. ::
 
-            tls_key='/etc/tls/client.key'
+            tls_key='/etc/ssl/private/ssl-cert-snakeoil.key'
 
         Path to the TLS key file.
         """
@@ -241,18 +242,20 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
 
     def _tls(self):
         handle = self._handle
-        while True:
-            try:
-                handle.do_handshake()
-                # Connected
-                return self._cleanup().emit('connect', handle)
-            except SSLWantReadError:
-                return self.reactor.watch(handle, True, False)
-            except SSLWantWriteError:
-                return self.reactor.watch(handle, True, True)
-            except SSLError:
-                return self.reactor.watch(handle, True, True)
-        return self.emit('error', 'TLS upgrade failed')
+
+        try:
+            handle.do_handshake()
+            # Connected
+            return self._cleanup().emit('connect', handle)
+        except SSLWantReadError:
+            return self.reactor.watch(handle, True, False)
+        except SSLWantWriteError:
+            return self.reactor.watch(handle, True, True)
+        except SSLError as ex:
+            self.reactor.remove(handle)  # TODO remove here?
+            raise ex
+
+        return self.reactor.watch(handle, True, True)
 
     def _try_tls(self, **kwargs):
         handle = self._handle
@@ -261,13 +264,29 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
         if not TLS:
             return self.emit('error', 'ssl required for TLS support')
 
+        tls_kwargs = {
+            'do_handshake_on_connect': False,
+            'server_side': False,
+            'ca_certs': kwargs.get('tls_ca'),
+            'certfile': kwargs.get('tls_cert'),
+            'keyfile': kwargs.get('tls_key'),
+        }
+
+        if tls_kwargs['ca_certs']:
+            tls_kwargs['cert_reqs'] = ssl.CERT_REQUIRED
+
         reactor = self.reactor
         reactor.remove(handle)
+
         try:
-            ssl_handle = ssl.wrap_socket(handle, do_handshake_on_connect=False) # TODO options
+            ssl_handle = ssl.wrap_socket(handle, **tls_kwargs)
             self._handle = ssl_handle
-        except SSLError:
-            return self.emit('error', 'TLS upgrade failed')
+        except SSLError as ex:
+            if DIE:
+                raise ex
+            else:
+                return self.emit('error', 'TLS upgrade failed')
+
         reactor.io(lambda reactor, write: self._tls(), ssl_handle).watch(ssl_handle, False, True)
 
 
