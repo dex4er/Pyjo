@@ -125,44 +125,71 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
 
         Open a socket connection to a remote host.
 
-        These options are currently available: ::
+        These options are currently available:
 
-            address='mojolicio.us'
+        ``address``
+            ::
 
-        Address or host name of the peer to connect to, defaults to ``127.0.0.1``. ::
+                address='mojolicio.us'
 
-            handle=handle
+            Address or host name of the peer to connect to, defaults to ``127.0.0.1``.
 
-        Use an already prepared handle. ::
+        ``handle``
+            ::
 
-            local_address='127.0.0.1'
+                handle=handle
 
-        Local address to bind to. ::
+            Use an already prepared handle.
 
-            port=80
+        ``local_address``
+            ::
 
-        Port to connect to, defaults to ``80`` or ``443`` with ``tls`` option. ::
+                local_address='127.0.0.1'
 
-            timeout=15
+            Local address to bind to.
 
-        Maximum amount of time in seconds establishing connection may take before
-        getting canceled, defaults to ``10``. ::
+        ``port``
+            ::
 
-            tls=True
+                port=80
 
-        Enable TLS. ::
+            Port to connect to, defaults to ``80`` or ``443`` with ``tls`` option.
 
-            tls_ca='/etc/ssl/certs/ca-certificates.crt'
+        ``timeout``
+            ::
 
-        Path to TLS certificate authority file. Also activates hostname verification. ::
+                timeout=15
 
-            tls_cert='/etc/ssl/certs/ssl-cert-snakeoil.pem'
+            Maximum amount of time in seconds establishing connection may take before
+            getting canceled, defaults to ``10``.
 
-        Path to the TLS certificate file. ::
+        ``tls``
+            ::
 
-            tls_key='/etc/ssl/private/ssl-cert-snakeoil.key'
+                tls=True
 
-        Path to the TLS key file.
+            Enable TLS.
+
+        ``tls_ca``
+            ::
+
+                tls_ca='/etc/ssl/certs/ca-certificates.crt'
+
+            Path to TLS certificate authority file. Also activates hostname verification.
+
+        ``tls_cert``
+            ::
+
+                tls_cert='/etc/ssl/certs/ssl-cert-snakeoil.pem'
+
+            Path to the TLS certificate file.
+
+        ``tls_key``
+            ::
+
+                tls_key='/etc/ssl/private/ssl-cert-snakeoil.key'
+
+            Path to the TLS key file.
         """
 
         reactor = self.reactor
