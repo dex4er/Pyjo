@@ -50,11 +50,15 @@ import Pyjo.IOLoop
 from Pyjo.Base import lazy
 from Pyjo.Util import getenv, warn
 
+import os
 import socket
 import weakref
 
 
 DEBUG = getenv('PYJO_IOLOOP_DEBUG', False)
+
+CERT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'certs', 'server.crt')
+KEY = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'certs', 'server.key')
 
 
 class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
