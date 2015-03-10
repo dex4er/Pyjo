@@ -32,6 +32,7 @@ emit the following new ones.
 
 accept
 ~~~~~~
+::
 
     @server.on
     def accept(server, handle):
