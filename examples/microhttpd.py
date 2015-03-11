@@ -3,10 +3,10 @@ import sys
 import Pyjo.IOLoop
 
 
-port = int(sys.argv[1]) if len(sys.argv) > 1 else 8080
+opts = dict([['address', '0.0.0.0'], ['port', 8080]] + list(map(lambda a: a.split('='), sys.argv[1:])))
 
 
-@Pyjo.IOLoop.server(address='0.0.0.0', port=port)
+@Pyjo.IOLoop.server(**opts)
 def server(loop, stream, cid):
 
     @stream.on

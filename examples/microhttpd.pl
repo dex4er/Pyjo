@@ -2,9 +2,9 @@ use v5.14;
 
 use Mojo::IOLoop;
 
-my $port = $ARGV[0] || 8080;
+my %opts = (address => '0.0.0.0', port => 8080, map { split /=/, $_, 2 } @ARGV);
 
-Mojo::IOLoop->server(address => '0.0.0.0', port => $port, sub {
+Mojo::IOLoop->server(%opts, sub {
     my ($loop, $stream, $id) = @_;
 
     $stream->on(read => sub {

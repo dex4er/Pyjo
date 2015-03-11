@@ -56,9 +56,35 @@ import weakref
 
 
 DEBUG = getenv('PYJO_IOLOOP_DEBUG', False)
+DIE = getenv('PYJO_IOLOOP_DIE', False)
 
 CERT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'certs', 'server.crt')
 KEY = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'certs', 'server.key')
+
+
+NoneType = None.__class__
+
+if getenv('PYJO_NO_TLS', False):
+    TLS = False
+    TLS_WANT_ERROR = None
+else:
+    try:
+        import ssl
+        from ssl import SSLError
+        TLS = True
+        try:
+            from ssl import SSLWantReadError, SSLWantWriteError
+            TLS_WANT_ERROR = True
+        except ImportError:
+            TLS_WANT_ERROR = False
+    except ImportError:
+        TLS = None
+        TLS_WANT_ERROR = None
+
+if not TLS:
+    SSLError = NoneType
+if not TLS_WANT_ERROR:
+    SSLWantReadError = SSLWantWriteError = NoneType
 
 
 class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
@@ -88,6 +114,7 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
 
     _handle = None
     _handles = lazy(lambda self: {})
+    _tls_kwargs = lazy(lambda self: {})
 
     def __del__(self):
         if DEBUG:
@@ -216,6 +243,28 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
         s.listen(backlog)
         self._handle = s
 
+        if not kwargs.get('tls'):
+            return
+
+        tls_kwargs = {
+            'do_handshake_on_connect': False,
+            'server_side': True,
+            'ca_certs': kwargs.get('tls_ca'),
+            'certfile': kwargs.get('tls_cert', CERT),
+            'keyfile': kwargs.get('tls_key', KEY),
+            'ciphers': kwargs.get('tls_ciphers'),
+        }
+
+        if 'tls_verify' in kwargs:
+            tls_kwargs['cert_reqs'] = kwargs['tls_verify']
+        else:
+            if tls_kwargs['ca_certs']:
+                tls_kwargs['cert_reqs'] = 0x03
+            else:
+                tls_kwargs['cert_reqs'] = 0x00
+
+        self._tls_kwargs = tls_kwargs
+
     @property
     def port(self):
         """::
@@ -264,8 +313,39 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
             handle.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 
             self.emit('accept', handle)
-            # self.reactor.remove(self._handle)
-            # TODO TLS
+
+            if self._tls_kwargs:
+                try:
+                    ssl_handle = ssl.wrap_socket(handle, **self._tls_kwargs)
+                    self._handles[handle] = ssl_handle
+                    self._handshake(ssl_handle)
+                except SSLError as ex:
+                    if DIE:
+                        raise ex
+                    else:
+                        return self.emit('error', 'TLS upgrade failed')
+
+    def _handshake(self, handle):
+        self = weakref.proxy(self)
+        self.reactor.io(lambda reactor, write: self._tls(handle), handle)
+
+    def _tls(self, handle):
+        # Accepted
+        try:
+            handle.do_handshake()
+            # Accepted
+            self.reactor.remove(handle)
+            del self._handles[handle]
+            return self.emit('accept', handle)
+        except SSLWantReadError:
+            return self.reactor.watch(handle, True, False)
+        except SSLWantWriteError:
+            return self.reactor.watch(handle, True, True)
+        except SSLError as ex:
+            self.reactor.remove(handle)  # TODO remove here?
+            raise ex
+
+        return self.reactor.watch(handle, True, True)
 
 
 new = Pyjo_IOLoop_Server.new
