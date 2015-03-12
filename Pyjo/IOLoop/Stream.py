@@ -153,9 +153,16 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
     global :mod:`Pyjo.IOLoop` singleton.
     """
 
+    handle = None
+    """::
+
+        handle = stream.handle
+
+    Get handle for stream.
+    """
+
     _buffer = b''
     _graceful = False
-    _handle = None
     _paused = False
     _timeout = 15
     _timer = None
@@ -206,16 +213,6 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
             self._graceful = True
             return self
         return self.close()
-
-    @property
-    def handle(self):
-        """::
-
-            handle = stream.handle
-
-        Get handle for stream.
-        """
-        return self._handle
 
     # TODO @property
     def is_readable(self):
@@ -285,7 +282,10 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
 
         Steal handle from stream and prevent it from getting closed automatically.
         """
-        ...
+        handle = self.handle
+        self.reactor.remove(handle)
+        self.handle = None
+        return handle
 
     @property
     def timeout(self):
