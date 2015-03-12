@@ -28,7 +28,7 @@ done = False
 def _print(*args, **kwargs):
     output = kwargs.get('file', sys.stdout)
     string = ' '.join(args) + "\n"
-    if not isinstance(string, bytes):
+    if sys.stdout.encoding.lower() != 'utf-8':
         string = string.encode('ascii', 'backslashreplace').decode('ascii')
     output.write(string)
     output.flush()
