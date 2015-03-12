@@ -214,7 +214,7 @@ def done_testing():
     global done, failed, test, tests
 
     if done:
-        fail('done_testing() was already called')
+        fail_ok('done_testing() was already called')
         return
 
     if not tests:
