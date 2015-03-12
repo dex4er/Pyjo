@@ -307,8 +307,14 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
             self._buffer = self._buffer[need:]
             self._decompress(chunk)
             self._size += len(chunk)
+
         if length <= self.progress:
             self._state = 'finished'
+
+            # Replace Content-Encoding with Content-Length
+            if self.auto_decompress and self.is_compressed:
+                self.headers.content_length = self._gz_size
+                self.headers.remove('Content-Encoding')
 
         return self
 
@@ -346,7 +352,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
 
         # Decompress
         if self._gz is None:
-            self._gz = zlib.decompressobj(16 + zlib.MAX_WBITS)
+            self._gz = zlib.decompressobj(zlib.MAX_WBITS | 16)
         gz = self._gz
 
         out = gz.decompress(chunk)
@@ -357,16 +363,10 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
 
         self._gz_size += l
 
-        # Replace Content-Encoding with Content-Length
-        if gz.eof:
-            self.headers.content_length = self._gz_size
-            self.headers.remove('Content-Encoding')
-
         # Check buffer size
-        else:
-            if len(gz.unconsumed_tail) > self.max_buffer_size:
-                self._state = 'finished'
-                self._limit = True
+        if len(gz.unconsumed_tail) > self.max_buffer_size:
+            self._state = 'finished'
+            self._limit = True
 
     def _parse_chunked(self):
         # Trailing headers
