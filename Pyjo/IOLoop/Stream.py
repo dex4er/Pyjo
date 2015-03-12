@@ -1,5 +1,105 @@
 """
-Pyjo.IOLoop.Stream
+Pyjo.IOLoop.Stream - Non-blocking I/O stream
+============================================
+::
+
+    import Pyjo.IOLoop.Stream
+
+    # Create stream
+    stream = Pyjo.IOLoop.Stream.new(handle)
+
+    @stream.on
+    def read(stream, bstring):
+        ...
+
+    @stream.on
+    def close(stream):
+        ...
+
+    @stream.on
+    def error(stream, err):
+        ...
+
+    # Start and stop watching for new data
+    stream.start()
+    stream.stop()
+
+    # Start reactor if necessary
+    if not stream.reactor.is_running:
+        stream.reactor.start()
+
+
+:mod:`Pyjo.IOLoop.Stream` is a container for I/O streams used by :mod:`Pyjo.IOLoop`.
+
+Events
+------
+
+:mod:`Pyjo.IOLoop.Stream` inherits all events from :mod:`Pyjo.IOLoop.EventEmitter` and can
+emit the following new ones.
+
+close
+~~~~~
+::
+
+    @stream.on
+    def close(stream):
+        ...
+
+Emitted if the stream gets closed.
+
+drain
+~~~~~
+::
+
+    @stream.on
+    def close(stream):
+        ...
+
+Emitted once all data has been written.
+
+error
+~~~~~
+::
+
+    @stream.on
+    def error(stream, err):
+        ...
+
+Emitted if an error occurs on the stream, fatal if unhandled.
+
+read
+~~~~
+::
+
+    @stream.on
+    def read(stream, bstring):
+        ...
+
+Emitted if new data arrives on the stream.
+
+timeout
+~~~~~~~
+::
+
+    @stream.on
+    def timeout(stream):
+        ...
+
+Emitted if the stream has been inactive for too long and will get closed
+automatically.
+
+write
+~~~~~
+::
+
+    @stream.on
+    def read(stream, bstring):
+        ...
+
+Emitted if new data has been written to the stream.
+
+Classes
+-------
 """
 
 import Pyjo.EventEmitter
@@ -8,10 +108,9 @@ import Pyjo.IOLoop
 from Pyjo.Base import lazy
 from Pyjo.Util import getenv
 
+import errno
 import socket
 import weakref
-
-from errno import EAGAIN, ECONNRESET, EINTR, EPIPE, EWOULDBLOCK
 
 
 NoneType = None.__class__
@@ -39,17 +138,35 @@ if not TLS_WANT_ERROR:
 
 
 class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
+    """
+    :mod:`Pyjo.IOLoop.Stream` inherits all attributes and methods from
+    :mod:`Pyjo.EventEmitter` and implements the following new ones.
+    """
 
     reactor = lazy(lambda self: Pyjo.IOLoop.singleton.reactor)
-    handle = None
+    """::
 
-    _graceful = False
-    _timeout = 15
+        reactor = stream.reactor
+        stream.reactor = Pyjo.Reactor.Poll.new()
+
+    Low-level event reactor, defaults to the :attr:`reactor` attribute value of the
+    global :mod:`Pyjo.IOLoop` singleton.
+    """
+
     _buffer = b''
-    _timer = None
+    _graceful = False
+    _handle = None
     _paused = False
+    _timeout = 15
+    _timer = None
 
     def __init__(self, handle, **kwargs):
+        """::
+
+            stream = Pyjo.IOLoop.Stream.new(handle)
+
+        Construct a new :mod:`Pyjo.IOLoop.Stream` object.
+        """
         super(Pyjo_IOLoop_Stream, self).__init__(handle=handle, **kwargs)
 
     def __del__(self):
@@ -57,6 +174,12 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
             self.close()
 
     def close(self):
+        """::
+
+            stream.close()
+
+        Close stream immediately.
+        """
         reactor = self.reactor
         if not dir(reactor):
             return
@@ -73,23 +196,60 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
             return self.emit('close')
 
     def close_gracefully(self):
+        """::
+
+            stream.close_gracefully()
+
+        Close stream gracefully.
+        """
         if self.is_writing():
             self._graceful = True
             return self
         return self.close()
 
+    @property
+    def handle(self):
+        """::
+
+            handle = stream.handle
+
+        Get handle for stream.
+        """
+        return self._handle
+
+    # TODO @property
     def is_readable(self):
+        """::
+
+            boolean = stream.is_readable
+
+        Quick non-blocking check if stream is readable, useful for identifying tainted
+        sockets.
+        """
         self._again()
         if not self.handle:
             return None
         return self.handle and Pyjo.Util._readable(self.handle.fileno())
 
+    # TODO @property
     def is_writing(self):
+        """::
+
+            boolean = stream.is_writing
+
+        Check if stream is writing.
+        """
         if not self.handle:
             return None
         return len(self._buffer) or self.has_subscribers('drain')
 
     def start(self):
+        """::
+
+            stream.start()
+
+        Start watching for new data on the stream.
+        """
         # Resume
         reactor = self.reactor
         if self._paused:
@@ -108,14 +268,36 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
         reactor.io(lambda reactor, write: cb_read_write(self, write), self.set(timeout=self._timeout).handle)
 
     def stop(self):
+        """::
+
+            stream.stop()
+
+        Stop watching for new data on the stream.
+        """
         if not self._paused:
             self.reactor.watch(self.handle, False, self.is_writing())
         self._paused = True
 
-    # TODO steal_handle
+    def steal_handle(self):
+        """::
+
+            handle = stream.steal_handle()
+
+        Steal handle from stream and prevent it from getting closed automatically.
+        """
+        ...
 
     @property
     def timeout(self):
+        """::
+
+            timeout = stream.timeout
+            stream.timeout = 45
+
+        Maximum amount of time in seconds stream can be inactive before getting closed
+        automatically, defaults to ``15``. Setting the value to ``0`` will allow this
+        stream to be inactive indefinitely.
+        """
         return self._timeout
 
     @timeout.setter
@@ -139,6 +321,14 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
         self._timer = reactor.timer(lambda reactor: timeout_cb(self), value)
 
     def write(self, chunk, cb=None):
+        """::
+
+            stream = stream.write(bstring)
+            stream = stream.write(bstring, cb)
+
+        Write data to stream, the optional drain callback will be invoked once all data
+        has been written.
+        """
         self._buffer += chunk
         if cb:
             self.once(cb, 'drain')
@@ -155,7 +345,7 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
 
     def _error(self, e):
         # Retry
-        if e.errno == EAGAIN or e.errno == EINTR or e.errno == EWOULDBLOCK:
+        if e.errno == errno.EAGAIN or e.errno == errno.EINTR or e.errno == errno.EWOULDBLOCK:
             return
 
         if isinstance(e, (SSLWantReadError, SSLWantReadError)):
@@ -165,7 +355,7 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
             return
 
         # Closed
-        if e.errno == ECONNRESET or e.errno == EPIPE:
+        if e.errno == errno.ECONNRESET or e.errno == errno.EPIPE:
             return self.close()
 
         # Error
