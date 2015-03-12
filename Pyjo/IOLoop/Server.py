@@ -317,7 +317,7 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
             if self._tls_kwargs:
                 try:
                     ssl_handle = ssl.wrap_socket(handle, **self._tls_kwargs)
-                    self._handles[handle] = ssl_handle
+                    self._handles[ssl_handle] = ssl_handle
                     self._handshake(ssl_handle)
                 except SSLError as ex:
                     if DIE:
@@ -330,6 +330,7 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
         self.reactor.io(lambda reactor, write: self._tls(handle), handle)
 
     def _tls(self, handle):
+        handle = self._handles[handle]
         # Accepted
         try:
             handle.do_handshake()
