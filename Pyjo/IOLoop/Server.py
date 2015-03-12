@@ -93,6 +93,14 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
     :mod:`Pyjo.EventEmitter` and implements the following new ones.
     """
 
+    handle = None
+    """::
+
+        handle = stream.handle
+
+    Handle for stream.
+    """
+
     multi_accept = 50
     """::
 
@@ -112,7 +120,6 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
     global :mod:`Pyjo.IOLoop` singleton.
     """
 
-    _handle = None
     _handles = lazy(lambda self: {})
     _tls_kwargs = lazy(lambda self: {})
 
@@ -121,7 +128,7 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
             warn("-- Method {0}.__del__".format(self))
 
         if dir(self.reactor):
-            if dir(self._handle) and self._handle:
+            if dir(self.handle) and self.handle:
                 self.stop()
             for handle in self._handles.values():
                 self.reactor.remove(handle)
@@ -137,16 +144,6 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
         listen.bind(('127.0.0.1', 0))
         listen.listen(5)
         return listen.getsockname()[1]
-
-    @property
-    def handle(self):
-        """::
-
-            handle = server.handle
-
-        Get handle for server.
-        """
-        return self._handle
 
     def listen(self, **kwargs):
         """::
@@ -241,7 +238,7 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.setblocking(0)
         s.listen(backlog)
-        self._handle = s
+        self.handle = s
 
         if not kwargs.get('tls'):
             return
@@ -273,7 +270,7 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
 
         Get port this server is listening on.
         """
-        return self._handle.getsockname()[1]
+        return self.handle.getsockname()[1]
 
     def start(self):
         """::
@@ -286,7 +283,7 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
             self._accept()
 
         self = weakref.proxy(self)
-        self.reactor.io(lambda reactor, write: ready_cb(self, reactor), self._handle)
+        self.reactor.io(lambda reactor, write: ready_cb(self, reactor), self.handle)
 
     def stop(self):
         """::
@@ -295,14 +292,14 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
 
         Stop accepting connections.
         """
-        self.reactor.remove(self._handle)
-        self._handle = None
+        self.reactor.remove(self.handle)
+        self.handle = None
 
     def _accept(self):
         # Greedy accept
         for _ in range(0, self.multi_accept):
             try:
-                (handle, unused) = self._handle.accept()
+                (handle, unused) = self.handle.accept()
             except:
                 return  # TODO EAGAIN because non-blocking mode
             if not handle:

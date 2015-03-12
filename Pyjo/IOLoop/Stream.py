@@ -158,7 +158,7 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
 
         handle = stream.handle
 
-    Get handle for stream.
+    Handle for stream.
     """
 
     _buffer = b''

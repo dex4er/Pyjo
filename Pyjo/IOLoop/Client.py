@@ -99,6 +99,14 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
     :mod:`Pyjo.EventEmitter` and implements the following new ones.
     """
 
+    handle = None
+    """::
+
+        handle = stream.handle
+
+    Handle for stream.
+    """
+
     reactor = lazy(lambda self: Pyjo.IOLoop.singleton.reactor)
     """::
 
@@ -109,7 +117,6 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
     global :mod:`Pyjo.IOLoop` singleton.
     """
 
-    _handle = None
     _timer = None
 
     def __del__(self):
@@ -221,16 +228,16 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
             reactor.remove(self._timer)
             self._timer = None
 
-        if self._handle:
-            reactor.remove(self._handle)
-            self._handle = None
+        if self.handle:
+            reactor.remove(self.handle)
+            self.handle = None
 
         return self
 
     def _connect(self, **kwargs):
         handle = kwargs.get('handle')
         if not handle:
-            handle = self._handle
+            handle = self.handle
         if not handle:
             address = kwargs.get('address', 'localhost')
             port = self._port(**kwargs)
@@ -238,7 +245,7 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
             handle = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             handle.connect((address, port))
             # TODO return self.emit('error', "Can't connect: " + str(e))
-            self._handle = handle
+            self.handle = handle
 
         handle.setblocking(0)
 
@@ -259,7 +266,7 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
 
     def _ready(self, **kwargs):
         # Retry or handle exceptions
-        handle = self._handle
+        handle = self.handle
 
         # Disable Nagle's algorithm
         handle.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
@@ -268,7 +275,7 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
         return self._try_tls(**kwargs)
 
     def _tls(self):
-        handle = self._handle
+        handle = self.handle
 
         try:
             handle.do_handshake()
@@ -285,7 +292,7 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
         return self.reactor.watch(handle, True, True)
 
     def _try_tls(self, **kwargs):
-        handle = self._handle
+        handle = self.handle
         if not kwargs.get('tls', False) or (TLS and isinstance(handle, ssl.SSLSocket)):
             return self._cleanup().emit('connect', handle)
         if not TLS:
@@ -307,7 +314,7 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
 
         try:
             ssl_handle = ssl.wrap_socket(handle, **tls_kwargs)
-            self._handle = ssl_handle
+            self.handle = ssl_handle
         except SSLError as ex:
             if DIE:
                 raise ex
