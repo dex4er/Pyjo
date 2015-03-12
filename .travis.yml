@@ -10,6 +10,8 @@ matrix:
     env: PACKAGES='' PYTHONIOENCODING='ascii'
   - python: "3.4"
     env: PACKAGES=''
+  - python: "3.4"
+    env: PACKAGES='' PYTHONIOENCODING='ascii'
   - python: "pypy"
     env: PACKAGES=''
   - python: "pypy3"
