@@ -13,5 +13,8 @@ Contents:
     :maxdepth: 2
 
     intro
+    status
     examples
     api/index
+    authors
+    license
