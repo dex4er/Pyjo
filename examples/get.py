@@ -1,6 +1,11 @@
 import Pyjo.UserAgent
 
-import sys
+import sys, codecs
+
+if sys.stdout.isatty():
+    sys.stdout = codecs.getwriter(sys.stdout.encoding)(sys.stdout, 'xmlcharrefreplace')
+else:
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
 
 try:
     url = sys.argv[1]
