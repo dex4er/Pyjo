@@ -1,21 +1,21 @@
 # -*- coding: utf-8 -*-
 
 """
-Pyjo.ByteStream - ByteStream
-============================
+Pyjo.BytesString - BytesString
+==============================
 ::
 
-    import Pyjo.ByteStream
+    import Pyjo.BytesString
 
-    # Manipulate bytestream
-    stream = Pyjo.ByteStream.new('foo:bar:baz')
+    # Manipulate BytesString
+    stream = Pyjo.BytesString.new('foo:bar:baz')
     print(stream.url_escape().decode('ascii'))
 
     # Use the alternative constructor
-    from Pyjo.ByteStream import b
+    from Pyjo.BytesString import b
     bstream = b('foo:bar:baz').url_escape()
 
-:mod:`Pyjo.ByteStream` is a container for bytestreams that provides a
+:mod:`Pyjo.BytesString` is a container for BytesStrings that provides a
 more friendly API for many of the functions in :mod:`Pyjo.Util`.
 
 It also inherits all attributes and methods from
@@ -25,7 +25,7 @@ Classes
 -------
 """
 
-import Pyjo.TextStream
+import Pyjo.UnicodeString
 import Pyjo.Util
 
 import sys
@@ -40,18 +40,18 @@ else:
 DEFAULT_CHARSET = 'utf-8'
 
 
-class Pyjo_ByteStream(base_object):
+class Pyjo_BytesString(base_object):
     """
-    :mod:`Pyjo.ByteStream` inherits all attributes and methods from
+    :mod:`Pyjo.BytesString` inherits all attributes and methods from
     either :class:`str` (Python 2.x) or :class:`bytes` (Python 3.x)
     and implements the following new ones.
     """
 
     def __new__(cls, value=b'', charset=DEFAULT_CHARSET):
-        return super(Pyjo_ByteStream, cls).__new__(cls, Pyjo.Util.b(value, charset))
+        return super(Pyjo_BytesString, cls).__new__(cls, Pyjo.Util.b(value, charset))
 
     def __repr__(self):
-        return "{0}.new({1})".format(self.__module__, super(Pyjo_ByteStream, self).__repr__())
+        return "{0}.new({1})".format(self.__module__, super(Pyjo_BytesString, self).__repr__())
 
     def decode(self, charset=DEFAULT_CHARSET):
         """::
@@ -59,22 +59,22 @@ class Pyjo_ByteStream(base_object):
             stream = stream.decode()
             stream = stream.decode('iso-8859-1')
 
-        Decode bytestream, defaults to ``utf-8``, and return new :mod:`Pyjo.TextStream` object. ::
+        Decode BytesString, defaults to ``utf-8``, and return new :mod:`Pyjo.UnicodeString` object. ::
 
             stream.decode('UTF-16LE').unquote().trim().say()
 
         """
-        return Pyjo.TextStream.new(super(Pyjo_ByteStream, self).decode(charset))
+        return Pyjo.UnicodeString.new(super(Pyjo_BytesString, self).decode(charset))
 
     @classmethod
     def new(cls, value=b'', charset=DEFAULT_CHARSET):
         """::
 
-            stream = Pyjo.ByteStream.new('test123')
+            stream = Pyjo.BytesString.new('test123')
 
-        Construct a new :mod:`Pyjo.ByteStream` object.
+        Construct a new :mod:`Pyjo.BytesString` object.
         """
-        return Pyjo_ByteStream(value, charset)
+        return Pyjo_BytesString(value, charset)
 
     def url_escape(self):
         """::
@@ -82,7 +82,7 @@ class Pyjo_ByteStream(base_object):
             stream = stream.url_escape()
             stream = stream.url_escape(br'^A-Za-z0-9\-._~')
 
-        Percent encode all unsafe characters in bytestream with
+        Percent encode all unsafe characters in BytesString with
         :func:`Pyjo.Util.url_escape`. ::
 
             b('foo bar baz').url_escape().decode().say()
@@ -94,7 +94,7 @@ class Pyjo_ByteStream(base_object):
 
             stream = stream.url_unescape()
 
-        Decode percent encoded characters in bytestream with
+        Decode percent encoded characters in BytesString with
         :func:`Pyjo.Util.url_unescape`. ::
 
             b('%3Chtml%3E').url_unescape().decode().xml_escape().say()
@@ -107,10 +107,10 @@ def b(value=b'', charset=DEFAULT_CHARSET):
 
         stream = b('test123')
 
-    Construct a new :mod:`Pyjo.ByteStream` object.
+    Construct a new :mod:`Pyjo.BytesString` object.
     """
-    return Pyjo_ByteStream(value, charset)
+    return Pyjo_BytesString(value, charset)
 
 
-new = Pyjo_ByteStream.new
-object = Pyjo_ByteStream  # @ReservedAssignment
+new = Pyjo_BytesString.new
+object = Pyjo_BytesString  # @ReservedAssignment

@@ -17,7 +17,7 @@ if __name__ == '__main__':
     from Pyjo.Test import *  # @UnusedWildImport
 
     import Pyjo.Path
-    from Pyjo.TextStream import u
+    from Pyjo.UnicodeString import u
 
     # __init __
     path = Pyjo.Path.new()

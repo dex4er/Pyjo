@@ -11,7 +11,7 @@ Pyjo.Collection - Collection
 """
 
 
-import Pyjo.TextStream
+import Pyjo.UnicodeString
 
 
 DEFAULT_CHARSET = 'utf-8'
@@ -155,12 +155,12 @@ class Pyjo_Collection(list):
             stream = collection.join()
             stream = collection.join("\\n")
 
-        Turn collection into :mod:`Pyjo.ByteStream`. ::
+        Turn collection into :mod:`Pyjo.BytesString`. ::
 
             # Join all values with commas
             collection.join(', ').say()
         """
-        return Pyjo.TextStream.new(string.join(map(lambda s: Pyjo.Util.u(s), self)))
+        return Pyjo.UnicodeString.new(string.join(map(lambda s: Pyjo.Util.u(s), self)))
 
     def last(self):
         """::

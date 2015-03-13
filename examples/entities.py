@@ -1,5 +1,5 @@
 import Pyjo.UserAgent
-from Pyjo.TextStream import u
+from Pyjo.UnicodeString import u
 
 tx = Pyjo.UserAgent.new().get('https://html.spec.whatwg.org')
 for n in tx.res.dom('#named-character-references-table tbody > tr').each():

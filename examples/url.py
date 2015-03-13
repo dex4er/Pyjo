@@ -1,5 +1,5 @@
 import Pyjo.URL
-from Pyjo.TextStream import u
+from Pyjo.UnicodeString import u
 
 # 'ssh+git://git@github.com/dex4er/Pyjo.git'
 url = Pyjo.URL.new('https://github.com/dex4er/Pyjo')

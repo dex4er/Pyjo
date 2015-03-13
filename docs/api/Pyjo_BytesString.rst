@@ -1,3 +1,3 @@
-.. automodule:: Pyjo.ByteStream
+.. automodule:: Pyjo.BytesString
     :members:
     :special-members:

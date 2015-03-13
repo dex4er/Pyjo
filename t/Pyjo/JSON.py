@@ -25,8 +25,8 @@ if __name__ == '__main__':
     from Pyjo.Test import *  # @UnusedWildImport
 
     from Pyjo.JSON import decode_json, encode_json, from_json, j, to_json
-    from Pyjo.ByteStream import b
-    from Pyjo.TextStream import u
+    from Pyjo.BytesString import b
+    from Pyjo.UnicodeString import u
 
     # Decode array
     array = decode_json('[]')

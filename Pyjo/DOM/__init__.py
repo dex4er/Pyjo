@@ -43,7 +43,7 @@ import Pyjo.Collection
 import Pyjo.DOM.CSS
 import Pyjo.DOM.HTML
 import Pyjo.Mixin.String
-import Pyjo.TextStream
+import Pyjo.UnicodeString
 
 from Pyjo.Base import lazy
 from Pyjo.Regexp import m, s

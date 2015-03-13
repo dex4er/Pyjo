@@ -1,3 +1,3 @@
-.. automodule:: Pyjo.TextStream
+.. automodule:: Pyjo.UnicodeString
     :members:
     :special-members:
