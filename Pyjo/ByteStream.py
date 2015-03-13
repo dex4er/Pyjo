@@ -7,14 +7,28 @@ Pyjo.ByteStream - ByteStream
 
     import Pyjo.ByteStream
 
-    stream = Pyjo.ByteStream.new('foo_bar_baz')
+    # Manipulate bytestream
+    stream = Pyjo.ByteStream.new('foo:bar:baz')
+    print(stream.url_escape().decode('ascii'))
+
+    # Use the alternative constructor
+    from Pyjo.ByteStream import b
+    bstream = b('foo:bar:baz').url_escape()
+
+:mod:`Pyjo.ByteStream` is a container for bytestreams that provides a
+more friendly API for many of the functions in :mod:`Pyjo.Util`.
+
+It also inherits all attributes and methods from
+either :class:`str` (Python 2.x) or :class:`bytes` (Python 3.x).
+
+Classes
+-------
 """
-
-
-import sys
 
 import Pyjo.TextStream
 import Pyjo.Util
+
+import sys
 
 
 if sys.version_info >= (3, 0):
@@ -27,12 +41,12 @@ DEFAULT_CHARSET = 'utf-8'
 
 
 class Pyjo_ByteStream(base_object):
-    """::
-
-        stream = Pyjo.ByteStream.new('test123')
-
-    Construct a new :mod:`Pyjo.ByteStream` object.
     """
+    :mod:`Pyjo.ByteStream` inherits all attributes and methods from
+    either :class:`str` (Python 2.x) or :class:`bytes` (Python 3.x)
+    and implements the following new ones.
+    """
+
     def __new__(cls, value=b'', charset=DEFAULT_CHARSET):
         return super(Pyjo_ByteStream, cls).__new__(cls, Pyjo.Util.b(value, charset))
 
@@ -54,6 +68,12 @@ class Pyjo_ByteStream(base_object):
 
     @classmethod
     def new(cls, value=b'', charset=DEFAULT_CHARSET):
+        """::
+
+            stream = Pyjo.ByteStream.new('test123')
+
+        Construct a new :mod:`Pyjo.ByteStream` object.
+        """
         return Pyjo_ByteStream(value, charset)
 
     def url_escape(self):

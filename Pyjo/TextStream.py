@@ -7,16 +7,35 @@ Pyjo.TextStream - TextStream
 
     import Pyjo.TextStream
 
+    # Manipulate textstream
     stream = Pyjo.TextStream.new('foo_bar_baz')
-"""
+    print(stream.camelize())
 
+    # Chain methods
+    stream = Pyjo.TextStream.new('foo_bar_baz').quote()
+    stream = stream.unquote().encode('utf-8').b64_encode('')
+    print(stream.decode('ascii'))
+
+    # Use the alternative constructor
+    from Pyjo.TextStream import u
+    my $stream = u('foobarbaz').camelize('').say()
+
+:mod:`Pyjo.TextStream` is a container for textstreams that provides a
+more friendly API for many of the functions in :mod:`Pyjo.Util`.
+
+It also inherits all attributes and methods from
+either :class:`unicode` (Python 2.x) or :class:`str` (Python 3.x).
+
+Classes
+-------
+"""
 
 from __future__ import print_function
 
-import sys
-
 import Pyjo.ByteStream
 import Pyjo.Util
+
+import sys
 
 
 if sys.version_info >= (3, 0):
@@ -29,12 +48,12 @@ DEFAULT_CHARSET = 'utf-8'
 
 
 class Pyjo_TextStream(base_object):
-    """::
-
-        stream = Pyjo.TextStream.new('test123')
-
-    Construct a new :mod:`Pyjo.TextStream` object.
     """
+    :mod:`Pyjo.TextStream` inherits all attributes and methods from
+    either :class:`unicode` (Python 2.x) or :class:`str` (Python 3.x)
+    and implements the following new ones.
+    """
+
     def __new__(cls, value=u'', charset=DEFAULT_CHARSET):
         return super(Pyjo_TextStream, cls).__new__(cls, Pyjo.Util.u(value, charset))
 
@@ -46,7 +65,7 @@ class Pyjo_TextStream(base_object):
 
             stream = stream.html_unescape()
 
-        Unescape all HTML entities in bytestream with :func:`Pyjo.Util.html_unescape`. ::
+        Unescape all HTML entities in textstream with :func:`Pyjo.Util.html_unescape`. ::
 
             b('&lt;html&gt;').html_unescape().url_escape().say()
         """
@@ -58,7 +77,7 @@ class Pyjo_TextStream(base_object):
             stream = stream.encode()
             stream = stream.encode('iso-8859-1')
 
-        Encode bytestream, defaults to ``utf-8``, and return new :mod:`Pyjo.ByteStream` object. ::
+        Encode textstream, defaults to ``utf-8``, and return new :mod:`Pyjo.ByteStream` object. ::
 
             stream.trim().quote().encode().say()
         """
@@ -66,6 +85,12 @@ class Pyjo_TextStream(base_object):
 
     @classmethod
     def new(cls, value=u'', charset=DEFAULT_CHARSET):
+        """::
+
+            stream = Pyjo.TextStream.new('test123')
+
+        Construct a new :mod:`Pyjo.TextStream` object.
+        """
         return Pyjo_TextStream(value, charset)
 
     def say(self, **kwargs):
@@ -74,7 +99,7 @@ class Pyjo_TextStream(base_object):
             stream = stream.say()
             stream = stream.say(file=sys.stderr, end='', flush=True)
 
-        Print bytestream to handle and append a newline, defaults to :attr:`sys.stdout`.
+        Print textstream to handle and append a newline, defaults to :attr:`sys.stdout`.
         """
         if 'flush' in kwargs and sys.version_info < (3, 0):
             flush = kwargs.pop('flush')
@@ -92,7 +117,7 @@ class Pyjo_TextStream(base_object):
             bstring = stream.to_bytes()
             bstring = stream.to_bytes(charset)
 
-        Turn parameters into a bytes string.
+        Turn textstream into a bytes string.
         """
         return Pyjo.Util.b(self, charset)
 
@@ -101,7 +126,7 @@ class Pyjo_TextStream(base_object):
 
             string = stream.to_str()
 
-        Turn parameters into a string:
+        Turn textstream into a string:
         on Python 2.x into bytes string, on Python 3.x into unicode string.
         """
         if sys.version_info >= (3, 0):
@@ -115,7 +140,7 @@ class Pyjo_TextStream(base_object):
             ustring = stream.to_unicode()
             ustring = stream.to_unicode(charset)
 
-        Turn parameters into an unicode string.
+        Turn textstream into an unicode string.
         """
         return Pyjo.Util.u(self, charset)
 
@@ -133,7 +158,8 @@ class Pyjo_TextStream(base_object):
 
             stream = stream.xml_escape()
 
-        Escape only the characters ``&``, ``<``, ``>``, ``"`` and ``'`` in bytestream with :func:`Pyjo.Util.xml_escape`.
+        Escape only the characters ``&``, ``<``, ``>``, ``"`` and ``'`` in
+        textstream with :func:`Pyjo.Util.xml_escape`.
         """
         return self.new(Pyjo.Util.xml_escape(self))
 
