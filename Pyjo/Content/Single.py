@@ -44,13 +44,13 @@ Classes
 
 import Pyjo.Asset.Memory
 import Pyjo.Content
-import Pyjo.Mixin.String
+import Pyjo.String.Mixin
 
 from Pyjo.Base import lazy
 from Pyjo.Util import u
 
 
-class Pyjo_Content_Single(Pyjo.Content.object, Pyjo.Mixin.String.object):
+class Pyjo_Content_Single(Pyjo.Content.object, Pyjo.String.Mixin.object):
     """
     :mod:`Pyjo.Content.Single` inherits all attributes and methods from
     :mod:`Pyjo.Content` and implements the following new ones.

@@ -1,26 +1,26 @@
 # -*- coding: utf-8 -*-
 
 """
-Pyjo.UnicodeString - Unicode string
+Pyjo.String.Unicode - Unicode string
 ===================================
 ::
 
-    import Pyjo.UnicodeString
+    import Pyjo.String.Unicode
 
-    # Manipulate UnicodeString
-    string = Pyjo.UnicodeString.new('foo_bar_baz')
+    # Manipulate String.Unicode
+    string = Pyjo.String.Unicode.new('foo_bar_baz')
     print(string.camelize())
 
     # Chain methods
-    string = Pyjo.UnicodeString.new('foo_bar_baz').quote()
+    string = Pyjo.String.Unicode.new('foo_bar_baz').quote()
     string = string.unquote().encode('utf-8').b64_encode('')
     print(string.decode('ascii'))
 
     # Use the alternative constructor
-    from Pyjo.UnicodeString import u
+    from Pyjo.String.Unicode import u
     my $string = u('foobarbaz').camelize('').say()
 
-:mod:`Pyjo.UnicodeString` is a container for UnicodeStrings that provides a
+:mod:`Pyjo.String.Unicode` is a container for unicode strings that provides a
 more friendly API for many of the functions in :mod:`Pyjo.Util`.
 
 It also inherits all attributes and methods from
@@ -32,7 +32,7 @@ Classes
 
 from __future__ import print_function
 
-import Pyjo.BytesString
+import Pyjo.String.Bytes
 import Pyjo.Util
 
 import sys
@@ -47,25 +47,25 @@ else:
 DEFAULT_CHARSET = 'utf-8'
 
 
-class Pyjo_UnicodeString(base_object):
+class Pyjo_String_Unicode(base_object):
     """
-    :mod:`Pyjo.UnicodeString` inherits all attributes and methods from
+    :mod:`Pyjo.String.Unicode` inherits all attributes and methods from
     either :class:`unicode` (Python 2.x) or :class:`str` (Python 3.x)
     and implements the following new ones.
     """
 
     def __new__(cls, value=u'', charset=DEFAULT_CHARSET):
-        return super(Pyjo_UnicodeString, cls).__new__(cls, Pyjo.Util.u(value, charset))
+        return super(Pyjo_String_Unicode, cls).__new__(cls, Pyjo.Util.u(value, charset))
 
     def __repr__(self):
-        return "{0}.new({1})".format(self.__module__, super(Pyjo_UnicodeString, self).__repr__())
+        return "{0}.new({1})".format(self.__module__, super(Pyjo_String_Unicode, self).__repr__())
 
     def html_unescape(self):
         """::
 
             string = string.html_unescape()
 
-        Unescape all HTML entities in UnicodeString with :func:`Pyjo.Util.html_unescape`. ::
+        Unescape all HTML entities in unicode string with :func:`Pyjo.Util.html_unescape`. ::
 
             b('&lt;html&gt;').html_unescape().url_escape().say()
         """
@@ -77,21 +77,21 @@ class Pyjo_UnicodeString(base_object):
             string = string.encode()
             string = string.encode('iso-8859-1')
 
-        Encode UnicodeString, defaults to ``utf-8``, and return new :mod:`Pyjo.BytesString` object. ::
+        Encode unicode string, defaults to ``utf-8``, and return new :mod:`Pyjo.String.Bytes` object. ::
 
             string.trim().quote().encode().say()
         """
-        return Pyjo.BytesString.new(super(Pyjo_UnicodeString, self).encode(charset))
+        return Pyjo.String.Bytes.new(super(Pyjo_String_Unicode, self).encode(charset))
 
     @classmethod
     def new(cls, value=u'', charset=DEFAULT_CHARSET):
         """::
 
-            string = Pyjo.UnicodeString.new('test123')
+            string = Pyjo.String.Unicode.new('test123')
 
-        Construct a new :mod:`Pyjo.UnicodeString` object.
+        Construct a new :mod:`Pyjo.String.Unicode` object.
         """
-        return Pyjo_UnicodeString(value, charset)
+        return Pyjo_String_Unicode(value, charset)
 
     def say(self, **kwargs):
         """::
@@ -99,7 +99,7 @@ class Pyjo_UnicodeString(base_object):
             string = string.say()
             string = string.say(file=sys.stderr, end='', flush=True)
 
-        Print UnicodeString to handle and append a newline, defaults to :attr:`sys.stdout`.
+        Print unicode string to handle and append a newline, defaults to :attr:`sys.stdout`.
         """
         if 'flush' in kwargs and sys.version_info < (3, 0):
             flush = kwargs.pop('flush')
@@ -117,7 +117,7 @@ class Pyjo_UnicodeString(base_object):
             bstring = string.to_bytes()
             bstring = string.to_bytes(charset)
 
-        Turn UnicodeString into a bytes string.
+        Turn unicode string into a bytes string.
         """
         return Pyjo.Util.b(self, charset)
 
@@ -126,7 +126,7 @@ class Pyjo_UnicodeString(base_object):
 
             string = string.to_str()
 
-        Turn UnicodeString into a string:
+        Turn unicode string into a string:
         on Python 2.x into bytes string, on Python 3.x into unicode string.
         """
         if sys.version_info >= (3, 0):
@@ -140,7 +140,7 @@ class Pyjo_UnicodeString(base_object):
             ustring = string.to_unicode()
             ustring = string.to_unicode(charset)
 
-        Turn UnicodeString into an unicode string.
+        Turn unicode string into an unicode string.
         """
         return Pyjo.Util.u(self, charset)
 
@@ -159,7 +159,7 @@ class Pyjo_UnicodeString(base_object):
             string = string.xml_escape()
 
         Escape only the characters ``&``, ``<``, ``>``, ``"`` and ``'`` in
-        UnicodeString with :func:`Pyjo.Util.xml_escape`.
+        unicode string with :func:`Pyjo.Util.xml_escape`.
         """
         return self.new(Pyjo.Util.xml_escape(self))
 
@@ -169,10 +169,10 @@ def u(value=u'', charset=DEFAULT_CHARSET):
 
         string = u('test123')
 
-    Construct a new :mod:`Pyjo.UnicodeString` object.
+    Construct a new :mod:`Pyjo.String.Unicode` object.
     """
-    return Pyjo_UnicodeString(value, charset)
+    return Pyjo_String_Unicode(value, charset)
 
 
-new = Pyjo_UnicodeString.new
-object = Pyjo_UnicodeString  # @ReservedAssignment
+new = Pyjo_String_Unicode.new
+object = Pyjo_String_Unicode  # @ReservedAssignment

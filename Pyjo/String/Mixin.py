@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
 """
-Pyjo.Mixin.String - Methods for object with to_str() method
+Pyjo.String.Mixin - Methods for object with to_str() method
 ===========================================================
 ::
 
     import Pyjo.Base
-    import Pyjo.Mixin.String
+    import Pyjo.String.Mixin
 
-    class SubClass(Pyjo.Base.object, Pyjo.Mixin.String.object):
+    class SubClass(Pyjo.Base.object, Pyjo.String.Mixin.object):
         def to_str(self):
             return 'value'
 
@@ -24,7 +24,7 @@ import platform
 import sys
 
 
-class Pyjo_Mixin_String(object):
+class Pyjo_String_Mixin(object):
     """
     This mixin does not provide own constructor method.
     """
@@ -242,4 +242,4 @@ class Pyjo_Mixin_String(object):
         pass
 
 
-object = Pyjo_Mixin_String  # @ReservedAssignment
+object = Pyjo_String_Mixin  # @ReservedAssignment

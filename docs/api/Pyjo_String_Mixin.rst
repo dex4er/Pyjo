@@ -1,3 +1,3 @@
-.. automodule:: Pyjo.Mixin.String
+.. automodule:: Pyjo.String.Mixin
     :members:
     :special-members:

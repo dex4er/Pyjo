@@ -24,15 +24,15 @@ Classes
 """
 
 import Pyjo.Base
-import Pyjo.Mixin.String
+import Pyjo.String.Mixin
 
 from Pyjo.Util import b, u, url_escape, url_unescape
 
 
-class Pyjo_Path(Pyjo.Base.object, Pyjo.Mixin.String.object):
+class Pyjo_Path(Pyjo.Base.object, Pyjo.String.Mixin.object):
     """
     :mod:`Pyjo.Path` inherits all attributes and methods from
-    :mod:`Pyjo.Base` and :mod:`Pyjo.Mixin.String` and implements the following new ones.
+    :mod:`Pyjo.Base` and :mod:`Pyjo.String.Mixin` and implements the following new ones.
     """
 
     charset = 'utf-8'

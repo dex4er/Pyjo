@@ -42,18 +42,18 @@ import Pyjo.Base
 import Pyjo.Collection
 import Pyjo.DOM.CSS
 import Pyjo.DOM.HTML
-import Pyjo.Mixin.String
-import Pyjo.UnicodeString
+import Pyjo.String.Mixin
+import Pyjo.String.Unicode
 
 from Pyjo.Base import lazy
 from Pyjo.Regexp import m, s
 from Pyjo.Util import squish, u
 
 
-class Pyjo_DOM(Pyjo.Base.object, Pyjo.Mixin.String.object):
+class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
     """
     :mod:`Pyjo.DOM` inherits all attributes and methods from
-    :mod:`Pyjo.Base` and :mod:`Pyjo.Mixin.String` and implements the following new ones.
+    :mod:`Pyjo.Base` and :mod:`Pyjo.String.Mixin` and implements the following new ones.
     """
 
     html = lazy(lambda self: Pyjo.DOM.HTML.new())

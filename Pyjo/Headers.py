@@ -29,7 +29,7 @@ Classes
 """
 
 import Pyjo.Base
-import Pyjo.Mixin.String
+import Pyjo.String.Mixin
 
 from Pyjo.Base import lazy
 from Pyjo.Regexp import m, s
@@ -53,10 +53,10 @@ NORMALCASE = dict(map(lambda i: (b(i.lower()), b(i)), [
 ]))
 
 
-class Pyjo_Headers(Pyjo.Base.object, Pyjo.Mixin.String.object):
+class Pyjo_Headers(Pyjo.Base.object, Pyjo.String.Mixin.object):
     """
     :mod:`Pyjo.Headers` inherits all attributes and methods from
-    :mod:`Pyjo.Base` and :mod:`Pyjo.Mixin.String` and implements the following new ones.
+    :mod:`Pyjo.Base` and :mod:`Pyjo.String.Mixin` and implements the following new ones.
     """
 
     max_line_size = int(getenv('PYJO_MAX_LINE_SIZE', 0)) or 8192

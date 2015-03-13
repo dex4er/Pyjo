@@ -15,7 +15,7 @@ if __name__ == '__main__':
     from Pyjo.Test import *  # @UnusedWildImport
 
     import Pyjo.URL
-    from Pyjo.UnicodeString import u
+    from Pyjo.String.Unicode import u
 
     url = Pyjo.URL.new('https://github.com/dex4er/Pyjo')
     is_ok(str(url.set(scheme='ssh+git', userinfo='git', path=u(url.path) + '.git')), 'ssh+git://git@github.com/dex4er/Pyjo.git', 'new github.com url')

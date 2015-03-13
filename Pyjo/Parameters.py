@@ -24,17 +24,17 @@ Classes
 """
 
 import Pyjo.Base
-import Pyjo.Mixin.String
+import Pyjo.String.Mixin
 
 from Pyjo.Base import lazy
 from Pyjo.Regexp import m, s
 from Pyjo.Util import b, u, isiterable, url_escape, url_unescape
 
 
-class Pyjo_Parameters(Pyjo.Base.object, Pyjo.Mixin.String.object):
+class Pyjo_Parameters(Pyjo.Base.object, Pyjo.String.Mixin.object):
     """
     :mod:`Pyjo.Parameters` inherits all attributes and methods from
-    :mod:`Pyjo.Base` and :mod:`Pyjo.Mixin.String` and implements the following new ones.
+    :mod:`Pyjo.Base` and :mod:`Pyjo.String.Mixin` and implements the following new ones.
     """
 
     charset = 'utf-8'

@@ -20,9 +20,9 @@ if __name__ == '__main__':
     import sys
 
     import Pyjo.Base
-    import Pyjo.Mixin.String
+    import Pyjo.String.Mixin
 
-    class C(Pyjo.Base.object, Pyjo.Mixin.String.object):
+    class C(Pyjo.Base.object, Pyjo.String.Mixin.object):
         value = None
 
         def to_str(self):

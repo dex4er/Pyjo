@@ -39,7 +39,7 @@ Classes
 """
 
 import Pyjo.Base
-import Pyjo.Mixin.String
+import Pyjo.String.Mixin
 import Pyjo.Parameters
 import Pyjo.Path
 
@@ -47,10 +47,10 @@ from Pyjo.Regexp import m, s
 from Pyjo.Util import b, u, url_escape, url_unescape
 
 
-class Pyjo_URL(Pyjo.Base.object, Pyjo.Mixin.String.object):
+class Pyjo_URL(Pyjo.Base.object, Pyjo.String.Mixin.object):
     """
     :mod:`Pyjo.URL` inherits all attributes and methods from
-    :mod:`Pyjo.Base` and :mod:`Pyjo.Mixin.String` and implements the following new ones.
+    :mod:`Pyjo.Base` and :mod:`Pyjo.String.Mixin` and implements the following new ones.
     """
 
     fragment = None
