@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 
 """
-Pyjo.BytesString - BytesString
-==============================
+Pyjo.BytesString - Bytes string
+===============================
 ::
 
     import Pyjo.BytesString
 
     # Manipulate BytesString
-    stream = Pyjo.BytesString.new('foo:bar:baz')
-    print(stream.url_escape().decode('ascii'))
+    string = Pyjo.BytesString.new('foo:bar:baz')
+    print(string.url_escape().decode('ascii'))
 
     # Use the alternative constructor
     from Pyjo.BytesString import b
-    bstream = b('foo:bar:baz').url_escape()
+    bstring = b('foo:bar:baz').url_escape()
 
 :mod:`Pyjo.BytesString` is a container for BytesStrings that provides a
 more friendly API for many of the functions in :mod:`Pyjo.Util`.
@@ -56,12 +56,12 @@ class Pyjo_BytesString(base_object):
     def decode(self, charset=DEFAULT_CHARSET):
         """::
 
-            stream = stream.decode()
-            stream = stream.decode('iso-8859-1')
+            string = string.decode()
+            string = string.decode('iso-8859-1')
 
         Decode BytesString, defaults to ``utf-8``, and return new :mod:`Pyjo.UnicodeString` object. ::
 
-            stream.decode('UTF-16LE').unquote().trim().say()
+            string.decode('UTF-16LE').unquote().trim().say()
 
         """
         return Pyjo.UnicodeString.new(super(Pyjo_BytesString, self).decode(charset))
@@ -70,7 +70,7 @@ class Pyjo_BytesString(base_object):
     def new(cls, value=b'', charset=DEFAULT_CHARSET):
         """::
 
-            stream = Pyjo.BytesString.new('test123')
+            string = Pyjo.BytesString.new('test123')
 
         Construct a new :mod:`Pyjo.BytesString` object.
         """
@@ -79,8 +79,8 @@ class Pyjo_BytesString(base_object):
     def url_escape(self):
         """::
 
-            stream = stream.url_escape()
-            stream = stream.url_escape(br'^A-Za-z0-9\-._~')
+            string = string.url_escape()
+            string = string.url_escape(br'^A-Za-z0-9\-._~')
 
         Percent encode all unsafe characters in BytesString with
         :func:`Pyjo.Util.url_escape`. ::
@@ -92,7 +92,7 @@ class Pyjo_BytesString(base_object):
     def url_unescape(self):
         """
 
-            stream = stream.url_unescape()
+            string = string.url_unescape()
 
         Decode percent encoded characters in BytesString with
         :func:`Pyjo.Util.url_unescape`. ::
@@ -105,7 +105,7 @@ class Pyjo_BytesString(base_object):
 def b(value=b'', charset=DEFAULT_CHARSET):
     """::
 
-        stream = b('test123')
+        string = b('test123')
 
     Construct a new :mod:`Pyjo.BytesString` object.
     """

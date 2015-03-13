@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 
 """
-Pyjo.UnicodeString - UnicodeString
-==================================
+Pyjo.UnicodeString - Unicode string
+===================================
 ::
 
     import Pyjo.UnicodeString
 
     # Manipulate UnicodeString
-    stream = Pyjo.UnicodeString.new('foo_bar_baz')
-    print(stream.camelize())
+    string = Pyjo.UnicodeString.new('foo_bar_baz')
+    print(string.camelize())
 
     # Chain methods
-    stream = Pyjo.UnicodeString.new('foo_bar_baz').quote()
-    stream = stream.unquote().encode('utf-8').b64_encode('')
-    print(stream.decode('ascii'))
+    string = Pyjo.UnicodeString.new('foo_bar_baz').quote()
+    string = string.unquote().encode('utf-8').b64_encode('')
+    print(string.decode('ascii'))
 
     # Use the alternative constructor
     from Pyjo.UnicodeString import u
-    my $stream = u('foobarbaz').camelize('').say()
+    my $string = u('foobarbaz').camelize('').say()
 
 :mod:`Pyjo.UnicodeString` is a container for UnicodeStrings that provides a
 more friendly API for many of the functions in :mod:`Pyjo.Util`.
@@ -63,7 +63,7 @@ class Pyjo_UnicodeString(base_object):
     def html_unescape(self):
         """::
 
-            stream = stream.html_unescape()
+            string = string.html_unescape()
 
         Unescape all HTML entities in UnicodeString with :func:`Pyjo.Util.html_unescape`. ::
 
@@ -74,12 +74,12 @@ class Pyjo_UnicodeString(base_object):
     def encode(self, charset=DEFAULT_CHARSET):
         """::
 
-            stream = stream.encode()
-            stream = stream.encode('iso-8859-1')
+            string = string.encode()
+            string = string.encode('iso-8859-1')
 
         Encode UnicodeString, defaults to ``utf-8``, and return new :mod:`Pyjo.BytesString` object. ::
 
-            stream.trim().quote().encode().say()
+            string.trim().quote().encode().say()
         """
         return Pyjo.BytesString.new(super(Pyjo_UnicodeString, self).encode(charset))
 
@@ -87,7 +87,7 @@ class Pyjo_UnicodeString(base_object):
     def new(cls, value=u'', charset=DEFAULT_CHARSET):
         """::
 
-            stream = Pyjo.UnicodeString.new('test123')
+            string = Pyjo.UnicodeString.new('test123')
 
         Construct a new :mod:`Pyjo.UnicodeString` object.
         """
@@ -96,8 +96,8 @@ class Pyjo_UnicodeString(base_object):
     def say(self, **kwargs):
         """::
 
-            stream = stream.say()
-            stream = stream.say(file=sys.stderr, end='', flush=True)
+            string = string.say()
+            string = string.say(file=sys.stderr, end='', flush=True)
 
         Print UnicodeString to handle and append a newline, defaults to :attr:`sys.stdout`.
         """
@@ -114,8 +114,8 @@ class Pyjo_UnicodeString(base_object):
     def to_bytes(self, charset=DEFAULT_CHARSET):
         """::
 
-            bstring = stream.to_bytes()
-            bstring = stream.to_bytes(charset)
+            bstring = string.to_bytes()
+            bstring = string.to_bytes(charset)
 
         Turn UnicodeString into a bytes string.
         """
@@ -124,7 +124,7 @@ class Pyjo_UnicodeString(base_object):
     def to_str(self, charset=DEFAULT_CHARSET):
         """::
 
-            string = stream.to_str()
+            string = string.to_str()
 
         Turn UnicodeString into a string:
         on Python 2.x into bytes string, on Python 3.x into unicode string.
@@ -137,8 +137,8 @@ class Pyjo_UnicodeString(base_object):
     def to_unicode(self, charset=DEFAULT_CHARSET):
         """::
 
-            ustring = stream.to_unicode()
-            ustring = stream.to_unicode(charset)
+            ustring = string.to_unicode()
+            ustring = string.to_unicode(charset)
 
         Turn UnicodeString into an unicode string.
         """
@@ -147,16 +147,16 @@ class Pyjo_UnicodeString(base_object):
     def trim(self):
         """::
 
-            stream = stream.trim()
+            string = string.trim()
 
-        Trim whitespace characters from both ends of bytestream with :func:`Pyjo.Util.trim`.
+        Trim whitespace characters from both ends of bytestring with :func:`Pyjo.Util.trim`.
         """
         return self.new(Pyjo.Util.trim(self))
 
     def xml_escape(self):
         """::
 
-            stream = stream.xml_escape()
+            string = string.xml_escape()
 
         Escape only the characters ``&``, ``<``, ``>``, ``"`` and ``'`` in
         UnicodeString with :func:`Pyjo.Util.xml_escape`.
@@ -167,7 +167,7 @@ class Pyjo_UnicodeString(base_object):
 def u(value=u'', charset=DEFAULT_CHARSET):
     """::
 
-        stream = u('test123')
+        string = u('test123')
 
     Construct a new :mod:`Pyjo.UnicodeString` object.
     """
