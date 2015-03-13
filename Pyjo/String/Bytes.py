@@ -18,7 +18,7 @@ Pyjo.String.Bytes - Bytes string
 :mod:`Pyjo.String.Bytes` is a container for bytes strings that provides a
 more friendly API for many of the functions in :mod:`Pyjo.Util`.
 
-It also inherits all attributes and methods from
+It also inherits all methods from
 either :class:`str` (Python 2.x) or :class:`bytes` (Python 3.x).
 
 Classes
@@ -42,7 +42,7 @@ DEFAULT_CHARSET = 'utf-8'
 
 class Pyjo_String_Bytes(base_object):
     """
-    :mod:`Pyjo.String.Bytes` inherits all attributes and methods from
+    :mod:`Pyjo.String.Bytes` inherits all methods from
     either :class:`str` (Python 2.x) or :class:`bytes` (Python 3.x)
     and implements the following new ones.
     """

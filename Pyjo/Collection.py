@@ -7,9 +7,25 @@ Pyjo.Collection - Collection
 
     import Pyjo.Collection
 
+    # Manipulate collection
     collection = Pyjo.Collection.new(['just', 'works'])
-"""
+    collection.insert(0, 'it')
+    print(collection.join("\\n")
 
+    # Chain methods
+    collection.map(lambda word: word.capitalize()).shuffle() \\
+        .each(lambda word, num: print('{0}: {1}'.format(word, num)))
+
+    # Use the alternative constructor
+    from Pyjo.Collection import c
+    c(['a', 'b', 'c']).join('/').encode().url_escape().decode().say()
+
+:mod:`Pyjo.Collection` is a container for list-based collections which
+inherits all methods from :class:`list` and provides own methods.
+
+Classes
+-------
+"""
 
 import Pyjo.String.Unicode
 
@@ -18,12 +34,11 @@ DEFAULT_CHARSET = 'utf-8'
 
 
 class Pyjo_Collection(list):
-    """::
-
-        stream = Pyjo.Collection.new([1, 2, 3])
-
-    Construct a new :mod:`Pyjo.Collection` object.
     """
+    :mod:`Pyjo.Collection` inherits all methods from
+    :class:`list` and implements the following new ones.
+    """
+
     def __new__(cls, value=[]):
         return super(Pyjo_Collection, cls).__new__(cls, value)
 
@@ -39,7 +54,7 @@ class Pyjo_Collection(list):
         string or list. ::
 
             # "0, 1, 2, 3"
-            Pyjo.Collection.new(0, 1, None, 2, '', 3).compact().join(', ')
+            Pyjo.Collection.new([0, 1, None, 2, '', 3]).compact().join(', ')
         """
         return self.new(filter(lambda i: i is not None and not (hasattr(i, '__len__') and not len(i)), self))
 
@@ -54,9 +69,9 @@ class Pyjo_Collection(list):
         to the callback. ::
 
             # Make a numbered list
-            collection.each(lambda e, num:
-                print("{0}: {1}".format(e, num)
-            )
+            @collection.each
+            def cb(e, num):
+                print("{0}: {1}".format(e, num))
         """
         if cb is None:
             return self.to_iter()
@@ -104,7 +119,7 @@ class Pyjo_Collection(list):
     def flatten(self):
         """::
 
-            my $new = $collection->flatten;
+            new = collection.flatten()
 
         Flatten nested collections/lists/tuples recursively and create a new collection with
         all elements. ::
@@ -210,12 +225,18 @@ class Pyjo_Collection(list):
 
     @classmethod
     def new(cls, value=[]):
+        """::
+
+            collection = Pyjo.Collection.new([1, 2, 3])
+
+        Construct a new :mod:`Pyjo.Collection` object.
+        """
         return Pyjo_Collection(value)
 
     def reverse(self):
         """::
 
-            new = collection.reverse
+            new = collection.reverse()
 
         Create a new collection with all elements in reverse order.
         """

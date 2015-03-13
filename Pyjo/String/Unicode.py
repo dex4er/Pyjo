@@ -23,7 +23,7 @@ Pyjo.String.Unicode - Unicode string
 :mod:`Pyjo.String.Unicode` is a container for unicode strings that provides a
 more friendly API for many of the functions in :mod:`Pyjo.Util`.
 
-It also inherits all attributes and methods from
+It also inherits all methods from
 either :class:`unicode` (Python 2.x) or :class:`str` (Python 3.x).
 
 Classes
@@ -49,7 +49,7 @@ DEFAULT_CHARSET = 'utf-8'
 
 class Pyjo_String_Unicode(base_object):
     """
-    :mod:`Pyjo.String.Unicode` inherits all attributes and methods from
+    :mod:`Pyjo.String.Unicode` inherits all methods from
     either :class:`unicode` (Python 2.x) or :class:`str` (Python 3.x)
     and implements the following new ones.
     """
