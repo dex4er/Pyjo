@@ -306,14 +306,10 @@ if __name__ == '__main__':
     # Detection
     is_ok(Pyjo.Reactor.Base.detect(), 'Pyjo.Reactor.Select', 'right class')
 
-    # Dummy reactor
-    class TestReactor(Pyjo.Reactor.Select.object):
-        pass
-
-    setenv('PYJO_REACTOR', 'TestReactor')
+    setenv('PYJO_REACTOR', 't.lib.TestReactor')
 
     # Detection (env)
-    is_ok(Pyjo.Reactor.Base.detect(), 'TestReactor', 'right class')
+    is_ok(Pyjo.Reactor.Base.detect(), 't.lib.TestReactor', 'right class')
 
     # Reactor in control
     setenv('PYJO_REACTOR', 'Pyjo.Reactor.Select')
