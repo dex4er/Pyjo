@@ -13,8 +13,9 @@ import unittest
 
 
 __all__ = ['cmp_ok', 'done_testing', 'diag', 'fail_ok', 'in_ok', 'is_ok',
-           'isa_ok', 'is_deeply_ok', 'isnt_ok', 'none_ok', 'not_in_ok',
-           'ok', 'pass_ok', 'plan', 'skip', 'throws_ok']
+           'isa_ok', 'is_deeply_ok', 'isnt_ok', 'like_ok', 'none_ok',
+           'not_in_ok', 'ok', 'pass_ok', 'plan', 'skip', 'throws_ok',
+           'unlike_ok']
 
 
 done = False
@@ -126,6 +127,31 @@ def isnt_ok(got, expected, test_name=None):
         diag("         got: {0}\n    expected: anything else\n".format(repr(got)))
 
 
+def like_ok(got, expected, flags='', test_name=None):
+    FLAGS = {
+        'd': re.DEBUG,
+        'i': re.IGNORECASE,
+        'l': re.LOCALE,
+        'm': re.MULTILINE,
+        's': re.DOTALL,
+        'u': re.UNICODE,
+        'x': re.VERBOSE,
+    }
+    re_flags = 0
+    for c in flags:
+        re_flags |= FLAGS[c]
+    if test_name is None:
+        test_name = "An object {0}".format(type(got))
+    test_name = "{0} matches {1}".format(test_name, repr(expected))
+    try:
+        check = re.search(expected, got, re_flags)
+    except:
+        check = False
+    _ok(check, test_name)
+    if not check:
+        diag("                {0}\n  doesn't match {1}\n".format(repr(got), repr(expected)))
+
+
 def none_ok(got, test_name=None):
     if test_name is None:
         test_name = "An object {0} is None".format(type(got))
@@ -203,6 +229,31 @@ def throws_ok(cb, expected, test_name=None):
     _ok(check, test_name)
     if not check:
         diag("         got: {0}\n    expected: {1}\n".format(got.__class__.__name__ if got is not None else None, expected.__name__))
+
+
+def unlike_ok(got, expected, flags='', test_name=None):
+    FLAGS = {
+        'd': re.DEBUG,
+        'i': re.IGNORECASE,
+        'l': re.LOCALE,
+        'm': re.MULTILINE,
+        's': re.DOTALL,
+        'u': re.UNICODE,
+        'x': re.VERBOSE,
+    }
+    re_flags = 0
+    for c in flags:
+        re_flags |= FLAGS[c]
+    if test_name is None:
+        test_name = "An object {0}".format(type(got))
+    test_name = "{0} doesn't match {1}".format(test_name, repr(expected))
+    try:
+        check = not re.search(expected, got, re_flags)
+    except:
+        check = True
+    _ok(check, test_name)
+    if not check:
+        diag("                {0}\n        matches {1}\n".format(repr(got), repr(expected)))
 
 
 def _deep_check(stack, e1, e2):
