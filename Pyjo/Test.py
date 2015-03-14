@@ -13,7 +13,7 @@ import unittest
 
 
 __all__ = ['cmp_ok', 'done_testing', 'diag', 'fail_ok', 'in_ok', 'is_ok',
-           'isa_ok', 'is_deeply_ok', 'isnt_ok', 'none_ok', 'notin_ok',
+           'isa_ok', 'is_deeply_ok', 'isnt_ok', 'none_ok', 'not_in_ok',
            'ok', 'pass_ok', 'plan', 'skip', 'throws_ok']
 
 
@@ -135,7 +135,7 @@ def none_ok(got, test_name=None):
     _ok(check, test_name)
 
 
-def notin_ok(got, elem, test_name=None):
+def not_in_ok(got, elem, test_name=None):
     if test_name is None:
         test_name = "an object {0}".format(type(got))
     test_name = "{0} is not in {1}".format(repr(elem), test_name)
