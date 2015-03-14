@@ -68,6 +68,7 @@ import Pyjo.EventEmitter
 
 from Pyjo.Util import getenv, not_implemented
 
+import importlib
 import os
 
 
@@ -107,11 +108,18 @@ class Pyjo_Reactor_Base(Pyjo.EventEmitter.object):
             # Instantiate best reactor implementation available
             reactor = Pyjo.Reactor.detect().new()
         """
+        try:
+            reactor = getenv('PYJO_REACTOR')
+            if reactor:
+                importlib.import_module(reactor)
+                return reactor
+        except ImportError:
+            pass
+
         if os.name == "nt":
-            default = 'Pyjo.Reactor.Select'
+            return 'Pyjo.Reactor.Select'
         else:
-            default = 'Pyjo.Reactor.Poll'
-        return getenv('PYJO_REACTOR', default)
+            return 'Pyjo.Reactor.Poll'
 
     @not_implemented
     def io(self, cb, handle):
