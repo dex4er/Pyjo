@@ -346,7 +346,7 @@ class Pyjo_IOLoop(Pyjo.Base.object):
             def do_something(loop):
                 ...
         """
-        return self.reactor.next_tick(cb)
+        return self.reactor.next_tick(lambda reactor: cb(self))
 
     def one_tick(self):
         """::
