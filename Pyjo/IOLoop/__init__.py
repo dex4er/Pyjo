@@ -180,7 +180,10 @@ class Pyjo_IOLoop(Pyjo.Base.object):
         """
         # Find acceptor for id
         if isinstance(acceptor, str):
-            return self._acceptors[acceptor]
+            if acceptor in self._acceptors:
+                return self._acceptors[acceptor]
+            else:
+                return
 
         # Connect acceptor with reactor
         cid = self._id()
@@ -523,7 +526,10 @@ class Pyjo_IOLoop(Pyjo.Base.object):
         """
         # Find stream for id
         if isinstance(stream, str):
-            return self._connections[stream]['stream']
+            if stream in self._connections:
+                return self._connections[stream]['stream']
+            else:
+                return
 
         return self._stream(stream, self._id())
 
