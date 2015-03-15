@@ -48,9 +48,11 @@ import Pyjo.EventEmitter
 import Pyjo.IOLoop
 
 from Pyjo.Base import lazy
-from Pyjo.Util import getenv, warn
+from Pyjo.Regexp import m, s
+from Pyjo.Util import getenv, setenv, warn
 
 import os
+import re
 import socket
 import weakref
 
@@ -121,11 +123,17 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
     """
 
     _handles = lazy(lambda self: {})
+    _reuse = None
     _tls_kwargs = lazy(lambda self: {})
 
     def __del__(self):
         if DEBUG:
             warn("-- Method {0}.__del__".format(self))
+
+        if self._reuse:
+            reuse = getenv('PYJO_REUSE')
+            reuse -= s(r'(?:^|\,){0}'.format(re.escape(reuse)), '')
+            setenv('PYJO_REUSE', reuse)
 
         if dir(self.reactor):
             if dir(self.handle) and self.handle:
@@ -229,13 +237,32 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
         port = kwargs.get('port', 0)
         backlog = kwargs.get('backlog', socket.SOMAXCONN)
 
-        # TODO Allow file descriptor inheritance
-        # TODO Reuse file descriptor
+        address_port = '{0}:{1}'.format(address, port)
+        g = getenv('PYJO_REUSE', '') == m(r'(?:^|\,){0}:(\d+)'.format(re.escape(address_port)))
+        if g:
+            fd = int(g[1])
+        else:
+            fd = None
+
+        # Reuse file descriptor
+        if fd:
+            s = socket.fromfd(fd, socket.AF_INET, socket.SOCK_STREAM)
 
         # New socket
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.bind((address, port))
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        else:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            if kwargs.get('reuse'):
+                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+            s.bind((address, port))
+
+            fd = s.fileno()
+            self._reuse = '{0}:{1}:{2}'.format(address, s.getsockname()[1], fd)
+            if len(getenv('PYJO_REUSE', '')):
+                setenv('PYJO_REUSE', getenv('PYJO_REUSE') + ',' + self._reuse)
+            else:
+                setenv('PYJO_REUSE', self._reuse)
+
         s.setblocking(0)
         s.listen(backlog)
         self.handle = s
