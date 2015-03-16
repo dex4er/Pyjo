@@ -47,6 +47,23 @@ Pyjo.IOLoop - Minimalistic event loop
 it has been reduced to the absolute minimal feature set required to build
 solid and scalable non-blocking TCP clients and servers.
 
+Events
+------
+
+:mod:`Pyjo.IOLoop` inherits all events from :mod:`Pyjo.EventEmitter` and can emit the
+following new ones.
+
+finish
+~~~~~~
+::
+
+    @loop.on
+    def finish(loop):
+        ...
+
+Emitted when the event loop wants to shut down gracefully and is just waiting
+for all existing connections to be closed.
+
 Debugging
 ---------
 
@@ -59,7 +76,7 @@ Classes
 -------
 """
 
-import Pyjo.Base
+import Pyjo.EventEmitter
 import Pyjo.IOLoop.Client
 import Pyjo.IOLoop.Delay
 import Pyjo.IOLoop.Server
@@ -84,10 +101,10 @@ class Error(Exception):
     pass
 
 
-class Pyjo_IOLoop(Pyjo.Base.object):
+class Pyjo_IOLoop(Pyjo.EventEmitter.object):
     """
     :mod:`Pyjo.IOLoop` inherits all attributes and methods from
-    :mod:`Pyjo.Base` and implements the following new ones.
+    :mod:`Pyjo.EventEmitter` and implements the following new ones.
     """
 
     max_accepts = 0
@@ -149,11 +166,10 @@ class Pyjo_IOLoop(Pyjo.Base.object):
         loop.reactor.remove(handle)
     """
 
-    _acceptors = lazy(lambda self: {})
-    _connections = lazy(lambda self: {})
-
-    _accepts = None
     _accepting_timer = False
+    _acceptors = lazy(lambda self: {})
+    _accepts = None
+    _connections = lazy(lambda self: {})
     _stop_timer = None
 
     def __init__(self, **kwargs):
@@ -235,7 +251,11 @@ class Pyjo_IOLoop(Pyjo.Base.object):
 
         client.on(lambda client, handle: connect_cb(self, cid, client, handle), 'connect')
 
-        # TODO client.on(error_cb, 'error')
+        def error_cb(self, cid, err):
+            self._remove(cid)
+            cb(self, err, None)
+
+        client.on(lambda client, err: error_cb(self, cid, err), 'error')
 
         client.connect(**kwargs)
         return cid
