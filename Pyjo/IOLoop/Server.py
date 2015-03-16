@@ -141,6 +141,7 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
             for handle in self._handles.values():
                 self.reactor.remove(handle)
 
+    @classmethod
     def generate_port(self):
         """::
 
@@ -370,6 +371,9 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
             raise ex
 
         return self.reactor.watch(handle, True, True)
+
+
+generate_port = Pyjo_IOLoop_Server.generate_port
 
 
 new = Pyjo_IOLoop_Server.new
