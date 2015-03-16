@@ -159,6 +159,7 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.Base.object):
                             io = self._ios[fd]
                             last = True
                             self._sandbox(io['cb'], 'Read', False)
+                    if fd in self._ios:
                         if fd in writable:
                             io = self._ios[fd]
                             last = True

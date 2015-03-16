@@ -107,6 +107,7 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.Select.object):
                             io = self._ios[fd]
                             last = True
                             self._sandbox(io['cb'], 'Read', False)
+                    if fd in self._ios:
                         if flag & (select.POLLOUT):
                             io = self._ios[fd]
                             last = True
