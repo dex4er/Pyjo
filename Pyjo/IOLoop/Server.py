@@ -320,7 +320,6 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
         Stop accepting connections.
         """
         self.reactor.remove(self.handle)
-        self.handle = None
 
     def _accept(self):
         # Greedy accept
