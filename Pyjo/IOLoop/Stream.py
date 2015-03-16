@@ -251,7 +251,7 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
         reactor = self.reactor
         if self._paused:
             self._paused = False
-            return reactor.watch(self.handle, True, self.is_writting())
+            return reactor.watch(self.handle, True, self.is_writing())
 
         self = weakref.proxy(self)
 
