@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""
+r"""
 Pyjo.DOM - Minimalistic HTML/XML DOM parser with CSS selectors
 ==============================================================
 ::
@@ -12,8 +12,8 @@ Pyjo.DOM - Minimalistic HTML/XML DOM parser with CSS selectors
 
     # Find
     print(dom.at('#b').text)
-    print(dom.find('p').map('text').join("\\n"))
-    dom.find('[id]').map('attr', 'id').join("\\n")
+    print(dom.find('p').map('text').join("\n"))
+    dom.find('[id]').map('attr', 'id').join("\n")
 
     # Iterate
     dom.find('p[id]').reverse().each(lambda i: print(i.attr('id')))
@@ -70,7 +70,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
 
     @property
     def all_text(self, trim=True):
-        """::
+        r"""::
 
             trimmed   = dom.all_text
 
@@ -78,26 +78,26 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
         enabled. ::
 
             # "foo bar baz"
-            dom.parse("<div>foo\\n<p>bar</p>baz\\n</div>").at('div').all_text
+            dom.parse("<div>foo\n<p>bar</p>baz\n</div>").at('div').all_text
         """
         return self._all_text(True, True)
 
     @property
     def all_raw_text(self):
-        """::
+        r"""::
 
             untrimmed = dom.all_raw_text
 
         Extract all text content from DOM structure, smart whitespace trimming is
         disabled. ::
 
-            # "foo\\nbar baz\\n"
-            dom.parse("<div>foo\\n<p>bar</p>baz\\n</div>").at('div').all_raw_text
+            # "foo\nbar baz\n"
+            dom.parse("<div>foo\n<p>bar</p>baz\n</div>").at('div').all_raw_text
         """
         return self._all_text(True, False)
 
     def ancestors(self, pattern=None):
-        """::
+        r"""::
 
             collection = dom.ancestors()
             collection = dom.ancestors('div > p')
@@ -107,8 +107,8 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
         All selectors from :mod:`Pyjo.DOM.CSS` are supported. ::
 
             # "div > p > i"
-            dom.parse('<div><p><i>bar</i></p></div>').at('i').child_nodes[0] \\
-               .ancestors() \\
+            dom.parse('<div><p><i>bar</i></p></div>').at('i').child_nodes[0] \
+               .ancestors() \
                .map('tag').reverse().join(" > ").say()
         """
         return self._select(self._collect(self._ancestors()), pattern)
@@ -151,7 +151,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
         return self._content(True, False, string)
 
     def at(self, pattern):
-        """::
+        r"""::
 
             result = dom.at('div > p')
 
@@ -160,14 +160,14 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
         from :mod:`Pyjo.DOM.CSS` are supported. ::
 
             # Find first element with ``svg`` namespace definition
-            namespace = dom.at('[xmlns\\:svg]').attr('xmlns:svg')
+            namespace = dom.at('[xmlns\:svg]').attr('xmlns:svg')
         """
         result = self._css.select_one(pattern)
         if result:
             return self._build(result, self.xml)
 
     def attr(self, *args, **kwargs):
-        """::
+        r"""::
 
             my_dict = dom.attr()
             foo = dom.attr('foo')
@@ -178,8 +178,8 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
         Setting value to :class:`None` deletes attribute. ::
 
             # List id attributes
-            dom.parse('<div id="a">foo</div><p>bar</p><div id="b">baz</div>') \\
-               .find('*').map('attr', 'id').compact().join("\\n").say()
+            dom.parse('<div id="a">foo</div><p>bar</p><div id="b">baz</div>') \
+               .find('*').map('attr', 'id').compact().join("\n").say()
         """
         tree = self.tree
 
@@ -231,7 +231,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
         return self._collect(self._nodes(self.tree))
 
     def children(self, pattern=None):
-        """::
+        r"""::
 
             collection = dom.children()
             collection = dom.children('div > p')
@@ -241,7 +241,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
         All selectors from :mod:`Pyjo.DOM.CSS` are supported. ::
 
             # Show type of random child element
-            print(dom.parse('<b>foo</b><i>bar</i><p>baz</p>') \\
+            print(dom.parse('<b>foo</b><i>bar</i><p>baz</p>') \
                 .children().shuffle().first().type)
         """
         return self._select(self._collect(self._nodes(self.tree, True)), pattern)
@@ -312,7 +312,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
 
     @property
     def descendant_nodes(self):
-        """::
+        r"""::
 
             collection = dom.descendant_nodes
 
@@ -320,14 +320,14 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
         element as :mod:`Pyjo.DOM` objects. ::
 
             # "<p><b>123</b></p>"
-            dom.parse('<p><!-- Test --><b>123<!-- 456 --></b></p>') \\
-               .descendant_nodes \\
+            dom.parse('<p><!-- Test --><b>123<!-- 456 --></b></p>') \
+               .descendant_nodes \
                .grep(lambda i: i.type == 'comment').map('remove').first()
         """
         return self._collect(self._all(self._nodes(self.tree)))
 
     def following(self, pattern=None):
-        """::
+        r"""::
 
             collection = dom.following()
             collection = dom.following('div > p')
@@ -337,8 +337,8 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
         objects. All selectors from :mod:`Pyjo.DOM.CSS` are supported. ::
 
             # List types of sibling elements before this node
-            dom.parse('<b>foo</b><i>bar</i><p>baz</p>').at('b') \\
-               .following().map('tag').join("\\n").say()
+            dom.parse('<b>foo</b><i>bar</i><p>baz</p>').at('b') \
+               .following().map('tag').join("\n").say()
         """
         return self._select(self._collect(self._siblings(True)[1]), pattern)
 
@@ -378,14 +378,14 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
 
     @property
     def namespace(self):
-        """::
+        r"""::
 
             namespace = dom.namespace
 
         Find this element's namespace or return :class:`None` if none could be found. ::
 
             # Find namespace for an element with namespace prefix
-            namespace = dom.at('svg > svg\\:circle').namespace
+            namespace = dom.at('svg > svg\:circle').namespace
 
             # Find namespace for an element that may or may not have a namespace prefix
             namespace = dom.at('svg > circle').namespace
@@ -432,7 +432,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
 
     @property
     def next_node(self):
-        """::
+        r"""::
 
             sibling = dom.next_node
 
@@ -440,11 +440,11 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
         no more siblings. ::
 
             # "456"
-            dom.parse('<p><b>123</b><!-- Test -->456</p>') \\
+            dom.parse('<p><b>123</b><!-- Test -->456</p>') \
                .at('b').next_node.next_node
 
             # " Test "
-            dom.parse('<p><b>123</b><!-- Test -->456</p>') \\
+            dom.parse('<p><b>123</b><!-- Test -->456</p>') \
                .at('b').next_node.content
         """
         return self._maybe(self._siblings(False, 0)[1])
@@ -477,7 +477,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
         return self
 
     def preceding(self, pattern=None):
-        """::
+        r"""::
 
             collection = dom.preceding()
             collection = dom.preceding('div > p')
@@ -487,32 +487,32 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
         objects. All selectors from :mod:`Pyjo.DOM.CSS` are supported. ::
 
             # List types of sibling elements before this node
-            dom.preceding().map('tag').join("\\n").say()
+            dom.preceding().map('tag').join("\n").say()
         """
         return self._select(self._collect(self._siblings(True)[0]), pattern)
 
     def preceding_nodes(self):
-        """::
+        r"""::
             collection = dom.preceding_nodes()
 
         Return a :mod:`Pyjo.Collection` object containing all sibling nodes before this
         node as :mod:`Pyjo.DOM` objects. ::
 
             # "A"
-            dom.parse('A<!-- B --><p>C</p>') \\
+            dom.parse('A<!-- B --><p>C</p>') \
                .at('p').preceding_nodes().first().content
         """
         return self._collect(self._siblings(False)[0])
 
     def prepend(self, string):
-        """::
+        r"""::
 
             dom = dom.prepend(u'<p>I ♥ Pyjo!</p>')
 
         Prepend HTML/XML fragment to this node. ::
 
             # "<div><h1>123</h1><h2>Test</h2></div>"
-            dom.parse('<div><h2>Test</h2></div>') \\
+            dom.parse('<div><h2>Test</h2></div>') \
                .at('h2').prepend('<h1>123</h1>').root
 
             # "<p>Test 123</p>"
@@ -521,7 +521,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
         return self._add(0, string)
 
     def prepend_content(self, string):
-        """::
+        r"""::
 
             dom = dom.prepend_content(u'<p>I ♥ Pyjo!</p>')
 
@@ -529,11 +529,11 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
         node's content. ::
 
             # "<div><h2>Test 123</h2></div>"
-            dom.parse('<div><h2>123</h2></div>') \\
+            dom.parse('<div><h2>123</h2></div>') \
                .at('h2').prepend_content('Test ').root
 
             # "<!-- Test 123 --><br>"
-            dom.parse('<!-- 123 --><br>') \\
+            dom.parse('<!-- 123 --><br>') \
                .child_nodes.first().prepend_content(' Test').root
 
             # "<p><i>123</i>Test</p>"
@@ -557,7 +557,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
 
     @property
     def previous_node(self):
-        """::
+        r"""::
 
             sibling = dom.previous_node
 
@@ -565,26 +565,26 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
         are no more siblings. ::
 
             # "123"
-            dom.parse('<p>123<!-- Test --><b>456</b></p>') \\
+            dom.parse('<p>123<!-- Test --><b>456</b></p>') \
                .at('b').previous_node.previous_node
 
             # " Test "
-            dom.parse('<p>123<!-- Test --><b>456</b></p>') \\
+            dom.parse('<p>123<!-- Test --><b>456</b></p>') \
                .at('b').previous_node.content
         """
         return self._maybe(self._siblings(False, -1)[0])
 
     @property
     def raw_text(self):
-        """::
+        r"""::
 
             untrimmed = dom.raw_text
 
         Extract text content from this element only (not including child elements),
         smart whitespace trimming is disabled. ::
 
-            # "foo\\nbaz\\n"
-            dom.parse("<div>foo\\n<p>bar</p>baz\\n</div>").at('div').raw_text
+            # "foo\nbaz\n"
+            dom.parse("<div>foo\n<p>bar</p>baz\n</div>").at('div').raw_text
         """
         return self._all_text(False, False)
 
@@ -604,7 +604,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
         return self.replace('')
 
     def replace(self, new):
-        """::
+        r"""::
 
             parent = dom.replace(u'<div>I ♥ Pyjo!</div>')
 
@@ -614,7 +614,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
             dom.parse('<div><h1>Test</h1></div>').at('h1').replace('<h2>123</h2>')
 
             # "<p><b>123</b></p>"
-            dom.parse('<p>Test</p>') \\
+            dom.parse('<p>Test</p>') \
                .at('p').child_nodes.item(0).replace('<b>123</b>').root
         """
         tree = self.tree
@@ -660,7 +660,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
 
     @property
     def tag(self):
-        """::
+        r"""::
 
             tag = dom.tag
             dom.tag = 'div'
@@ -668,7 +668,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
         This element's tag name. ::
 
             # List tag names of child elements
-            dom.children().map('tag').join("\\n").say()
+            dom.children().map('tag').join("\n").say()
         """
         tree = self.tree
         if tree[0] != 'tag':
@@ -684,7 +684,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
 
     @property
     def text(self):
-        """::
+        r"""::
 
             trimmed = dom.text
 
@@ -692,7 +692,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
         smart whitespace trimming is enabled. ::
 
             # "foo baz"
-            dom.parse("<div>foo\\n<p>bar</p>baz\\n</div>").at('div').text
+            dom.parse("<div>foo\n<p>bar</p>baz\n</div>").at('div').text
         """
         return self._all_text(False, True)
 

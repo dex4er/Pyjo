@@ -503,7 +503,7 @@ class Pyjo_URL(Pyjo.Base.object, Pyjo.String.Mixin.object):
         return self
 
     def to_abs(self, base=None):
-        """::
+        r"""::
 
             absolute = url.to_abs()
             absolute = url.to_abs(Pyjo.URL.new('http://example.com/foo'))
@@ -512,15 +512,15 @@ class Pyjo_URL(Pyjo.Base.object, Pyjo.String.Mixin.object):
         provided base URL. ::
 
             # "http://example.com/foo/baz.xml?test=123"
-            Pyjo.URL.new('baz.xml?test=123') \\
+            Pyjo.URL.new('baz.xml?test=123') \
                 .to_abs(Pyjo.URL.new('http://example.com/foo/bar.html'))
 
             # "http://example.com/baz.xml?test=123"
-            Pyjo.URL.new('/baz.xml?test=123') \\
+            Pyjo.URL.new('/baz.xml?test=123') \
                 .to_abs(Pyjo.URL.new('http://example.com/foo/bar.html'))
 
             # "http://example.com/foo/baz.xml?test=123"
-            Pyjo.URL.new('//example.com/foo/baz.xml?test=123') \\
+            Pyjo.URL.new('//example.com/foo/baz.xml?test=123') \
                 .to_abs(Pyjo.URL.new('http://example.com/foo/bar.html'))
         """
         absolute = self.clone()

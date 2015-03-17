@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""
+r"""
 Pyjo.Collection - Collection
 ============================
 ::
@@ -10,10 +10,10 @@ Pyjo.Collection - Collection
     # Manipulate collection
     collection = Pyjo.Collection.new(['just', 'works'])
     collection.insert(0, 'it')
-    print(collection.join("\\n")
+    print(collection.join("\n")
 
     # Chain methods
-    collection.map(lambda word: word.capitalize()).shuffle() \\
+    collection.map(lambda word: word.capitalize()).shuffle() \
         .each(lambda word, num: print('{0}: {1}'.format(word, num)))
 
     # Use the alternative constructor
@@ -165,10 +165,10 @@ class Pyjo_Collection(list):
         return self[offset]
 
     def join(self, string=u''):
-        """::
+        r"""::
 
             stream = collection.join()
-            stream = collection.join("\\n")
+            stream = collection.join("\n")
 
         Turn collection into :mod:`Pyjo.String.Bytes`. ::
 

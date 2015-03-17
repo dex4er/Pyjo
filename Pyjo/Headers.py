@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""
+r"""
 Pyjo.Headers - Headers
 ======================
 ::
@@ -9,8 +9,8 @@ Pyjo.Headers - Headers
 
     # Parse
     headers = Pyjo.Headers.new()
-    headers.parse("Content-Length: 42\\x0d\\x0a")
-    headers.parse("Content-Type: text/html\\x0d\\x0a\\x0d\\x0a")
+    headers.parse("Content-Length: 42\x0d\x0a")
+    headers.parse("Content-Type: text/html\x0d\x0a\x0d\x0a")
     print(headers.content_length)
     print(headers.content_type)
 
@@ -87,10 +87,10 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.String.Mixin.object):
     _state = None
 
     def __init__(self, path=None):
-        """::
+        r"""::
 
             headers = Pyjo.Headers.new()
-            headers = Pyjo.Headers.new(b"Content-Type: text/plain\\x0d\\x0a\\x0d\\x0a")
+            headers = Pyjo.Headers.new(b"Content-Type: text/plain\x0d\x0a\x0d\x0a")
 
         Construct a new :mod`Pyjo.Headers` object and :meth:`parse` headers if necessary.
         """
@@ -709,9 +709,9 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.String.Mixin.object):
         self.header(b'Origin', value)
 
     def parse(self, string):
-        """::
+        r"""::
 
-            headers = headers.parse(b"Content-Type: text/plain\\x0d\\x0a\\x0d\\x0a")
+            headers = headers.parse(b"Content-Type: text/plain\x0d\x0a\x0d\x0a")
 
         Parse formatted headers.
         """

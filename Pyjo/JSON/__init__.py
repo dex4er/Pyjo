@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""
+r"""
 Pyjo.JSON - Minimalistic JSON
 =============================
 ::
@@ -19,11 +19,11 @@ stringify them if it doesn't exist.
 The two Unicode whitespace characters ``u2028`` and ``u2029`` will always be
 escaped to make JSONP easier, and the character ``/`` to prevent XSS attacks. ::
 
-    u"\\u2028\\u2029</script>" -> b'"\\\\u2028\\\\u2029<\\\\/script>"'
+    u"\u2028\u2029</script>" -> b'"\\u2028\\u2029<\\/script>"'
 
 Other charaters will be encoded with ``utf-8`` encoding without escaping. ::
 
-    {'i': u"♥ pyjo"} -> b'{"i":"\\xe2\\x99\\xa5 pyjo"}'
+    {'i': u"♥ pyjo"} -> b'{"i":"\xe2\x99\xa5 pyjo"}'
 
 Classes
 -------
