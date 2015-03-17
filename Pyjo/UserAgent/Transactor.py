@@ -36,7 +36,7 @@ import Pyjo.URL
 from Pyjo.Base import lazy
 from Pyjo.JSON import encode_json
 from Pyjo.Regexp import m
-from Pyjo.Util import b, nvl
+from Pyjo.Util import b, notnone
 
 
 class Pyjo_UserAgent_Transactor(Pyjo.Base.object):
@@ -143,7 +143,7 @@ class Pyjo_UserAgent_Transactor(Pyjo.Base.object):
         # Check for uploads and force multipart if necessary
         req = tx.req
         headers = req.headers
-        multipart = 'multipart/form-data' in nvl(headers.content_type, '').lower()
+        multipart = 'multipart/form-data' in notnone(headers.content_type, '').lower()
         for value in [v for l in map(lambda v: v if isinstance(v, (list, tuple)) else (v,), form.values()) for v in l]:
             if isinstance(value, dict):
                 multipart = True

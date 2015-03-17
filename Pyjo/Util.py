@@ -117,11 +117,10 @@ def not_implemented(method):
     return stub
 
 
-def nvl(obj, value):
-    if obj is None:
-        return value
-    else:
-        return obj
+def notnone(*args):
+    for a in args:
+        if a is not None:
+            return a
 
 
 def rand(value=1):
