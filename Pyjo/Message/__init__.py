@@ -3,7 +3,6 @@
 """
 Pyjo.Message - HTTP message base class
 ======================================
-
 ::
 
     import Pyjo.Message
