@@ -48,7 +48,7 @@ class Pyjo_Asset_Memory(Pyjo.Asset.object):
 
     _content = b''
 
-    def add_chunk(self, chunk):
+    def add_chunk(self, chunk=b''):
         """::
 
             asset_mem = mem.add_chunk(b'foo bar baz')

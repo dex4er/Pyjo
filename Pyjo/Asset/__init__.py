@@ -8,7 +8,7 @@ Pyjo.Asset - HTTP content storage base class
     import Pyjo.Asset
 
     class MyAsset(Pyjo.Asset.object):
-        def add_chunk(self):
+        def add_chunk(self, chunk=b''):
             ...
 
         def contains(self):
@@ -67,7 +67,7 @@ class Pyjo_Asset(Pyjo.EventEmitter.object):
     """
 
     @not_implemented
-    def add_chunk(self, chunk):
+    def add_chunk(self, chunk=b''):
         """::
 
             asset = asset.add_chunk('foo bar baz')
