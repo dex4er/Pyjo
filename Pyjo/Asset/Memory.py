@@ -39,6 +39,8 @@ Classes
 
 import Pyjo.Asset
 
+from Pyjo.Util import notnone
+
 
 class Pyjo_Asset_Memory(Pyjo.Asset.object):
     """
@@ -61,11 +63,29 @@ class Pyjo_Asset_Memory(Pyjo.Asset.object):
         return self
         # TODO upgrade
 
+    def contains(self, bstring):
+        """::
+
+            position = mem.contains(b'bar')
+
+        Check if asset contains a specific string.
+        """
+        start = self.start_range
+        pos = notnone(self._content, b'').find(bstring, start)
+        if start and pos >= 0:
+            pos -= start
+        end = self.end_range
+
+        if end and (pos + len(bstring)) >= end:
+            return -1
+        else:
+            return pos
+
     def get_chunk(self, offset, maximum=131072):
         """::
 
-            bstream = asset.get_chunk(offset)
-            bstream = asset.get_chunk(offset, maximum)
+            bstream = mem.get_chunk(offset)
+            bstream = mem.get_chunk(offset, maximum)
 
         Get chunk of data starting from a specific position, defaults to a maximum
         chunk size of ``131072`` bytes (128KB).
