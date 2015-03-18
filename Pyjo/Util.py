@@ -142,6 +142,15 @@ def slurp(path):
         return b(f.read())
 
 
+def spurt(content, path):
+    if isbytes(content):
+        with open(path, "wb") as f:
+            return b(f.write(content))
+    else:
+        with open(path, "w") as f:
+            return b(f.write(content))
+
+
 def trim(string):
     string -= s(r'^\s+', '')
     string -= s(r'\s+$', '')
