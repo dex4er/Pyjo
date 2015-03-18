@@ -39,7 +39,7 @@ Classes
 
 import Pyjo.Asset
 
-from Pyjo.Util import notnone
+from Pyjo.Util import notnone, spurt
 
 
 class Pyjo_Asset_Memory(Pyjo.Asset.object):
@@ -97,6 +97,16 @@ class Pyjo_Asset_Memory(Pyjo.Asset.object):
 
         return self._content[offset:offset + maximum]
 
+    def move_to(self, dst):
+        """::
+
+            file = mem.move_to('/home/pyjo/bar.txt')
+
+        Move asset data into a specific file.
+        """
+        spurt(self._content, dst)
+        return self
+
     @property
     def size(self):
         """::
@@ -105,7 +115,7 @@ class Pyjo_Asset_Memory(Pyjo.Asset.object):
 
         Size of asset data in bytes.
         """
-        return len(self._content)
+        return len(notnone(self._content, b''))
 
     def slurp(self):
         """::
@@ -114,7 +124,7 @@ class Pyjo_Asset_Memory(Pyjo.Asset.object):
 
         Read all asset data at once.
         """
-        return self._content
+        return notnone(self._content, b'')
 
 
 new = Pyjo_Asset_Memory.new

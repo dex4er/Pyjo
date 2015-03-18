@@ -11,23 +11,25 @@ Pyjo.Asset - HTTP content storage base class
         def add_chunk(self, chunk=b''):
             ...
 
-        def contains(self):
+        def contains(self, bstring):
             ...
 
-        def get_chunk(self):
-            ....
+        def get_chunk(self, offset, maximum=131072):
+            ...
 
-        def move_to(self):
-            ....
+        def move_to(self, dst):
+            ...
 
+        @property
         def mtime(self):
-            ....
+            ...
 
+        @property
         def size(self):
-            ....
+            ...
 
         def slurp(self):
-            ....
+            ...
 
 :mod:`Pyjo.Asset` is an abstract base class for HTTP content storage.
 
@@ -35,6 +37,9 @@ Events
 ------
 
 :mod:`Pyjo.Asset` inherits all events from :mod:`Pyjo.EventEmitter`.
+
+Classes
+-------
 """
 
 import Pyjo.EventEmitter
@@ -77,6 +82,16 @@ class Pyjo_Asset(Pyjo.EventEmitter.object):
         pass
 
     @not_implemented
+    def contains(self, bstring):
+        """::
+
+            position = asset.contains(b'bar')
+
+        Check if asset contains a specific string. Meant to be overloaded
+        in a subclass.
+        """
+
+    @not_implemented
     def get_chunk(self, offset, maximum=131072):
         """::
 
@@ -87,6 +102,46 @@ class Pyjo_Asset(Pyjo.EventEmitter.object):
         chunk size of ``131072`` bytes (128KB). Meant to be overloaded in a subclass.
         """
         pass
+
+    @property
+    def is_file(self):
+        """::
+
+            false = asset.is_file
+
+        False.
+        """
+        return False
+
+    @property
+    def is_range(self):
+        """::
+
+            boolean = asset.is_range
+
+        Check if asset has a :attr:`start_range` or :attr:`end_range`.
+        """
+        return bool(self.end_range or self.start_range)
+
+    @not_implemented
+    def move_to(self, dst):
+        """::
+
+            asset = asset.move_to('/home/pyjo/foo.txt')
+
+        Move asset data into a specific file. Meant to be overloaded in a subclass.
+        """
+        pass
+
+    @property
+    @not_implemented
+    def mtime(self):
+        """::
+
+            mtime = asset.mtime
+
+        Modification time of asset. Meant to be overloaded in a subclass.
+        """
 
     @property
     @not_implemented
