@@ -40,13 +40,6 @@ import os
 import tempfile
 
 
-class Error(Exception):
-    """
-    Exception raised when can't write to asset.
-    """
-    pass
-
-
 class Pyjo_Asset_File(Pyjo.Asset.object):
     """
     :mod:`Pyjo.Asset.File` inherits all attributes and methods from
@@ -106,9 +99,7 @@ class Pyjo_Asset_File(Pyjo.Asset.object):
 
         Add chunk of data.
         """
-        if self.handle.write(chunk) is None:
-            raise Error("Can't write to asset")
-
+        self.handle.write(chunk)
         return self
 
     def contains(self, bstring):
@@ -269,7 +260,7 @@ class Pyjo_Asset_File(Pyjo.Asset.object):
         if self.cleanup is None:
             self.cleanup = True
 
-        return os.fdopen(fd, 'a+b')
+        return os.fdopen(fd, 'a+b', 0)
 
 
 new = Pyjo_Asset_File.new
