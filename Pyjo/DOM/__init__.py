@@ -114,14 +114,14 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
         return self._select(self._collect(self._ancestors()), pattern)
 
     def append(self, string):
-        """::
+        r"""::
 
             dom = dom.append(u'<p>I ♥ Pyjo!</p>')
 
         Append HTML/XML fragment to this node. ::
 
             # "<div><h1>Test</h1><h2>123</h2></div>"
-            dom.parse('<div><h1>Test</h1></div>')
+            dom.parse('<div><h1>Test</h1></div>') \
                .at('h1').append('<h2>123</h2>').root
 
             # "<p>Test 123</p>"
@@ -130,7 +130,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
         return self._add(1, string)
 
     def append_content(self, string):
-        """::
+        r"""::
 
             dom = dom.append_content(u'<p>I ♥ Pyjo!</p>')
 
@@ -138,11 +138,11 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
         node's content. ::
 
             # "<div><h1>Test123</h1></div>"
-            dom.parse('<div><h1>Test</h1></div>')
+            dom.parse('<div><h1>Test</h1></div>') \
                .at('h1').append_content('123').root
 
             # "<!-- Test 123 --><br>"
-            dom.parse('<!-- Test --><br>')
+            dom.parse('<!-- Test --><br>') \
                .child_nodes.first().append_content('123 ').root
 
             # "<p>Test<i>123</i></p>"
@@ -248,7 +248,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
 
     @property
     def content(self):
-        """::
+        r"""::
 
             string = dom.content
             dom.content = u'<p>I ♥ Pyjo!</p>'
@@ -272,7 +272,7 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
             dom.parse('<!-- Test --><br>').child_nodes.first().content
 
             # "<div><!-- 123 -->456</div>"
-            dom.parse('<div><!-- Test -->456</div>')
+            dom.parse('<div><!-- Test -->456</div>') \
                .at('div').child_nodes.first().set(content=' 123 ').root
         """
         nodetype = self.type

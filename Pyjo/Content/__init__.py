@@ -11,11 +11,11 @@ Pyjo.Content - HTTP content base class
         def body_contains(self):
             ...
 
-        def sub body_size(self):
+        def body_size(self):
             ...
 
         def get_body_chunk(self):
-            ....
+            ...
 
 :mod:`Pyjo.Content` is an abstract base class for HTTP content based on
 :rfc:`7230` and

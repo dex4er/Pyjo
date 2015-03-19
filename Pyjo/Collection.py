@@ -10,7 +10,7 @@ Pyjo.Collection - Collection
     # Manipulate collection
     collection = Pyjo.Collection.new(['just', 'works'])
     collection.insert(0, 'it')
-    print(collection.join("\n")
+    print(collection.join("\n"))
 
     # Chain methods
     collection.map(lambda word: word.capitalize()).shuffle() \

@@ -18,7 +18,7 @@ Pyjo.String.Unicode - Unicode string
 
     # Use the alternative constructor
     from Pyjo.String.Unicode import u
-    my $string = u('foobarbaz').camelize('').say()
+    string = u('foobarbaz').camelize('').say()
 
 :mod:`Pyjo.String.Unicode` is a container for unicode strings that provides a
 more friendly API for many of the functions in :mod:`Pyjo.Util`.

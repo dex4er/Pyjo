@@ -11,7 +11,7 @@ Pyjo.Asset.File - File storage for HTTP content
     asset_file = Pyjo.Asset.File.new()
     asset_file.add_chunk('foo bar baz')
     if asset_file.contains('bar'):
-        print('File contains "bar")
+        print('File contains "bar"')
     print(asset_file.slurp())
 
     # Existing file

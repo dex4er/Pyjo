@@ -4,41 +4,40 @@ Pyjo.Reactor.Base - Low-level event reactor base class
 ::
 
     import Pyjo.Reactor.Base
-    class MyEventLoop(Pyjo.Reactor.Base.object)
+    class MyEventLoop(Pyjo.Reactor.Base.object):
 
-    def again(self, tid):
-        ...
+        def again(self, tid):
+            ...
 
-    def io(self, cb, handle):
-        ...
+        def io(self, cb, handle):
+            ...
 
-    def is_running(self):
-        ...
+        def is_running(self):
+            ...
 
-    def one_tick(self):
-        ...
+        def one_tick(self):
+            ...
 
-    def recurring(self, cb, after):
-        ...
+        def recurring(self, cb, after):
+            ...
 
-    def remove(self, remove):
-        ...
+        def remove(self, remove):
+            ...
 
-    def reset(self):
-        ...
+        def reset(self):
+            ...
 
-    def start(self):
-        ...
+        def start(self):
+            ...
 
-    def stop(self):
-        ...
+        def stop(self):
+            ...
 
-    def timer(self, cb, after):
-        ...
+        def timer(self, cb, after):
+            ...
 
-    def watch(self, handle, read, write):
-        ...
-
+        def watch(self, handle, read, write):
+            ...
 
 :mod:`Pyjo.Reactor.Base` is an abstract base class for low-level event reactors.
 
@@ -137,7 +136,7 @@ class Pyjo_Reactor_Base(Pyjo.EventEmitter.object):
                 else:
                     print('Handle is readable')
 
-            reactor->io(cb, handle)
+            reactor.io(cb, handle)
         """
         pass
 
@@ -253,7 +252,7 @@ class Pyjo_Reactor_Base(Pyjo.EventEmitter.object):
 
         Change I/O events to watch handle for with true and false values. Meant to be
         overloaded in a subclass. Note that this method requires an active I/O
-        watcher.
+        watcher. ::
 
             # Watch only for readable events
             reactor.watch(handle, read=True, write=False)

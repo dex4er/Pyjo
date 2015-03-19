@@ -107,7 +107,7 @@ class Pyjo_Path(Pyjo.Base.object, Pyjo.String.Mixin.object):
             path = path.canonicalize()
 
         Canonicalize path by resolving ``.`` and ``..``, in addition ``...`` will be
-        treated as ``.`` to protect from path traversal attacks.
+        treated as ``.`` to protect from path traversal attacks. ::
 
             # "/foo/baz"
             Pyjo.Path.new('/foo/./bar/../baz').canonicalize()
