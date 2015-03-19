@@ -8,16 +8,16 @@ Pyjo.Asset.File - File storage for HTTP content
     import Pyjo.Asset.File
 
     # Temporary file
-    file = Pyjo.Asset.File.new()
-    file.add_chunk('foo bar baz')
-    if file.contains('bar'):
+    asset_file = Pyjo.Asset.File.new()
+    asset_file.add_chunk('foo bar baz')
+    if asset_file.contains('bar'):
         print('File contains "bar")
-    print(file.slurp())
+    print(asset_file.slurp())
 
     # Existing file
-    file = Pyjo.Asset.File.new(path='/home/pyjo/foo.txt')
-    file.move_to('/tmp/yada.txt')
-    print(file.slurp())
+    asset_file = Pyjo.Asset.File.new(path='/home/pyjo/foo.txt')
+    asset_file.move_to('/tmp/yada.txt')
+    print(asset_file.slurp())
 
 :mod:`Pyjo.Asset.File` is an file storage backend for HTTP content.
 
@@ -56,8 +56,8 @@ class Pyjo_Asset_File(Pyjo.Asset.object):
     cleanup = None
     """::
 
-        boolean = file.cleanup
-        file.cleanup = boolean
+        boolean = asset_file.cleanup
+        asset_file.cleanup = boolean
 
     Delete :attr:`path` automatically once the file is not used anymore.
     """
@@ -65,8 +65,8 @@ class Pyjo_Asset_File(Pyjo.Asset.object):
     handle = lazy(lambda self: self._init_handle())
     """::
 
-        handle = file.handle
-        file.handle = open('/home/pyjo/foo.txt', 'rb')
+        handle = asset_file.handle
+        asset_file.handle = open('/home/pyjo/foo.txt', 'rb')
 
     Filehandle, created on demand.
     """
@@ -74,8 +74,8 @@ class Pyjo_Asset_File(Pyjo.Asset.object):
     path = None
     """::
 
-        path = file.path
-        file.path = '/home/pyjo/foo.txt'
+        path = asset_file.path
+        asset_file.path = '/home/pyjo/foo.txt'
 
     File path used to create :attr:`handle`, can also be automatically generated if
     necessary.
@@ -84,8 +84,8 @@ class Pyjo_Asset_File(Pyjo.Asset.object):
     tmpdir = lazy(lambda self: getenv('PYJO_TMPDIR') or tempfile.gettempdir())
     """::
 
-        tmpdir = file.tmpdir
-        file.tmpdir = '/tmp'
+        tmpdir = asset_file.tmpdir
+        asset_file.tmpdir = '/tmp'
 
     Temporary directory used to generate :attr:`path`, defaults to the value of the
     ``PYJO_TMPDIR`` environment variable or auto detection.
@@ -102,7 +102,7 @@ class Pyjo_Asset_File(Pyjo.Asset.object):
     def add_chunk(self, chunk=b''):
         """::
 
-            file = file.add_chunk(b'foo bar baz')
+            asset_file = asset_file.add_chunk(b'foo bar baz')
 
         Add chunk of data.
         """
@@ -114,7 +114,7 @@ class Pyjo_Asset_File(Pyjo.Asset.object):
     def contains(self, bstring):
         """::
 
-            position = file.contains(b'bar')
+            position = asset_file.contains(b'bar')
 
         Check if asset contains a specific string.
         """
@@ -182,7 +182,7 @@ class Pyjo_Asset_File(Pyjo.Asset.object):
     def is_file(self):
         """::
 
-            true = file.is_file
+            true = asset_file.is_file
 
         True.
         """
@@ -191,7 +191,7 @@ class Pyjo_Asset_File(Pyjo.Asset.object):
     def move_to(self, dst):
         """::
 
-            file = file.move_to('/home/pyjo/bar.txt')
+            asset_file = asset_file.move_to('/home/pyjo/bar.txt')
 
         Move asset data into a specific file and disable :attr:`cleanup`.
         """
@@ -210,7 +210,7 @@ class Pyjo_Asset_File(Pyjo.Asset.object):
     def mtime(self):
         """::
 
-            mtime = file.mtime
+            mtime = asset_file.mtime
 
         Modification time of asset.
         """
@@ -220,7 +220,7 @@ class Pyjo_Asset_File(Pyjo.Asset.object):
     def size(self):
         """::
 
-            size = file.size
+            size = asset_file.size
 
         Size of asset data in bytes. Reading the size flushes writing buffer.
         """
@@ -230,7 +230,7 @@ class Pyjo_Asset_File(Pyjo.Asset.object):
     def slurp(self):
         """::
 
-            bstring = file.slurp()
+            bstring = asset_file.slurp()
 
         Read all asset data at once.
         """

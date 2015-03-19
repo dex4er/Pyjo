@@ -7,9 +7,9 @@ Pyjo.Asset.Memory - In-memory storage for HTTP content
 
     import Pyjo.Asset.Memory
 
-    mem = Pyjo.Asset.Memory.new()
-    mem.add_chunk('foo bar baz')
-    print(mem.slurp())
+    asset_mem = Pyjo.Asset.Memory.new()
+    asset_mem.add_chunk('foo bar baz')
+    print(asset_mem.slurp())
 
 :mod:`Pyjo.Asset.Memory` is an in-memory storage backend for HTTP content.
 
@@ -24,22 +24,26 @@ upgrade
 ::
 
     @content.on
-    def upgrade(mem, file):
+    def upgrade(asset_mem, asset_file):
         ...
 
 Emitted when asset gets upgraded to a :mod:`Pyjo.Asset.File` object. ::
 
     @content.on
-    def upgrade(mem, file):
-        file.tmpdir = '/tmp'
+    def upgrade(asset_mem, asset_file):
+        asset_file.tmpdir = '/tmp'
 
 Classes
 -------
 """
 
-import Pyjo.Asset
+import Pyjo.Asset.File
 
-from Pyjo.Util import notnone, spurt
+from Pyjo.Base import lazy
+from Pyjo.Util import getenv, notnone, spurt, steady_time
+
+
+MTIME = steady_time()
 
 
 class Pyjo_Asset_Memory(Pyjo.Asset.object):
@@ -48,25 +52,58 @@ class Pyjo_Asset_Memory(Pyjo.Asset.object):
     :mod:`Pyjo.Asset` and implements the following new ones.
     """
 
+    auto_upgrade = False
+    """::
+
+        boolean = asset_mem.auto_upgrade
+        asset_mem.auto_upgrade = boolean
+
+    Try to detect if content size exceeds :attr:`max_memory_size` limit and
+    automatically upgrade to a :mod:`Pyjo.Asset.File` object.
+    """
+
+    max_memory_size = lazy(lambda self: getenv('MOJO_MAX_MEMORY_SIZE', 262144))
+    """::
+
+        size = asset_mem.max_memory_size
+        asset_mem.max_memory_size = 1024
+
+    Maximum size in bytes of data to keep in memory before automatically upgrading
+    to a :mod:`Pyjo.Asset.File` object, defaults to the value of the
+    ``MOJO_MAX_MEMORY_SIZE`` environment variable or ``262144`` (256KB).
+    """
+
+    mtime = lazy(lambda self: MTIME)
+    """::
+
+        mtime = asset_mem.mtime
+        asset_mem.mtime = 1408567500
+
+    Modification time of asset, defaults to the time this class was loaded.
+    """
+
     _content = b''
 
     def add_chunk(self, chunk=b''):
         """::
 
-            asset_mem = mem.add_chunk(b'foo bar baz')
-            asset_file = mem.add_chunk(b'abc' * 262144)
+            asset_mem = asset_mem.add_chunk(b'foo bar baz')
+            asset_file = asset_mem.add_chunk(b'abc' * 262144)
 
         Add chunk of data and upgrade to :mod:`Pyjo.Asset.File` object if necessary.
         """
         # Upgrade if necessary
         self._content += chunk
-        return self
-        # TODO upgrade
+        if not self.auto_upgrade or self.size <= self.max_memory_size:
+            return self
+
+        asset_file = Pyjo.Asset.File.new()
+        return asset_file.add_chunk(self.emit('upgrade', asset_file).slurp())
 
     def contains(self, bstring):
         """::
 
-            position = mem.contains(b'bar')
+            position = asset_mem.contains(b'bar')
 
         Check if asset contains a specific string.
         """
@@ -84,8 +121,8 @@ class Pyjo_Asset_Memory(Pyjo.Asset.object):
     def get_chunk(self, offset, maximum=131072):
         """::
 
-            bstream = mem.get_chunk(offset)
-            bstream = mem.get_chunk(offset, maximum)
+            bstream = asset_mem.get_chunk(offset)
+            bstream = asset_mem.get_chunk(offset, maximum)
 
         Get chunk of data starting from a specific position, defaults to a maximum
         chunk size of ``131072`` bytes (128KB).
@@ -100,7 +137,7 @@ class Pyjo_Asset_Memory(Pyjo.Asset.object):
     def move_to(self, dst):
         """::
 
-            file = mem.move_to('/home/pyjo/bar.txt')
+            file = asset_mem.move_to('/home/pyjo/bar.txt')
 
         Move asset data into a specific file.
         """
@@ -111,7 +148,7 @@ class Pyjo_Asset_Memory(Pyjo.Asset.object):
     def size(self):
         """::
 
-            size = mem.size
+            size = asset_mem.size
 
         Size of asset data in bytes.
         """
@@ -120,7 +157,7 @@ class Pyjo_Asset_Memory(Pyjo.Asset.object):
     def slurp(self):
         """::
 
-            bstring = mem.slurp()
+            bstring = asset_mem.slurp()
 
         Read all asset data at once.
         """
