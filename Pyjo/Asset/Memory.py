@@ -40,7 +40,7 @@ Classes
 import Pyjo.Asset.File
 
 from Pyjo.Base import lazy
-from Pyjo.Util import getenv, notnone, spurt, steady_time
+from Pyjo.Util import convert, getenv, notnone, spurt, steady_time
 
 
 MTIME = steady_time()
@@ -62,7 +62,7 @@ class Pyjo_Asset_Memory(Pyjo.Asset.object):
     automatically upgrade to a :mod:`Pyjo.Asset.File` object.
     """
 
-    max_memory_size = lazy(lambda self: getenv('MOJO_MAX_MEMORY_SIZE', 262144))
+    max_memory_size = lazy(lambda self: convert(getenv('MOJO_MAX_MEMORY_SIZE'), int, 262144))
     """::
 
         size = asset_mem.max_memory_size
