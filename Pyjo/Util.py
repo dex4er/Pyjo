@@ -36,6 +36,13 @@ else:
             return str(string)
 
 
+def convert(value, newtype, default=None):
+    try:
+        return newtype(value)
+    except (TypeError, ValueError):
+        return default
+
+
 def decorator(func):
     @functools.wraps(func)
     def wrap(*args):
