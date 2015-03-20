@@ -80,10 +80,14 @@ import Pyjo.EventEmitter
 import Pyjo.Headers
 
 from Pyjo.Base import lazy
-from Pyjo.Regexp import m, s
+from Pyjo.Regexp import r
 from Pyjo.Util import b, getenv, not_implemented, u
 
 import zlib
+
+
+re_charset = r(r'charset\s*=\s*"?([^"\s;]+)"?', 'i')
+re_chunk = r(br'^(?:\x0d?\x0a)?([0-9a-fA-F]+).*\x0a')
 
 
 class Pyjo_Content(Pyjo.EventEmitter.object):
@@ -197,9 +201,9 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
         content_type = self.headers.content_type
         if content_type is None:
             content_type = ''
-        g = content_type == m(r'charset\s*=\s*"?([^"\s;]+)"?', 'i')
-        if g:
-            return g[1]
+        m = re_charset.search(content_type)
+        if m:
+            return m.group(1)
         else:
             return
 
@@ -239,7 +243,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
         if self.headers.content_encoding is None:
             return False
         else:
-            return bool(self.headers.content_encoding == m(r'^gzip$', 'i'))
+            return bool(self.headers.content_encoding.lower() == 'gzip')
 
     @property
     def is_dynamic(self):
@@ -380,10 +384,12 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
 
             # Start new chunk (ignore the chunk extension)
             if not self._chunk_len:
-                self._pre_buffer, g = self._pre_buffer == s(br'^(?:\x0d?\x0a)?([0-9a-fA-F]+).*\x0a', '')
-                if not g:
+                m = re_chunk.search(self._pre_buffer)
+                if m:
+                    self._pre_buffer = re_chunk.sub(b'', self._pre_buffer, 1)
+                else:
                     break
-                self._chunk_len = int(g[1], 16)
+                self._chunk_len = int(m.group(1), 16)
                 if self._chunk_len:
                     continue
 

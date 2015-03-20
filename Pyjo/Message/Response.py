@@ -35,7 +35,11 @@ Classes
 
 import Pyjo.Message
 
-from Pyjo.Regexp import m, s
+from Pyjo.Regexp import r
+
+
+re_line = r(br'^(.*?)\x0d?\x0a')
+re_http = r(br'^\s*HTTP/(\d\.\d)\s+(\d\d\d)\s*(.+)?$')
 
 
 class Pyjo_Message_Response(Pyjo.Message.object):
@@ -49,14 +53,19 @@ class Pyjo_Message_Response(Pyjo.Message.object):
 
     def extract_start_line(self):
         # We have a full response line
-        self._buffer, g = self._buffer == s(br'^(.*?)\x0d?\x0a', b'')
-        if not g:
+        m = re_line.search(self._buffer)
+        if m:
+            self._buffer = re_line.sub(b'', self._buffer, 1)
+            line = m.group(1)
+        else:
             return
-        g = g[1] == m(br'^\s*HTTP/(\d\.\d)\s+(\d\d\d)\s*(.+)?$')
-        if not g:
+        m = re_http.search(line)
+        if not m:
             return
 
-        self.code = int(g[2])
+        version, code, message = m.groups()
+
+        self.code = int(code)
 
         content = self.content
         if self.is_empty:
@@ -67,11 +76,11 @@ class Pyjo_Message_Response(Pyjo.Message.object):
         if content.auto_relax is None:
             content.auto_relax = True
 
-        if g[1] == '1.0':
+        if version == '1.0':
             content.expect_close = True
 
-        self.version = g[1]
-        self.message = g[3]
+        self.version = version
+        self.message = message
         return bool(self.message)
 
     def fix_headers(self):

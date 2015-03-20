@@ -32,11 +32,16 @@ import Pyjo.Base
 import Pyjo.String.Mixin
 
 from Pyjo.Base import lazy
-from Pyjo.Regexp import m, s
+from Pyjo.Regexp import r
 from Pyjo.Util import b, getenv, u
 
 import collections
 import sys
+
+
+re_line = r(br'(.*?)\x0d?\x0a')
+re_field = r(br'^(\S[^:]*)\s*:\s*(.*)$')
+re_startswith_space = r(br'^\s+')
 
 
 NORMALCASE = dict(map(lambda i: (b(i.lower()), b(i)), [
@@ -722,27 +727,29 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.String.Mixin.object):
         lines = self.max_lines
         pos = 0
 
-        for g in m(br'(.*?)\x0d?\x0a', 'g').match(self._buffer):
-            pos += len(g[0])
-            line = g[1]
+        for m in re_line.finditer(self._buffer):
+            chunk = m.group(0)
+            pos += len(chunk)
+            line = m.group(1)
 
             # Check line size limit
-            if len(g[0]) > size or len(headers) >= lines:
+            if len(chunk) > size or len(headers) >= lines:
                 self._buffer = self._buffer[pos:]
                 self._state = 'finished'
                 self._limit = True
                 return self
 
             # New header
-            g = line == m(br'^(\S[^:]*)\s*:\s*(.*)$')
-            if g:
-                headers.append([g[1], g[2]])
+            m = re_field.search(line)
+            if m:
+                headers.append(list(m.groups()))
 
             else:
                 # Multiline
-                line, g = line == s(br'^\s+', b'')
-                if g and headers:
-                    headers[-1][1] += b' ' + line
+                if re_startswith_space.search(line):
+                    line = re_startswith_space.sub(b'', line, 1)
+                    if headers:
+                        headers[-1][1] += b' ' + line
 
                 # Empty line
                 else:

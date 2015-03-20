@@ -43,8 +43,15 @@ import Pyjo.String.Mixin
 import Pyjo.Parameters
 import Pyjo.Path
 
-from Pyjo.Regexp import m, s
+from Pyjo.Regexp import r
 from Pyjo.Util import b, u, url_escape, url_unescape
+
+
+re_authority = r(br'^([^\@]+)\@')
+re_port = r(br':(\d+)$')
+re_non_ascii = r(br'[^\x00-\x7f]')
+re_idn = r(br'^xn--(.+)$')
+re_url = r(br'^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?')
 
 
 class Pyjo_URL(Pyjo.Base.object, Pyjo.String.Mixin.object):
@@ -187,19 +194,23 @@ class Pyjo_URL(Pyjo.Base.object, Pyjo.String.Mixin.object):
         if authority is None:
             return self
 
+        authority = b(authority)
+
         # Userinfo
-        (authority, g) = b(authority) == s(br'^([^\@]+)\@', b'')
-        if g:
-            self.userinfo = u(url_unescape(g[1]))
+        m = re_authority.search(authority)
+        if m:
+            authority = re_authority.sub(b'', authority, 1)
+            self.userinfo = u(url_unescape(m.group(1)))
 
         # Port
-        (authority, g) = authority == s(br':(\d+)$', b'')
-        if g:
-            self.port = int(g[1])
+        m = re_port.search(authority)
+        if m:
+            authority = re_port.sub(b'', authority, 1)
+            self.port = int(m.group(1))
 
         # Host
         host = url_unescape(authority)
-        if host == m(br'[^\x00-\x7f]'):
+        if re_non_ascii.search(host):
             self.ihost = host
         else:
             self.host = str(u(host))
@@ -284,17 +295,17 @@ class Pyjo_URL(Pyjo.Base.object, Pyjo.String.Mixin.object):
         if self.host is None:
             return
 
-        if b(self.host) != m(br'[^\x00-\x7f]'):
+        if not re_non_ascii.search(b(self.host)):
             return self.host.lower()
 
         # Encode
-        parts = map(lambda s: ('xn--' + s.encode('punycode').decode('ascii')) if b(s) == m(br'[^\x00-\x7f]') else s, self.host.split('.'))
+        parts = map(lambda s: ('xn--' + s.encode('punycode').decode('ascii')) if re_non_ascii.search(b(s)) else s, self.host.split('.'))
         return '.'.join(parts).lower()
 
     @ihost.setter
     def ihost(self, value):
         # Decode
-        parts = map(lambda s: s[4:].decode('punycode') if s == m(br'^xn--(.+)$') else u(s), b(value).split(b'.'))
+        parts = map(lambda s: s[4:].decode('punycode') if re_idn.search(s) else u(s), b(value).split(b'.'))
         self.host = '.'.join(parts)
         return self
 
@@ -351,18 +362,19 @@ class Pyjo_URL(Pyjo.Base.object, Pyjo.String.Mixin.object):
             # "sri@example.com"
             url.parse('mailto:sri@example.com').path
         """
-        g = b(url) == m(br'^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?')
-        if g:
-            if g[2] is not None:
-                self.scheme = u(g[2])
-            if g[4] is not None:
-                self.authority = g[4]
-            if g[5] is not None:
-                self.path = g[5]
-            if g[7] is not None:
-                self.query = g[7]
-            if g[9] is not None:
-                self.fragment = u(url_unescape(g[9]))
+        m = re_url.search(b(url))
+        if m:
+            scheme, authority, path, query, fragment = m.group(2, 4, 5, 7, 9)
+            if scheme is not None:
+                self.scheme = u(scheme)
+            if authority is not None:
+                self.authority = authority
+            if path is not None:
+                self.path = path
+            if query is not None:
+                self.query = query
+            if fragment is not None:
+                self.fragment = u(url_unescape(fragment))
         return self
 
     @property
@@ -594,7 +606,7 @@ class Pyjo_URL(Pyjo.Base.object, Pyjo.String.Mixin.object):
         # Path and query
         path = self.path_query
 
-        if not authority or path == '' or path == m(r'^[/?]'):
+        if not authority or path == '' or path.startswith('/') or path.startswith('?'):
             url += path
         else:
             url += '/' + path

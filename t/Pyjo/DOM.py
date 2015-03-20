@@ -18,8 +18,6 @@ if __name__ == '__main__':
 
     import Pyjo.DOM
 
-    from Pyjo.Regexp import m
-
     # Empty
     is_ok(str(Pyjo.DOM.new()), '', 'right result')
     is_ok(str(Pyjo.DOM.new('')), '', 'right result')
@@ -540,14 +538,14 @@ if __name__ == '__main__':
     is_ok(dom.find('rss')[0].attr('version'), '2.0', 'right version')
     is_deeply_ok(dom.at('title').ancestors().map('tag'), ['channel', 'rss'], 'right results')
     is_ok(dom.at('extension').attr('foo:id'), 'works', 'right id')
-    is_ok(dom.at('#works').text, m(r'\[awesome\]\]'), 'right text')
-    is_ok(dom.at('[id="works"]').text, m(r'\[awesome\]\]'), 'right text')
+    like_ok(dom.at('#works').text, r'\[awesome\]\]', '', 'right text')
+    like_ok(dom.at('[id="works"]').text, r'\[awesome\]\]', '', 'right text')
     is_ok(dom.find('description')[1].text, '<p>trololololo>', 'right text')
     is_ok(dom.at('pubDate').text, 'Mon, 12 Jul 2010 20:42:00', 'right text')
-    is_ok(dom.at('[id*="ork"]').text, m(r'\[awesome\]\]'), 'right text')
-    is_ok(dom.at('[id*="orks"]').text, m(r'\[awesome\]\]'), 'right text')
-    is_ok(dom.at('[id*="work"]').text, m(r'\[awesome\]\]'), 'right text')
-    is_ok(dom.at('[id*="or"]').text, m(r'\[awesome\]\]'), 'right text')
+    like_ok(dom.at('[id*="ork"]').text, r'\[awesome\]\]', '', 'right text')
+    like_ok(dom.at('[id*="orks"]').text, r'\[awesome\]\]', '', 'right text')
+    like_ok(dom.at('[id*="work"]').text, r'\[awesome\]\]', '', 'right text')
+    like_ok(dom.at('[id*="or"]').text, r'\[awesome\]\]', '', 'right text')
     ok(dom.at('rss').xml, 'XML mode active')
     ok(dom.at('extension').parent.xml, 'XML mode active')
     ok(dom.at('extension').root.xml, 'XML mode active')

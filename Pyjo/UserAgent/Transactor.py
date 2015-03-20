@@ -35,8 +35,11 @@ import Pyjo.URL
 
 from Pyjo.Base import lazy
 from Pyjo.JSON import encode_json
-from Pyjo.Regexp import m
+from Pyjo.Regexp import r
 from Pyjo.Util import b, notnone
+
+
+re_no_proto = r(r'^/|://')
 
 
 class Pyjo_UserAgent_Transactor(Pyjo.Base.object):
@@ -110,7 +113,7 @@ class Pyjo_UserAgent_Transactor(Pyjo.Base.object):
         tx = Pyjo.Transaction.HTTP.new()
         req = tx.req
         req.method = method
-        if str(url) != m(r'^/|://'):
+        if not re_no_proto.search(str(url)):
             url = 'http://' + str(url)
         if isinstance(url, Pyjo.URL.object):
             req.url(url)

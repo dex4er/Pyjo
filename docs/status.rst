@@ -14,4 +14,3 @@ Early developement stage. Implemented already:
 * Low level event reactor based on select(2) and poll(2)
 * Lazy properties for objects
 * Test units with API based on Perl's Test::More and `TAP <http://testanything.org/>`_ protocol
-* Regexp objects with overloaded operators

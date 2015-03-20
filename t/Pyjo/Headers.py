@@ -16,8 +16,6 @@ if __name__ == '__main__':
 
     from Pyjo.Test import *  # @UnusedWildImport
 
-    from Pyjo.Regexp import m
-
     import Pyjo.Headers
 
     # Basic functionality
@@ -32,7 +30,7 @@ if __name__ == '__main__':
     headers.expect = 'continue-100'
     headers.connection = 'close'
     is_ok(headers.content_type, 'text/html', 'right value')
-    is_ok(headers.to_str(), m(r'.*\x0d\x0a.*\x0d\x0a.*'), 'right format')
+    like_ok(headers.to_str(), r'.*\x0d\x0a.*\x0d\x0a.*', '', 'right format')
     d = headers.to_dict()
     is_ok(d['Connection'], 'close', 'right value')
     is_ok(d['Expect'], 'continue-100', 'right value')

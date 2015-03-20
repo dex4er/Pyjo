@@ -27,8 +27,11 @@ import Pyjo.Base
 import Pyjo.String.Mixin
 
 from Pyjo.Base import lazy
-from Pyjo.Regexp import m, s
-from Pyjo.Util import b, u, isiterable, url_escape, url_unescape
+from Pyjo.Regexp import r
+from Pyjo.Util import b, u, isiterable, notnone, url_escape, url_unescape
+
+
+re_pair = r(br'^([^=]+)(?:=(.*))?$')
 
 
 class Pyjo_Parameters(Pyjo.Base.object, Pyjo.String.Mixin.object):
@@ -232,17 +235,17 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.String.Mixin.object):
             charset = self.charset
 
             for pair in string.split(b'&'):
-                g = pair == m(br'^([^=]+)(?:=(.*))?$')
+                m = re_pair.search(pair)
 
-                if not g:
+                if not m:
                     continue
 
-                name = g[1]
-                value = g[2] if g[2] is not None else b''
+                name = m.group(1)
+                value = notnone(m.group(2), b'')
 
                 # Replace "+" with whitespace, unescape and decode
-                name -= s(br'\+', b' ', 'g')
-                value -= s(br'\+', b' ', 'g')
+                name = name.replace(b'+', b' ')
+                value = value.replace(b'+', b' ')
 
                 name = url_unescape(name)
                 value = url_unescape(value)
@@ -350,8 +353,8 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.String.Mixin.object):
             name = url_escape(name, br'^A-Za-z0-9\-._~!$\'()*,:@/?')
             value = url_escape(value, br'^A-Za-z0-9\-._~!$\'()*,:@/?')
 
-            name -= s(br'%20', b'+', 'g')
-            value -= s(br'%20', b'+', 'g')
+            name = name.replace(b'%20', b'+')
+            value = value.replace(b'%20', b'+')
 
             strpairs.append(name + b'=' + value)
 
