@@ -20,7 +20,7 @@ import Pyjo.Base
 import Pyjo.DOM
 
 from Pyjo.Base import lazy
-from Pyjo.Regexp import m
+from Pyjo.Regexp import r
 from Pyjo.Util import html_unescape, xml_escape
 
 
@@ -89,7 +89,7 @@ BLOCK = {'a', 'address', 'applet', 'article', 'aside', 'b', 'big',
          'style', 'summary', 'table', 'tbody', 'td', 'template', 'textarea',
          'tfoot', 'th', 'thead', 'title', 'tr', 'tt', 'u', 'ul', 'xmp'}
 
-ATTR_RE = r'''
+ATTR_PAT = r'''
   ([^<>=\s\/]+|\/)   # Key
   (?:
     \s*=\s*
@@ -104,7 +104,7 @@ ATTR_RE = r'''
   \s*
 '''
 
-TOKEN_1_RE = r'''
+TOKEN_1_PAT = r'''
   (?P<text>[^<]+)?                                     # Text
   (?:
     <(?:
@@ -124,26 +124,34 @@ TOKEN_1_RE = r'''
     |
 '''
 
-RAW_RE = r'''
+RAW_PAT = r'''
       \s*(?P<rawtag>
         (?P<rawtagname>''' + '|'.join(RAW | RCDATA) + ''')\s*
-        (?:''' + ATTR_RE + ''')*
+        (?:''' + ATTR_PAT + ''')*
       )>
       (?P<raw>.*?)                                    # Raw
       <\s*/\s*(?P=rawtagname)\s*
     |
 '''
 
-TOKEN_2_RE = r'''
-      \s*(?P<tag>[^<>\s]+\s*(?:''' + ATTR_RE + ''')*) # Tag
+TOKEN_2_PAT = r'''
+      \s*(?P<tag>[^<>\s]+\s*(?:''' + ATTR_PAT + ''')*) # Tag
     )>
     | (?P<runaway><)                                  # Runaway "<"
   )?
 '''
 
-XML_TOKEN_RE = TOKEN_1_RE + TOKEN_2_RE
+XML_TOKEN_PAT = TOKEN_1_PAT + TOKEN_2_PAT
 
-HTML_TOKEN_RE = TOKEN_1_RE + RAW_RE + TOKEN_2_RE
+HTML_TOKEN_PAT = TOKEN_1_PAT + RAW_PAT + TOKEN_2_PAT
+
+
+re_startswith_xml = r(r'<\?\s*xml\b', 'is')
+re_xml_token = r(XML_TOKEN_PAT, 'isx')
+re_html_token = r(HTML_TOKEN_PAT, 'isx')
+re_end_tag = r(r'^\/\s*(\S+)')
+re_start_tag = r(r'^([^\s/]+)([\s\S]*)')
+re_attr = r(ATTR_PAT, 'x')
 
 
 class Pyjo_DOM_HTML(Pyjo.Base.object):
@@ -187,19 +195,19 @@ class Pyjo_DOM_HTML(Pyjo.Base.object):
         if isinstance(html, Pyjo.DOM.object):
             html = html.to_str()
 
-        if xml is None and html[:1024] == m(r'<\?\s*xml\b', 'is'):
+        if xml is None and re_startswith_xml.search(html[:1024]):
             xml = True
             self.xml = xml
 
         if xml:
-            token_re = XML_TOKEN_RE
+            re_token = re_xml_token
         else:
-            token_re = HTML_TOKEN_RE
+            re_token = re_html_token
 
-        for g in m(token_re, 'gisx').match(html):
-            text, doctype, comment, cdata, pi, tag, runaway = g['text'], g['doctype'], g['comment'], g['cdata'], g['pi'], g['tag'], g['runaway']
-            raw = g['raw'] if not xml else None
-            rawtag = g['rawtag'] if not xml else None
+        for m in re_token.finditer(html):
+            text, doctype, comment, cdata, pi, tag, runaway = m.group('text', 'doctype', 'comment', 'cdata', 'pi', 'tag', 'runaway')
+            raw = m.group('raw') if not xml else None
+            rawtag = m.group('rawtag') if not xml else None
             if rawtag is not None:
                 tag = rawtag
 
@@ -218,17 +226,17 @@ class Pyjo_DOM_HTML(Pyjo.Base.object):
             if tag is not None:
 
                 # End
-                g = tag == m(r'^\/\s*(\S+)')
-                if g:
-                    node = self._end(g[1] if xml else g[1].lower(), xml, current)
+                m = re_end_tag.search(tag)
+                if m:
+                    node = self._end(m.group(1) if xml else m.group(1).lower(), xml, current)
                     if node:
                         current = node
 
                 # Start
                 else:
-                    g = tag == m(r'^([^\s/]+)([\s\S]*)')
-                    if g:
-                        start, attr = g[1], g[2]
+                    m = re_start_tag.search(tag)
+                    if m:
+                        start, attr = m.group(1, 2)
                         if not xml:
                             start = start.lower()
 
@@ -236,18 +244,18 @@ class Pyjo_DOM_HTML(Pyjo.Base.object):
                         closing = False
 
                         # Attributes
-                        for g in m(ATTR_RE, 'gx').match(attr):
+                        for m in re_attr.finditer(attr):
                             if xml:
-                                key = g[1]
+                                key = m.group(1)
                             else:
-                                key = g[1].lower()
+                                key = m.group(1).lower()
 
-                            if g[2] is not None:
-                                value = g[2]
-                            elif g[3] is not None:
-                                value = g[3]
+                            if m.group(2) is not None:
+                                value = m.group(2)
+                            elif m.group(3) is not None:
+                                value = m.group(3)
                             else:
-                                value = g[4]
+                                value = m.group(4)
 
                             # Empty tag
                             if key == '/':
@@ -337,7 +345,7 @@ class Pyjo_DOM_HTML(Pyjo.Base.object):
                 break
 
     def _node(self, current, nodetype, content):
-        new = [nodetype, content, current]  # TODO weakref new[2]
+        new = [nodetype, content, current]
         current.append(new)
         return current
 

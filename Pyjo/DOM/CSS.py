@@ -272,14 +272,14 @@ Classes
 
 import Pyjo.Base
 
-from Pyjo.Regexp import m, s
+from Pyjo.Regexp import r
 from Pyjo.Util import uchr
 
 
-ESCAPE_RE = r'(?:\\[^0-9a-fA-F]|\\[0-9a-fA-F]{1,6})'
-ATTR_RE = r'''
+ESCAPE_PAT = r'(?:\\[^0-9a-fA-F]|\\[0-9a-fA-F]{1,6})'
+ATTR_PAT = r'''
     \[
-    ((?:''' + ESCAPE_RE + '''|[\w\-])+)           # Key
+    ((?:''' + ESCAPE_PAT + '''|[\w\-])+)           # Key
     (?:
         (\W)?=                                    # Operator
         (?:"((?:\\"|[^"])*?)"|([^\]]+?))          # Value
@@ -287,14 +287,28 @@ ATTR_RE = r'''
     )?
     \]
 '''
-PSEUDO_CLASS_RE = r'(?::([\w\-]+)(?:\(((?:\([^)]+\)|[^)])+)\))?)'
-TOKEN_RE = r'''
+PSEUDO_CLASS_PAT = r'(?::([\w\-]+)(?:\(((?:\([^)]+\)|[^)])+)\))?)'
+TOKEN_PAT = r'''
     (\s*,\s*)?                                    # Separator
-    ((?:[^[\\:\s,>+~]|''' + ESCAPE_RE + '''\s?)+)?   # Element
-    (''' + PSEUDO_CLASS_RE + '''*)?               # Pseudoclass
-    ((?:''' + ATTR_RE + ''')*)?                   # Attributes
+    ((?:[^[\\:\s,>+~]|''' + ESCAPE_PAT + '''\s?)+)?   # Element
+    (''' + PSEUDO_CLASS_PAT + '''*)?               # Pseudoclass
+    ((?:''' + ATTR_PAT + ''')*)?                   # Attributes
     (?:\s*([>+~]))?                               # Combinator
 '''
+
+
+re_token = r(TOKEN_PAT, 'x')
+re_tag = r(r'^((?:\\\.|\\\#|[^.#])+)')
+re_class_or_id = r(r'(?:([.#])((?:\\[.\#]|[^\#.])+))')
+re_pseudo_class = r(PSEUDO_CLASS_PAT)
+re_attr = r(ATTR_PAT, 'x')
+re_even = r(r'^\s*even\s*$', 'i')
+re_odd = r(r'^\s*odd\s*$', 'i')
+re_equation = r(r'(?:(-?(?:\d+)?)?(n))?\s*\+?\s*(-?\s*\d+)?\s*$', 'i')
+re_whitespace = r(r'\s+')
+re_first_last = r(r'^(first|last)-')
+re_only_child_of_type = r(r'^only-(?:child|(of-type))$')
+re_escaped_unicode = r(r'\\([0-9a-fA-F]{1,6})\s?')
 
 
 class Pyjo_DOM_CSS(Pyjo.Base.object):
@@ -354,12 +368,15 @@ class Pyjo_DOM_CSS(Pyjo.Base.object):
                 return True
         return False
 
-    def _attr(self, name_re, value_re, current):
+    def _attr(self, name_pat, value_pat, current):
         attrs = current[2]
+        re_name = r(name_pat)
+        if value_pat is not None:
+            re_value = r(value_pat)
         for name, value in attrs.items():
-            if name == m(name_re):
-                if value is not None and value_re is not None:
-                    if value == m(value_re):
+            if re_name.search(name):
+                if value is not None and value_pat is not None:
+                    if re_value.search(value):
                         return True
                 else:
                     return True
@@ -399,8 +416,8 @@ class Pyjo_DOM_CSS(Pyjo.Base.object):
 
     def _compile(self, css):
         pattern = [[]]
-        for g in m(TOKEN_RE, 'gx').match(css):
-            separator, element, pc, attrs, combinator = g[1], g[2], g[3], g[6], g[12]
+        for m in re_token.finditer(css):
+            separator, element, pc, attrs, combinator = m.group(1, 2, 3, 6, 12)
             if element is None:
                 element = ''
 
@@ -417,12 +434,16 @@ class Pyjo_DOM_CSS(Pyjo.Base.object):
                 # Tag
                 selector = []
                 part.append(selector)
-                element, g = element == s(r'^((?:\\\.|\\\#|[^.#])+)', '')
-                if g and g[1] != '*':
-                    selector.append(['tag', self._name(g[1])])
+                m = re_tag.search(element)
+                if m:
+                    element = re_tag.sub('', element, 1)
+                    g = ('',) + m.groups()
+                    if g[1] != '*':
+                        selector.append(['tag', self._name(g[1])])
 
                 # Class or ID
-                for g in m(r'(?:([.#])((?:\\[.\#]|[^\#.])+))', 'g').match(element):
+                for m in re_class_or_id.finditer(element):
+                    g = ('',) + m.groups()
                     if g[1] == '.':
                         name, op = 'class', '~'
                     else:
@@ -430,7 +451,8 @@ class Pyjo_DOM_CSS(Pyjo.Base.object):
                     selector.append(['attr', self._name(name), self._value(op, g[2])])
 
                 # Pseudo classes (":not" contains more selectors)
-                for g in m(PSEUDO_CLASS_RE, 'g').match(pc):
+                for m in re_pseudo_class.finditer(pc):
+                    g = ('',) + m.groups()
                     if g[1] == 'not':
                         value = self._compile(g[2])
                     else:
@@ -438,7 +460,8 @@ class Pyjo_DOM_CSS(Pyjo.Base.object):
                     selector.append(['pc', g[1].lower(), value])
 
                 # Attributes
-                for g in m(ATTR_RE, 'gx').match(attrs):
+                for m in re_attr.finditer(attrs):
+                    g = ('',) + m.groups()
                     if g[2] is not None:
                         op = g[2]
                     else:
@@ -464,19 +487,20 @@ class Pyjo_DOM_CSS(Pyjo.Base.object):
             return []
 
         # "even"
-        if equation == m(r'^\s*even\s*$', 'i'):
+        if re_even.search(equation):
             return [2, 2]
 
         # "odd"
-        if equation == m(r'^\s*odd\s*$', 'i'):
+        if re_odd.search(equation):
             return [2, 1]
 
         # Equation
         num = [1, 1]
-        g = equation == m(r'(?:(-?(?:\d+)?)?(n))?\s*\+?\s*(-?\s*\d+)?\s*$', 'i')
-        if g:
-            if g[1] is not None and len(g[1]):
-                num[0] = g[1]
+        m = re_equation.search(equation)
+        if m:
+            g = ('',) + m.groups()
+            if g[1] is not None and len(m.group(1)):
+                num[0] = m.group(1)
             elif g[2]:
                 num[0] = 1
             else:
@@ -488,7 +512,7 @@ class Pyjo_DOM_CSS(Pyjo.Base.object):
                 num[1] = g[3]
             else:
                 num[1] = '0'
-            num[1] -= s(r'\s+', '', 'g')
+            num[1] = re_whitespace.sub('', num[1])
             num[1] = int(num[1])
 
         return num
@@ -533,9 +557,10 @@ class Pyjo_DOM_CSS(Pyjo.Base.object):
             return 'checked' in current[2] or 'selected' in current[2]
 
         # ":first-*" or ":last-*" (rewrite with equation)
-        pclass, g = pclass == s(r'^(first|last)-', '')
-        if g:
-            if g[1] == 'first':
+        m = re_first_last.search(pclass)
+        if m:
+            pclass = re_first_last.sub('', pclass)
+            if m.group(1) == 'first':
                 pclass = 'nth-' + pclass
                 args = [0, 1]
             else:
@@ -568,9 +593,9 @@ class Pyjo_DOM_CSS(Pyjo.Base.object):
 
         # ":only-*"
         else:
-            g = pclass == m(r'^only-(?:child|(of-type))$')
-            if g:
-                for i in self._siblings(current, current[1] if g[1] else None):
+            m = re_only_child_of_type.search(pclass)
+            if m:
+                for i in self._siblings(current, current[1] if m.group(1) else None):
                     if i != current:
                         return False
                 return True
@@ -605,7 +630,7 @@ class Pyjo_DOM_CSS(Pyjo.Base.object):
 
                 # Tag
                 if nodetype == 'tag':
-                    if current[1] != m(s[1]):
+                    if not r(s[1]).search(current[1]):
                         return False
 
                 # Attribute
@@ -653,7 +678,7 @@ class Pyjo_DOM_CSS(Pyjo.Base.object):
         value = value.replace('\\\n', '')
 
         # Unescape Unicode characters
-        value -= s(r'\\([0-9a-fA-F]{1,6})\s?', lambda g: uchr(int(g[1], 16)), 'g')
+        value = re_escaped_unicode.sub(lambda m: uchr(int(m.group(1), 16)), value)
 
         # Remove backslash
         value = value.replace('\\', '')

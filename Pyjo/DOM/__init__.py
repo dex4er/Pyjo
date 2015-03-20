@@ -46,8 +46,14 @@ import Pyjo.String.Mixin
 import Pyjo.String.Unicode
 
 from Pyjo.Base import lazy
-from Pyjo.Regexp import m, s
+from Pyjo.Regexp import r
 from Pyjo.Util import squish, u
+
+
+re_namespace_prefix = r(r'^(.*?):')
+re_no_space_ending = r(r'\S\Z')
+re_good_punctuation = r(r'^[^.!?,;:\s]+')
+re_no_whitespace = r(r'\S+')
 
 
 class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
@@ -395,9 +401,9 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
             return
 
         # Extract namespace prefix and search parents
-        g = tree[1] == m(r'^(.*?):')
-        if g:
-            ns = 'xmlns:' + g[1]
+        m = re_namespace_prefix.search(tree[1])
+        if m:
+            ns = 'xmlns:' + m.group(1)
         else:
             ns = None
 
@@ -979,11 +985,11 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
                 chunk = self._text(self._nodes(node), True, False if node[1] == 'pre' else trim)
 
             # Add leading whitespace if punctuation allows it
-            if text == m(r'\S\Z') and chunk == m(r'^[^.!?,;:\s]+'):
+            if re_no_space_ending.search(text) and re_good_punctuation.search(chunk):
                 chunk = " " + chunk
 
             # Trim whitespace blocks
-            if chunk == m(r'\S+') or not trim:
+            if re_no_whitespace.search(chunk) or not trim:
                 text += chunk
 
         return text
