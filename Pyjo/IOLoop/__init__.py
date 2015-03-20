@@ -617,12 +617,14 @@ class Pyjo_IOLoop(Pyjo.EventEmitter.object):
 
         # Acceptor
         if taskid in self._acceptors:
-            self._acceptors[taskid].stop()
+            self._acceptors[taskid].unsubscribe('accept').close()
             del self._acceptors[taskid]
             return self._not_accepting()._maybe_accepting()
 
         # Connections
         if taskid in self._connections:
+            if 'client' in self._connections[taskid]:
+                self._connections[taskid]['client'].unsubscribe('connect').close()
             del self._connections[taskid]
             self._maybe_accepting()
             if DEBUG:

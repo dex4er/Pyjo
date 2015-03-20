@@ -123,6 +123,19 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
         if DEBUG:
             warn("-- Method {0}.__del__".format(self))
 
+        if dir(self.reactor) and dir(self.handle) and self.handle:
+            self.close()
+
+    def close(self):
+        """::
+
+            client.close()
+
+        Close all server connections and server itself.
+        """
+        if self.handle:
+            self.handle.close()
+
         self._cleanup()
 
     def connect(self, **kwargs):

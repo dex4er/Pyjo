@@ -130,16 +130,30 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
         if DEBUG:
             warn("-- Method {0}.__del__".format(self))
 
+        if dir(self.reactor) and dir(self.handle) and self.handle:
+            self.close()
+
+    def close(self):
+        """::
+
+            server.close()
+
+        Close all server connections and server itself.
+        """
         if self._reuse:
             reuse = getenv('PYJO_REUSE')
             reuse -= s(r'(?:^|\,){0}'.format(re.escape(reuse)), '')
             setenv('PYJO_REUSE', reuse)
 
-        if dir(self.reactor):
-            if dir(self.handle) and self.handle:
-                self.stop()
-            for handle in self._handles.values():
-                self.reactor.remove(handle)
+        self.stop()
+
+        for handle in self._handles.values():
+            handle.close()
+        self._handles = {}
+
+        if self.handle:
+            self.handle.close()
+            self.handle = None
 
     @classmethod
     def generate_port(self):
