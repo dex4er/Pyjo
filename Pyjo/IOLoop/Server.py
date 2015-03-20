@@ -48,7 +48,7 @@ import Pyjo.EventEmitter
 import Pyjo.IOLoop
 
 from Pyjo.Base import lazy
-from Pyjo.Regexp import m, s
+from Pyjo.Regexp import r
 from Pyjo.Util import getenv, setenv, warn
 
 import os
@@ -142,7 +142,7 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
         """
         if self._reuse:
             reuse = getenv('PYJO_REUSE')
-            reuse -= s(r'(?:^|\,){0}'.format(re.escape(reuse)), '')
+            reuse = r(r'(?:^|\,){0}'.format(re.escape(reuse))).sub('', reuse, 1)
             setenv('PYJO_REUSE', reuse)
 
         self.stop()
@@ -253,9 +253,9 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
         backlog = kwargs.get('backlog', socket.SOMAXCONN)
 
         address_port = '{0}:{1}'.format(address, port)
-        g = getenv('PYJO_REUSE', '') == m(r'(?:^|\,){0}:(\d+)'.format(re.escape(address_port)))
-        if g:
-            fd = int(g[1])
+        m = r(r'(?:^|\,){0}:(\d+)'.format(re.escape(address_port))).match(getenv('PYJO_REUSE', ''))
+        if m:
+            fd = int(m.group(1))
         else:
             fd = None
 
