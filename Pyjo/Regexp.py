@@ -165,3 +165,21 @@ m = regexp.m
 s = regexp.s
 
 object = Pyjo_Regexp  # @ReservedAssignment
+
+
+def r(pattern, flags=''):
+    idx = ':'.join((str(hash(pattern)), str(hash(flags)), str(hash(type(pattern)))))
+    if idx in CACHE:
+        return CACHE[idx]
+
+    re_flags = 0
+    for f in flags:
+        if f in FLAGS:
+            re_flags |= FLAGS[f]
+        else:
+            raise ValueError('Bad flag: {0}'.format(f))
+
+    new_obj = re.compile(pattern, flags=re_flags)
+    if 'o' not in flags:
+        CACHE[idx] = new_obj
+    return new_obj

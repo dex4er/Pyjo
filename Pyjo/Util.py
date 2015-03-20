@@ -4,7 +4,7 @@ Pyjo.Util
 
 from __future__ import print_function
 
-from Pyjo.Regexp import s
+from Pyjo.Regexp import r
 
 import functools
 import hashlib
@@ -73,9 +73,11 @@ def getenv(name, default=None):
     return os.environ.get(name, default)
 
 
+re_entity = r(r'&(?:\#((?:\d{1,7}|x[0-9a-fA-F]{1,6}));|(\w+;?))')
+
+
 def html_unescape(ustring):
-    ustring -= s(u'' + r'&(?:\#((?:\d{1,7}|x[0-9a-fA-F]{1,6}));|(\w+;?))', lambda g: _decode(g[1], g[2]), 'g')
-    return ustring
+    return re_entity.sub(lambda m: _decode(m.group(1), m.group(2)), ustring)
 
 
 if sys.version_info >= (3, 0):
@@ -138,10 +140,11 @@ def setenv(name, value):
     return os.environ.update({name: value})
 
 
+re_whitespaces = r(r'\s+')
+
+
 def squish(string):
-    string = trim(string)
-    string -= s(r'\s+', ' ', 'g')
-    return string
+    return re_whitespaces.sub(' ', trim(string))
 
 
 def slurp(path):
@@ -158,10 +161,12 @@ def spurt(content, path):
             return b(f.write(content))
 
 
+re_whitespaces_starts = r(r'^\s+')
+re_whitespaces_ends = r(r'\s+$')
+
+
 def trim(string):
-    string -= s(r'^\s+', '')
-    string -= s(r'\s+$', '')
-    return string
+    return re_whitespaces_starts.sub('', re_whitespaces_ends.sub('', string, 1), 1)
 
 
 def steady_time():
@@ -188,19 +193,27 @@ else:
     uchr = unichr
 
 
+re_url_allow_chars = r(br'([^A-Za-z0-9\-._~])')
+
+
 def url_escape(bstring, pattern=None):
     if pattern is not None:
         pattern = b'([' + pattern + b'])'
+        re_pattern = r(pattern)
     else:
-        pattern = br'([^A-Za-z0-9\-._~])'
+        re_pattern = re_url_allow_chars
 
-    replacement = lambda m: b'%' + format(ord(m[1]), 'X').encode('ascii')
+    replacement = lambda m: b'%' + format(ord(m.group(1)), 'X').encode('ascii')
 
-    return bstring == s(pattern, replacement, 'gr')
+    return re_pattern.sub(replacement, bstring)
+
+
+re_percent_chars = r(br'%([0-9a-fA-F]{2})')
 
 
 def url_unescape(bstring):
-    return bstring == s(br'%([0-9a-fA-F]{2})', lambda m: b(chr(int(m[1], 16)), 'iso-8859-1'), 'gr')
+    replacement = lambda m: b(chr(int(m.group(1), 16)), 'iso-8859-1')
+    return re_percent_chars.sub(replacement, bstring)
 
 
 def warn(*args):
@@ -217,9 +230,11 @@ XML = {
 }
 
 
+re_xml_allow_chars = r(r'([&<>"\'])')
+
+
 def xml_escape(string):
-    string -= s(r'([&<>"\'])', lambda g: XML[g[1]], 'g')
-    return string
+    return re_xml_allow_chars.sub(lambda m: XML[m.group(1)], string)
 
 
 ENTITIES = {
