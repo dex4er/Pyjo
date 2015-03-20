@@ -286,7 +286,11 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
         except SSLWantWriteError:
             return self.reactor.watch(handle, True, True)
         except SSLError as ex:
-            self.reactor.remove(handle)  # TODO remove here?
+            if ex.strerror == 'The operation did not complete (read)':
+                return self.reactor.watch(handle, True, False)
+            elif ex.strerror == 'The operation did not complete (write)':
+                return self.reactor.watch(handle, True, True)
+            self.reactor.remove(handle)
             raise ex
 
         return self.reactor.watch(handle, True, True)

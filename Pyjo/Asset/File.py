@@ -246,7 +246,7 @@ class Pyjo_Asset_File(Pyjo.Asset.object):
             while True:
                 try:
                     fd = os.open(name, os.O_APPEND | os.O_CREAT | os.O_EXCL | os.O_RDWR)
-                except IOError as e:
+                except (IOError, OSError) as e:
                     if e.errno == errno.EEXIST:
                         name = '{0}.{1}'.format(base, md5_sum(b('{0}{1}{2}'.format(steady_time(), os.getpid(), rand()))))
                     else:
