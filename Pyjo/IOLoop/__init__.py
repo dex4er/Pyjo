@@ -528,6 +528,14 @@ class Pyjo_IOLoop(Pyjo.EventEmitter.object):
         self.reactor.stop()
 
     def stop_gracefully(self):
+        """::
+
+            Pyjo.IOLoop.stop_gracefully()
+            loop.stop_gracefully()
+
+        Stop accepting new connections and wait for all existing connections to be
+        closed before stopping the event loop.
+        """
         self._not_accepting()
         if self._stop_timer is None:
             self._stop_timer = self.emit('finish').recurring(lambda self: self._stop(), 1)
@@ -745,6 +753,10 @@ def start():
 
 def stop():
     return singleton.stop()
+
+
+def stop_gracefully():
+    return singleton.stop_gracefully()
 
 
 def stream(stream):
