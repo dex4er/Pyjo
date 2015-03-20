@@ -172,6 +172,16 @@ if __name__ == '__main__':
     e.emit('foo')
     is_ok(counter.get(), 5, 'event was not emitted again')
 
+    # Unsubscribe all
+    e = Pyjo.EventEmitter.new()
+    counter = Value(0)
+    e.on(lambda e: counter.inc(), 'foo')
+    e.on(lambda e: counter.inc(), 'foo')
+    e.unsubscribe_all()
+    is_ok(len(e.subscribers('foo')), 0, 'no subscribers')
+    e.emit('foo')
+    is_ok(counter.get(), 0, 'event was not emitted again')
+
     # Pass by reference and assignment to $_
     e = Pyjo.EventEmitter.new()
     buf = Value('')

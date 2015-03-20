@@ -213,6 +213,16 @@ class Pyjo_EventEmitter(Pyjo.Base.object):
 
         return self
 
+    def unsubscribe_all(self):
+        """::
+
+            e = e.unsubscribe_all()
+
+        Unsubscribe from all events.
+        """
+        self._events = {}
+        return self
+
 
 new = Pyjo_EventEmitter.new
 object = Pyjo_EventEmitter  # @ReservedAssignment
