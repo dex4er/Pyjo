@@ -123,8 +123,10 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
         if DEBUG:
             warn("-- Method {0}.__del__".format(self))
 
-        if dir(self.reactor) and dir(self.handle) and self.handle:
+        try:
             self.close()
+        except:
+            pass
 
     def close(self):
         """::

@@ -106,11 +106,14 @@ import Pyjo.EventEmitter
 import Pyjo.IOLoop
 
 from Pyjo.Base import lazy
-from Pyjo.Util import getenv
+from Pyjo.Util import getenv, warn
 
 import errno
 import socket
 import weakref
+
+
+DEBUG = getenv('PYJO_IOLOOP_DEBUG', False)
 
 
 NoneType = None.__class__
@@ -177,8 +180,13 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
         super(Pyjo_IOLoop_Stream, self).__init__(handle=handle, **kwargs)
 
     def __del__(self):
-        if dir(self.reactor) and dir(self.handle) and self.handle:
+        if DEBUG:
+            warn("-- Method {0}.__del__".format(self))
+
+        try:
             self.close()
+        except:
+            pass
 
     def close(self):
         """::
@@ -187,6 +195,9 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
 
         Close stream immediately.
         """
+        if not dir(self):
+            return
+
         reactor = self.reactor
         if not dir(reactor):
             return
