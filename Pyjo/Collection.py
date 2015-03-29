@@ -58,6 +58,12 @@ class Pyjo_Collection(list):
         """
         return self.new(filter(lambda i: i is not None and not (hasattr(i, '__len__') and not len(i)), self))
 
+    def get(self, index, default=None):
+        if len(self) > index:
+            return self[index]
+        else:
+            return default
+
     def each(self, cb=None):
         """::
 
