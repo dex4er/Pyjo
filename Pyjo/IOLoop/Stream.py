@@ -116,7 +116,7 @@ import weakref
 DEBUG = getenv('PYJO_IOLOOP_DEBUG', False)
 
 
-NoneType = None.__class__
+NoneType = type(None)
 
 if getenv('PYJO_NO_TLS', 0):
     TLS = False

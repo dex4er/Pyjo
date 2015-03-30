@@ -68,7 +68,7 @@ DEBUG = getenv('PYJO_IOLOOP_DEBUG', False)
 DIE = getenv('PYJO_IOLOOP_DIE', False)
 
 
-NoneType = None.__class__
+NoneType = type(None)
 
 if getenv('PYJO_NO_TLS', False):
     TLS = False

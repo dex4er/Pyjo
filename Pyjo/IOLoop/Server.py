@@ -64,7 +64,7 @@ CERT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'certs', 'server
 KEY = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'certs', 'server.key')
 
 
-NoneType = None.__class__
+NoneType = type(None)
 
 if getenv('PYJO_NO_TLS', False):
     TLS = False
