@@ -8,12 +8,10 @@ import dns.rdataclass
 import sys
 
 from Pyjo.Collection import c
+from Pyjo.Util import die
 
-try:
-    name = sys.argv[1]
-except IndexError:
-    raise Exception('dns.py name A 8.8.8.8')
 
+name = c(sys.argv).get(1) or die('Usage: dns.py name A 8.8.8.8')
 rtype = c(sys.argv).get(2, 'A')
 ns = c(sys.argv).get(3, '8.8.8.8')
 

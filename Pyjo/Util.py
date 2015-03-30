@@ -69,6 +69,14 @@ def dictget(d, *k):
     return [d[i] for i in k]
 
 
+def die(msg):
+    if isinstance(msg, Exception):
+        raise msg
+    else:
+        print(msg, file=sys.stderr)
+        sys.exit(1)
+
+
 def getenv(name, default=None):
     return os.environ.get(name, default)
 
