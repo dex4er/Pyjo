@@ -59,6 +59,18 @@ class Pyjo_Collection(list):
         return self.new(filter(lambda i: i is not None and not (hasattr(i, '__len__') and not len(i)), self))
 
     def get(self, index, default=None):
+        """::
+
+            value = collection.get(index)
+            value = collection.get(index, default)
+
+        Return the value for index if index is in the collection, else default.
+        If default is not given, it defaults to None, so that this method never
+        raises a KeyError. ::
+
+            import sys
+            address = c(sys.argv).get(1, 'localhost')
+        """
         if len(self) > index:
             return self[index]
         else:
