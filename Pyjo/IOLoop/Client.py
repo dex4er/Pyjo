@@ -1,6 +1,6 @@
 """
-Pyjo.IOLoop.Client - Non-blocking TCP client
-============================================
+Pyjo.IOLoop.Client - Non-blocking TCP/UDP client
+================================================
 ::
 
     import Pyjo.IOLoop.Client
@@ -16,13 +16,13 @@ Pyjo.IOLoop.Client - Non-blocking TCP client
     def error(client, err):
         ...
 
-    client.connect(address='example.com', port=80)
+    client.connect(address='example.com', port=80, proto='tcp')
 
     # Start reactor if necessary
     if not client.reactor.is_running:
         client.reactor.start()
 
-:mod:`Pyjo.IOLoop.Client` opens TCP connections for :mod:`Pyjo.IOLoop`.
+:mod:`Pyjo.IOLoop.Client` opens TCP/UDP connections for :mod:`Pyjo.IOLoop`.
 
 Events
 ------
@@ -91,6 +91,12 @@ if not TLS:
     SSLError = NoneType
 if not TLS_WANT_ERROR:
     SSLWantReadError = SSLWantWriteError = NoneType
+
+
+SOCK = {
+    'tcp': socket.SOCK_STREAM,
+    'udp': socket.SOCK_DGRAM,
+}
 
 
 class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
@@ -177,6 +183,13 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
 
             Port to connect to, defaults to ``80`` or ``443`` with ``tls`` option.
 
+        ``proto``
+            ::
+
+                proto='tcp'
+
+            Transport protocol: ``tcp`` or ``udp``, defaults to ``tcp``.
+
         ``timeout``
             ::
 
@@ -256,8 +269,9 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
         if not handle:
             address = kwargs.get('address', 'localhost')
             port = self._port(**kwargs)
+            proto = kwargs.get('proto', 'tcp')
 
-            handle = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            handle = socket.socket(socket.AF_INET, SOCK[proto])
             handle.connect((address, port))
             # TODO return self.emit('error', "Can't connect: " + str(e))
             self.handle = handle
@@ -282,6 +296,9 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
     def _ready(self, **kwargs):
         # Retry or handle exceptions
         handle = self.handle
+
+        if handle.getsockopt(socket.SOL_SOCKET, socket.SO_TYPE) == socket.SOCK_DGRAM:
+            return self._cleanup().emit('connect', handle)
 
         # Disable Nagle's algorithm
         handle.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
