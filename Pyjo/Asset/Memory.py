@@ -88,6 +88,7 @@ class Pyjo_Asset_Memory(Pyjo.Asset.object):
         """::
 
             asset_mem = asset_mem.add_chunk(b'foo bar baz')
+            asset_mem.auto_upgrade = True
             asset_file = asset_mem.add_chunk(b'abc' * 262144)
 
         Add chunk of data and upgrade to :mod:`Pyjo.Asset.File` object if necessary.
@@ -99,6 +100,15 @@ class Pyjo_Asset_Memory(Pyjo.Asset.object):
 
         asset_file = Pyjo.Asset.File.new()
         return asset_file.add_chunk(self.emit('upgrade', asset_file).slurp())
+
+    def close(self):
+        """::
+
+            asset_mem.close()
+
+        Close asset immediately and free resources.
+        """
+        self._content = b''
 
     def contains(self, bstring):
         """::

@@ -11,6 +11,9 @@ Pyjo.Asset - HTTP content storage base class
         def add_chunk(self, chunk=b''):
             ...
 
+        def close():
+            ...
+
         def contains(self, bstring):
             ...
 
@@ -71,6 +74,18 @@ class Pyjo_Asset(Pyjo.EventEmitter.object):
     Pretend file starts later.
     """
 
+    def __del__(self):
+        try:
+            self.close()
+        except:
+            pass
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, t, v, tb):
+        self.close()
+
     @not_implemented
     def add_chunk(self, chunk=b''):
         """::
@@ -78,6 +93,15 @@ class Pyjo_Asset(Pyjo.EventEmitter.object):
             asset = asset.add_chunk('foo bar baz')
 
         Add chunk of data to asset. Meant to be overloaded in a subclass.
+        """
+        pass
+
+    def close(self):
+        """::
+
+            asset.close()
+
+        Close asset immediately and free resources.
         """
         pass
 

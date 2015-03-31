@@ -8,11 +8,11 @@ Pyjo.Asset.File - File storage for HTTP content
     import Pyjo.Asset.File
 
     # Temporary file
-    asset_file = Pyjo.Asset.File.new()
-    asset_file.add_chunk('foo bar baz')
-    if asset_file.contains('bar'):
-        print('File contains "bar"')
-    print(asset_file.slurp())
+    while Pyjo.Asset.File.new() as asset_file:
+        asset_file.add_chunk('foo bar baz')
+        if asset_file.contains('bar'):
+            print('File contains "bar"')
+        print(asset_file.slurp())
 
     # Existing file
     asset_file = Pyjo.Asset.File.new(path='/home/pyjo/foo.txt')
@@ -86,12 +86,6 @@ class Pyjo_Asset_File(Pyjo.Asset.object):
 
     _content = b''
 
-    def __del__(self):
-        if self.cleanup and self.path is not None and self.handle:
-            self.handle.close()
-            if os.access(self.path, os.W_OK):
-                os.unlink(self.path)
-
     def add_chunk(self, chunk=b''):
         """::
 
@@ -101,6 +95,18 @@ class Pyjo_Asset_File(Pyjo.Asset.object):
         """
         self.handle.write(chunk)
         return self
+
+    def close(self):
+        """::
+
+            asset_file.close()
+
+        Close asset immediately and free resources.
+        """
+        if self.cleanup and self.path is not None and self.handle:
+            self.handle.close()
+            if os.access(self.path, os.W_OK):
+                os.unlink(self.path)
 
     def contains(self, bstring):
         """::
