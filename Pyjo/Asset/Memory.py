@@ -84,6 +84,9 @@ class Pyjo_Asset_Memory(Pyjo.Asset.object):
 
     _content = b''
 
+    def __repr__(self):
+        return "<{0}.{1} _content={2}>".format(self.__class__.__module__, self.__class__.__name__, repr(self._content))
+
     def add_chunk(self, chunk=b''):
         """::
 

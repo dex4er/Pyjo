@@ -86,6 +86,9 @@ class Pyjo_Asset_File(Pyjo.Asset.object):
 
     _content = b''
 
+    def __repr__(self):
+        return "<{0}.{1} handle={2} path={3}>".format(self.__class__.__module__, self.__class__.__name__, repr(self.handle), repr(self.path))
+
     def add_chunk(self, chunk=b''):
         """::
 
@@ -107,6 +110,7 @@ class Pyjo_Asset_File(Pyjo.Asset.object):
             self.handle.close()
             if os.access(self.path, os.W_OK):
                 os.unlink(self.path)
+            self.path = None
 
     def contains(self, bstring):
         """::
@@ -246,7 +250,8 @@ class Pyjo_Asset_File(Pyjo.Asset.object):
         # Open new or temporary file
         base = os.path.join(self.tmpdir, 'pyjo.tmp')
         if path is not None:
-            fd = os.open(path, os.O_APPEND | os.O_CREAT | os.O_EXCL | os.O_RDWR)
+            name = path
+            fd = os.open(name, os.O_APPEND | os.O_CREAT | os.O_EXCL | os.O_RDWR)
         else:
             name = base
             while True:
