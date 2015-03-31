@@ -71,7 +71,7 @@ class Pyjo_Collection(list):
             import sys
             from Pyjo.Util import die
             address = c(sys.argv).get(1) or die('address missing')
-            port = c(sys.argv).get(2, 80)
+            port = int(c(sys.argv).get(2, '80'))
         """
         if len(self) > index:
             return self[index]
