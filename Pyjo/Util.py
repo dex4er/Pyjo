@@ -145,7 +145,11 @@ def rand(value=1):
 
 
 def setenv(name, value):
-    return os.environ.update({name: value})
+    if value is None:
+        if name in os.environ:
+            del os.environ[name]
+    else:
+        os.environ.update({name: value})
 
 
 re_whitespaces = r(r'\s+')
