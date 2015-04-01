@@ -8,13 +8,15 @@ Pyjo.Content - HTTP content base class
     import Pyjo.Content
 
     class MyContent(Pyjo.Content.object):
+        @property
         def body_contains(self):
             ...
 
+        @property
         def body_size(self):
             ...
 
-        def get_body_chunk(self):
+        def get_body_chunk(self, offset):
             ...
 
 :mod:`Pyjo.Content` is an abstract base class for HTTP content based on
@@ -81,17 +83,20 @@ import Pyjo.Headers
 
 from Pyjo.Base import lazy
 from Pyjo.Regexp import r
-from Pyjo.Util import b, getenv, not_implemented, u
+from Pyjo.Util import b, getenv, not_implemented, notnone, u
 
 import zlib
 
 
+re_boundary = r(r'''multipart.*boundary\s*=\s*(?:"([^"]+)"|([\w'(),.:?\-+/]+))''', 'i')
 re_charset = r(r'charset\s*=\s*"?([^"\s;]+)"?', 'i')
 re_chunk = r(br'^(?:\x0d?\x0a)?([0-9a-fA-F]+).*\x0a')
 
 
 class Pyjo_Content(Pyjo.EventEmitter.object):
     """
+    :mod:`Pyjo.Content` inherits all methods from :mod:`Pyjo.EventEmitter` and implements
+    the following new ones.
     """
 
     auto_decompress = None
@@ -178,10 +183,47 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
     _size = 0
     _state = None
 
+    @not_implemented
+    def body_contains(self, ustring):
+        """::
+
+            boolean = content.body_contains('foo bar baz')
+
+        Check if content contains a specific string. Meant to be overloaded in a
+        subclass.
+        """
+        pass
+
+    @property
+    @not_implemented
+    def body_size(self):
+        """::
+
+            size = content.body_size
+
+        Content size in bytes. Meant to be overloaded in a subclass.
+        """
+        pass
+
+    @property
+    def boundary(self):
+        """::
+
+            boundary = content.boundary
+
+        Extract multipart boundary from ``Content-Type`` header.
+        """
+        content_type = notnone(self.headers.content_type, '')
+        m = re_boundary.search(content_type)
+        if m:
+            return notnone(m.group(1), m.group(2))
+        else:
+            return
+
     def build_body(self):
         """::
 
-            str = content.build_body()
+            bstring = content.build_body()
 
         Render whole body.
         """
@@ -190,7 +232,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
     def build_headers(self):
         """::
 
-            str = content.build_headers()
+            bstring = content.build_headers()
 
         Render all headers.
         """
@@ -198,6 +240,12 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
 
     @property
     def charset(self):
+        """::
+
+            charset = content.charset
+
+        Extract charset from ``Content-Type`` header.
+        """
         content_type = self.headers.content_type
         if content_type is None:
             content_type = ''
@@ -206,6 +254,18 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
             return m.group(1)
         else:
             return
+
+    def clone(self):
+        """::
+
+            clone = content.clone()
+
+        Clone content if possible, otherwise return :class:`None`.
+        """
+        if self.is_dynamic:
+            return
+        else:
+            return self.new(headers=self.headers.clone())
 
     @not_implemented
     def get_body_chunk(self, offset):
