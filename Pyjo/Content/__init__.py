@@ -168,10 +168,14 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
     """
 
     _body = False
+    _body_buffer = b''
     _buffer = b''
     _chunk_len = 0
     _chunk_state = None
+    _chunks = 0
+    _delay = False
     _dynamic = False
+    _eof = False
     _gz = None
     _gz_size = 0
     _header_buffer = None
@@ -267,11 +271,32 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
         else:
             return self.new(headers=self.headers.clone())
 
+    def generate_body_chunk(self, offset):
+        """::
+
+            bstring = content.generate_body_chunk(0)
+
+        Generate dynamic content.
+        """
+        if not self._delay and not len(self._body_buffer):
+            self.emit('drain', offset)
+        else:
+            self._delay = False
+        chunk = self._body_buffer
+        self._body_buffer = b''
+        if not len(chunk):
+            if self._eof:
+                return b''
+            else:
+                return
+        else:
+            return chunk
+
     @not_implemented
     def get_body_chunk(self, offset):
         """::
 
-            bytes = content.get_body_chunk(0)
+            bstring = content.get_body_chunk(0)
 
         Get a chunk of content starting from a specific position. Meant to be
         overloaded in a subclass.
@@ -281,7 +306,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
     def get_header_chunk(self, offset):
         """::
 
-            bytes = content.get_header_chunk(13)
+            bstring = content.get_header_chunk(13)
 
         Get a chunk of the headers starting from a specific position.
         """
@@ -292,36 +317,105 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
 
     @property
     def header_size(self):
+        """::
+
+            size = content.header_size
+
+        Size of headers in bytes.
+        """
         return len(self.build_headers())
 
     @property
     def is_chunked(self):
+        """::
+
+            boolean = content.is_chunked
+
+        Check if content is chunked.
+        """
         return bool(self.headers.transfer_encoding)
 
     @property
     def is_compressed(self):
+        """::
+
+            boolean = content.is_compressed
+
+        Check if content is gzip compressed.
+        """
         if self.headers.content_encoding is None:
             return False
         else:
-            return bool(self.headers.content_encoding.lower() == 'gzip')
+            return self.headers.content_encoding.lower() == 'gzip'
 
     @property
     def is_dynamic(self):
+        """::
+
+            boolean = content.is_dynamic
+
+        Check if content will be dynamically generated, which prevents :meth:`clone` from
+        working.
+        """
         return self._dynamic and self.headers.content_length is None
 
     @property
     def is_finished(self):
+        """::
+
+            boolean = content.is_finished
+
+        Check if parser is finished.
+        """
         return self._state == 'finished'
 
     @property
     def is_limit_exceeded(self):
+        """::
+
+            boolean = content.is_limit_exceeded
+
+        Check if buffer has exceeded :attr:`max_buffer_size`.
+        """
         return self._limit
 
     @property
     def is_multipart(self):
-        return
+        """::
+
+            false = content.is_multipart
+
+        False.
+        """
+        return False
+
+    @property
+    def is_parsing_mode(self):
+        """::
+
+            boolean = content.is_parsing_body
+
+        Check if body parsing started yet.
+        """
+        return self._state == 'body'
+
+    @property
+    def leftovers(self):
+        """::
+
+            bstring = content.leftovers
+
+        Get leftover data from content parser.
+        """
+        return self._buffer
 
     def parse(self, chunk):
+        r"""::
+
+            content = content.parse(b"Content-Length: 12\x0d\x0a\x0d\x0aHello World!")
+
+        Parse content chunk.
+        """
         # Headers
         self._parse_until_body(b(chunk, 'ascii'))
         if self._state == 'headers':
@@ -382,8 +476,24 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
 
         return self
 
+    def parse_body(self, body):
+        """::
+
+            content = content.parse_body(b'Hi!')
+
+        Parse body chunk and skip headers.
+        """
+        self._state = 'body'
+        return self.parse(body)
+
     @property
     def progress(self):
+        """::
+
+            size = content.progress
+
+        Size of content already received from message in bytes.
+        """
         state = self._state
         if not state:
             return 0
@@ -391,6 +501,48 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
             return self._raw_size - self._header_size
         else:
             return 0
+
+    def write(self, chunk=None, cb=None):
+        """::
+
+            content = content.write(bstring)
+            content = content.write(bstring, cb)
+
+        Write dynamic content non-blocking, the optional drain callback will be invoked
+        once all data has been written.
+        """
+        self._dynamic = True
+
+        if chunk is not None:
+            self._body_buffer += chunk
+        else:
+            self._delay = True
+
+        if cb:
+            self.once(cb, 'drain')
+
+        if chunk == b'':
+            self._eof = True
+
+        return self
+
+    def write_chunk(self, chunk=None, cb=None):
+        """::
+
+            content = content.write_chunk(bstring)
+            content = content.write_chunk(bstring, cb)
+
+        Write dynamic content non-blocking with ``chunked`` transfer encoding, the
+        optional drain callback will be invoked once all data has been written.
+        """
+        if not self.is_chunked:
+            self.headers.transfer_encoding = 'chunked'
+
+        self.write(self._build_chunk(chunk) if chunk is not None else chunk, cb)
+        if chunk == b'':
+            self._eof = True
+
+        return self
 
     def _build(self, method):
         buf, offset = b'', 0
@@ -408,6 +560,20 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
             buf += chunk
 
         return buf
+
+    def _build_chunk(self, chunk):
+        # End
+        if not len(chunk):
+            return b"\x0d\x0a0\x0d\x0a\x0d\x0a"
+
+        # First chunk has no leading CRLF
+        if self._chunks:
+            crlf = b"\x0d\x0a"
+        else:
+            crlf = b''
+        self._chunks += 1
+
+        return crlf + b('{0:x}'.format(len(chunk)), 'ascii') + b"\x0d\x0a" + chunk
 
     def _decompress(self, chunk):
         # No compression
