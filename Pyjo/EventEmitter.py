@@ -166,6 +166,9 @@ class Pyjo_EventEmitter(Pyjo.Base.object):
             def foo(e, *args):
                 ...
         """
+        if not callable(cb):
+            raise TypeError('cb argument is not callable')
+
         if name is None:
             name = cb.__name__
 
