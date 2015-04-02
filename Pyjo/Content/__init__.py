@@ -188,10 +188,10 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
     _state = None
 
     @not_implemented
-    def body_contains(self, ustring):
+    def body_contains(self, chunk):
         """::
 
-            boolean = content.body_contains('foo bar baz')
+            boolean = content.body_contains(b'foo bar baz')
 
         Check if content contains a specific string. Meant to be overloaded in a
         subclass.
@@ -264,7 +264,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
 
             clone = content.clone()
 
-        Clone content if possible, otherwise return :class:`None`.
+        Clone content if possible, otherwise return ``None``.
         """
         if self.is_dynamic:
             return
@@ -409,7 +409,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
         """
         return self._buffer
 
-    def parse(self, chunk):
+    def parse(self, chunk=None):
         r"""::
 
             content = content.parse(b"Content-Length: 12\x0d\x0a\x0d\x0aHello World!")
@@ -417,7 +417,9 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
         Parse content chunk.
         """
         # Headers
-        self._parse_until_body(b(chunk, 'ascii'))
+        if chunk is not None:
+            self._parse_until_body(b(chunk, 'ascii'))
+
         if self._state == 'headers':
             return self
 
@@ -502,11 +504,29 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
         else:
             return 0
 
+    def to_bytes(self):
+        """::
+
+            bstring = content.to_bytes()
+
+        Turn content into a bytes string, suitable for HTTP messages.
+        """
+        return self.get_header_chunk(0) + self.get_body_chunk(0)
+
+    def to_str(self):
+        """::
+
+            string = content.to_str()
+
+        Turn content into a string representation.
+        """
+        return self.to_bytes()
+
     def write(self, chunk=None, cb=None):
         """::
 
-            content = content.write(bstring)
-            content = content.write(bstring, cb)
+            content = content.write(chunk)
+            content = content.write(chunk, cb)
 
         Write dynamic content non-blocking, the optional drain callback will be invoked
         once all data has been written.
@@ -529,8 +549,8 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
     def write_chunk(self, chunk=None, cb=None):
         """::
 
-            content = content.write_chunk(bstring)
-            content = content.write_chunk(bstring, cb)
+            content = content.write_chunk(chunk)
+            content = content.write_chunk(chunk, cb)
 
         Write dynamic content non-blocking with ``chunked`` transfer encoding, the
         optional drain callback will be invoked once all data has been written.
