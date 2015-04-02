@@ -6,6 +6,7 @@ from __future__ import print_function
 
 from Pyjo.Regexp import r
 
+import base64
 import functools
 import hashlib
 import os
@@ -34,6 +35,14 @@ else:
             return unicode(string).encode(charset)
         else:
             return str(string)
+
+
+def b64_decode(ustring):
+    return base64.b64decode(ustring)
+
+
+def b64_encode(bstring):
+    return u(base64.b64encode(bstring), 'ascii')
 
 
 def convert(value, newtype, default=None):
