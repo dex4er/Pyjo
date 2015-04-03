@@ -12,24 +12,6 @@ class UnitTest(Pyjo.Test.UnitTest):
     script = __file__
 
 
-class Value(object):
-    value = None
-
-    def __init__(self, value):
-        self.value = value
-
-    def get(self):
-        return self.value
-
-    def set(self, value):
-        self.value = value
-        return self.value
-
-    def inc(self):
-        self.value += 1
-        return self.value
-
-
 if __name__ == '__main__':
 
     from Pyjo.Test import *  # @UnusedWildImport
@@ -40,6 +22,8 @@ if __name__ == '__main__':
 
     import socket
     import time
+
+    from t.lib.Value import Value
 
     # Instantiation
     setenv('PYJO_REACTOR', 'Pyjo.Reactor.Select')

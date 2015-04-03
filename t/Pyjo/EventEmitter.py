@@ -14,26 +14,12 @@ class TestException(Exception):
     pass
 
 
-class Value(object):
-    value = None
-
-    def __init__(self, value):
-        self.value = value
-
-    def get(self):
-        return self.value
-
-    def set(self, value):
-        self.value = value
-
-    def inc(self):
-        self.value += 1
-
-
 if __name__ == '__main__':
     from Pyjo.Test import *  # @UnusedWildImport
 
     import Pyjo.EventEmitter
+
+    from t.lib.Value import Value
 
     # Normal event
     e = Pyjo.EventEmitter.new()
