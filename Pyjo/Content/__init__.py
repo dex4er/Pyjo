@@ -511,16 +511,22 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
 
         Turn content into a bytes string, suitable for HTTP messages.
         """
-        return self.get_header_chunk(0) + self.get_body_chunk(0)
-
-    def to_str(self):
-        """::
-
-            string = content.to_str()
-
-        Turn content into a string representation.
-        """
-        return self.to_bytes()
+        buf = b''
+        offset = 0
+        while True:
+            chunk = self.get_header_chunk(offset)
+            if not chunk:
+                break
+            buf += chunk
+            offset += len(chunk)
+        offset = 0
+        while True:
+            chunk = self.get_body_chunk(offset)
+            if not chunk:
+                break
+            buf += chunk
+            offset += len(chunk)
+        return buf
 
     def write(self, chunk=None, cb=None):
         """::

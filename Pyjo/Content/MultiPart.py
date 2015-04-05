@@ -140,7 +140,7 @@ class Pyjo_Content_MultiPart(Pyjo.Content.object, Pyjo.String.Mixin.object):
             boundary = b64_encode(b(''.join([chr(int(rand(256))) for _ in range(size * 3)]), 'iso-8859-1'))
             size += 1
             boundary = re_non_word.sub('X', boundary)
-            if not self.body_contains(boundary):
+            if not self.body_contains(b(boundary, 'ascii')):
                 break
 
         # Add boundary to Content-Type header
