@@ -214,21 +214,39 @@ def skip(why=None, how_many=1):
 
 
 def throws_ok(cb, expected, test_name=None):
-    if test_name is None:
-        test_name = "Raised {0}".format(expected.__name__)
-    else:
-        test_name = "{0} raised {1}".format(test_name, expected.__name__)
     got = None
     check = False
-    try:
-        cb()
-    except expected:
-        check = True
-    except Exception as e:
-        got = e
+
+    if isinstance(expected, type) and issubclass(expected, Exception):
+        if test_name is None:
+            test_name = "Raised {0}".format(expected.__name__)
+        else:
+            test_name = "{0} raised {1}".format(test_name, expected.__name__)
+
+        try:
+            cb()
+        except expected:
+            check = True
+        except Exception as e:
+            got = e.__class__.__name__
+
+        expected = expected.__name__
+
+    else:
+        if test_name is None:
+            test_name = "Raised '{0}'".format(expected)
+        else:
+            test_name = "{0} raised '{1}'".format(test_name, expected)
+
+        try:
+            cb()
+        except Exception as e:
+            got = str(e)
+            check = got == expected
+
     _ok(check, test_name)
     if not check:
-        diag("         got: {0}\n    expected: {1}\n".format(got.__class__.__name__ if got is not None else None, expected.__name__))
+        diag("         got: {0}\n    expected: {1}\n".format(got if got is not None else None, expected))
 
 
 def unlike_ok(got, expected, flags='', test_name=None):

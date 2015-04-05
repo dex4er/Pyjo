@@ -253,53 +253,12 @@ if __name__ == '__main__':
     ok(not os.path.exists(path), 'file has been cleaned up')
 
     # Abstract methods
-    try:
-        Pyjo.Asset.new().add_chunk()
-    except Exception as e:
-        is_ok(str(e), 'Method "add_chunk" not implemented by subclass', 'right error')
-    else:
-        fail_ok('right error')
-
-    try:
-        Pyjo.Asset.new().contains()
-    except Exception as e:
-        is_ok(str(e), 'Method "contains" not implemented by subclass', 'right error')
-    else:
-        fail_ok('right error')
-
-    try:
-        Pyjo.Asset.new().get_chunk()
-    except Exception as e:
-        is_ok(str(e), 'Method "get_chunk" not implemented by subclass', 'right error')
-    else:
-        fail_ok('right error')
-
-    try:
-        Pyjo.Asset.new().move_to()
-    except Exception as e:
-        is_ok(str(e), 'Method "move_to" not implemented by subclass', 'right error')
-    else:
-        fail_ok('right error')
-
-    try:
-        Pyjo.Asset.new().mtime
-    except Exception as e:
-        is_ok(str(e), 'Method "mtime" not implemented by subclass', 'right error')
-    else:
-        fail_ok('right error')
-
-    try:
-        Pyjo.Asset.new().size
-    except Exception as e:
-        is_ok(str(e), 'Method "size" not implemented by subclass', 'right error')
-    else:
-        fail_ok('right error')
-
-    try:
-        Pyjo.Asset.new().slurp()
-    except Exception as e:
-        is_ok(str(e), 'Method "slurp" not implemented by subclass', 'right error')
-    else:
-        fail_ok('right error')
+    throws_ok(lambda: Pyjo.Asset.new().add_chunk(), 'Method "add_chunk" not implemented by subclass', 'right error')
+    throws_ok(lambda: Pyjo.Asset.new().contains(), 'Method "contains" not implemented by subclass', 'right error')
+    throws_ok(lambda: Pyjo.Asset.new().get_chunk(), 'Method "get_chunk" not implemented by subclass', 'right error')
+    throws_ok(lambda: Pyjo.Asset.new().move_to(), 'Method "move_to" not implemented by subclass', 'right error')
+    throws_ok(lambda: Pyjo.Asset.new().mtime, 'Method "mtime" not implemented by subclass', 'right error')
+    throws_ok(lambda: Pyjo.Asset.new().size, 'Method "size" not implemented by subclass', 'right error')
+    throws_ok(lambda: Pyjo.Asset.new().slurp(), 'Method "slurp" not implemented by subclass', 'right error')
 
     done_testing()
