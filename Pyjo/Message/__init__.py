@@ -23,6 +23,54 @@ Pyjo.Message - HTTP message base class
 :rfc:`7231` and
 :rfc:`2388`.
 
+Events
+------
+
+:mod:`Pyjo.Message` inherits all events from :mod:`Pyjo.EventEmitter` and can emit
+the following new ones.
+
+finish
+~~~~~~
+::
+
+    @msg.on
+    def finish(msg):
+        ...
+
+
+Emitted after message building or parsing is finished. ::
+
+    from Pyjo.Util import steady_time
+    before = steady_time()
+
+    @msg.on
+    def finish(msg):
+        msg.headers.header('X-Parser-Time', int(steady_time() - before)
+
+progress
+~~~~~~~~
+::
+
+    @msg.on
+    def progress(msg, state, offset):
+        ...
+
+Emitted when message building or parsing makes progress. ::
+
+    # Building
+    @msg.on
+    def progress(msg, state, offset):
+        print("Building {0} at offset {1}".format(state, offset))
+
+    # Parsing
+    @msg.on
+    def progress(msg, state, offset):
+        length = msg.headers.content_length
+        if length:
+            size = msg.content.progress
+            print("Progress: {0}%".format(100 if size == length
+                                          else int(size / (length / 100))))
+
 Classes
 -------
 """
@@ -45,9 +93,57 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
     """
 
     content = lazy(lambda self: Pyjo.Content.Single.new())
-    max_line_size = lazy(lambda self: getenv('PYJO_MAX_LINE_SIZE', 10240))
-    max_message_size = lazy(lambda self: getenv('PYJO_MAX_MESSAGE_SIZE', 10485760))
+    """::
+
+        content = msg.content
+        msg.content = Pyjo.Content.Single.new()
+
+    Message content, defaults to a :mod:`Pyjo.Content.Single` object.
+    """
+
+    default_charset = 'utf-8'
+    """::
+
+        charset = msg.default_charset
+        msg.default_charset = 'utf-8'
+
+    Default charset used by :attr:`text` and to extract data from
+    ``application/x-www-form-urlencoded`` or ``multipart/form-data`` message body,
+    defaults to ``utf-8``.
+    """
+
+    max_line_size = lazy(lambda self: getenv('PYJO_MAX_LINE_SIZE') or 8192)
+    """::
+
+        size = msg.max_line_size
+        msg.max_line_size = 8192
+
+    Maximum start-line size in bytes, defaults to the value of the
+    ``PYJO_MAX_LINE_SIZE`` environment variable or ``8192`` (8KB).
+    """
+
+    max_message_size = lazy(lambda self: getenv('PYJO_MAX_MESSAGE_SIZE', 16777216))
+    """::
+
+        size = msg.max_message_size
+        msg.max_message_size = 16777216
+
+    Maximum message size in bytes, defaults to the value of the
+    ``PYJO_MAX_MESSAGE_SIZE`` environment variable or ``16777216`` (16MB). Setting
+    the value to ``0`` will allow messages of indefinite size. Note that increasing
+    this value can also drastically increase memory usage, should you for example
+    attempt to parse an excessively large message body with the :attr:`body_params`,
+    :meth:`dom` or :meth:`json` methods.
+    """
+
     version = '1.1'
+    """::
+
+        version = msg.version
+        msg.version = '1.1'
+
+    HTTP version of message, defaults to ``1.1``.
+    """
 
     _buffer = b''
     _dom = None
