@@ -12,7 +12,7 @@ Pyjo.Message - HTTP message base class
         def cookies(self):
             ...
 
-        def extract_start_line(self):
+        def extract_start_line(self, chunk):
             ...
 
         def get_start_line_chunk(self):
@@ -154,9 +154,9 @@ class Pyjo_Message(Pyjo.EventEmitter.object, Pyjo.String.Mixin.object):
     """
 
     _body_params = None
-    _buffer = b''
+    _buffer = lazy(lambda self: bytearray())
     _dom = None
-    _error = None
+    _error = lazy(lambda self: {})
     _finished = False
     _fixed = False
     _json = None
@@ -235,8 +235,15 @@ class Pyjo_Message(Pyjo.EventEmitter.object, Pyjo.String.Mixin.object):
             else:
                 return dom.find(pattern)
 
+    def error(self, **kwargs):
+        if kwargs:
+            self._error = kwargs
+            self.finish()
+        else:
+            return self._error
+
     @not_implemented
-    def extract_start_line(self):
+    def extract_start_line(self, chunk):
         pass
 
     def finish(self):
@@ -314,7 +321,7 @@ class Pyjo_Message(Pyjo.EventEmitter.object, Pyjo.String.Mixin.object):
         # Content
         if self._state == 'content' or self._state == 'finished':
             self.content = self.content.parse(self._buffer)
-            self._buffer = b''
+            self._buffer = bytearray()
 
         # Check message size
         max_size = self.max_message_size
@@ -339,7 +346,7 @@ class Pyjo_Message(Pyjo.EventEmitter.object, Pyjo.String.Mixin.object):
         return len(self.build_start_line())
 
     def to_bytes(self):
-        return b(self.headers) + self.body
+        return self.content.to_bytes()
 
     @property
     def text(self):

@@ -38,7 +38,12 @@ import Pyjo.Message
 import Pyjo.URL
 
 from Pyjo.Base import lazy
-from Pyjo.Util import b
+from Pyjo.Regexp import r
+from Pyjo.Util import b, u
+
+
+re_start_line = r(br'^\s*(.*?)\x0d?\x0a')
+re_request = r(br'^(\S+)\s+(\S+)\s+HTTP\/(\d\.\d)$')
 
 
 class Pyjo_Message_Request(Pyjo.Message.object):
@@ -51,6 +56,29 @@ class Pyjo_Message_Request(Pyjo.Message.object):
     url = lazy(lambda self: Pyjo.URL.new())
 
     _start_buffer = None
+
+    def extract_start_line(self):
+        # Ignore any leading empty lines
+        m = re_start_line.search(self._buffer)
+        if not m:
+            return
+
+        del self._buffer[:m.end()]
+        m = re_request.search(m.group(1))
+
+        if not m:
+            return not self.error(message='Bad request start-line')
+
+        self.method = u(m.group(1), 'ascii')
+        self.version = u(m.group(3), 'ascii')
+        url = self.url
+
+        if self.method == 'CONNECT':
+            url.authority = m.group(2)
+        else:
+            url.parse(m.group(2))
+
+        return bool(url)
 
     def fix_headers(self):
         if self._fixed:
