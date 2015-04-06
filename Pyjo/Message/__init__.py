@@ -80,16 +80,24 @@ import Pyjo.Content.Single
 import Pyjo.DOM
 import Pyjo.EventEmitter
 import Pyjo.JSON.Pointer
+import Pyjo.Parameters
+import Pyjo.String.Mixin
 
 from Pyjo.Base import lazy
 from Pyjo.JSON import j
-from Pyjo.Util import getenv, not_implemented
+from Pyjo.Regexp import r
+from Pyjo.Util import b, getenv, not_implemented, notnone
 
 
-class Pyjo_Message(Pyjo.EventEmitter.object):
+re_filename = r(r'[; ]filename="((?:\\"|[^"])*)"')
+re_name = r(r'[; ]name="((?:\\"|[^;"])*)"')
+
+
+class Pyjo_Message(Pyjo.EventEmitter.object, Pyjo.String.Mixin.object):
     """
     :mod:`Pyjo.Message` inherits all attributes and methods from
-    :mod:`Pyjo.EventEmitter` and implements the following new ones.
+    :mod:`Pyjo.EventEmitter` and :mod:`Pyjo.String.Mixin`
+    and implements the following new ones.
     """
 
     content = lazy(lambda self: Pyjo.Content.Single.new())
@@ -145,6 +153,7 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
     HTTP version of message, defaults to ``1.1``.
     """
 
+    _body_params = None
     _buffer = b''
     _dom = None
     _error = None
@@ -171,6 +180,41 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
     def body(self, value):
         content = self._downgrade_content()
         return content.set(asset=Pyjo.Asset.Memory.new().add_chunk(value))
+
+    @property
+    def body_params(self):
+        """::
+
+            params = msg.body_params
+
+        ``POST`` parameters extracted from ``application/x-www-form-urlencoded`` or
+        ``multipart/form-data`` message body, usually a :mod:`Pyjo.Parameters` object. Note
+        that this method caches all data, so it should not be called before the entire
+        message body has been received. Parts of the message body need to be loaded
+        into memory to parse ``POST`` parameters, so you have to make sure it is not
+        excessively large, there's a 16MB limit by default. ::
+
+            # Get POST parameter names and values
+            params_dict = msg.body_params.to_dict()
+        """
+        if self._body_params:
+            return self._body_params
+
+        params = Pyjo.Parameters.new()
+        self._body_params = params
+        params.charset = self.content.charset or self.default_charset
+
+        # "application/x-www-form-urlencoded"
+        content_type = notnone(self.headers.content_type, '')
+        if content_type.lower().find('application/x-www-form-urlencoded') >= 0:
+            params.parse(self.content.asset.slurp())
+
+        # "multipart/form-data"
+        elif content_type.lower().find('multipart/form-data'):
+            for name, value in self._parse_formdata():
+                params.append((name, value),)
+
+        return params
 
     @property
     def body_size(self):
@@ -294,6 +338,9 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
     def start_line_size(self):
         return len(self.build_start_line())
 
+    def to_bytes(self):
+        return b(self.headers) + self.body
+
     @property
     def text(self):
         body = self.body
@@ -328,6 +375,41 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
         if self.content.is_multipart:
             self.content = Pyjo.Content.Single.new()
         return self.content
+
+    def _parse_formdata(self, upload=False):
+        content = self.content
+
+        if not content.is_multipart:
+            return
+
+        charset = content.charset or self.default_charset
+
+        # Check all parts recursively
+        parts = [content]
+        while parts:
+            part = parts.pop(0)
+            if part.is_multipart:
+                parts = part.parts + parts
+                continue
+
+            disposition = part.headers.content_disposition
+            if not disposition:
+                continue
+
+            m = re_filename.search(disposition)
+            filename = m.group(1) if m else None
+
+            if upload and filename is None or not upload and filename is not None:
+                continue
+
+            m = re_name.search(disposition)
+            name = m.group(1) if m else None
+            if not upload:
+                part = part.asset.slurp()
+
+            # TODO charset
+
+            yield name, part, filename
 
 
 new = Pyjo_Message.new
