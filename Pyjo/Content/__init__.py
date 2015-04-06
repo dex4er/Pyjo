@@ -63,7 +63,7 @@ read
 ::
 
     @content.on
-    def read(content, bstring):
+    def read(content, chunk):
         ...
 
 Emitted when a new chunk of content arrives. ::
@@ -71,8 +71,8 @@ Emitted when a new chunk of content arrives. ::
     content.unsubscribe('read')
 
     @content.on
-    def read(content, bstring):
-        print("Streaming: {0}".format(bstring))
+    def read(content, chunk):
+        print("Streaming: {0}".format(chunk))
 
 Classess
 --------
