@@ -212,6 +212,8 @@ class Pyjo_Content_MultiPart(Pyjo.Content.object, Pyjo.String.Mixin.object):
             length += boundary_length
             i += 1
 
+        return b''
+
     @property
     def is_multipart(self):
         """::

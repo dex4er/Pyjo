@@ -218,9 +218,39 @@ class Pyjo_Message(Pyjo.EventEmitter.object, Pyjo.String.Mixin.object):
 
     @property
     def body_size(self):
+        """::
+
+            size = msg.body_size
+
+        Content size in bytes.
+        """
         return self.content.body_size
 
+    def build_body(self):
+        """::
+
+            chunk = msg.build_body()
+
+        Render whole body.
+        """
+        return self._build('get_body_chunk')
+
+    def build_headers(self):
+        """::
+
+            chunk = msg.build_headers()
+
+        Render all headers.
+        """
+        return self._build('get_header_chunk')
+
     def build_start_line(self):
+        """::
+
+            chunk = msg.build_start_line()
+
+        Render start-line.
+        """
         return self._build('get_start_line_chunk')
 
     def dom(self, pattern=None):
@@ -346,7 +376,7 @@ class Pyjo_Message(Pyjo.EventEmitter.object, Pyjo.String.Mixin.object):
         return len(self.build_start_line())
 
     def to_bytes(self):
-        return self.content.to_bytes()
+        return self.build_start_line() + self.build_headers() + self.build_body()
 
     @property
     def text(self):
