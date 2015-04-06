@@ -156,12 +156,21 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
 
     @property
     def body(self):
-        # TODO downgrade multipart to single
-        return self.content.asset.slurp()
+        """::
+
+            bytes = msg.body
+            msg.body = b'Hello!'
+
+        Slurp or replace :attr:`content`, :mod:`Mojo.Content.MultiPart` will be
+        automatically downgraded to :mod:`Pyjo.Content.Single`.
+        """
+        content = self._downgrade_content()
+        return content.asset.slurp()
 
     @body.setter
     def body(self, value):
-        return self.content.set(asset=Pyjo.Asset.Memory.new().add_chunk(value))
+        content = self._downgrade_content()
+        return content.set(asset=Pyjo.Asset.Memory.new().add_chunk(value))
 
     @property
     def body_size(self):
@@ -276,7 +285,7 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
         if self.content.is_limit_exceeded:
             return self._limit('Maximum buffer size exceeded')
 
-        if self.emit('progress').content.is_finished:
+        if self.emit('progress', 'parse', 0).content.is_finished:
             return self.finish()
         else:
             return self
@@ -313,6 +322,12 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
             buf += chunk
 
         return buf
+
+    def _downgrade_content(self):
+        # Downgrade multipart content
+        if self.content.is_multipart:
+            self.content = Pyjo.Content.Single.new()
+        return self.content
 
 
 new = Pyjo_Message.new
