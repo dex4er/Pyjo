@@ -76,7 +76,7 @@ class Pyjo_Content_Single(Pyjo.Content.object, Pyjo.String.Mixin.object):
     :mod:`Pyjo.Content.MultiPart` object, defaults to a true value.
     """
 
-    _read = None
+    _on_read = None
 
     def __init__(self, *args, **kwargs):
         """::
@@ -88,7 +88,7 @@ class Pyjo_Content_Single(Pyjo.Content.object, Pyjo.String.Mixin.object):
         event with default content parser.
         """
         super(Pyjo_Content_Single, self).__init__(*args, **kwargs)
-        self._read = self.on(lambda content, chunk: content.set(asset=content.asset.add_chunk(chunk)), 'read')
+        self._on_read = self.on(lambda content, chunk: content.set(asset=content.asset.add_chunk(chunk)), 'read')
 
     def body_contains(self, chunk):
         """::
@@ -155,7 +155,7 @@ class Pyjo_Content_Single(Pyjo.Content.object, Pyjo.String.Mixin.object):
             return super(Pyjo_Content_Single, self).parse()
 
         # Content needs to be upgraded to multipart
-        self.unsubscribe('read', self._read)
+        self.unsubscribe('read', self._on_read)
         multi = Pyjo.Content.MultiPart.new(**vars(self))
         self.emit('upgrade', multi)
         return multi.parse()
