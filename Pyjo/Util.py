@@ -161,6 +161,14 @@ def setenv(name, value):
         os.environ.update({name: value})
 
 
+def split_cookie_header(string):
+    return _header(string, True)
+
+
+def split_header(string):
+    return _header(string, False)
+
+
 re_whitespaces = r(r'\s+')
 
 
@@ -212,6 +220,28 @@ if sys.version_info >= (3, 0):
     uchr = chr
 else:
     uchr = unichr
+
+
+re_b_unquote = r(br'^"(.*)"$')
+re_b_unquote2 = r(br'\\\\')
+re_b_unquote3 = r(br'\\"')
+re_u_unquote = r(r'^"(.*)"$')
+re_u_unquote2 = r(r'\\\\')
+re_u_unquote3 = r(r'\\"')
+
+
+def unquote(string):
+    if isbytes(string):
+        string, n = re_b_unquote.subn(lambda m: m.group(1), string)
+        if n:
+            string = re_b_unquote2.sub(br'\\', string)
+            string = re_b_unquote3.sub(br'"', string)
+    else:
+        string, n = re_u_unquote.subn(lambda m: m.group(1), string)
+        if n:
+            string = re_u_unquote2.sub(r'\\', string)
+            string = re_u_unquote3.sub(r'"', string)
+    return string
 
 
 re_url_allow_chars = r(br'([^A-Za-z0-9\-._~])')
@@ -2511,6 +2541,71 @@ def _decode(point, name):
         name = name[:-1]
 
     return u'&' + rest
+
+
+re_header = r(br'^[,;\s]*([^=;, ]+)\s*')
+re_expires = r(br'^=\s*(\w+\W+\d+\W+\w+\W+\d+\W+\d+:\d+:\d+\W*\w+)')
+re_quoted = r(br'^=\s*("(?:\\\\|\\"|[^"])*")')
+re_unquoted = r(br'^=\s*([^;, ]*)')
+re_separator = r(br'^[;\s]*,\s*')
+
+
+def _header(string, cookie):
+    decode = not isbytes(string)
+    buf = bytearray(b(string, 'ascii'))
+    tree = []
+    tokens = []
+
+    while buf:
+        m = re_header.search(buf)
+        if not m:
+            break
+
+        token = m.group(1)
+        if decode:
+            token = token.decode('ascii')
+        tokens.extend([token, None])
+        del buf[:m.end()]
+
+        while True:
+            if cookie and len(tokens) and token.lower() == 'expires':
+                m = re_expires.search(buf)
+                if m:
+                    tokens[-1] = m.group(1)
+                    if decode:
+                        tokens[-1] = tokens[-1].decode('ascii')
+                    del buf[:m.end()]
+                    break
+
+            m = re_quoted.search(buf)
+            if m:
+                tokens[-1] = unquote(m.group(1))
+                if decode:
+                    tokens[-1] = tokens[-1].decode('ascii')
+                del buf[:m.end()]
+                break
+
+            m = re_unquoted.search(buf)
+            if m:
+                tokens[-1] = m.group(1)
+                if decode:
+                    tokens[-1] = tokens[-1].decode('ascii')
+                del buf[:m.end()]
+                break
+
+            break
+
+        m = re_separator.search(buf)
+        if m:
+            del buf[:m.end()]
+            tree.append(tokens)
+            tokens = []
+
+    # Take care of final token
+    if len(tokens):
+        tree.append(tokens)
+
+    return tree
 
 
 def _readable(fd):
