@@ -99,10 +99,10 @@ def html_unescape(ustring):
 
 if sys.version_info >= (3, 0):
     def isbytes(obj):
-        return isinstance(obj, bytes)
+        return isinstance(obj, (bytearray, bytes))
 else:
     def isbytes(obj):
-        return isinstance(obj, str)
+        return isinstance(obj, (bytearray, str))
 
 
 def isiterable(obj):
@@ -169,17 +169,17 @@ def squish(string):
 
 
 def slurp(path):
-    with open(path, "r") as f:
+    with open(path, "rb") as f:
         return b(f.read())
 
 
 def spurt(content, path):
     if isbytes(content):
         with open(path, "wb") as f:
-            return b(f.write(content))
+            return f.write(b(content))
     else:
         with open(path, "w") as f:
-            return b(f.write(content))
+            return f.write(u(content))
 
 
 re_whitespaces_starts = r(r'^\s+')
