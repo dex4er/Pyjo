@@ -9,7 +9,7 @@ Pyjo.Content - HTTP content base class
 
     class MyContent(Pyjo.Content.object):
         @property
-        def body_contains(self):
+        def body_contains(self, chunk):
             ...
 
         @property
