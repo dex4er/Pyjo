@@ -35,17 +35,21 @@ if __name__ == '__main__':
 
     port = Pyjo.IOLoop.acceptor(server).port
 
-    # Connect to server
-    @Pyjo.IOLoop.client(port=port)
-    def client(loop, err, stream):
+    # Prevent race with server
+    @Pyjo.IOLoop.timer(0.2)
+    def client_delay(loop):
 
-        @stream.on
-        def read(stream, chunk):
-            # Process input
-            is_ok(chunk.decode('utf-8'), "HTTP/1.1 200 OK\x0d\x0a\x0d\x0a", "client's input chunk")
+        # Connect to server
+        @Pyjo.IOLoop.client(port=port)
+        def client(loop, err, stream):
 
-        # Write request
-        stream.write(b"GET / HTTP/1.1\x0d\x0a\x0d\x0a")
+            @stream.on
+            def read(stream, chunk):
+                # Process input
+                is_ok(chunk.decode('utf-8'), "HTTP/1.1 200 OK\x0d\x0a\x0d\x0a", "client's input chunk")
+
+            # Write request
+            stream.write(b"GET / HTTP/1.1\x0d\x0a\x0d\x0a")
 
     # Add a timer
     @Pyjo.IOLoop.timer(1)
