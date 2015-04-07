@@ -14,7 +14,7 @@ Pyjo.Asset - HTTP content storage base class
         def close():
             ...
 
-        def contains(self, bstring):
+        def contains(self, chunk):
             ...
 
         def get_chunk(self, offset, maximum=131072):
