@@ -84,7 +84,7 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.String.Mixin.object):
     environment variable or ``100``.
     """
 
-    _buffer = b''
+    _buffer = lazy(lambda self: bytearray())
     _cache = lazy(lambda self: [])
     _headers = lazy(lambda self: collections.OrderedDict())
     _limit = False
@@ -642,13 +642,13 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.String.Mixin.object):
     def leftovers(self):
         """::
 
-          bstring = headers.leftovers
+          chunk = headers.leftovers
 
         Get and remove leftover data from header parser.
         """
-        buf = self._buffer
-        self._buffer = b''
-        return buf
+        chunk = bytes(self._buffer)
+        self._buffer = bytearray()
+        return chunk
 
     @property
     def link(self):
@@ -721,7 +721,7 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.String.Mixin.object):
         Parse formatted headers.
         """
         self._state = 'headers'
-        self._buffer += b(string, 'ascii')
+        self._buffer.extend(b(string, 'ascii'))
         headers = self._cache
         size = self.max_line_size
         lines = self.max_lines
@@ -734,10 +734,9 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.String.Mixin.object):
 
             # Check line size limit
             if len(chunk) > size or len(headers) >= lines:
-                self._buffer = self._buffer[pos:]
                 self._state = 'finished'
                 self._limit = True
-                return self
+                break
 
             # New header
             m = re_field.search(line)
@@ -747,7 +746,7 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.String.Mixin.object):
             else:
                 # Multiline
                 if re_startswith_space.search(line):
-                    line = re_startswith_space.sub(b'', line, 1)
+                    line = re_startswith_space.sub(b'', bytes(line), 1)
                     if headers:
                         headers[-1][1] += b' ' + line
 
@@ -755,12 +754,11 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.String.Mixin.object):
                 else:
                     for h in headers:
                         self.add(h[0], h[1])
-                    self._buffer = self._buffer[pos:]
                     self._state = 'finished'
                     self._cache = []
-                    return self
+                    break
 
-        self._buffer = self._buffer[pos:]
+        del self._buffer[:pos]
 
         # Check line size limit
         if len(self._buffer) > size:
