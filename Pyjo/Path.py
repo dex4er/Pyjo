@@ -73,15 +73,6 @@ class Pyjo_Path(Pyjo.Base.object, Pyjo.String.Mixin.object):
         """
         return True
 
-    def __bytes__(self):
-        """::
-
-            bstring = bytes(path)
-
-        Byte-string representation of an object. (Python 3.x)
-        """
-        return self.to_bytes()
-
     def __iter__(self):
         """::
 
