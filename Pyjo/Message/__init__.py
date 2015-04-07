@@ -254,6 +254,26 @@ class Pyjo_Message(Pyjo.EventEmitter.object, Pyjo.String.Mixin.object):
         return self._build('get_start_line_chunk')
 
     def dom(self, pattern=None):
+        """::
+
+            dom = msg.dom()
+            collection = msg.dom('a[href]')
+
+        Retrieve message body from :attr:`text` and turn it into a :mod:`Pyjo.DOM` object,
+        an optional selector can be used to call the method :meth:`Pyjo.DOM.find` on it
+        right away, which then returns a :mod:`Pyjo.Collection` object. Note that this
+        method caches all data, so it should not be called before the entire message
+        body has been received. The whole message body needs to be loaded into memory
+        to parse it, so you have to make sure it is not excessively large, there's a
+        16MB limit by default. ::
+
+            # Perform "find" right away
+            print(msg.dom('h1, h2, h3').map('text').join("\n"))
+
+            # Use everything else Mojo::DOM has to offer
+            print(msg.dom.at('title').text)
+            print(msg.dom.at('body').children().map('tag').uniq().join("\n"))
+        """
         if self.content.is_multipart:
             return
         else:
@@ -266,6 +286,20 @@ class Pyjo_Message(Pyjo.EventEmitter.object, Pyjo.String.Mixin.object):
                 return dom.find(pattern)
 
     def error(self, **kwargs):
+        """::
+
+            err = msg.error
+            msg = msg.error(message='Parser error')
+
+        Get or set message error, an ``None`` return value indicates that there is no
+        error. ::
+
+            # Connection or parser error
+            msg.error(message='Connection refused')
+
+            # 4xx/5xx response
+            msg.error(message='Internal Server Error', code=500)
+        """
         if kwargs:
             self._error = kwargs
             self.finish()
