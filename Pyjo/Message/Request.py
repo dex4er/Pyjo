@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""
+r"""
 Pyjo.Message.Request - HTTP request
 ===================================
 

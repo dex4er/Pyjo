@@ -45,7 +45,7 @@ Emitted after message building or parsing is finished. ::
 
     @msg.on
     def finish(msg):
-        msg.headers.header('X-Parser-Time', int(steady_time() - before)
+        msg.headers.header('X-Parser-Time', int(steady_time() - before))
 
 progress
 ~~~~~~~~
