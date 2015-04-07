@@ -9,8 +9,8 @@ Pyjo.Asset.File - File storage for HTTP content
 
     # Temporary file
     with Pyjo.Asset.File.new() as asset_file:
-        asset_file.add_chunk('foo bar baz')
-        if asset_file.contains('bar'):
+        asset_file.add_chunk(b'foo bar baz')
+        if asset_file.contains(b'bar'):
             print('File contains "bar"')
         print(asset_file.slurp())
 
