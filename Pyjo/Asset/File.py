@@ -84,8 +84,6 @@ class Pyjo_Asset_File(Pyjo.Asset.object):
     ``PYJO_TMPDIR`` environment variable or auto detection.
     """
 
-    _content = b''
-
     def __repr__(self):
         return "<{0}.{1} handle={2} path={3}>".format(self.__class__.__module__, self.__class__.__name__, repr(self.handle), repr(self.path))
 

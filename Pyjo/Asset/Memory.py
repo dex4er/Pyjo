@@ -8,7 +8,7 @@ Pyjo.Asset.Memory - In-memory storage for HTTP content
     import Pyjo.Asset.Memory
 
     asset_mem = Pyjo.Asset.Memory.new()
-    asset_mem.add_chunk('foo bar baz')
+    asset_mem.add_chunk(b'foo bar baz')
     print(asset_mem.slurp())
 
 :mod:`Pyjo.Asset.Memory` is an in-memory storage backend for HTTP content.
@@ -82,7 +82,7 @@ class Pyjo_Asset_Memory(Pyjo.Asset.object):
     Modification time of asset, defaults to the time this class was loaded.
     """
 
-    _content = b''
+    _content = lazy(lambda self: bytearray())
 
     def __repr__(self):
         return "<{0}.{1} _content={2}>".format(self.__class__.__module__, self.__class__.__name__, repr(self._content))
@@ -97,7 +97,7 @@ class Pyjo_Asset_Memory(Pyjo.Asset.object):
         Add chunk of data and upgrade to :mod:`Pyjo.Asset.File` object if necessary.
         """
         # Upgrade if necessary
-        self._content += chunk
+        self._content.extend(chunk)
         if not self.auto_upgrade or self.size <= self.max_memory_size:
             return self
 
@@ -111,9 +111,9 @@ class Pyjo_Asset_Memory(Pyjo.Asset.object):
 
         Close asset immediately and free resources.
         """
-        self._content = b''
+        self._content = bytearray()
 
-    def contains(self, bstring):
+    def contains(self, chunk):
         """::
 
             position = asset_mem.contains(b'bar')
@@ -121,12 +121,12 @@ class Pyjo_Asset_Memory(Pyjo.Asset.object):
         Check if asset contains a specific string.
         """
         start = self.start_range
-        pos = notnone(self._content, b'').find(bstring, start)
+        pos = notnone(self._content, b'').find(chunk, start)
         if start and pos >= 0:
             pos -= start
         end = self.end_range
 
-        if end and (pos + len(bstring)) >= end:
+        if end and (pos + len(chunk)) >= end:
             return -1
         else:
             return pos
@@ -134,8 +134,8 @@ class Pyjo_Asset_Memory(Pyjo.Asset.object):
     def get_chunk(self, offset, maximum=131072):
         """::
 
-            bstream = asset_mem.get_chunk(offset)
-            bstream = asset_mem.get_chunk(offset, maximum)
+            chunk = asset_mem.get_chunk(offset)
+            chunk = asset_mem.get_chunk(offset, maximum)
 
         Get chunk of data starting from a specific position, defaults to a maximum
         chunk size of ``131072`` bytes (128KB).
@@ -145,7 +145,7 @@ class Pyjo_Asset_Memory(Pyjo.Asset.object):
         if end and offset + maximum > end:
             maximum = end + 1 - offset
 
-        return self._content[offset:offset + maximum]
+        return bytes(self._content[offset:offset + maximum])
 
     def move_to(self, dst):
         """::
