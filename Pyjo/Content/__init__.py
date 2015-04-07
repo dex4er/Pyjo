@@ -168,8 +168,8 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
     """
 
     _body = False
-    _body_buffer = b''
-    _buffer = b''
+    _body_buffer = lazy(lambda self: bytearray())
+    _buffer = lazy(lambda self: bytearray())
     _chunk_len = 0
     _chunk_state = None
     _chunks = 0
@@ -181,7 +181,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
     _header_buffer = None
     _header_size = 0
     _limit = False
-    _pre_buffer = b''
+    _pre_buffer = lazy(lambda self: bytearray())
     _raw_size = 0
     _real_size = 0
     _size = 0
@@ -274,7 +274,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
     def generate_body_chunk(self, offset):
         """::
 
-            bstring = content.generate_body_chunk(0)
+            chunk = content.generate_body_chunk(0)
 
         Generate dynamic content.
         """
@@ -282,8 +282,8 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
             self.emit('drain', offset)
         else:
             self._delay = False
-        chunk = self._body_buffer
-        self._body_buffer = b''
+        chunk = bytes(self._body_buffer)
+        self._body_buffer = bytearray()
         if not len(chunk):
             if self._eof:
                 return b''
@@ -296,7 +296,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
     def get_body_chunk(self, offset):
         """::
 
-            bstring = content.get_body_chunk(0)
+            chunk = content.get_body_chunk(0)
 
         Get a chunk of content starting from a specific position. Meant to be
         overloaded in a subclass.
@@ -306,14 +306,14 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
     def get_header_chunk(self, offset):
         """::
 
-            bstring = content.get_header_chunk(13)
+            chunk = content.get_header_chunk(13)
 
         Get a chunk of the headers starting from a specific position.
         """
         if self._header_buffer is None:
-            self._header_buffer = self.headers.to_bytes()
+            self._header_buffer = bytearray(self.headers.to_bytes())
 
-        return self._header_buffer[offset:131072]
+        return bytes(self._header_buffer[offset:131072])
 
     @property
     def header_size(self):
@@ -407,7 +407,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
 
         Get leftover data from content parser.
         """
-        return self._buffer
+        return bytes(self._buffer)
 
     def parse(self, chunk=None):
         r"""::
@@ -433,8 +433,8 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
         else:
             self._real_size += len(self._pre_buffer)
             if not (self.is_finished and len(self._buffer) > self.max_leftover_size):
-                self._buffer += self._pre_buffer
-            self._pre_buffer = b''
+                self._buffer.extend(self._pre_buffer)
+            self._pre_buffer = bytearray()
 
         # No content
         if self.skip_body:
@@ -453,7 +453,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
         if self.is_chunked or self.relaxed:
             self._decompress(self._buffer)
             self._size += len(self._buffer)
-            self._buffer = b''
+            self._buffer = bytearray()
             return self
 
         # Normal content
@@ -464,7 +464,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
         need = length - self._size
         if need > 0:
             chunk = self._buffer[:need]
-            self._buffer = self._buffer[need:]
+            del self._buffer[:need]
             self._decompress(chunk)
             self._size += len(chunk)
 
@@ -540,7 +540,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
         self._dynamic = True
 
         if chunk is not None:
-            self._body_buffer += chunk
+            self._body_buffer.extend(chunk)
         else:
             self._delay = True
 
@@ -638,7 +638,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
             if not self._chunk_len:
                 m = re_chunk.search(self._pre_buffer)
                 if m:
-                    self._pre_buffer = re_chunk.sub(b'', self._pre_buffer, 1)
+                    self._pre_buffer = bytearray(re_chunk.sub(b'', self._pre_buffer, 1))
                 else:
                     break
                 self._chunk_len = int(m.group(1), 16)
@@ -652,8 +652,8 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
             # Remove as much as possible from payload
             if self._chunk_len < l:
                 l = self._chunk_len
-            self._buffer += self._pre_buffer[0:l]
-            self._pre_buffer = self._pre_buffer[l:]
+            self._buffer.extend(self._pre_buffer[:l])
+            del self._pre_buffer[:l]
             self._real_size += l
             self._chunk_len -= l
 
@@ -668,7 +668,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
 
     def _parse_headers(self):
         pre_buffer = self._pre_buffer
-        self._pre_buffer = b''
+        self._pre_buffer = bytearray()
         headers = self.headers.parse(pre_buffer)
         if not headers.is_finished:
             return
@@ -680,20 +680,20 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
 
     def _parse_chunked_trailing_headers(self):
         headers = self.headers.parse(self._pre_buffer)
-        self._pre_buffer = b''
+        self._pre_buffer = bytearray()
         if not headers.is_finished:
             return
         self._chunk_state = 'finished'
 
         # Take care of leftover and replace Transfer-Encoding with Content-Length
-        self._buffer += headers.leftovers
+        self._buffer.extend(headers.leftovers)
         headers.remove('Transfer-Encoding')
         if not headers.content_length:
             headers.content_length = self._real_size
 
     def _parse_until_body(self, chunk):
         self._raw_size += len(chunk)
-        self._pre_buffer += chunk
+        self._pre_buffer.extend(chunk)
         if self._state is None:
             self._state = 'headers'
         if self._state == 'headers':

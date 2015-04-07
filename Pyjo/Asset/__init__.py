@@ -106,7 +106,7 @@ class Pyjo_Asset(Pyjo.EventEmitter.object):
         pass
 
     @not_implemented
-    def contains(self, bstring):
+    def contains(self, chunk):
         """::
 
             position = asset.contains(b'bar')
@@ -114,6 +114,7 @@ class Pyjo_Asset(Pyjo.EventEmitter.object):
         Check if asset contains a specific string. Meant to be overloaded
         in a subclass.
         """
+        pass
 
     @not_implemented
     def get_chunk(self, offset, maximum=131072):
@@ -166,6 +167,7 @@ class Pyjo_Asset(Pyjo.EventEmitter.object):
 
         Modification time of asset. Meant to be overloaded in a subclass.
         """
+        pass
 
     @property
     @not_implemented
