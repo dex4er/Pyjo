@@ -149,6 +149,19 @@ def notnone(*args):
             return a
 
 
+re_b_quote = r(br'(["\\])')
+re_u_quote = r(r'(["\\])')
+
+
+def quote(string):
+    if isbytes(string):
+        string = re_b_quote.sub(br'\\\1', string)
+        return b'"' + string + b'"'
+    else:
+        string = re_u_quote.sub(r'\\\1', string)
+        return '"' + string + '"'
+
+
 def rand(value=1):
     return random.random() * value
 
@@ -2564,32 +2577,32 @@ def _header(string, cookie):
         token = m.group(1)
         if decode:
             token = token.decode('ascii')
-        tokens.extend([token, None])
+        tokens.append([token, None])
         del buf[:m.end()]
 
         while True:
             if cookie and len(tokens) and token.lower() == 'expires':
                 m = re_expires.search(buf)
                 if m:
-                    tokens[-1] = m.group(1)
+                    tokens[-1][1] = m.group(1)
                     if decode:
-                        tokens[-1] = tokens[-1].decode('ascii')
+                        tokens[-1][1] = tokens[-1][1].decode('ascii')
                     del buf[:m.end()]
                     break
 
             m = re_quoted.search(buf)
             if m:
-                tokens[-1] = unquote(m.group(1))
+                tokens[-1][1] = unquote(m.group(1))
                 if decode:
-                    tokens[-1] = tokens[-1].decode('ascii')
+                    tokens[-1][1] = tokens[-1][1].decode('ascii')
                 del buf[:m.end()]
                 break
 
             m = re_unquoted.search(buf)
             if m:
-                tokens[-1] = m.group(1)
+                tokens[-1][1] = m.group(1)
                 if decode:
-                    tokens[-1] = tokens[-1].decode('ascii')
+                    tokens[-1][1] = tokens[-1][1].decode('ascii')
                 del buf[:m.end()]
                 break
 
