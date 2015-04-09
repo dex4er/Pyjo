@@ -8,8 +8,8 @@ Pyjo.Cookie.Response - HTTP response cookie
     Pyjo.Cookie.Response
 
     cookie = Pyjo.Cookie.Response.new()
-    cookie.name('foo')
-    cookie.value('bar')
+    cookie.name = 'foo'
+    cookie.value = 'bar'
     print(cookie)
 
 :mod:`Pyjo.Cookie.Response` is a container for HTTP response cookies based on
@@ -21,6 +21,14 @@ Classes
 
 import Pyjo.Cookie
 
+from Pyjo.Regexp import r
+from Pyjo.Util import notnone, quote, split_cookie_header
+
+
+ATTRS = set(['domain', 'expires', 'httponly', 'max-age', 'path', 'secure'])
+
+re_quoted = r('[,;" ]')
+
 
 class Pyjo_Cookie_Response(Pyjo.Cookie.object):
     """
@@ -28,6 +36,145 @@ class Pyjo_Cookie_Response(Pyjo.Cookie.object):
     :mod:`Pyjo.Cookie` and implements the following new ones.
     """
 
+    domain = None
+    """::
+
+        domain = cookie.domain
+        cookie.domain = 'localhost'
+
+    Cookie domain.
+    """
+
+    expires = None
+    """::
+
+        expires = cookie.expires
+        cookie.expires = steady_time() + 60
+
+    Expiration for cookie.
+    """
+
+    httponly = None
+    """::
+
+        boolean = cookie.httponly
+        cookie.httponly = boolean
+
+    HttpOnly flag, which can prevent client-side scripts from accessing this
+    cookie.
+    """
+
+    max_age = None
+    """::
+
+        max_age = cookie.max_age
+        cookie.max_age = 60
+
+    Max age for cookie.
+    """
+
+    origin = None
+    """::
+
+        origin = cookie.origin
+        cookie.origin = 'mojolicio.us'
+
+    Origin of the cookie.
+    """
+
+    path = None
+    """::
+
+        path = cookie.path
+        cookie.path = '/test'
+
+    Cookie path.
+    """
+
+    secure = None
+    """::
+
+        boolean = cookie.secure
+        cookie.secure = boolean
+
+    Secure flag, which instructs browsers to only send this cookie over HTTPS
+    connections.
+    """
+
+    @classmethod
+    def parse(self, string):
+        """::
+
+            cookies = Pyjo.Cookie.Response.parse('f=b; path=/')
+
+        Parse cookies.
+        """
+        cookies = []
+        for pairs in split_cookie_header(notnone(string, '')):
+            name, value = pairs.pop(0)
+            cookies.append(self.new(name=name, value=notnone(value, '')))
+            for name, value in pairs:
+                attr = name.lower()
+                if attr in ATTRS:
+#                     if attr == 'expires':
+#                         value = Pyjo.Date.new(value).epoch
+                    if attr == 'secure' or attr == 'httponly':
+                        value = 1
+                    if attr == 'max-age':
+                        attr = 'max_age'
+                    setattr(cookies[-1], attr, value)
+
+        return cookies
+
+    def to_str(self):
+        """::
+
+            string = cookie.to_str()
+
+        Render cookie.
+        """
+        # Name and value
+        name = notnone(self.name, '')
+        if not name:
+            return ''
+
+        value = notnone(self.value, '')
+        if re_quoted.search(value):
+            value = quote(value)
+        cookie = '='.join([name, value])
+
+#         # "expires"
+#         expires = self.expires
+#         if expires is not None:
+#             cookie += '; expires=' + Pyjo.Date.new(expires)
+
+        # "domain"
+        domain = self.domain
+        if domain:
+            cookie += '; domain=' + domain
+
+        # "path"
+        path = self.path
+        if path:
+            cookie += '; path=' + path
+
+        # "secure"
+        if self.secure:
+            cookie += '; secure'
+
+        # "HttpOnly"
+        if self.httponly:
+            cookie += '; HttpOnly'
+
+        # "Max-Age"
+        max_age = self.max_age
+        if max_age is not None:
+            cookie += '; Max-Age=' + max_age
+
+        return cookie
+
+
+parse = Pyjo_Cookie_Response.parse
 
 new = Pyjo_Cookie_Response.new
 object = Pyjo_Cookie_Response  # @ReservedAssignment

@@ -32,6 +32,60 @@ class Pyjo_Cookie(Pyjo.Base.object, Pyjo.String.Mixin.object):
     and implements the following new ones.
     """
 
+    name = None
+    """::
+
+        name = cookie.name
+        cookie.name = 'foo'
+
+    Cookie name.
+    """
+
+    value = None
+    """::
+
+        value = cookie.value
+        cookie.value = '/test'
+
+    Cookie value.
+    """
+
+    def __bool__(self):
+        """::
+
+            boolean = bool(path)
+
+        Always true. (Python 3.x)
+        """
+        return True
+
+    def __nonzero__(self):
+        """::
+
+            boolean = bool(path)
+
+        Always true. (Python 2.x)
+        """
+        return True
+
+    def parse(self, string):
+        """::
+
+            cookies = cookie.parse(string)
+
+        Parse cookies. Meant to be overloaded in a subclass.
+        """
+        ...
+
+    def to_str(self):
+        """::
+
+            string = cookie.to_str()
+
+        Render cookie. Meant to be overloaded in a subclass.
+        """
+        ...
+
 
 new = Pyjo_Cookie.new
 object = Pyjo_Cookie  # @ReservedAssignment
