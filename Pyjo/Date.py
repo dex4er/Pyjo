@@ -124,7 +124,7 @@ class Pyjo_Date(Pyjo.Base.object, Pyjo.String.Mixin.object):
         """
         # epoch (784111777)
         if isinstance(date, (int, float)) or re_epoch.search(date):
-            if isinstance(date, float) or str(date).isdigit():
+            if isinstance(date, float) or not str(date).isdigit():
                 self.epoch = float(date)
             else:
                 self.epoch = int(date)
@@ -189,10 +189,10 @@ class Pyjo_Date(Pyjo.Base.object, Pyjo.String.Mixin.object):
         Render :rfc:`3339` date and time. ::
 
             # "1994-11-06T08:49:37Z"
-            Pyjo.Date.new(784111777).iso_format()
+            Pyjo.Date.new(784111777).isoformat()
 
             # "1994-11-06T08:49:37.21Z"
-            Pyjo.Date.new(784111777.21).iso_format(sep='T')
+            Pyjo.Date.new(784111777.21).isoformat(sep='T')
         """
         # RFC 3339 (1994-11-06T08:49:37Z)
         epoch = self.epoch
