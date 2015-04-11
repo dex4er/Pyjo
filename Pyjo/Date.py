@@ -3,6 +3,7 @@
 """
 Pyjo.Date - HTTP date
 =====================
+::
 
     import Pyjo.Date
 
