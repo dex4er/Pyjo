@@ -73,7 +73,8 @@ class Pyjo_Date(Pyjo.Base.object, Pyjo.String.Mixin.object):
         Construct a new :mod:`Pyjo.Date` object and :meth:`parse` date if necessary.
         """
         super(Pyjo_Date, self).__init__()
-        self.parse(*args, **kwargs)
+        if args or kwargs:
+            self.parse(*args, **kwargs)
 
     def __bool__(self):
         """::
@@ -122,7 +123,7 @@ class Pyjo_Date(Pyjo.Base.object, Pyjo.String.Mixin.object):
         """
         # epoch (784111777)
         if isinstance(date, (int, float)) or re_epoch.search(date):
-            if isinstance(date, float) or str(date).isdecimal():
+            if isinstance(date, float) or str(date).isdigit():
                 self.epoch = float(date)
             else:
                 self.epoch = int(date)
@@ -134,31 +135,40 @@ class Pyjo_Date(Pyjo.Base.object, Pyjo.String.Mixin.object):
         while True:
             m = re_rfc_822_850.search(date)
             if m:
-                day, month, year, h, m, s = int(m.group(1)), MONTHNAMES[m.group(2)], int(m.group(3)), int(m.group(4)), int(m.group(5)), int(m.group(6))
+                day, month, year, hh, mm, ss = int(m.group(1)), MONTHNAMES.get(m.group(2)), int(m.group(3)), int(m.group(4)), int(m.group(5)), float(m.group(6))
                 break
 
             # RFC 3339 (1994-11-06T08:49:37Z)
             m = re_rfc3339.search(date)
             if m:
-                year, month, day, h, m, s = int(m.group(1)), int(m.group(2)) - 1, int(m.group(3)), int(m.group(4)), int(m.group(5)), int(m.group(6))
+                year, month, day, hh, mm, ss = int(m.group(1)), int(m.group(2)), int(m.group(3)), int(m.group(4)), int(m.group(5)), float(m.group(6))
                 if m.group(7):
                     offset = ((int(m.group(8)) * 3600) + (int(m.group(9)) * 60)) * (-1 if m.group(7) == '+' else 1)
                 break
 
             # ANSI C asctime() (Sun Nov  6 08:49:37 1994)
-            m = re_asctime(date)
+            m = re_asctime.search(date)
             if m:
-                month, day, h, m, s, year = MONTHNAMES[m.group(1)], int(m.group(2)), int(m.group(3)), int(m.group(4)), int(m.group(5)), int(m.group(6))
+                month, day, hh, mm, ss, year = MONTHNAMES.get(m.group(1)), int(m.group(2)), int(m.group(3)), int(m.group(4)), float(m.group(5)), int(m.group(6))
                 break
 
             self.epoch = None
             return self
 
-        # Prevent crash
-        print(repr([year, month, day, h, m, s, 0, 0, -1]))
-        epoch = time.mktime((year, month, day, h, m, s, 0, 0, -1),)
         try:
-            epoch = calendar.timegm((year, month, day, h, m, s, 0, 0, -1),)
+            if year < 0 or month < 0 or month > 12 or day < 0 or day > 31 \
+                    or hh < 0 or hh > 24 or mm < 0 or mm > 60 or ss < 0 or ss > 60:
+                self.epoch = None
+                return self
+
+            if year < 100:
+                if year < 70:
+                    year += 2000
+                else:
+                    year += 1900
+
+            # Prevent crash
+            epoch = calendar.timegm((year, month, day, hh, mm, ss, 0, 0, -1),)
         except:
             epoch = None
 
