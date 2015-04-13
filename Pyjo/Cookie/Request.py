@@ -35,7 +35,7 @@ class Pyjo_Cookie_Request(Pyjo.Cookie.object):
     """
 
     @classmethod
-    def parse(self, string):
+    def parse(self, string=''):
         """::
 
             cookies = Pyjo.Cookie.Request.parse('f=b; g=a');
@@ -44,12 +44,11 @@ class Pyjo_Cookie_Request(Pyjo.Cookie.object):
         """
         cookies = []
 
-        for pairs in split_header(notnone(string, '')):
+        for pairs in split_header(string):
             for name, value in pairs:
-                if name.startswith('\\'):
+                if name.startswith('$'):
                     continue
                 cookies.append(self.new(name=name, value=notnone(value, '')))
-
         return cookies
 
     def to_str(self):

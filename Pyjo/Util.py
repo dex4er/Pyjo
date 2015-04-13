@@ -155,7 +155,7 @@ re_u_quote = r(r'(["\\])')
 
 def quote(string):
     if isbytes(string):
-        string = re_b_quote.sub(br'\\\1', string)
+        string = re_b_quote.sub(br'\\\1', bytes(string))
         return b'"' + string + b'"'
     else:
         string = re_u_quote.sub(r'\\\1', string)
@@ -245,7 +245,7 @@ re_u_unquote3 = r(r'\\"')
 
 def unquote(string):
     if isbytes(string):
-        string, n = re_b_unquote.subn(lambda m: m.group(1), string)
+        string, n = re_b_unquote.subn(lambda m: m.group(1), bytes(string))
         if n:
             string = re_b_unquote2.sub(br'\\', string)
             string = re_b_unquote3.sub(br'"', string)
@@ -2574,7 +2574,7 @@ def _header(string, cookie):
         if not m:
             break
 
-        token = m.group(1)
+        token = bytes(m.group(1))
         if decode:
             token = token.decode('ascii')
         tokens.append([token, None])
@@ -2584,7 +2584,7 @@ def _header(string, cookie):
             if cookie and len(tokens) and token.lower() == 'expires':
                 m = re_expires.search(buf)
                 if m:
-                    tokens[-1][1] = m.group(1)
+                    tokens[-1][1] = bytes(m.group(1))
                     if decode:
                         tokens[-1][1] = tokens[-1][1].decode('ascii')
                     del buf[:m.end()]
@@ -2592,7 +2592,7 @@ def _header(string, cookie):
 
             m = re_quoted.search(buf)
             if m:
-                tokens[-1][1] = unquote(m.group(1))
+                tokens[-1][1] = unquote(bytes(m.group(1)))
                 if decode:
                     tokens[-1][1] = tokens[-1][1].decode('ascii')
                 del buf[:m.end()]
@@ -2600,7 +2600,7 @@ def _header(string, cookie):
 
             m = re_unquoted.search(buf)
             if m:
-                tokens[-1][1] = m.group(1)
+                tokens[-1][1] = bytes(m.group(1))
                 if decode:
                     tokens[-1][1] = tokens[-1][1].decode('ascii')
                 del buf[:m.end()]

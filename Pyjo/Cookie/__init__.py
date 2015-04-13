@@ -25,6 +25,8 @@ Classess
 import Pyjo.Base
 import Pyjo.String.Mixin
 
+from Pyjo.Util import not_implemented
+
 
 class Pyjo_Cookie(Pyjo.Base.object, Pyjo.String.Mixin.object):
     """
@@ -68,6 +70,7 @@ class Pyjo_Cookie(Pyjo.Base.object, Pyjo.String.Mixin.object):
         """
         return True
 
+    @not_implemented
     def parse(self, string):
         """::
 
@@ -75,8 +78,9 @@ class Pyjo_Cookie(Pyjo.Base.object, Pyjo.String.Mixin.object):
 
         Parse cookies. Meant to be overloaded in a subclass.
         """
-        ...
+        pass
 
+    @not_implemented
     def to_str(self):
         """::
 
@@ -84,7 +88,7 @@ class Pyjo_Cookie(Pyjo.Base.object, Pyjo.String.Mixin.object):
 
         Render cookie. Meant to be overloaded in a subclass.
         """
-        ...
+        pass
 
 
 new = Pyjo_Cookie.new
