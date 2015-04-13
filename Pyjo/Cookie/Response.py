@@ -20,6 +20,7 @@ Classes
 """
 
 import Pyjo.Cookie
+import Pyjo.Date
 
 from Pyjo.Regexp import r
 from Pyjo.Util import notnone, quote, split_cookie_header
@@ -54,7 +55,7 @@ class Pyjo_Cookie_Response(Pyjo.Cookie.object):
     Expiration for cookie.
     """
 
-    httponly = None
+    httponly = False
     """::
 
         boolean = cookie.httponly
@@ -91,7 +92,7 @@ class Pyjo_Cookie_Response(Pyjo.Cookie.object):
     Cookie path.
     """
 
-    secure = None
+    secure = False
     """::
 
         boolean = cookie.secure
@@ -102,7 +103,7 @@ class Pyjo_Cookie_Response(Pyjo.Cookie.object):
     """
 
     @classmethod
-    def parse(self, string):
+    def parse(self, string=''):
         """::
 
             cookies = Pyjo.Cookie.Response.parse('f=b; path=/')
@@ -110,18 +111,19 @@ class Pyjo_Cookie_Response(Pyjo.Cookie.object):
         Parse cookies.
         """
         cookies = []
-        for pairs in split_cookie_header(notnone(string, '')):
+        for pairs in split_cookie_header(string):
             name, value = pairs.pop(0)
             cookies.append(self.new(name=name, value=notnone(value, '')))
             for name, value in pairs:
                 attr = name.lower()
                 if attr in ATTRS:
-#                     if attr == 'expires':
-#                         value = Pyjo.Date.new(value).epoch
-                    if attr == 'secure' or attr == 'httponly':
-                        value = 1
-                    if attr == 'max-age':
+                    if attr == 'expires':
+                        value = Pyjo.Date.new(value).epoch
+                    elif attr == 'secure' or attr == 'httponly':
+                        value = True
+                    elif attr == 'max-age':
                         attr = 'max_age'
+                        value = int(value)
                     setattr(cookies[-1], attr, value)
 
         return cookies
@@ -143,10 +145,10 @@ class Pyjo_Cookie_Response(Pyjo.Cookie.object):
             value = quote(value)
         cookie = '='.join([name, value])
 
-#         # "expires"
-#         expires = self.expires
-#         if expires is not None:
-#             cookie += '; expires=' + Pyjo.Date.new(expires)
+        # "expires"
+        expires = self.expires
+        if expires is not None:
+            cookie += '; expires=' + str(Pyjo.Date.new(expires))
 
         # "domain"
         domain = self.domain
@@ -169,7 +171,7 @@ class Pyjo_Cookie_Response(Pyjo.Cookie.object):
         # "Max-Age"
         max_age = self.max_age
         if max_age is not None:
-            cookie += '; Max-Age=' + max_age
+            cookie += '; Max-Age=' + str(max_age)
 
         return cookie
 
