@@ -58,11 +58,11 @@ class Pyjo_Cookie_Request(Pyjo.Cookie.object):
 
         Render cookie.
         """
-        name = notnone(self.name, '')
+        name = str(notnone(self.name, ''))
         if not name:
             return ''
 
-        value = notnone(self.value, '')
+        value = str(notnone(self.value, ''))
         if re_quoted.search(value):
             value = quote(value)
         return '='.join([name, value])

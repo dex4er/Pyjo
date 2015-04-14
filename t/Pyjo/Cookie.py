@@ -29,6 +29,12 @@ if __name__ == '__main__':
     cookie.value = 'ba =r'
     is_ok(cookie.to_str(), '0="ba =r"', 'right format')
 
+    # Request cookie with numbers
+    cookie = Pyjo.Cookie.Request.new()
+    cookie.name = 2
+    cookie.value = 3
+    is_ok(cookie.to_str(), '2=3', 'right format')
+
     # Request cookie without value as string
     cookie = Pyjo.Cookie.Request.new()
     cookie.name = 'foo'
@@ -147,6 +153,12 @@ if __name__ == '__main__':
     cookie.value = 'ba r'
     cookie.path = '/test'
     is_ok(cookie.to_str(), 'foo="ba r"; path=/test', 'right format')
+
+    # Response cookie with numbers
+    cookie = Pyjo.Cookie.Response.new()
+    cookie.name = 2
+    cookie.value = 3
+    is_ok(cookie.to_str(), '2=3', 'right format')
 
     # Response cookie without value as string
     cookie = Pyjo.Cookie.Response.new()
