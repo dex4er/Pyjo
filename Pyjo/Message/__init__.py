@@ -81,6 +81,7 @@ import Pyjo.DOM
 import Pyjo.EventEmitter
 import Pyjo.JSON.Pointer
 import Pyjo.Parameters
+import Pyjo.Upload
 
 from Pyjo.Base import lazy
 from Pyjo.JSON import j
@@ -159,6 +160,7 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
     _finished = False
     _fixed = False
     _json = None
+    _limited = False
     _raw_size = 0
     _state = None
 
@@ -268,6 +270,16 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
         """
         return self._cache('cookie', False, name)
 
+    @not_implemented
+    def cookies(self):
+        """::
+
+            cookies = msg.cookies
+
+        Access message cookies. Meant to be overloaded in a subclass.
+        """
+        pass
+
     def dom(self, pattern=None):
         """::
 
@@ -321,11 +333,49 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
         else:
             return self._error
 
+    def every_cookie(self, name):
+        """::
+
+            cookies = msg.every_cookie('foo')
+
+        Similar to :meth:`cookie`, but returns all message cookies sharing the same name
+        as an array reference. ::
+
+            # Get first cookie value
+            print(msg.every_cookie('foo')[0].value)
+        """
+        return self._cache('cookie', True, name)
+
+    def every_upload(self, name):
+        """::
+
+            uploads = msg.every_upload('foo')
+
+        Similar to :meth:`upload`, but returns all file uploads sharing the same name as
+        an array reference. ::
+
+            # Get content of first uploaded file
+            print(msg.every_upload('foo')[0].asset.slurp())
+        """
+        return self._cache('upload', True, name)
+
     @not_implemented
     def extract_start_line(self, chunk):
+        """::
+
+            boolean = msg.extract_start_line(chunk)
+
+        Extract start-line from string. Meant to be overloaded in a subclass.
+        """
         pass
 
     def finish(self):
+        """::
+
+            msg = msg.finish()
+
+        Finish message parser/generator.
+        """
         self._state = 'finished'
         if self._finished:
             return self
@@ -334,11 +384,38 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
             return self.emit('finish')
 
     def fix_headers(self):
-        # TODO
+        """::
+
+            msg = msg.fix_headers()
+
+        Make sure message has all required headers.
+        """
+        if self._fixed:
+            return self
+
         self._fixed = True
+
+        # Content-Length or Connection (unless chunked transfer encoding is used)
+        content = self.content
+        headers = content.headers
+        if content.is_multipart:
+            headers.remove('Content-Length')
+        elif content.is_chunked or headers.content_length:
+            return self
+        if content.is_dynamic:
+            headers.connection = 'close'
+        else:
+            headers.content_length = self.body_size
+
         return self
 
     def get_body_chunk(self, offset):
+        """::
+
+            chunk = msg.get_body_chunk(offset)
+
+        Get a chunk of body data starting from a specific position.
+        """
         self.emit('progress', 'body', offset)
         chunk = self.content.get_body_chunk(offset)
         if chunk is not None and not len(chunk):
@@ -346,26 +423,88 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
         return chunk
 
     def get_header_chunk(self, offset):
+        """::
+
+            chunk = msg.get_header_chunk(offset)
+
+        Get a chunk of header data, starting from a specific position.
+        """
         self.emit('progress', 'headers', offset)
         return self.fix_headers().content.get_header_chunk(offset)
 
     @not_implemented
     def get_start_line_chunk(self, offset):
+        """::
+
+            chunk = msg.get_start_line_chunk(offset)
+
+        Get a chunk of start-line data starting from a specific position. Meant to be
+        overloaded in a subclass.
+        """
         pass
 
     @property
     def header_size(self):
+        """::
+
+            size = msg.header_size
+
+        Size of headers in bytes.
+        """
         return self.fix_headers().content.header_size
 
     @property
     def headers(self):
+        """::
+
+            headers = msg.headers
+
+        Message headers, usually a :mod:`Pyjo.Headers` object. ::
+
+            # Longer version
+            headers = msg.content.headers
+        """
         return self.content.headers
 
     @property
     def is_finished(self):
+        """::
+
+            boolean = msg.is_finished
+
+        Check if message parser/generator is finished.
+        """
         return self._state == 'finished'
 
+    @property
+    def is_limit_exceeded(self):
+        """::
+
+            boolean = msg.is_limit_exceeded
+
+        Check if message has exceeded :attr:`max_line_size`, :attr:`max_message_size`,
+        :attr:`Pyjo.Content.max_buffer_size` or :attr:`Pyjo.Headers.max_line_size`.
+        """
+        return self._limited
+
     def json(self, pointer=None):
+        """::
+
+            value = msg.json()
+            value = msg.json('/foo/bar')
+
+        Decode JSON message body directly using :mod:`Pyjo.JSON` if possible, an ``None``
+        return value indicates a bare ``null`` or that decoding failed. An optional JSON
+        Pointer can be used to extract a specific value with :mod:`Pyjo.JSON.Pointer`.
+        Note that this method caches all data, so it should not be called before the
+        entire message body has been received. The whole message body needs to be
+        loaded into memory to parse it, so you have to make sure it is not excessively
+        large, there's a 16MB limit by default. ::
+
+            # Extract JSON values
+            print(msg.json()['foo']['bar'][23])
+            print(msg.json('/foo/bar/23'))
+        """
         if self.content.is_multipart():
             return
 
@@ -379,6 +518,12 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
             return data
 
     def parse(self, chunk=b''):
+        """::
+
+            msg = msg.parse('HTTP/1.1 200 OK...')
+
+        Parse message chunk.
+        """
         if self._error:
             return self
         self._raw_size += len(chunk)
@@ -422,16 +567,66 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
 
     @property
     def start_line_size(self):
+        """::
+
+            size = msg.start_line_size
+
+        Size of the start-line in bytes.
+        """
         return len(self.build_start_line())
 
     @property
     def text(self):
+        """::
+
+            string = msg.text
+
+        Retrieve :attr:`body` and try to decode it with :attr:`Pyjo.Content.charset` or
+        :attr:`default_charset`.
+        """
         body = self.body
         charset = self.content.charset or 'utf-8'
         try:
             return body.decode(charset)
         except:
             return body.decode('iso-8859-1')
+
+    def upload(self, name):
+        """::
+
+            upload = msg.upload('foo')
+
+        Access ``multipart/form-data`` file uploads, usually :mod:`Pyjo.Upload` objects. If
+        there are multiple uploads sharing the same name, and you want to access more
+        than just the last one, you can use :meth:`every_upload`. Note that this method
+        caches all data, so it should not be called before the entire message body has
+        been received. ::
+
+            # Get content of uploaded file
+            print(msg.upload('foo').asset.slurp())
+        """
+        return self._cache('upload', False, name)
+
+    @property
+    def uploads(self):
+        """::
+
+            uploads = msg.uploads
+
+        All ``multipart/form-data`` file uploads, usually :mod:`Pyjo.Upload` objects. ::
+
+            # Names of all uploads
+            for upload in msg.uploads:
+                print(upload.name)
+        """
+        uploads = []
+        for data in self._parse_formdata(True):
+            upload = Pyjo.Upload.new(name=data[0],
+                                     filename=data[2],
+                                     asset=data[1].asset,
+                                     headers=data[1].headers)
+            uploads.append(upload)
+        return uploads
 
     def _build(self, method):
         buf = b''
@@ -484,6 +679,10 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
             self.content = Pyjo.Content.Single.new()
         return self.content
 
+    def _limit(self, message):
+        self._limited = True
+        return self.error(message=message)
+
     def _parse_formdata(self, upload=False):
         content = self.content
 
@@ -515,7 +714,7 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
             if not upload:
                 part = part.asset.slurp()
 
-            # TODO charset
+            # TODO charset?
 
             yield name, part, filename
 
