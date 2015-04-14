@@ -34,7 +34,9 @@ Classes
 -------
 """
 
+import Pyjo.Cookie.Request
 import Pyjo.Message
+import Pyjo.String.Mixin
 import Pyjo.URL
 
 from Pyjo.Base import lazy
@@ -46,16 +48,58 @@ re_start_line = r(br'^\s*(.*?)\x0d?\x0a')
 re_request = r(br'^(\S+)\s+(\S+)\s+HTTP\/(\d\.\d)$')
 
 
-class Pyjo_Message_Request(Pyjo.Message.object):
+class Pyjo_Message_Request(Pyjo.Message.object, Pyjo.String.Mixin.object):
     """
     :mod:`Pyjo.Message.Request` inherits all attributes and methods from
-    :mod:`Pyjo.Message` and implements the following new ones.
+    :mod:`Pyjo.Message` and :mod:`Pyjo.String.Mixin`
+    and implements the following new ones.
     """
 
     method = 'GET'
     url = lazy(lambda self: Pyjo.URL.new())
 
+    _proxy = None
     _start_buffer = None
+
+    def __repr__(self):
+        if self.method is not None:
+            return "{0}.{1}({2})".format(self.__module__, self.__class__.__name__, repr(b('{0} {1} HTTP/{2}\r\n'.format(self.method, self.url, self.version), 'ascii') + bytes(self.content)))
+        else:
+            return "{0}.{1}()".format(self.__module__, self.__class__.__name__)
+
+    def clone(self):
+        # Dynamic requests cannot be cloned
+        content = self.content.clone()
+        if content is not None:
+            clone = self.new(content=content,
+                             method=self.method,
+                             url=self.url.clone(),
+                             version=self.version)
+            if self._proxy:
+                clone._proxy = self._proxy.clone()
+            return clone
+        else:
+            return
+
+    @property
+    def cookies(self):
+        """::
+
+            cookies = req.cookies
+
+        Access request cookies, usually :mod:`Pyjo.Cookie.Request` objects. ::
+
+            # Names of all cookies
+            for cookie in req.cookies:
+                print(cookie.name)
+        """
+        # Parse cookies
+        headers = self.headers
+        cookies = headers.set_cookie
+        if cookies is not None:
+            return Pyjo.Cookie.Request.parse(cookies)
+        else:
+            return
 
     def extract_start_line(self):
         # Ignore any leading empty lines
@@ -113,6 +157,26 @@ class Pyjo_Message_Request(Pyjo.Message.object):
 
         self.emit('progress', 'start_line', offset)
         return self._start_buffer[offset:offset + 131072]
+
+    def set_cookie(self, cookie):
+        """::
+
+            req = req.set_cookie(Pyjo.Message.Response.new(name='foo', value='bar'))
+            req = req.set_cookie({'name': 'foo', 'value': 'bar'})
+
+        Set message cookies, usually :mod:`Pyjo.Cookie.Response` object.
+        """
+        if isinstance(cookie, dict):
+            value = Pyjo.Cookie.Request.new(**cookie)
+        value = str(value)
+        if self.headers.cookie is not None:
+            self.headers.cookie += '; ' + value
+        else:
+            self.headers.cookie = value
+        return self
+
+    def to_bytes(self):
+        return self.build_start_line() + self.build_headers() + self.build_body()
 
 
 new = Pyjo_Message_Request.new

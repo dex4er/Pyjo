@@ -33,23 +33,47 @@ Classes
 -------
 """
 
+import Pyjo.Cookie.Response
 import Pyjo.Message
+import Pyjo.String.Mixin
 
 from Pyjo.Regexp import r
+from Pyjo.Util import b
 
 
 re_line = r(br'^(.*?)\x0d?\x0a')
 re_http = r(br'^\s*HTTP/(\d\.\d)\s+(\d\d\d)\s*(.+)?$')
 
 
-class Pyjo_Message_Response(Pyjo.Message.object):
+class Pyjo_Message_Response(Pyjo.Message.object, Pyjo.String.Mixin.object):
     """
     :mod:`Pyjo.Message.Response` inherits all attributes and methods from
-    :mod:`Pyjo.Message` and implements the following new ones.
+    :mod:`Pyjo.Message` and :mod:`Pyjo.String.Mixin`
+    and implements the following new ones.
     """
 
     code = None
     message = None
+
+    @property
+    def cookies(self):
+        """::
+
+            cookies = res.cookies
+
+        Access response cookies, usually :mod:`Pyjo.Cookie.Response` objects. ::
+
+            # Names of all cookies
+            for cookie in res.cookies:
+                print(cookie.name)
+        """
+        # Parse cookies
+        headers = self.headers
+        cookies = headers.set_cookie
+        if cookies is not None:
+            return Pyjo.Cookie.Response.parse(cookies)
+        else:
+            return
 
     def extract_start_line(self):
         # We have a full response line
@@ -63,9 +87,9 @@ class Pyjo_Message_Response(Pyjo.Message.object):
         if not m:
             return
 
-        version, code, message = m.groups()
-
-        self.code = int(code)
+        self.version = m.group(1).decode('ascii')
+        self.code = int(m.group(2))
+        self.message = m.group(3).decode('ascii')
 
         content = self.content
         if self.is_empty:
@@ -76,11 +100,9 @@ class Pyjo_Message_Response(Pyjo.Message.object):
         if content.auto_relax is None:
             content.auto_relax = True
 
-        if version == '1.0':
+        if self.version == '1.0':
             content.expect_close = True
 
-        self.version = version
-        self.message = message
         return bool(self.message)
 
     def fix_headers(self):
@@ -105,6 +127,23 @@ class Pyjo_Message_Response(Pyjo.Message.object):
             return
         else:
             return code >= status_class and code < (status_class + 100)
+
+    def set_cookie(self, cookie):
+        """::
+
+            res = res.set_cookie(Pyjo.Message.Response.new(name='foo', value='bar'))
+            res = res.set_cookie({'name': 'foo', 'value': 'bar'})
+
+        Set message cookies, usually :mod:`Pyjo.Cookie.Response` object.
+        """
+        if isinstance(cookie, dict):
+            value = Pyjo.Cookie.Response.new(**cookie)
+        value = str(value)
+        self.headers.add('Set-Cookie', value)
+        return self
+
+    def to_bytes(self):
+        return b("HTTP/{0} {1} {2}\r\n".format(self.version, self.code, self.message), 'ascii') + bytes(self.headers) + bytes(self.body)
 
 
 new = Pyjo_Message_Response.new

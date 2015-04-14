@@ -81,7 +81,6 @@ import Pyjo.DOM
 import Pyjo.EventEmitter
 import Pyjo.JSON.Pointer
 import Pyjo.Parameters
-import Pyjo.String.Mixin
 
 from Pyjo.Base import lazy
 from Pyjo.JSON import j
@@ -93,11 +92,10 @@ re_filename = r(r'[; ]filename="((?:\\"|[^"])*)"')
 re_name = r(r'[; ]name="((?:\\"|[^;"])*)"')
 
 
-class Pyjo_Message(Pyjo.EventEmitter.object, Pyjo.String.Mixin.object):
+class Pyjo_Message(Pyjo.EventEmitter.object):
     """
     :mod:`Pyjo.Message` inherits all attributes and methods from
-    :mod:`Pyjo.EventEmitter` and :mod:`Pyjo.String.Mixin`
-    and implements the following new ones.
+    :mod:`Pyjo.EventEmitter` and implements the following new ones.
     """
 
     content = lazy(lambda self: Pyjo.Content.Single.new())
@@ -155,6 +153,7 @@ class Pyjo_Message(Pyjo.EventEmitter.object, Pyjo.String.Mixin.object):
 
     _body_params = None
     _buffer = lazy(lambda self: bytearray())
+    _cookies = lazy(lambda self: {})
     _dom = None
     _error = lazy(lambda self: {})
     _finished = False
@@ -252,6 +251,22 @@ class Pyjo_Message(Pyjo.EventEmitter.object, Pyjo.String.Mixin.object):
         Render start-line.
         """
         return self._build('get_start_line_chunk')
+
+    def cookie(self, name):
+        """::
+
+            cookie = msg.cookie('foo')
+
+        Access message cookies, usually :mod:`Pyjo.Cookie.Request` or
+        :mod:`Pyjo.Cookie.Response` objects. If there are multiple cookies sharing the
+        same name, and you want to access more than just the last one, you can use
+        :meth:`every_cookie`. Note that this method caches all data, so it should not be
+        called before all headers have been received. ::
+
+            # Get cookie value
+            print(msg.cookie('foo').value)
+        """
+        return self._cache('cookie', False, name)
 
     def dom(self, pattern=None):
         """::
@@ -409,9 +424,6 @@ class Pyjo_Message(Pyjo.EventEmitter.object, Pyjo.String.Mixin.object):
     def start_line_size(self):
         return len(self.build_start_line())
 
-    def to_bytes(self):
-        return self.build_start_line() + self.build_headers() + self.build_body()
-
     @property
     def text(self):
         body = self.body
@@ -440,6 +452,31 @@ class Pyjo_Message(Pyjo.EventEmitter.object, Pyjo.String.Mixin.object):
             buf += chunk
 
         return buf
+
+    def _cache(self, method, ret_all, name):
+        # Cache objects by name
+        method += 's'
+        attr = '_' + method
+
+        if not getattr(self, attr):
+            setattr(self, attr, {})
+            for a in getattr(self, method):
+                if a.name not in getattr(self, attr):
+                    getattr(self, attr)[a.name] = []
+                getattr(self, attr)[a.name].append(a)
+
+        if name in getattr(self, attr):
+            objects = getattr(self, attr)[name]
+        else:
+            objects = []
+
+        if ret_all:
+            return objects
+        else:
+            if objects:
+                return objects[-1]
+            else:
+                return
 
     def _downgrade_content(self):
         # Downgrade multipart content
