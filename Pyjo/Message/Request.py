@@ -63,7 +63,7 @@ class Pyjo_Message_Request(Pyjo.Message.object, Pyjo.String.Mixin.object):
 
     def __repr__(self):
         if self.method is not None:
-            return "{0}.{1}({2})".format(self.__module__, self.__class__.__name__, repr(b('{0} {1} HTTP/{2}\r\n'.format(self.method, self.url, self.version), 'ascii') + bytes(self.content)))
+            return "{0}.{1}({2})".format(self.__module__, self.__class__.__name__, repr(b('{0} {1} HTTP/{2}\r\n'.format(self.method, self.url, self.version), 'ascii') + bytes(self.content.headers) + bytes(self.content.asset.slurp())))
         else:
             return "{0}.{1}()".format(self.__module__, self.__class__.__name__)
 
