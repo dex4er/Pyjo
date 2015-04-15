@@ -103,10 +103,14 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.String.Mixin.object):
             params = params.append(foo='ba&r')
             params = params.append(foo=['ba&r', 'baz'])
             params = params.append(('foo', ['bar', 'baz']), ('bar', 23))
+            params = params.append(Pyjo.Params.new())
 
         Append parameters. Note that this method will normalize the parameters.
 
         ::
+
+            # "foo=bar&foo=baz"
+            Pyjo.Parameters.new('foo=bar').append(Pyjo.Parameters.new('foo=baz'))
 
             # "foo=bar&foo=baz"
             Pyjo.Parameters.new('foo=bar').append(foo='baz')
@@ -118,6 +122,10 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.String.Mixin.object):
             Pyjo.Parameters.new('foo=bar').append(('foo', ['baz', 'yada']), ('bar', 23))
         """
         pairs = self.pairs
+
+        if args and len(args) == 1 and isinstance(args[0], Pyjo_Parameters):
+            args = args[0].pairs
+
         for k, v in list(args) + sorted(kwargs.items()):
             if isiterable(v):
                 for vv in v:

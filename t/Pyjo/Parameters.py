@@ -78,6 +78,13 @@ if __name__ == '__main__':
     is_ok(str(params), 'foo=&bar=bar', 'right format')
     params = Pyjo.Parameters.new(('bar', 'bar'), ('foo', ''))
     is_ok(str(params), 'bar=bar&foo=', 'right format')
+    params = Pyjo.Parameters.new('')
+    params.append(Pyjo.Parameters.new(''))
+    is_ok(str(params), '', 'right format')
+    params.append(Pyjo.Parameters.new('foo=bar&baz=42'))
+    is_ok(str(params), 'foo=bar&baz=42', 'right format')
+    params.append(Pyjo.Parameters.new('yada=yada'))
+    is_ok(str(params), 'foo=bar&baz=42&yada=yada', 'right format')
 
     # "0"
     params = Pyjo.Parameters.new(('foo', 0),)

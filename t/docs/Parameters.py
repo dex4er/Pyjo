@@ -60,6 +60,9 @@ if __name__ == '__main__':
     ok(Pyjo.Parameters.new(), "Pyjo.Parameters.new()")
 
     # append
+    params = Pyjo.Parameters.new('foo=bar').append(Pyjo.Parameters.new('foo=baz'))
+    is_ok(str(params), 'foo=bar&foo=baz', 'params')
+
     params = Pyjo.Parameters.new('foo=bar').append(foo='baz')
     is_ok(str(params), 'foo=bar&foo=baz', 'params')
 

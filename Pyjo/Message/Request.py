@@ -3,7 +3,6 @@
 r"""
 Pyjo.Message.Request - HTTP request
 ===================================
-
 ::
 
     import Pyjo.Message.Request
@@ -41,7 +40,7 @@ import Pyjo.URL
 
 from Pyjo.Base import lazy
 from Pyjo.Regexp import r
-from Pyjo.Util import b, u
+from Pyjo.Util import b, b64_encode, notnone, u
 
 
 re_start_line = r(br'^\s*(.*?)\x0d?\x0a')
@@ -58,16 +57,29 @@ class Pyjo_Message_Request(Pyjo.Message.object, Pyjo.String.Mixin.object):
     method = 'GET'
     url = lazy(lambda self: Pyjo.URL.new())
 
+    _params = None
     _proxy = None
     _start_buffer = None
 
     def __repr__(self):
+        """::
+
+            string = repr(req)
+
+        String representation of an object shown in console.
+        """
         if self.method is not None:
-            return "{0}.{1}({2})".format(self.__module__, self.__class__.__name__, repr(b('{0} {1} HTTP/{2}\r\n'.format(self.method, self.url, self.version), 'ascii') + bytes(self.content.headers) + bytes(self.content.asset.slurp())))
+            return "{0}.new({1})".format(self.__module__, repr(b('{0} {1} HTTP/{2}\r\n'.format(self.method, self.url, self.version), 'ascii') + bytes(self.content.headers) + bytes(self.content.asset.slurp())))
         else:
-            return "{0}.{1}()".format(self.__module__, self.__class__.__name__)
+            return "{0}.new()".format(self.__module__)
 
     def clone(self):
+        """::
+
+            clone = req.clone
+
+        Clone request if possible, otherwise return ``None``.
+        """
         # Dynamic requests cannot be cloned
         content = self.content.clone()
         if content is not None:
@@ -101,14 +113,34 @@ class Pyjo_Message_Request(Pyjo.Message.object, Pyjo.String.Mixin.object):
         else:
             return
 
-    def extract_start_line(self):
+    def every_param(self, name):
+        """::
+
+            values = req.every_param('foo')
+
+        Similar to :meth:`param`, but returns all values sharing the same name as an
+        array reference.
+
+            # Get first value
+            print(req.every_param('foo')[0])
+        """
+        return self.params.every_param(name)
+
+    def extract_start_line(self, buf):
+        """::
+
+            boolean = req.extract_start_line(buf)
+
+        Extract request-line from string.
+        """
         # Ignore any leading empty lines
-        m = re_start_line.search(self._buffer)
+        m = re_start_line.search(buf)
         if not m:
             return
 
-        del self._buffer[:m.end()]
-        m = re_request.search(m.group(1))
+        line = m.group(1)
+        del buf[:m.end()]
+        m = re_request.search(line)
 
         if not m:
             return not self.error(message='Bad request start-line')
@@ -125,6 +157,12 @@ class Pyjo_Message_Request(Pyjo.Message.object, Pyjo.String.Mixin.object):
         return bool(url)
 
     def fix_headers(self):
+        """::
+
+            req = req.fix_headers()
+
+        Make sure request has all required headers.
+        """
         if self._fixed:
             return self
 
@@ -136,10 +174,32 @@ class Pyjo_Message_Request(Pyjo.Message.object, Pyjo.String.Mixin.object):
         if not headers.host:
             headers.host = url.host_port
 
-        # TODO
+        # Basic authentication
+        info = url.userinfo
+        if info and not headers.authorization:
+            headers.authorization = 'Basic ' + b64_encode(b(info), '')
+
+        # Basic proxy authentication
+        proxy = self.proxy
+        if not proxy:
+            return self
+
+        info = proxy.userinfo
+        if not info:
+            return self
+
+        if not headers.proxy_authorization:
+            headers.authorization = 'Basic ' + b64_encode(b(info), '')
+
         return self
 
     def get_start_line_chunk(self, offset):
+        """::
+
+            chunk = req.get_start_line_chunk(offset)
+
+        Get a chunk of request-line data starting from a specific position.
+        """
         if self._start_buffer is None:
 
             # Path
@@ -148,15 +208,82 @@ class Pyjo_Message_Request(Pyjo.Message.object, Pyjo.String.Mixin.object):
             if not path.startswith('/'):
                 path = '/' + path
 
-            # TODO CONNECT
+            # CONNECT
             method = self.method.upper()
+            if method == 'CONNECT':
+                port = url.port or (443 if url.protocol == 'https' else 80)
+                path = '{0}:{1}'.format(self.ihost, port)
 
-            # TODO Proxy
+            # Proxy
+            elif self.proxy and url.protocol != 'https':
+                if self.is_handshake:
+                    path = url.clone().userinfo = None
 
-            self._start_buffer = b(method) + b' ' + b(path) + b' HTTP/' + b(self.version) + b'\x0d\x0a'
+            self._start_buffer = b("{0} {1} HTTP/{2}\x0d\x0a".format(method, path, self.version))
 
         self.emit('progress', 'start_line', offset)
         return self._start_buffer[offset:offset + 131072]
+
+    @property
+    def is_handshake(self):
+        """::
+
+            boolean = req.is_handshake
+
+        Check ``Upgrade`` header for ``websocket`` value.
+        """
+        return notnone(self.headers.upgrade, '').lower() == 'websocket'
+
+    @property
+    def is_secure(self):
+        """::
+
+            boolean = req.is_secure
+
+        Check if connection is secure.
+        """
+        url = self.url
+        return (url.protocol or url.base.protocol) == 'https'
+
+    @property
+    def is_xhr(self):
+        """::
+
+            boolean = req.is_xhr
+
+        Check ``X-Requested-With`` header for ``XMLHttpRequest`` value.
+        """
+        return notnone(self.headers.header('X-Requested-With'), '').lower().find('xmlhttprequest') >= 0
+
+    def param(self, name):
+        """::
+
+            value = req.param('foo')
+
+        Access ``GET`` and ``POST`` parameters extracted from the query string and
+        ``application/x-www-form-urlencoded`` or ``multipart/form-data`` message body. If
+        there are multiple values sharing the same name, and you want to access more
+        than just the last one, you can use :meth:`every_param`. Note that this method
+        caches all data, so it should not be called before the entire request body has
+        been received. Parts of the request body need to be loaded into memory to parse
+        ``POST`` parameters, so you have to make sure it is not excessively large,
+        there's a 16MB limit by default.
+        """
+        return self.params.param(name)
+
+    @property
+    def params(self):
+        if not self._params:
+            self._params = self.body_params.clone().append(self.query_params)
+        return self._params
+
+    @property
+    def proxy(self):
+        return
+
+    @property
+    def query_params(self):
+        return self.url.query
 
     def set_cookie(self, cookie):
         """::
