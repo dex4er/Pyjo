@@ -75,12 +75,12 @@ class Pyjo_Message_Response(Pyjo.Message.object, Pyjo.String.Mixin.object):
         else:
             return
 
-    def extract_start_line(self):
+    def extract_start_line(self, buf):
         # We have a full response line
-        m = re_line.search(self._buffer)
+        m = re_line.search(buf)
         if m:
-            self._buffer = re_line.sub(b'', self._buffer, 1)
             line = m.group(1)
+            del buf[:m.end()]
         else:
             return
         m = re_http.search(line)

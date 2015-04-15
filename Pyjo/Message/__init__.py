@@ -12,7 +12,7 @@ Pyjo.Message - HTTP message base class
         def cookies(self):
             ...
 
-        def extract_start_line(self, chunk):
+        def extract_start_line(self, buf):
             ...
 
         def get_start_line_chunk(self):
@@ -360,10 +360,10 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
         return self._cache('upload', True, name)
 
     @not_implemented
-    def extract_start_line(self, chunk):
+    def extract_start_line(self, buf):
         """::
 
-            boolean = msg.extract_start_line(chunk)
+            boolean = msg.extract_start_line(buf)
 
         Extract start-line from string. Meant to be overloaded in a subclass.
         """
@@ -539,7 +539,7 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
             if l > self.max_line_size:
                 return self._limit('Maximum start-line size exceeded')
 
-            if self.extract_start_line():
+            if self.extract_start_line(self._buffer):
                 self._state = 'content'
 
         # Content

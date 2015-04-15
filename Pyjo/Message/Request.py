@@ -273,9 +273,35 @@ class Pyjo_Message_Request(Pyjo.Message.object, Pyjo.String.Mixin.object):
 
     @property
     def params(self):
+        """::
+
+            params = req.params
+
+        All ``GET`` and ``POST`` parameters extracted from the query string and
+        ``application/x-www-form-urlencoded`` or ``multipart/form-data`` message body,
+        usually a :mod:`Pyjo.Parameters` object. Note that this method caches all data, so
+        it should not be called before the entire request body has been received. Parts
+        of the request body need to be loaded into memory to parse ``POST`` parameters,
+        so you have to make sure it is not excessively large, there's a 16MB limit by
+        default. ::
+
+            # Get parameter names and values
+            params_dict = req.params.to_dict()
+        """
         if not self._params:
             self._params = self.body_params.clone().append(self.query_params)
         return self._params
+
+    def parse(self):
+        """::
+
+            req = req.parse('GET /foo/bar HTTP/1.1')
+            req = req.parse(REQUEST_METHOD='GET')
+            req = req.parse({'REQUEST_METHOD': 'GET'})
+
+        Parse HTTP request chunks or environment hash.
+        """
+        ...
 
     @property
     def proxy(self):

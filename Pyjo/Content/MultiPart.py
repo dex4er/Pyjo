@@ -137,7 +137,7 @@ class Pyjo_Content_MultiPart(Pyjo.Content.object, Pyjo.String.Mixin.object):
         # Generate and check boundary
         size = 1
         while True:
-            boundary = b64_encode(b(''.join([chr(int(rand(256))) for _ in range(size * 3)]), 'iso-8859-1'))
+            boundary = b64_encode(b(''.join([chr(int(rand(256))) for _ in range(size * 3)]), 'iso-8859-1'), '')
             size += 1
             boundary = re_non_word.sub('X', boundary)
             if not self.body_contains(b(boundary, 'ascii')):
