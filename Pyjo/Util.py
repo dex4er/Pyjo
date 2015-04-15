@@ -41,8 +41,11 @@ def b64_decode(ustring):
     return base64.b64decode(ustring)
 
 
-def b64_encode(bstring):
-    return u(base64.b64encode(bstring), 'ascii')
+re_chars_76 = r('(.{76})')
+
+
+def b64_encode(bstring, sep="\n"):
+    return re_chars_76.sub(lambda m: m.group(1) + sep, u(base64.b64encode(bstring), 'ascii'))
 
 
 def convert(value, newtype, default=None):
