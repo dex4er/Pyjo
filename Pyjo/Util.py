@@ -7,6 +7,7 @@ from __future__ import print_function
 from Pyjo.Regexp import r
 
 import base64
+import binascii
 import functools
 import hashlib
 import os
@@ -38,7 +39,12 @@ else:
 
 
 def b64_decode(ustring):
-    return base64.b64decode(ustring)
+    for _ in range(6):
+        try:
+            return base64.b64decode(ustring)
+        except binascii.Error:
+            ustring = ustring[:-1]
+    return b''
 
 
 re_chars_76 = r('(.{76})')
