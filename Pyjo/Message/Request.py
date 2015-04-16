@@ -40,11 +40,13 @@ import Pyjo.URL
 
 from Pyjo.Base import lazy
 from Pyjo.Regexp import r
-from Pyjo.Util import b, b64_encode, notnone, u
+from Pyjo.Util import b, b64_decode, b64_encode, notnone, u
 
 
 re_start_line = r(br'^\s*(.*?)\x0d?\x0a')
 re_request = r(br'^(\S+)\s+(\S+)\s+HTTP\/(\d\.\d)$')
+re_hostport = r(r'^([^:]*):?(.*)$')
+re_server_protocol = r(r'^([^/]+)/([^/]+)$')
 
 
 class Pyjo_Message_Request(Pyjo.Message.object, Pyjo.String.Mixin.object):
@@ -54,8 +56,10 @@ class Pyjo_Message_Request(Pyjo.Message.object, Pyjo.String.Mixin.object):
     and implements the following new ones.
     """
 
+    environ = lazy(lambda self: {})
     method = 'GET'
     url = lazy(lambda self: Pyjo.URL.new())
+    reverse_proxy = None
 
     _params = None
     _proxy = None
@@ -219,6 +223,7 @@ class Pyjo_Message_Request(Pyjo.Message.object, Pyjo.String.Mixin.object):
                 if self.is_handshake:
                     path = url.clone().userinfo = None
 
+            # TODO bytearray?
             self._start_buffer = b("{0} {1} HTTP/{2}\x0d\x0a".format(method, path, self.version))
 
         self.emit('progress', 'start_line', offset)
@@ -292,23 +297,94 @@ class Pyjo_Message_Request(Pyjo.Message.object, Pyjo.String.Mixin.object):
             self._params = self.body_params.clone().append(self.query_params)
         return self._params
 
-    def parse(self):
+    def parse(self, request):
         """::
 
-            req = req.parse('GET /foo/bar HTTP/1.1')
-            req = req.parse(REQUEST_METHOD='GET')
+            req = req.parse(b'GET /foo/bar HTTP/1.1')
             req = req.parse({'REQUEST_METHOD': 'GET'})
 
-        Parse HTTP request chunks or environment hash.
+        Parse HTTP request chunks or environment dict.
         """
-        ...
+        # Parse CGI environment
+        if isinstance(request, dict):
+            chunk = b''
+            self.environ = request
+            self._parse_environ(request)
+        else:
+            chunk = request
+
+        # Parse normal message
+        if self._state != 'cgi':
+            super(Pyjo_Message_Request, self).parse(chunk)
+
+        # Parse CGI content
+        else:
+            self.content = self.content.parse_body(chunk)
+            super(Pyjo_Message_Request, self).parse()
+
+        # Check if we can fix things that require all headers
+        if not self.is_finished:
+            return self
+
+        # Base URL
+        base = self.url.base
+        if not base.scheme:
+            base.scheme = 'http'
+        headers = self.headers
+        if not base.host:
+            host = headers.host
+            if host:
+                base.authority = host
+
+        # Basic authentication
+        auth = self._parse_basic_auth(headers.authorization)
+        if auth:
+            base.userinfo = auth
+
+        # Basic proxy authentication
+        proxy_auth = self._parse_basic_auth(headers.proxy_authorization)
+        if proxy_auth:
+            self.proxy = Pyjo.URL.new(userinfo=proxy_auth)
+
+        # "X-Forwarded-Proto"
+        if self.reverse_proxy and headers.header('X-Forwarded-Proto') == 'https':
+            base.scheme = 'https'
+
+        return self
 
     @property
     def proxy(self):
-        return
+        """::
+
+            proxy = req.proxy
+            req.proxy = 'http://foo:bar@127.0.0.1:3000'
+            req.proxy = Pyjo.URL.new('http://127.0.0.1:3000')
+
+        Proxy URL for request. ::
+
+            # Disable proxy
+            req.proxy = None
+        """
+        return self._proxy
+
+    @proxy.setter
+    def proxy(self, value):
+        if isinstance(value, Pyjo.URL.object):
+            self._proxy = value
+        else:
+            self._proxy = Pyjo.URL.new(value)
 
     @property
     def query_params(self):
+        """::
+
+            params = req.query_params
+
+        All ``GET`` parameters, usually a :mod:`Pyjo.Parameters` object. ::
+
+            # Turn GET parameters to hash and extract value
+            print(req.query_params.to_hash()['foo'])
+        """
         return self.url.query
 
     def set_cookie(self, cookie):
@@ -329,7 +405,103 @@ class Pyjo_Message_Request(Pyjo.Message.object, Pyjo.String.Mixin.object):
         return self
 
     def to_bytes(self):
+        """::
+
+            bstring = req.to_bytes()
+
+        Turn message into a bytes string.
+        """
         return self.build_start_line() + self.build_headers() + self.build_body()
+
+    def _parse_basic_auth(self, header):
+        if header:
+            basic = 'Basic '
+            offset = header.find(basic)
+            if offset >= 0:
+                offset += len(basic)
+                auth = header[basic:]
+                try:
+                    return u(b64_decode(auth))
+                except:
+                    pass
+        return
+
+    def _parse_environ(self, environ):
+        # Extract headers
+        headers = self.headers
+        url = self.url
+        base = url.base
+        for name, value in environ.items():
+            if not name.upper().startswith('HTTP_'):
+                continue
+            name = name[5:].replace('_', '-')
+            headers.header(name, value)
+
+            # Host/Port
+            if (name == 'HOST'):
+                host, port = value, None
+                m = re_hostport.search(host)
+                if m:
+                    host, port = m.groups()
+                base.host = host
+                base.port = port
+
+        # Content-Type is a special case on some servers
+        if environ.get('CONTENT_TYPE', ''):
+            headers.content_type = environ['CONTENT_TYPE']
+
+        # Content-Length is a special case on some servers
+        if environ.get('CONTENT_LENGTH', ''):
+            headers.content_length = environ['CONTENT_LENGTH']
+
+        # Query
+        if environ.get('QUERY_STRING', ''):
+            url.query.parse(environ['QUERY_STRING'])
+
+        # Method
+        if environ.get('REQUEST_METHOD'):
+            self.method = environ['REQUEST_METHOD']
+
+        # Scheme/Version
+        m = re_server_protocol.search(environ.get('SERVER_PROTOCOL', ''))
+        if m:
+            base.scheme = m.group(1)
+            self.version = m.group(2)
+
+        # HTTPS
+        if environ.get('HTTPS', '').upper() == 'ON':
+            base.scheme = 'https'
+
+        # Path
+        path = url.path.parse(environ.get('PATH_INFO', ''))
+
+        # Base path
+        value = environ.get('SCRIPT_NAME', '')
+        if value:
+            # Make sure there is a trailing slash (important for merging)
+            if value.endswith('/'):
+                base.path.parse(value)
+            else:
+                base.path.parse(value + '/')
+
+            # Remove SCRIPT_NAME prefix if necessary
+            buf = path.to_str()
+            if value.startswith('/'):
+                value = value[1:]
+            if value.endswith('/'):
+                value = value[:-1]
+            if buf.startswith('/'):
+                buf = buf[1:]
+            if buf.find(value) == 0:
+                buf = buf[len(value):]
+                if buf.startswith('/'):
+                    buf = buf[1:]
+            if buf.startswith('/'):
+                buf = buf[1:]
+            path.parse(buf)
+
+        # Bypass normal message parser
+        self._state = 'cgi'
 
 
 new = Pyjo_Message_Request.new
