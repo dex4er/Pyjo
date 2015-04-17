@@ -3,7 +3,6 @@
 r"""
 Pyjo.Message.Response - HTTP Response
 ===================================
-
 ::
 
     import Pyjo.Message.Response
@@ -29,6 +28,11 @@ Pyjo.Message.Response - HTTP Response
 :rfc:`7230` and
 :rfc:`7231`.
 
+Events
+------
+
+:mod:`Pyjo.Message.Response` inherits all events from :mod:`Pyjo.Message`.
+
 Classes
 -------
 """
@@ -38,11 +42,76 @@ import Pyjo.Message
 import Pyjo.String.Mixin
 
 from Pyjo.Regexp import r
-from Pyjo.Util import b
+from Pyjo.Util import b, notnone
 
 
 re_line = r(br'^(.*?)\x0d?\x0a')
 re_http = r(br'^\s*HTTP/(\d\.\d)\s+(\d\d\d)\s*(.+)?$')
+
+
+# Umarked codes are from RFC 7231
+MESSAGES = {
+    100: 'Continue',
+    101: 'Switching Protocols',
+    102: 'Processing',                         # RFC 2518 (WebDAV)
+    200: 'OK',
+    201: 'Created',
+    202: 'Accepted',
+    203: 'Non-Authoritative Information',
+    204: 'No Content',
+    205: 'Reset Content',
+    206: 'Partial Content',
+    207: 'Multi-Status',                       # RFC 2518 (WebDAV)
+    208: 'Already Reported',                   # RFC 5842
+    226: 'IM Used',                            # RFC 3229
+    300: 'Multiple Choices',
+    301: 'Moved Permanently',
+    302: 'Found',
+    303: 'See Other',
+    304: 'Not Modified',
+    305: 'Use Proxy',
+    307: 'Temporary Redirect',
+    308: 'Permanent Redirect',                 # RFC 7238
+    400: 'Bad Request',
+    401: 'Unauthorized',
+    402: 'Payment Required',
+    403: 'Forbidden',
+    404: 'Not Found',
+    405: 'Method Not Allowed',
+    406: 'Not Acceptable',
+    407: 'Proxy Authentication Required',
+    408: 'Request Timeout',
+    409: 'Conflict',
+    410: 'Gone',
+    411: 'Length Required',
+    412: 'Precondition Failed',
+    413: 'Request Entity Too Large',
+    414: 'Request-URI Too Long',
+    415: 'Unsupported Media Type',
+    416: 'Request Range Not Satisfiable',
+    417: 'Expectation Failed',
+    418: "I'm a teapot",                       # RFC 2324 :)
+    422: 'Unprocessable Entity',               # RFC 2518 (WebDAV)
+    423: 'Locked',                             # RFC 2518 (WebDAV)
+    424: 'Failed Dependency',                  # RFC 2518 (WebDAV)
+    425: 'Unordered Colection',                # RFC 3648 (WebDAV)
+    426: 'Upgrade Required',                   # RFC 2817
+    428: 'Precondition Required',              # RFC 6585
+    429: 'Too Many Requests',                  # RFC 6585
+    431: 'Request Header Fields Too Large',    # RFC 6585
+    500: 'Internal Server Error',
+    501: 'Not Implemented',
+    502: 'Bad Gateway',
+    503: 'Service Unavailable',
+    504: 'Gateway Timeout',
+    505: 'HTTP Version Not Supported',
+    506: 'Variant Also Negotiates',            # RFC 2295
+    507: 'Insufficient Storage',               # RFC 2518 (WebDAV)
+    508: 'Loop Detected',                      # RFC 5842
+    509: 'Bandwidth Limit Exceeded',           # Unofficial
+    510: 'Not Extended',                       # RFC 2774
+    511: 'Network Authentication Required'     # RFC 6585
+}
 
 
 class Pyjo_Message_Response(Pyjo.Message.object, Pyjo.String.Mixin.object):
@@ -53,7 +122,22 @@ class Pyjo_Message_Response(Pyjo.Message.object, Pyjo.String.Mixin.object):
     """
 
     code = None
+    """::
+
+        code = res.code
+        res.code = 200
+
+    HTTP response status code.
+    """
+
     message = None
+    """::
+
+        msg = res.message
+        res.message = 'OK'
+
+    HTTP response status message.
+    """
 
     @property
     def cookies(self):
@@ -75,7 +159,24 @@ class Pyjo_Message_Response(Pyjo.Message.object, Pyjo.String.Mixin.object):
         else:
             return
 
+    def default_message(self, code=None):
+        """::
+
+            msg = res.default_message()
+            msg = res.default_message(418)
+
+        Generate default response message for status code, defaults to using
+        :attr:`code`.
+        """
+        return MESSAGES.get(code or notnone(self.code, 404), 0) or ''
+
     def extract_start_line(self, buf):
+        """::
+
+            boolean = res.extract_start_line(buf)
+
+        Extract status-line from string.
+        """
         # We have a full response line
         m = re_line.search(buf)
         if m:
@@ -106,15 +207,46 @@ class Pyjo_Message_Response(Pyjo.Message.object, Pyjo.String.Mixin.object):
         return bool(self.message)
 
     def fix_headers(self):
+        """::
+
+            res = res.fix_headers()
+
+        Make sure response has all required headers.
+        """
         if self._fixed:
             return self
         super(Pyjo_Message_Response, self).fix_headers()
 
-        # TODO Date
+        # Date
+        headers = self.headers
+        if not headers.date:
+            headers.date = Pyjo.Date.new().to_str()
+
         return self
+
+    def get_start_line_chunk(self, offset):
+        """::
+
+            chunk = res.get_start_line_chunk(offset)
+
+        Get a chunk of status-line data starting from a specific position.
+        """
+        if self._start_buffer is None:
+            code = self.code or 404
+            msg = self.message or self.default_message()
+            self._start_buffer = b("HTTP/{0} {1} {2}\x0d\x0a".format(self.version, code, msg))
+
+        self.emit('progress', 'start_line', offset)
+        return self._start_buffer[offset:offset + 131072]
 
     @property
     def is_empty(self):
+        """::
+
+            boolean = res.is_empty
+
+        Check if this is a ``1xx``, ``204`` or ``304`` response.
+        """
         code = self.code
         if not code:
             return
@@ -122,6 +254,12 @@ class Pyjo_Message_Response(Pyjo.Message.object, Pyjo.String.Mixin.object):
             return self.is_status_class(100) or code == 204 or code == 304
 
     def is_status_class(self, status_class):
+        """::
+
+            boolean = res.is_status_class(200)
+
+        Check response status class.
+        """
         code = self.code
         if not code:
             return
@@ -143,7 +281,13 @@ class Pyjo_Message_Response(Pyjo.Message.object, Pyjo.String.Mixin.object):
         return self
 
     def to_bytes(self):
-        return b("HTTP/{0} {1} {2}\r\n".format(self.version, self.code, self.message), 'ascii') + bytes(self.headers) + bytes(self.body)
+        """::
+
+            bstring = req.to_bytes()
+
+        Turn message into a bytes string.
+        """
+        return b("HTTP/{0} {1} {2}\x0d\x0a".format(self.version, self.code, self.message), 'ascii') + bytes(self.headers) + bytes(self.body)
 
 
 new = Pyjo_Message_Response.new

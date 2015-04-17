@@ -29,6 +29,11 @@ Pyjo.Message.Request - HTTP request
 :rfc:`7235` and
 :rfc:`2817`.
 
+Events
+------
+
+:mod:`Pyjo.Message.Request` inherits all events from :mod:`Pyjo.Message`.
+
 Classes
 -------
 """
