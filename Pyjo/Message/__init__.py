@@ -655,10 +655,12 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
 
         if not getattr(self, attr):
             setattr(self, attr, {})
-            for a in getattr(self, method):
-                if a.name not in getattr(self, attr):
-                    getattr(self, attr)[a.name] = []
-                getattr(self, attr)[a.name].append(a)
+            c = getattr(self, method)
+            if c:
+                for a in c:
+                    if a.name not in getattr(self, attr):
+                        getattr(self, attr)[a.name] = []
+                    getattr(self, attr)[a.name].append(a)
 
         if name in getattr(self, attr):
             objects = getattr(self, attr)[name]
