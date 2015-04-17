@@ -170,7 +170,7 @@ class Pyjo_Message_Request(Pyjo.Message.object, Pyjo.String.Mixin.object):
             values = req.every_param('foo')
 
         Similar to :meth:`param`, but returns all values sharing the same name as an
-        array reference.
+        array reference. ::
 
             # Get first value
             print(req.every_param('foo')[0])

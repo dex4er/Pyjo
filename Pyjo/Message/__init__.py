@@ -281,7 +281,7 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
         pass
 
     def dom(self, pattern=None):
-        """::
+        r"""::
 
             dom = msg.dom()
             collection = msg.dom('a[href]')
