@@ -57,9 +57,51 @@ class Pyjo_Message_Request(Pyjo.Message.object, Pyjo.String.Mixin.object):
     """
 
     environ = lazy(lambda self: {})
+    """::
+
+        environ = req.environ
+        req.environ = {}
+
+    Direct access to the ``CGI`` or ``WSGI`` environment hash if available. ::
+
+        # Check CGI version
+        version = req.environ['GATEWAY_INTERFACE']
+
+        # Check WSGI version
+        version = req.environ['wsgi.version']
+    """
+
     method = 'GET'
+    """::
+
+        method = req.method
+        req.method = 'POST'
+
+    HTTP request method, defaults to ``GET``.
+    """
+
     url = lazy(lambda self: Pyjo.URL.new())
+    """::
+
+        url = req.url
+        req.url = Pyjo.URL.new()
+
+    HTTP request URL, defaults to a `Pyjo.URL` object. ::
+
+        # Get request information
+        info = req.url.to_abs().userinfo
+        host = req.url.to_abs().host
+        path = req.url.to_abs().path
+    """
+
     reverse_proxy = None
+    """::
+
+        boolean = req.reverse_proxy
+        req.reverse_proxy = boleean
+
+    Request has been performed through a reverse proxy.
+    """
 
     _params = None
     _proxy = None
