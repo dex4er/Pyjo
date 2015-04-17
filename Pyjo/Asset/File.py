@@ -85,6 +85,12 @@ class Pyjo_Asset_File(Pyjo.Asset.object):
     """
 
     def __repr__(self):
+        """::
+
+            string = repr(asset_file)
+
+        String representation of an object shown in console.
+        """
         return "<{0}.{1} handle={2} path={3}>".format(self.__class__.__module__, self.__class__.__name__, repr(self.handle), repr(self.path))
 
     def add_chunk(self, chunk=b''):

@@ -234,7 +234,7 @@ class Pyjo_Message_Response(Pyjo.Message.object, Pyjo.String.Mixin.object):
         if self._start_buffer is None:
             code = self.code or 404
             msg = self.message or self.default_message()
-            self._start_buffer = b("HTTP/{0} {1} {2}\x0d\x0a".format(self.version, code, msg))
+            self._start_buffer = bytearray(b("HTTP/{0} {1} {2}\x0d\x0a".format(self.version, code, msg)))
 
         self.emit('progress', 'start_line', offset)
         return self._start_buffer[offset:offset + 131072]

@@ -85,6 +85,12 @@ class Pyjo_Asset_Memory(Pyjo.Asset.object):
     _content = lazy(lambda self: bytearray())
 
     def __repr__(self):
+        """::
+
+            string = repr(asset_mem)
+
+        String representation of an object shown in console.
+        """
         return "<{0}.{1} _content={2}>".format(self.__class__.__module__, self.__class__.__name__, repr(self._content))
 
     def add_chunk(self, chunk=b''):
@@ -145,7 +151,7 @@ class Pyjo_Asset_Memory(Pyjo.Asset.object):
         if end and offset + maximum > end:
             maximum = end + 1 - offset
 
-        return bytes(self._content[offset:offset + maximum])
+        return self._content[offset:offset + maximum]
 
     def move_to(self, dst):
         """::
@@ -174,7 +180,7 @@ class Pyjo_Asset_Memory(Pyjo.Asset.object):
 
         Read all asset data at once.
         """
-        return notnone(self._content, b'')
+        return notnone(self._content, bytearray())
 
 
 new = Pyjo_Asset_Memory.new

@@ -282,11 +282,11 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
             self.emit('drain', offset)
         else:
             self._delay = False
-        chunk = bytes(self._body_buffer)
+        chunk = self._body_buffer
         self._body_buffer = bytearray()
         if not len(chunk):
             if self._eof:
-                return b''
+                return bytearray()
             else:
                 return
         else:
@@ -313,7 +313,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
         if self._header_buffer is None:
             self._header_buffer = bytearray(self.headers.to_bytes())
 
-        return bytes(self._header_buffer[offset:131072])
+        return self._header_buffer[offset:131072]
 
     @property
     def header_size(self):

@@ -270,8 +270,7 @@ class Pyjo_Message_Request(Pyjo.Message.object, Pyjo.String.Mixin.object):
                 if self.is_handshake:
                     path = url.clone().userinfo = None
 
-            # TODO bytearray?
-            self._start_buffer = b("{0} {1} HTTP/{2}\x0d\x0a".format(method, path, self.version))
+            self._start_buffer = bytearray(b("{0} {1} HTTP/{2}\x0d\x0a".format(method, path, self.version)))
 
         self.emit('progress', 'start_line', offset)
         return self._start_buffer[offset:offset + 131072]

@@ -183,7 +183,7 @@ class Pyjo_Content_MultiPart(Pyjo.Content.object, Pyjo.String.Mixin.object):
         boundary_length = len(boundary) + 6
         length = boundary_length - 2
         if length > offset:
-            return b('--' + boundary + "\x0d\x0a", 'ascii')[offset:]
+            return bytearray(b('--' + boundary + "\x0d\x0a", 'ascii')[offset:])
 
         # Prepare content part by part
         parts = self.parts
@@ -207,12 +207,12 @@ class Pyjo_Content_MultiPart(Pyjo.Content.object, Pyjo.String.Mixin.object):
                 boundary_length += 2
 
             if length + boundary_length > offset:
-                return b("\x0d\x0a--" + boundary + "\x0d\x0a", 'ascii')[offset - length:]
+                return bytearray(b("\x0d\x0a--" + boundary + "\x0d\x0a", 'ascii')[offset - length:])
 
             length += boundary_length
             i += 1
 
-        return b''
+        return bytearray()
 
     @property
     def is_multipart(self):
