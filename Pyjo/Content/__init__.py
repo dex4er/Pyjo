@@ -403,11 +403,11 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
     def leftovers(self):
         """::
 
-            bstring = content.leftovers
+            chunk = content.leftovers
 
         Get leftover data from content parser.
         """
-        return bytes(self._buffer)
+        return self._buffer
 
     def parse(self, chunk=None):
         r"""::
