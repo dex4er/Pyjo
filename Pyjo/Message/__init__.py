@@ -85,7 +85,7 @@ import Pyjo.Upload
 from Pyjo.Base import lazy
 from Pyjo.JSON import j
 from Pyjo.Regexp import r
-from Pyjo.Util import b, getenv, not_implemented, notnone
+from Pyjo.Util import b, convert, getenv, not_implemented, notnone
 
 
 re_filename = r(r'[; ]filename="((?:\\"|[^"])*)"')
@@ -118,7 +118,7 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
     defaults to ``utf-8``.
     """
 
-    max_line_size = lazy(lambda self: getenv('PYJO_MAX_LINE_SIZE') or 8192)
+    max_line_size = lazy(lambda self: convert(getenv('PYJO_MAX_LINE_SIZE'), int) or 8192)
     """::
 
         size = msg.max_line_size
@@ -128,7 +128,7 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
     ``PYJO_MAX_LINE_SIZE`` environment variable or ``8192`` (8KB).
     """
 
-    max_message_size = lazy(lambda self: getenv('PYJO_MAX_MESSAGE_SIZE', 16777216))
+    max_message_size = lazy(lambda self: notnone(convert(getenv('PYJO_MAX_MESSAGE_SIZE'), int), 16777216))
     """::
 
         size = msg.max_message_size

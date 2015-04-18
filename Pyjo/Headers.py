@@ -33,7 +33,7 @@ import Pyjo.String.Mixin
 
 from Pyjo.Base import lazy
 from Pyjo.Regexp import r
-from Pyjo.Util import b, getenv, u
+from Pyjo.Util import b, convert, getenv, u
 
 import collections
 import sys
@@ -64,23 +64,23 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.String.Mixin.object):
     :mod:`Pyjo.Base` and :mod:`Pyjo.String.Mixin` and implements the following new ones.
     """
 
-    max_line_size = int(getenv('PYJO_MAX_LINE_SIZE', 0)) or 8192
+    max_line_size = lazy(lambda self: convert(getenv('PYJO_MAX_LINE_SIZE'), int) or 8192)
     """::
 
         size = headers.max_line_size
         headers.max_line_size = 1024
 
     Maximum header line size in bytes, defaults to the value of the
-    ``MOJO_MAX_LINE_SIZE`` environment variable or ``8192`` (8KB).
+    ``PYJO_MAX_LINE_SIZE`` environment variable or ``8192`` (8KB).
     """
 
-    max_lines = int(getenv('PYJO_MAX_LINES', 0)) or 100
+    max_lines = lazy(lambda self: convert(getenv('PYJO_MAX_LINES'), int) or 100)
     """::
 
         num = headers.max_lines
         headers.max_lines = 200
 
-    Maximum number of header lines, defaults to the value of the ``MOJO_MAX_LINES``
+    Maximum number of header lines, defaults to the value of the ``PYJO_MAX_LINES``
     environment variable or ``100``.
     """
 
