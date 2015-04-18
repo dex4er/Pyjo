@@ -37,7 +37,6 @@ finish
     def finish(msg):
         ...
 
-
 Emitted after message building or parsing is finished. ::
 
     from Pyjo.Util import steady_time

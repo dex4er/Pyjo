@@ -646,7 +646,7 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.String.Mixin.object):
 
         Get and remove leftover data from header parser.
         """
-        chunk = bytes(self._buffer)
+        chunk = self._buffer
         self._buffer = bytearray()
         return chunk
 
@@ -759,6 +759,8 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.String.Mixin.object):
                     break
 
         del self._buffer[:pos]
+        if self._state == 'finished':
+            return self
 
         # Check line size limit
         if len(self._buffer) > size:
