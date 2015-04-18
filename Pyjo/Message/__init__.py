@@ -690,7 +690,7 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
         if not content.is_multipart:
             return
 
-        charset = content.charset or self.default_charset
+        # TODO charset = content.charset or self.default_charset
 
         # Check all parts recursively
         parts = [content]
