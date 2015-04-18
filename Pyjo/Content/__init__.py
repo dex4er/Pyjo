@@ -638,10 +638,13 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
             if not self._chunk_len:
                 m = re_chunk.search(self._pre_buffer)
                 if m:
-                    self._pre_buffer = bytearray(re_chunk.sub(b'', self._pre_buffer, 1))
+                    self._pre_buffer = bytearray(re_chunk.sub(b'', bytes(self._pre_buffer), 1))
                 else:
                     break
-                self._chunk_len = int(m.group(1), 16)
+                try:
+                    self._chunk_len = int(bytes(m.group(1)), 16)
+                except:
+                    self._chunk_len = None
                 if self._chunk_len:
                     continue
 
