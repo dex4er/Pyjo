@@ -194,7 +194,8 @@ class Pyjo_Message_Request(Pyjo.Message.object, Pyjo.String.Mixin.object):
         m = re_request.search(line)
 
         if not m:
-            return not self.error(message='Bad request start-line')
+            self.error(message='Bad request start-line')
+            return
 
         self.method = u(m.group(1), 'ascii')
         self.version = u(m.group(3), 'ascii')
