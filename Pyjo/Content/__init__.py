@@ -390,7 +390,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
         return False
 
     @property
-    def is_parsing_mode(self):
+    def is_parsing_body(self):
         """::
 
             boolean = content.is_parsing_body
