@@ -226,7 +226,7 @@ class Pyjo_Content_MultiPart(Pyjo.Content.object, Pyjo.String.Mixin.object):
 
     def _parse_multipart_body(self, boundary):
         # Whole part in buffer
-        pos = self._multipart(b("\x0d\x0a--" + boundary, 'ascii'))
+        pos = self._multipart.find(b"\x0d\x0a--" + b(boundary, 'ascii'))
         if pos < 0:
             length = len(self._multipart) - (len(boundary) + 8)
             if length <= 0:
