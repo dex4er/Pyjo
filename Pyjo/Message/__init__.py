@@ -85,7 +85,7 @@ import Pyjo.Upload
 from Pyjo.Base import lazy
 from Pyjo.JSON import j
 from Pyjo.Regexp import r
-from Pyjo.Util import b, convert, getenv, not_implemented, notnone
+from Pyjo.Util import b, convert, getenv, not_implemented, notnone, u
 
 
 re_filename = r(r'[; ]filename="((?:\\"|[^"])*)"')
@@ -162,6 +162,7 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
     _limited = False
     _raw_size = 0
     _state = None
+    _uploads = lazy(lambda self: {})
 
     @property
     def body(self):
@@ -210,9 +211,9 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
             params.parse(self.content.asset.slurp())
 
         # "multipart/form-data"
-        elif content_type.lower().find('multipart/form-data'):
-            for name, value in self._parse_formdata():
-                params.append((name, value),)
+        elif content_type.lower().find('multipart/form-data') >= 0:
+            for name, value, _ in self._parse_formdata():
+                params.append((name, u(value, params.charset)),)
 
         return params
 
