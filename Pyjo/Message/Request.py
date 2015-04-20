@@ -40,7 +40,6 @@ Classes
 
 import Pyjo.Cookie.Request
 import Pyjo.Message
-import Pyjo.String.Mixin
 import Pyjo.URL
 
 from Pyjo.Base import lazy
@@ -54,11 +53,10 @@ re_hostport = r(r'^([^:]*):?(.*)$')
 re_server_protocol = r(r'^([^/]+)/([^/]+)$')
 
 
-class Pyjo_Message_Request(Pyjo.Message.object, Pyjo.String.Mixin.object):
+class Pyjo_Message_Request(Pyjo.Message.object):
     """
     :mod:`Pyjo.Message.Request` inherits all attributes and methods from
-    :mod:`Pyjo.Message` and :mod:`Pyjo.String.Mixin`
-    and implements the following new ones.
+    :mod:`Pyjo.Message` and implements the following new ones.
     """
 
     environ = lazy(lambda self: {})
@@ -119,10 +117,7 @@ class Pyjo_Message_Request(Pyjo.Message.object, Pyjo.String.Mixin.object):
 
         String representation of an object shown in console.
         """
-        if self.method is not None:
-            return "{0}.new({1})".format(self.__module__, repr(b('{0} {1} HTTP/{2}\r\n'.format(self.method, self.url, self.version), 'ascii') + bytes(self.content.headers) + bytes(self.content.asset.slurp())))
-        else:
-            return "{0}.new()".format(self.__module__)
+        return "<{0}.{1} method={2} url={3} version={4}>".format(self.__class__.__module__, self.__class__.__name__, repr(self.method), repr(self.url), repr(self.version))
 
     def clone(self):
         """::

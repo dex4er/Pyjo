@@ -39,7 +39,6 @@ Classes
 
 import Pyjo.Cookie.Response
 import Pyjo.Message
-import Pyjo.String.Mixin
 
 from Pyjo.Regexp import r
 from Pyjo.Util import b, notnone
@@ -114,11 +113,10 @@ MESSAGES = {
 }
 
 
-class Pyjo_Message_Response(Pyjo.Message.object, Pyjo.String.Mixin.object):
+class Pyjo_Message_Response(Pyjo.Message.object):
     """
     :mod:`Pyjo.Message.Response` inherits all attributes and methods from
-    :mod:`Pyjo.Message` and :mod:`Pyjo.String.Mixin`
-    and implements the following new ones.
+    :mod:`Pyjo.Message` and implements the following new ones.
     """
 
     code = None
@@ -138,6 +136,15 @@ class Pyjo_Message_Response(Pyjo.Message.object, Pyjo.String.Mixin.object):
 
     HTTP response status message.
     """
+
+    def __repr__(self):
+        """::
+
+            string = repr(res)
+
+        String representation of an object shown in console.
+        """
+        return "<{0}.{1} code={2} message={3}>".format(self.__class__.__module__, self.__class__.__name__, repr(self.code), repr(self.message))
 
     @property
     def cookies(self):
