@@ -312,10 +312,10 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
         """
         if self._header_buffer is None:
             headers = bytearray(self.headers.to_bytes())
-            if headers == b'\x0d\x0a\x0d\x0a':
-                self._header_buffer = bytearray(b'\x0d\x0a')
+            if headers:
+                self._header_buffer = headers + b"\x0d\x0a\x0d\x0a"
             else:
-                self._header_buffer = headers
+                self._header_buffer = bytearray(b"\x0d\x0a")
 
         return self._header_buffer[offset:131072]
 

@@ -116,8 +116,7 @@ class Pyjo_Content_MultiPart(Pyjo.Content.object, Pyjo.String.Mixin.object):
             return length
 
         # Calculate length of whole body
-        boundary_length = len(self.build_boundary()) + 6
-        length = boundary_length - 2
+        length = boundary_length = len(self.build_boundary()) + 6
         for part in self.parts:
             length += part.header_size + part.body_size + boundary_length
 
