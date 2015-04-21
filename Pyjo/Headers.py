@@ -64,7 +64,7 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.String.Mixin.object):
     :mod:`Pyjo.Base` and :mod:`Pyjo.String.Mixin` and implements the following new ones.
     """
 
-    charset = 'ascii'
+    charset = 'utf-8'
     """::
 
         charset = headers.charset
