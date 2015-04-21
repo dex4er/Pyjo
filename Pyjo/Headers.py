@@ -64,6 +64,15 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.String.Mixin.object):
     :mod:`Pyjo.Base` and :mod:`Pyjo.String.Mixin` and implements the following new ones.
     """
 
+    charset = 'ascii'
+    """::
+
+        charset = headers.charset
+        headers.charset = 'ascii'
+
+    Charset used for encoding and decoding, defaults to ``ascii``.
+    """
+
     max_line_size = lazy(lambda self: convert(getenv('PYJO_MAX_LINE_SIZE'), int) or 8192)
     """::
 
@@ -565,7 +574,7 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.String.Mixin.object):
         if key not in self._headers:
             return
 
-        return ', '.join(map(lambda i: u(i), self._headers[key]))
+        return ', '.join(map(lambda i: u(i, self.charset), self._headers[key]))
 
     @property
     def host(self):

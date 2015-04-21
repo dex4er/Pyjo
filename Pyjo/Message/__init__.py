@@ -691,7 +691,7 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
         if not content.is_multipart:
             return
 
-        # TODO charset = content.charset or self.default_charset
+        charset = content.charset or self.default_charset
 
         # Check all parts recursively
         parts = [content]
@@ -716,7 +716,22 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
             if not upload:
                 part = part.asset.slurp()
 
-            # TODO charset?
+            if charset:
+                if name:
+                    try:
+                        name = u(name, charset)
+                    except:
+                        pass
+                if filename:
+                    try:
+                        filename = u(filename, charset)
+                    except:
+                        pass
+                if not upload:
+                    try:
+                        part = u(part, charset)
+                    except:
+                        pass
 
             yield name, part, filename
 
