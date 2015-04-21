@@ -228,15 +228,10 @@ class Pyjo_Message_Request(Pyjo.Message.object):
 
         # Basic proxy authentication
         proxy = self.proxy
-        if not proxy:
-            return self
-
-        info = proxy.userinfo
-        if not info:
-            return self
-
-        if not headers.proxy_authorization:
-            headers.authorization = 'Basic ' + b64_encode(b(info), '')
+        if proxy:
+            info = proxy.userinfo
+            if info and not headers.proxy_authorization:
+                headers.proxy_authorization = 'Basic ' + b64_encode(b(info), '')
 
         return self
 
