@@ -434,12 +434,15 @@ class Pyjo_Message_Request(Pyjo.Message.object):
         Set message cookies, usually :mod:`Pyjo.Cookie.Response` object.
         """
         if isinstance(cookie, dict):
-            value = Pyjo.Cookie.Request.new(**cookie)
-        value = str(value)
+            value = Pyjo.Cookie.Request.new(**cookie).to_str()
+        else:
+            value = str(cookie)
+
         if self.headers.cookie is not None:
             self.headers.cookie += '; ' + value
         else:
             self.headers.cookie = value
+
         return self
 
     def to_bytes(self):
