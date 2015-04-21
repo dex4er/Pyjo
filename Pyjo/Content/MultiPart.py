@@ -165,6 +165,7 @@ class Pyjo_Content_MultiPart(Pyjo.Content.object, Pyjo.String.Mixin.object):
         clone = super(Pyjo_Content_MultiPart, self).clone()
         if clone is not None:
             clone.parts = self.parts
+            return clone
         else:
             return
 
