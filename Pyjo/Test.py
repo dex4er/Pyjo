@@ -368,9 +368,9 @@ def _format_stack(stack):
         t = entry.get('type', '')
         idx = entry.get('idx', 0)
         if t == 'list' or t == 'tuple' or t == 'dict':
-            vname += '[{0}]'.format(idx)
+            vname += '[{0}]'.format(repr(idx))
         elif t == 'set':
-            vname = 'sorted({0})[{1}]'.format(vname, idx)
+            vname = 'sorted({0})[{1}]'.format(vname, repr(idx))
 
     vals = stack[-1]['vals']
     vnames = ['     ' + re.sub(r'\$FOO', 'got', vname),
