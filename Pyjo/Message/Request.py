@@ -462,7 +462,7 @@ class Pyjo_Message_Request(Pyjo.Message.object):
             offset = header.find(basic)
             if offset >= 0:
                 offset += len(basic)
-                auth = header[basic:]
+                auth = header[len(basic):]
                 try:
                     return u(b64_decode(auth))
                 except:
