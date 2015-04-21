@@ -144,6 +144,7 @@ class Pyjo_Message_Request(Pyjo.Message.object):
         """::
 
             cookies = req.cookies
+            req.cookies = cookies
 
         Access request cookies, usually :mod:`Pyjo.Cookie.Request` objects. ::
 
@@ -158,6 +159,13 @@ class Pyjo_Message_Request(Pyjo.Message.object):
             return Pyjo.Cookie.Request.parse(cookies)
         else:
             return
+
+    @cookies.setter
+    def cookies(self, value):
+        headers = self.headers
+        headers.cookies = []
+        for cookie in value:
+            self.set_cookie(cookie)
 
     def every_param(self, name):
         """::
