@@ -263,8 +263,8 @@ class Pyjo_Message_Request(Pyjo.Message.object):
 
             # Proxy
             elif self.proxy and url.protocol != 'https':
-                if self.is_handshake:
-                    path = url.clone().userinfo = None
+                if not self.is_handshake:
+                    path = url.clone().set(userinfo=None)
 
             self._start_buffer = bytearray(b("{0} {1} HTTP/{2}\x0d\x0a".format(method, path, self.version)))
 
@@ -412,7 +412,7 @@ class Pyjo_Message_Request(Pyjo.Message.object):
 
     @proxy.setter
     def proxy(self, value):
-        if isinstance(value, Pyjo.URL.object):
+        if isinstance(value, Pyjo.URL.object) or not value:
             self._proxy = value
         else:
             self._proxy = Pyjo.URL.new(value)
