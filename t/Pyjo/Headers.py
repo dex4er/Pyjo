@@ -161,7 +161,7 @@ Foo: first again
     }
     is_deeply_ok(headers.to_dict_list(), d, 'right structure')
     is_ok(headers.header('Foo'), 'first second third, first again second ":again"', 'right value')
-    headers = Pyjo.Headers.new().parse(headers.to_str())
+    headers = Pyjo.Headers.new().parse(headers.to_str() + "\x0d\x0a\x0d\x0a")
     ok(headers.is_finished, 'parser is_ok(finished')
     is_deeply_ok(headers.to_dict_list(), d, 'successful roundtrip')
     d = {
@@ -205,7 +205,7 @@ Foo: first again
     d = headers.to_dict_list()
     is_deeply_ok(d['X-Test'], ['23', '24'], 'right structure')
     is_deeply_ok(d['X-Test2'], ['foo'], 'right structure')
-    headers = Pyjo.Headers.new().parse(headers.to_str())
+    headers = Pyjo.Headers.new().parse(headers.to_str() + "\x0d\x0a\x0d\x0a")
     is_deeply_ok(headers.to_dict_list(), {'X-Test': ['23', '24'], 'X-Test2': ['foo']}, 'right structure')
 
     # Headers in chunks

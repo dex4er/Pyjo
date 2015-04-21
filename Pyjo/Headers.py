@@ -103,6 +103,15 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.String.Mixin.object):
         if path is not None:
             self.parse(path)
 
+    def __repr__(self):
+        """::
+
+            reprstring = headers()
+
+        String representation of an object shown in console.
+        """
+        return "{0}.new({1})".format(self.__module__, repr(self.to_str() + '\x0d\x0a\x0d\x0a'))
+
     @property
     def accept(self):
         """::
@@ -1034,7 +1043,7 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.String.Mixin.object):
             for v in self._headers[name.lower()]:
                 headers.append(name + b': ' + v)
 
-        return b"\x0d\x0a".join(headers) + b"\x0d\x0a\x0d\x0a"
+        return b"\x0d\x0a".join(headers)
 
     def to_str(self):
         """::
