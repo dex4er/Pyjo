@@ -701,7 +701,11 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
                 parts = part.parts + parts
                 continue
 
-            disposition = part.headers.content_disposition
+            try:
+                disposition = part.headers.content_disposition
+            except:
+                disposition = None
+
             if not disposition:
                 continue
 
