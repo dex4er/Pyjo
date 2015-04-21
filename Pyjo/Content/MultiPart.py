@@ -183,9 +183,9 @@ class Pyjo_Content_MultiPart(Pyjo.Content.object, Pyjo.String.Mixin.object):
         # First boundary
         boundary = self.build_boundary()
         boundary_length = len(boundary) + 6
-        length = boundary_length - 4
+        length = boundary_length - 2
         if length > offset:
-            return bytearray(b('--' + boundary, 'ascii')[offset:])
+            return bytearray(b('--' + boundary + "\x0d\x0a", 'ascii')[offset:])
 
         # Prepare content part by part
         parts = self.parts

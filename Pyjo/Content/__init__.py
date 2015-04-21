@@ -311,7 +311,11 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
         Get a chunk of the headers starting from a specific position.
         """
         if self._header_buffer is None:
-            self._header_buffer = bytearray(self.headers.to_bytes())
+            headers = bytearray(self.headers.to_bytes())
+            if headers == b'\x0d\x0a\x0d\x0a':
+                self._header_buffer = bytearray(b'\x0d\x0a')
+            else:
+                self._header_buffer = headers
 
         return self._header_buffer[offset:131072]
 
