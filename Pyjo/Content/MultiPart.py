@@ -116,7 +116,8 @@ class Pyjo_Content_MultiPart(Pyjo.Content.object, Pyjo.String.Mixin.object):
             return length
 
         # Calculate length of whole body
-        length = boundary_length = len(self.build_boundary()) + 6
+        boundary_length = len(self.build_boundary()) + 6
+        length = boundary_length - 2
         for part in self.parts:
             length += part.header_size + part.body_size + boundary_length
 
@@ -181,9 +182,9 @@ class Pyjo_Content_MultiPart(Pyjo.Content.object, Pyjo.String.Mixin.object):
         # First boundary
         boundary = self.build_boundary()
         boundary_length = len(boundary) + 6
-        length = boundary_length - 2
+        length = boundary_length - 4
         if length > offset:
-            return bytearray(b('--' + boundary + "\x0d\x0a", 'ascii')[offset:])
+            return bytearray(b('--' + boundary, 'ascii')[offset:])
 
         # Prepare content part by part
         parts = self.parts
