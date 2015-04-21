@@ -153,7 +153,7 @@ class Pyjo_Message_Request(Pyjo.Message.object):
         """
         # Parse cookies
         headers = self.headers
-        cookies = headers.set_cookie
+        cookies = headers.cookie
         if cookies is not None:
             return Pyjo.Cookie.Request.parse(cookies)
         else:
