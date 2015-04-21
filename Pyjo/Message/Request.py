@@ -254,7 +254,7 @@ class Pyjo_Message_Request(Pyjo.Message.object):
             method = self.method.upper()
             if method == 'CONNECT':
                 port = url.port or (443 if url.protocol == 'https' else 80)
-                path = '{0}:{1}'.format(self.ihost, port)
+                path = '{0}:{1}'.format(url.ihost, port)
 
             # Proxy
             elif self.proxy and url.protocol != 'https':
