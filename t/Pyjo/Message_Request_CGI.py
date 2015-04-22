@@ -15,7 +15,7 @@ class UnitTest(Pyjo.Test.UnitTest):
 if __name__ == '__main__':
     from Pyjo.Test import *  # @UnusedWildImport
 
-    from Pyjo.Util import b, setenv
+    from Pyjo.Util import setenv
 
     import Pyjo.Message.Request
 
