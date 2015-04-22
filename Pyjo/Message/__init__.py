@@ -329,7 +329,7 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
         """
         if kwargs:
             self._error = kwargs
-            self.finish()
+            return self.finish()
         else:
             return self._error
 

@@ -41,7 +41,7 @@ import Pyjo.Cookie.Response
 import Pyjo.Message
 
 from Pyjo.Regexp import r
-from Pyjo.Util import b, notnone
+from Pyjo.Util import b, convert, notnone
 
 
 re_line = r(br'^(.*?)\x0d?\x0a')
@@ -191,13 +191,22 @@ class Pyjo_Message_Response(Pyjo.Message.object):
             del buf[:m.end()]
         else:
             return
+
         m = re_http.search(line)
         if not m:
-            return
+            return not self.error(message='Bad response start-line')
 
-        self.version = m.group(1).decode('ascii')
-        self.code = int(m.group(2))
-        self.message = m.group(3).decode('ascii')
+        try:
+            self.version = m.group(1).decode('ascii')
+        except:
+            self.version = None
+
+        self.code = convert(m.group(2), int)
+
+        try:
+            self.message = m.group(3).decode('ascii')
+        except:
+            self.message = None
 
         content = self.content
         if self.is_empty:
@@ -211,7 +220,7 @@ class Pyjo_Message_Response(Pyjo.Message.object):
         if self.version == '1.0':
             content.expect_close = True
 
-        return bool(self.message)
+        return True
 
     def fix_headers(self):
         """::
