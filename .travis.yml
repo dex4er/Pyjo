@@ -11,8 +11,6 @@ matrix:
     env: PYTHONIOENCODING=''
   - python: "pypy"
     env: PYTHONIOENCODING='utf-8'
-  - python: "pypy3"
-    env: PYTHONIOENCODING='utf-8'
 before_install:
   - sudo apt-get update -qq
 install:
