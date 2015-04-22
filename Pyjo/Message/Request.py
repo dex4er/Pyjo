@@ -492,7 +492,7 @@ class Pyjo_Message_Request(Pyjo.Message.object):
                 m = re_hostport.search(host)
                 if m:
                     host = m.group(1)
-                    port = convert(m.group(2), int, 0)
+                    port = convert(m.group(2), int, None)
                 base.host = host
                 base.port = port
 

@@ -206,7 +206,7 @@ class Pyjo_URL(Pyjo.Base.object, Pyjo.String.Mixin.object):
         m = re_port.search(authority)
         if m:
             authority = re_port.sub(b'', authority, 1)
-            self.port = convert(m.group(1), int, 0)
+            self.port = convert(m.group(1), int, None)
 
         # Host
         host = url_unescape(authority)
