@@ -135,7 +135,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
     Content headers, defaults to a :mod:`Pyjo.Headers` object.
     """
 
-    max_buffer_size = lazy(lambda self: convert(getenv('PYJO_MAX_BUFFER_SIZE', int, 0)) or 262144)
+    max_buffer_size = lazy(lambda self: convert(getenv('PYJO_MAX_BUFFER_SIZE', '0'), int, 0) or 262144)
     """::
 
         size = content.max_buffer_size
@@ -145,7 +145,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
     the ``PYJO_MAX_BUFFER_SIZE` environment variable or ``262144`` (256KB).
     """
 
-    max_leftover_size = lazy(lambda self: convert(getenv('PYJO_MAX_LEFTOVER_SIZE', int, 0)) or 262144)
+    max_leftover_size = lazy(lambda self: convert(getenv('PYJO_MAX_LEFTOVER_SIZE', '0'), int, 0) or 262144)
     """::
 
         size = content.max_leftover_size
