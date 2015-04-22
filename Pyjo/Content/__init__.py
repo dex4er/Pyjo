@@ -83,7 +83,7 @@ import Pyjo.Headers
 
 from Pyjo.Base import lazy
 from Pyjo.Regexp import r
-from Pyjo.Util import b, getenv, not_implemented, notnone, u
+from Pyjo.Util import b, convert, getenv, not_implemented, notnone, u
 
 import zlib
 
@@ -135,9 +135,17 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
     Content headers, defaults to a :mod:`Pyjo.Headers` object.
     """
 
-    max_buffer_size = int(getenv('PYJO_MAX_BUFFER_SIZE', 0)) or 262144
+    max_buffer_size = lazy(lambda self: convert(getenv('PYJO_MAX_BUFFER_SIZE', int, 0)) or 262144)
+    """::
 
-    max_leftover_size = int(getenv('PYJO_MAX_LEFTOVER_SIZE', 0)) or 262144
+        size = content.max_buffer_size
+        content.max_buffer_size = 1024
+
+    Maximum size in bytes of buffer for content parser, defaults to the value of
+    the ``PYJO_MAX_BUFFER_SIZE` environment variable or ``262144`` (256KB).
+    """
+
+    max_leftover_size = lazy(lambda self: convert(getenv('PYJO_MAX_LEFTOVER_SIZE', int, 0)) or 262144)
     """::
 
         size = content.max_leftover_size
