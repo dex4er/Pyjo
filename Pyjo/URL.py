@@ -44,7 +44,7 @@ import Pyjo.Parameters
 import Pyjo.Path
 
 from Pyjo.Regexp import r
-from Pyjo.Util import b, u, url_escape, url_unescape
+from Pyjo.Util import b, convert, u, url_escape, url_unescape
 
 
 re_authority = r(br'^([^\@]+)\@')
@@ -206,7 +206,7 @@ class Pyjo_URL(Pyjo.Base.object, Pyjo.String.Mixin.object):
         m = re_port.search(authority)
         if m:
             authority = re_port.sub(b'', authority, 1)
-            self.port = int(m.group(1))
+            self.port = convert(m.group(1), int, 0)
 
         # Host
         host = url_unescape(authority)

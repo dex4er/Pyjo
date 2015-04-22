@@ -44,7 +44,7 @@ import Pyjo.URL
 
 from Pyjo.Base import lazy
 from Pyjo.Regexp import r
-from Pyjo.Util import b, b64_decode, b64_encode, notnone, u
+from Pyjo.Util import b, b64_decode, b64_encode, convert, notnone, u
 
 
 re_start_line = r(br'^\s*(.*?)\x0d?\x0a')
@@ -491,7 +491,8 @@ class Pyjo_Message_Request(Pyjo.Message.object):
                 host, port = value, None
                 m = re_hostport.search(host)
                 if m:
-                    host, port = m.groups()
+                    host = m.group(1)
+                    port = convert(m.group(2), int, 0)
                 base.host = host
                 base.port = port
 
