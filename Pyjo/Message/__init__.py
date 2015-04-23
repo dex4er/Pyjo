@@ -591,6 +591,15 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
         except:
             return body.decode('iso-8859-1')
 
+    def to_bytes(self):
+        """::
+
+            bstring = msg.to_bytes()
+
+        Render whole message.
+        """
+        return bytes(self.build_start_line() + self.build_headers() + self.build_body())
+
     def upload(self, name):
         """::
 

@@ -137,6 +137,8 @@ class Pyjo_Message_Response(Pyjo.Message.object):
     HTTP response status message.
     """
 
+    _start_buffer = None
+
     def __repr__(self):
         """::
 
@@ -295,15 +297,6 @@ class Pyjo_Message_Response(Pyjo.Message.object):
         value = str(value)
         self.headers.add('Set-Cookie', value)
         return self
-
-    def to_bytes(self):
-        """::
-
-            bstring = req.to_bytes()
-
-        Turn message into a bytes string.
-        """
-        return b("HTTP/{0} {1} {2}\x0d\x0a".format(self.version, self.code, self.message), 'ascii') + bytes(self.headers) + bytes(self.body)
 
 
 new = Pyjo_Message_Response.new
