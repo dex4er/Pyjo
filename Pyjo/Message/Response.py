@@ -153,6 +153,7 @@ class Pyjo_Message_Response(Pyjo.Message.object):
         """::
 
             cookies = res.cookies
+            res.cookies = cookies
 
         Access response cookies, usually :mod:`Pyjo.Cookie.Response` objects. ::
 
@@ -167,6 +168,13 @@ class Pyjo_Message_Response(Pyjo.Message.object):
             return Pyjo.Cookie.Response.parse(cookies)
         else:
             return
+
+    @cookies.setter
+    def cookies(self, value):
+        headers = self.headers
+        headers.cookies = []
+        for cookie in value:
+            self.set_cookie(cookie)
 
     def default_message(self, code=None):
         """::
