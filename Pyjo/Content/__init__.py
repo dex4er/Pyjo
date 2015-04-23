@@ -623,7 +623,11 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
             self._gz = zlib.decompressobj(zlib.MAX_WBITS | 16)
         gz = self._gz
 
-        out = gz.decompress(chunk)
+        try:
+            out = gz.decompress(chunk)
+        except zlib.error:
+            out = b''
+
         l = len(out)
 
         if l > 0:
