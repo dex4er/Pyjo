@@ -505,7 +505,7 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
             print(msg.json()['foo']['bar'][23])
             print(msg.json('/foo/bar/23'))
         """
-        if self.content.is_multipart():
+        if self.content.is_multipart:
             return
 
         if self._json is None:
