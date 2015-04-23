@@ -624,7 +624,7 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
         gz = self._gz
 
         try:
-            out = gz.decompress(chunk)
+            out = gz.decompress(bytes(chunk))
         except zlib.error:
             out = b''
 
