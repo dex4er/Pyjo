@@ -48,6 +48,7 @@ import Pyjo.Content.MultiPart
 import Pyjo.String.Mixin
 
 from Pyjo.Base import lazy
+from Pyjo.Util import convert
 
 
 class Pyjo_Content_Single(Pyjo.Content.object, Pyjo.String.Mixin.object):
@@ -108,7 +109,7 @@ class Pyjo_Content_Single(Pyjo.Content.object, Pyjo.String.Mixin.object):
         Content size in bytes.
         """
         if self._dynamic:
-            return self.headers.content_length
+            return convert(self.headers.content_length, int, 0)
         else:
             return self.asset.size
 

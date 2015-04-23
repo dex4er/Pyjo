@@ -50,7 +50,7 @@ import Pyjo.String.Mixin
 
 from Pyjo.Base import lazy
 from Pyjo.Regexp import r
-from Pyjo.Util import b, b64_encode, notnone, rand
+from Pyjo.Util import b, b64_encode, convert, notnone, rand
 
 
 re_non_word = r(r'\W')
@@ -111,7 +111,7 @@ class Pyjo_Content_MultiPart(Pyjo.Content.object, Pyjo.String.Mixin.object):
         Content size in bytes.
         """
         # Check for existing Content-Lenght header
-        length = self.headers.content_length
+        length = convert(self.headers.content_length, int, 0)
         if length:
             return length
 
