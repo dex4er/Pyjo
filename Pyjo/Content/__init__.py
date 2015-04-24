@@ -625,17 +625,19 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
 
         try:
             out = gz.decompress(bytes(chunk))
+
+            l = len(out)
+
+            if l > 0:
+                self.emit('read', out)
+
+            self._gz_size += l
+
         except zlib.error:
             out = b''
 
-        l = len(out)
-
-        if l > 0:
-            self.emit('read', out)
-
-        self._gz_size += l
-
         # Check buffer size
+        # TODO workaround for pypy bug and always empty unconsumed tail
         if len(gz.unconsumed_tail) > self.max_buffer_size:
             self._state = 'finished'
             self._limit = True

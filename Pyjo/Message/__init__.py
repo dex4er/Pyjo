@@ -587,8 +587,8 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
         body = self.body
         charset = self.content.charset or 'utf-8'
         try:
-            return body.decode(charset)
-        except:
+            return bytes(body).decode(charset)
+        except UnicodeDecodeError:
             return body.decode('iso-8859-1')
 
     def to_bytes(self):
