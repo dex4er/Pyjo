@@ -301,8 +301,9 @@ class Pyjo_Message_Response(Pyjo.Message.object):
         Set message cookies, usually :mod:`Pyjo.Cookie.Response` object.
         """
         if isinstance(cookie, dict):
-            value = Pyjo.Cookie.Response.new(**cookie)
-        value = str(value)
+            value = str(Pyjo.Cookie.Response.new(**cookie))
+        else:
+            value = str(cookie)
         self.headers.add('Set-Cookie', value)
         return self
 
