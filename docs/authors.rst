@@ -1,12 +1,12 @@
 Authors
 =======
 
-Pyjo
-----
+Pyjoyment
+---------
 
 `Piotr Roszatycki <mailto:piotr.roszatycki@gmail.com>`_
 
-Pyjo is based on `Mojolicious <http://mojolicio.us>`_ framework.
+Pyjoyment is based on `Mojolicious <http://mojolicio.us>`_ framework.
 
 Mojolicious
 -----------

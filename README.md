@@ -1,15 +1,15 @@
-[![Build Status](https://travis-ci.org/dex4er/Pyjo.png?branch=master)](https://travis-ci.org/dex4er/Pyjo)
+[![Build Status](https://travis-ci.org/dex4er/Pyjoyment.png?branch=master)](https://travis-ci.org/dex4er/Pyjoyment)
 
-Pyjo
-====
+Pyjoyment
+=========
 
 A next generation web framework for the Python programming language.
 
-Based on Mojo.
+Based on Mojolicious.
 
 
-Mojo
-====
+Mojolicious
+===========
 
 A next generation web framework for the Perl programming language.
 

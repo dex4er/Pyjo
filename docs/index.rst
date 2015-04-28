@@ -1,10 +1,10 @@
-============================
-Pyjo |release| documentation
-============================
+=================================
+Pyjoyment |release| documentation
+=================================
 
 A next generation web framework for the Python programming language.
 
-Based on Mojo.
+Based on Mojolicious.
 
 
 Contents:
