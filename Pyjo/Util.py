@@ -155,7 +155,10 @@ def not_implemented(method):
 def notnone(*args):
     for a in args:
         if a is not None:
-            return a
+            if callable(a):
+                return a()
+            else:
+                return a
 
 
 re_b_quote = r(br'(["\\])')
