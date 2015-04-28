@@ -35,6 +35,7 @@ if __name__ == '__main__':
     is_ok(path.to_str(), '', 'no path')
     is_ok(path.to_abs_str(), '/', 'right absolute path')
     is_ok(path.to_route(), '/', 'right route')
+    is_ok(path.to_dir(), '', 'no path')
 
     # Advanced
     path = Pyjo.Path.new('/AZaz09-._~!$&\'()*+,;=:@')

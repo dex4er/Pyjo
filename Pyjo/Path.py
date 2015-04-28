@@ -317,8 +317,9 @@ class Pyjo_Path(Pyjo.Base.object, Pyjo.String.Mixin.object):
             Pyjo.Path.new('i/%E2%99%A5/pyjo').to_dir()
         """
         clone = self.clone()
-        if not clone.trailing_slash:
-            clone.parts.pop()
+        parts = clone.parts
+        if not clone.trailing_slash and parts:
+            parts.pop()
         clone.trailing_slash = bool(clone.parts)
         return clone
 
