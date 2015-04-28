@@ -2,7 +2,7 @@
 
 """
 Pyjo.String.Unicode - Unicode string
-===================================
+====================================
 ::
 
     import Pyjo.String.Unicode

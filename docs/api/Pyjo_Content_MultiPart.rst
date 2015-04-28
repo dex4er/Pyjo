@@ -2,4 +2,4 @@
     :members:
     :special-members:
 
-    .. automethod:: __init__
+    .. automethod:: Pyjo_Content_MultiPart.__init__

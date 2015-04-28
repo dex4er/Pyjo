@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Pyjo documentation build configuration file, created by
+# Pyjoyment documentation build configuration file, created by
 # sphinx-quickstart on Wed Dec 24 10:39:56 2014.
 #
 # This file is execfile()d with the current directory set to its
@@ -48,8 +48,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'Pyjo'
-copyright = '2014, Piotr Roszatycki'
+project = 'Pyjoyment'
+copyright = '2014-2015, Piotr Roszatycki'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -181,7 +181,7 @@ html_split_index = False
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Pyjodoc'
+htmlhelp_basename = 'pydoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -211,7 +211,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'Pyjo.tex', 'Pyjo Documentation',
+  ('index', 'Pyjoyment.tex', 'Pyjoyment Documentation',
    'Piotr Roszatycki', 'manual'),
 ]
 
@@ -241,7 +241,7 @@ latex_show_urls = True
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'Pyjo', 'Pyjo Documentation',
+    ('index', 'Pyjoyment', 'Pyjoyment Documentation',
      ['Piotr Roszatycki'], 1)
 ]
 
@@ -255,8 +255,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'Pyjo', 'Pyjo Documentation',
-   'Piotr Roszatycki', 'Pyjo', 'A next generation web framework',
+  ('index', 'Pyjoyment', 'Pyjoyment Documentation',
+   'Piotr Roszatycki', 'Pyjoyment', 'A next generation web framework',
    'Miscellaneous'),
 ]
 
@@ -276,13 +276,13 @@ texinfo_documents = [
 # -- Options for Epub output ----------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = 'Pyjo'
+epub_title = 'Pyjoyment'
 epub_author = 'Piotr Roszatycki'
 epub_publisher = 'Piotr Roszatycki'
-epub_copyright = '2014, Piotr Roszatycki'
+epub_copyright = '2014-2015, Piotr Roszatycki'
 
 # The basename for the epub file. It defaults to the project name.
-#epub_basename = 'Pyjo'
+#epub_basename = 'Pyjoyment'
 
 # The HTML theme for the epub output. Since the default themes are not optimized
 # for small screen space, using the same theme for HTML and epub output is

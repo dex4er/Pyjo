@@ -2,4 +2,4 @@
     :members:
     :special-members:
 
-    .. automethod:: __init__
+    .. automethod:: Pyjo_JSON_Pointer.__init__
