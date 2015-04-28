@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/dex4er/Pyjoyment.png?branch=master)](https://travis-ci.org/dex4er/Pyjoyment)
+[![Documentation Status](https://readthedocs.org/projects/pyjoyment/badge/?version=latest)](http://pyjoyment.readthedocs.org/en/latest/)
 
 Pyjoyment
 =========
