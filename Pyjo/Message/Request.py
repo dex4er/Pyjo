@@ -164,8 +164,7 @@ class Pyjo_Message_Request(Pyjo.Message.object):
     def cookies(self, value):
         headers = self.headers
         headers.cookies = []
-        for cookie in value:
-            self.set_cookie(cookie)
+        self.set_cookie(*value)
 
     def every_param(self, name):
         """::
@@ -433,23 +432,25 @@ class Pyjo_Message_Request(Pyjo.Message.object):
         """
         return self.url.query
 
-    def set_cookie(self, cookie):
+    def set_cookie(self, *cookies):
         """::
 
+            req = req.set_cookie(cookie, cookie, cookie)
             req = req.set_cookie(Pyjo.Message.Response.new(name='foo', value='bar'))
             req = req.set_cookie({'name': 'foo', 'value': 'bar'})
 
         Set message cookies, usually :mod:`Pyjo.Cookie.Response` object.
         """
-        if isinstance(cookie, dict):
-            value = Pyjo.Cookie.Request.new(**cookie).to_str()
-        else:
-            value = str(cookie)
+        for cookie in cookies:
+            if isinstance(cookie, dict):
+                value = Pyjo.Cookie.Request.new(**cookie).to_str()
+            else:
+                value = str(cookie)
 
-        if self.headers.cookie is not None:
-            self.headers.cookie += '; ' + value
-        else:
-            self.headers.cookie = value
+            if self.headers.cookie is not None:
+                self.headers.cookie += '; ' + value
+            else:
+                self.headers.cookie = value
 
         return self
 
