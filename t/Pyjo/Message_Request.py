@@ -43,7 +43,7 @@ if __name__ == '__main__':
     ok(finished.get(), 'finish event has been emitted')
     ok(req.is_finished, 'request is finished')
     is_ok(req.content.leftovers, b'', 'no leftovers')
-    is_deeply_ok(req.error(), {'message': 'Maximum message size exceeded'}, 'right error')
+    is_deeply_ok(req.error, {'message': 'Maximum message size exceeded', 'code': None}, 'right error')
     ok(req.is_limit_exceeded, 'limit is exceeded')
     is_ok(req.method, 'PUT', 'right method')
     is_ok(req.version, '1.1', 'right version')
@@ -58,7 +58,7 @@ if __name__ == '__main__':
     req.parse(b"Cookie: " + b'a=b; ' * 131072 + b"\x0d\x0a")
     req.parse(b"Content-Length: 0\x0d\x0a\x0d\x0a")
     ok(req.is_finished, 'request is finished')
-    is_deeply_ok(req.error(), {'message': 'Maximum header size exceeded'}, 'right error')
+    is_deeply_ok(req.error, {'message': 'Maximum header size exceeded', 'code': None}, 'right error')
     ok(req.is_limit_exceeded, 'limit is exceeded')
     is_ok(req.method, 'GET', 'right method')
     is_ok(req.version, '1.1', 'right version')
@@ -73,7 +73,7 @@ if __name__ == '__main__':
     req.parse(b"Content-Length: 4\x0d\x0aCookie: " + b'a=b; ' * 131072 + b"\x0d\x0a" +
               b"X-Test: 23\x0d\x0a\x0d\x0aabcd")
     ok(req.is_finished, 'request is finished')
-    is_deeply_ok(req.error(), {'message': 'Maximum header size exceeded'}, 'right error')
+    is_deeply_ok(req.error, {'message': 'Maximum header size exceeded', 'code': None}, 'right error')
     ok(req.is_limit_exceeded, 'limit is exceeded')
     is_ok(req.method, 'GET', 'right method')
     is_ok(req.version, '1.1', 'right version')
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     req.parse(b"GET / HTTP/1.1\x0d\x0a")
     req.parse(b"Content-Length: 655360\x0d\x0a\x0d\x0a" + b'a=b; ' * 131072)
     ok(req.is_finished, 'request is finished')
-    is_deeply_ok(req.error(), {}, 'no error')
+    is_deeply_ok(req.error, {}, 'no error')
     is_ok(req.method, 'GET', 'right method')
     is_ok(req.version, '1.1', 'right version')
     is_ok(req.url, '/', 'right URL')
@@ -97,7 +97,7 @@ if __name__ == '__main__':
     req = Pyjo.Message.Request.new()
     req.parse(b"12345\x0d\x0a")
     ok(req.is_finished, 'request is finished')
-    is_deeply_ok(req.error(), {'message': 'Bad request start-line'}, 'right error')
+    is_deeply_ok(req.error, {'message': 'Bad request start-line', 'code': None}, 'right error')
     ok(not req.is_limit_exceeded, 'limit is not exceeded')
 
     # Parse broken HTTP 1.1 message with header exceeding line limit
@@ -107,7 +107,7 @@ if __name__ == '__main__':
     ok(not req.is_limit_exceeded, 'limit is not exceeded')
     req.parse(b"Foo: " + b'a' * 8192)
     ok(req.is_finished, 'request is finished')
-    is_deeply_ok(req.error(), {'message': 'Maximum header size exceeded'}, 'right error')
+    is_deeply_ok(req.error, {'message': 'Maximum header size exceeded', 'code': None}, 'right error')
     ok(req.is_limit_exceeded, 'limit is exceeded')
     is_ok(req.method, 'GET', 'right method')
     is_ok(req.version, '1.1', 'right version')
@@ -121,7 +121,7 @@ if __name__ == '__main__':
     is_ok(req.headers.max_lines, 100, 'right number')
     req.parse(b"GET /" + b'abcd' * 131072 + b" HTTP/1.1")
     ok(req.is_finished, 'request is finished')
-    is_deeply_ok(req.error(), {'message': 'Maximum start-line size exceeded'}, 'right error')
+    is_deeply_ok(req.error, {'message': 'Maximum start-line size exceeded', 'code': None}, 'right error')
     is_ok(req.method, 'GET', 'right method')
     is_ok(req.version, '1.1', 'right version')
     is_ok(req.url, '', 'no URL')
@@ -134,7 +134,7 @@ if __name__ == '__main__':
     req.parse(b'GET /')
     req.parse(b'abcd' * 131072)
     ok(req.is_finished, 'request is finished')
-    is_deeply_ok(req.error(), {'message': 'Maximum start-line size exceeded'}, 'right error')
+    is_deeply_ok(req.error, {'message': 'Maximum start-line size exceeded', 'code': None}, 'right error')
     is_ok(req.method, 'GET', 'right method')
     is_ok(req.version, '1.1', 'right version')
     is_ok(req.url, '', 'no URL')
@@ -160,7 +160,7 @@ if __name__ == '__main__':
     req.parse(b"GET /five HTTP/1.1\x0d\x0a")
     req.parse(b"Content-Length: 120000\x0d\x0a\x0d\x0a" + b'e' * 120000)
     is_ok(len(req.content.leftovers), 360138, 'right size')
-    is_deeply_ok(req.error(), {}, 'no error')
+    is_deeply_ok(req.error, {}, 'no error')
     is_ok(req.method, 'GET', 'right method')
     is_ok(req.version, '1.1', 'right version')
     is_ok(req.url, '/one', 'right URL')
@@ -189,7 +189,7 @@ if __name__ == '__main__':
     req.parse(b"GET /five HTTP/1.1\x0d\x0a")
     req.parse(b"Content-Length: 120000\x0d\x0a\x0d\x0a" + b'e' * 120000)
     is_ok(len(req.content.leftovers), 360138, 'right size')
-    is_deeply_ok(req.error(), {}, 'no error')
+    is_deeply_ok(req.error, {}, 'no error')
     is_ok(req.method, 'GET', 'right method')
     is_ok(req.version, '1.1', 'right version')
     is_ok(req.url, '/one', 'right URL')
@@ -363,11 +363,11 @@ if __name__ == '__main__':
     is_ok(req.headers.max_line_size, 5, 'right size')
     req.parse(b'GET /foo/bar/baz.html HTTP/1')
     ok(req.is_finished, 'request is finished')
-    is_deeply_ok(req.error(), {'message': 'Maximum start-line size exceeded'}, 'right error')
+    is_deeply_ok(req.error, {'message': 'Maximum start-line size exceeded', 'code': None}, 'right error')
     ok(req.is_limit_exceeded, 'limit is exceeded')
     ok(limit, 'limit is exceeded')
-    req.error(message='Nothing important.')
-    is_deeply_ok(req.error(), {'message': 'Nothing important.'}, 'right error')
+    req.set_error(message='Nothing important.')
+    is_deeply_ok(req.error, {'message': 'Nothing important.', 'code': None}, 'right error')
     ok(req.is_limit_exceeded, 'limit is still exceeded')
     setenv('PYJO_MAX_LINE_SIZE', None)
 
@@ -378,7 +378,7 @@ if __name__ == '__main__':
     req.parse(b"GET / HTTP/1.0\x0d\x0a")
     req.parse(b"Content-Type: text/plain\x0d\x0a")
     ok(req.is_finished, 'request is finished')
-    is_deeply_ok(req.error(), {'message': 'Maximum header size exceeded'}, 'right error')
+    is_deeply_ok(req.error, {'message': 'Maximum header size exceeded', 'code': None}, 'right error')
     ok(req.is_limit_exceeded, 'limit is exceeded')
     setenv('PYJO_MAX_LINE_SIZE', None)
 
@@ -390,7 +390,7 @@ if __name__ == '__main__':
     is_ok(req.max_message_size, 5, 'right size')
     req.parse(b'GET /foo/bar/baz.html HTTP/1')
     ok(req.is_finished, 'request is finished')
-    is_deeply_ok(req.error(), {'message': 'Maximum message size exceeded'}, 'right error')
+    is_deeply_ok(req.error, {'message': 'Maximum message size exceeded', 'code': None}, 'right error')
     ok(req.is_limit_exceeded, 'limit is exceeded')
     ok(limit.get(), 'limit is exceeded')
     setenv('PYJO_MAX_MESSAGE_SIZE', None)
@@ -401,7 +401,7 @@ if __name__ == '__main__':
     req.parse(b"GET / HTTP/1.0\x0d\x0a")
     req.parse(b"Content-Type: text/plain\x0d\x0a")
     ok(req.is_finished, 'request is finished')
-    is_deeply_ok(req.error(), {'message': 'Maximum message size exceeded'}, 'right error')
+    is_deeply_ok(req.error, {'message': 'Maximum message size exceeded', 'code': None}, 'right error')
     ok(req.is_limit_exceeded, 'limit is exceeded')
     setenv('PYJO_MAX_MESSAGE_SIZE', None)
 
@@ -413,7 +413,7 @@ if __name__ == '__main__':
     req.parse(b'Hello World!')
     req.parse(b'Hello World!')
     ok(req.is_finished, 'request is finished')
-    is_deeply_ok(req.error(), {'message': 'Maximum message size exceeded'}, 'right error')
+    is_deeply_ok(req.error, {'message': 'Maximum message size exceeded', 'code': None}, 'right error')
     ok(req.is_limit_exceeded, 'limit is exceeded')
     setenv('PYJO_MAX_MESSAGE_SIZE', None)
 
@@ -426,7 +426,7 @@ if __name__ == '__main__':
     ok(not req.is_limit_exceeded, 'limit is not exceeded')
     req.parse(b"D: d\x0d\x0a\x0d\x0a")
     ok(req.is_finished, 'request is finished')
-    is_deeply_ok(req.error(), {'message': 'Maximum header size exceeded'}, 'right error')
+    is_deeply_ok(req.error, {'message': 'Maximum header size exceeded', 'code': None}, 'right error')
     ok(req.is_limit_exceeded, 'limit is exceeded')
     is_ok(req.method, 'GET', 'right method')
     is_ok(req.version, '1.1', 'right version')
@@ -1166,9 +1166,9 @@ if __name__ == '__main__':
     is_ok(req.body, b"Hello World!\n", 'right content')
     req2 = Pyjo.Message.Request.new().parse(req.to_bytes())
     is_ok(req.content.leftovers, b'', 'no leftovers')
-    is_deeply_ok(req.error(), {}, 'no error')
+    is_deeply_ok(req.error, {}, 'no error')
     is_ok(req2.content.leftovers, b'', 'no leftovers')
-    is_deeply_ok(req2.error(), {}, 'no error')
+    is_deeply_ok(req2.error, {}, 'no error')
     ok(req2.is_finished, 'request is finished')
     is_ok(req2.method, 'GET', 'right method')
     is_ok(req2.version, '1.1', 'right version')
@@ -1656,8 +1656,8 @@ if __name__ == '__main__':
               b"boundary=----1234567890\x0d\x0a"
               b"Content-Length: " + b(str(len(multipart))) + b"\x0d\x0a"
               b"Connection: keep-alive\x0d\x0a"
-              b"Host: 127.0.0.1:3000\x0d\x0a\x0d\x0a"
-              + multipart)
+              b"Host: 127.0.0.1:3000\x0d\x0a\x0d\x0a" +
+              multipart)
     ok(req.is_finished, 'request is finished')
     is_ok(req.method, 'POST', 'right method')
     is_ok(req.version, '1.1', 'right version')
@@ -1788,8 +1788,8 @@ if __name__ == '__main__':
               b'AAAB1c2VyBp6FjksAAAAABwAAAGV4cGlyZXM=--1641adddfe885276cda0deb7475f'
               b"153a\x0d\x0a"
               b"Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.6,en;q=0.4\x0d\x0a"
-              b"Accept-Charset: windows-1251,utf-8;q=0.7,*;q=0.3\x0d\x0a\x0d\x0a"
-              + chrome)
+              b"Accept-Charset: windows-1251,utf-8;q=0.7,*;q=0.3\x0d\x0a\x0d\x0a" +
+              chrome)
     ok(req.is_finished, 'request is finished')
     is_ok(req.method, 'POST', 'right method')
     is_ok(req.version, '1.0', 'right version')
@@ -1854,8 +1854,8 @@ if __name__ == '__main__':
               b"93a7\x0d\x0a"
               b'Content-Type: multipart/form-data; boundary=-----------------------'
               b"----213090722714721300002030499922\x0d\x0a"
-              b"Content-Length: " + b(str(len(firefox))) + b"\x0d\x0a\x0d\x0a"
-              + firefox)
+              b"Content-Length: " + b(str(len(firefox))) + b"\x0d\x0a\x0d\x0a" +
+              firefox)
     ok(req.is_finished, 'request is finished')
     is_ok(req.method, 'POST', 'right method')
     is_ok(req.version, '1.0', 'right version')
@@ -1916,8 +1916,8 @@ if __name__ == '__main__':
               b"TE: deflate, gzip, chunked, identity, trailers\x0d\x0a"
               b"Content-Length: " + b(str(len(opera))) + b"\x0d\x0a"
               b'Content-Type: multipart/form-data; boundary=----------IWq9cR9mYYG66'
-              b"8xwSn56f0\x0d\x0a\x0d\x0a"
-              + opera)
+              b"8xwSn56f0\x0d\x0a\x0d\x0a" +
+              opera)
     ok(req.is_finished, 'request is finished')
     is_ok(req.method, 'POST', 'right method')
     is_ok(req.version, '1.0', 'right version')

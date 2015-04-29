@@ -312,26 +312,16 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
             else:
                 return dom.find(pattern)
 
-    def error(self, **kwargs):
+    @property
+    def error(self):
         """::
 
             err = msg.error
-            msg = msg.error(message='Parser error')
 
-        Get or set message error, an ``None`` return value indicates that there is no
-        error. ::
-
-            # Connection or parser error
-            msg.error(message='Connection refused')
-
-            # 4xx/5xx response
-            msg.error(message='Internal Server Error', code=500)
+        Get message error, a ``None`` return value indicates that there is no
+        error.
         """
-        if kwargs:
-            self._error = kwargs
-            return self.finish()
-        else:
-            return self._error
+        return self._error
 
     def every_cookie(self, name):
         """::
@@ -565,6 +555,30 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
         else:
             return self
 
+    def set_error(self, message=None, code=None):
+        """::
+
+            msg = msg.set_error(message, code)
+
+        Set message error, a ``None`` for message indicates that there is no
+        error. ::
+
+            # Connection or parser error
+            msg.set_error(message='Connection refused')
+
+            # 4xx/5xx response
+            msg.set_error(message='Internal Server Error', code=500)
+        """
+        if message:
+            self._error = {
+                'message': message,
+                'code': code,
+            }
+            return self.finish()
+        else:
+            self._error = {}
+            return self
+
     @property
     def start_line_size(self):
         """::
@@ -692,7 +706,7 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
 
     def _limit(self, message):
         self._limited = True
-        return self.error(message=message)
+        return self.set_error(message=message)
 
     def _parse_formdata(self, upload=False):
         content = self.content

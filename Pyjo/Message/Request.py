@@ -196,7 +196,7 @@ class Pyjo_Message_Request(Pyjo.Message.object):
         m = re_request.search(line)
 
         if not m:
-            self.error(message='Bad request start-line')
+            self.set_error(message='Bad request start-line')
             return
 
         self.method = u(m.group(1), 'ascii')

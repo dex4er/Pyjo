@@ -204,7 +204,7 @@ class Pyjo_Message_Response(Pyjo.Message.object):
 
         m = re_http.search(line)
         if not m:
-            return not self.error(message='Bad response start-line')
+            return not self.set_error(message='Bad response start-line')
 
         try:
             self.version = m.group(1).decode('ascii')
