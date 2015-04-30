@@ -3,7 +3,6 @@
 """
 Pyjo.Transaction.HTTP - HTTP transaction
 ========================================
-
 ::
 
     import Pyjo.Transaction.HTTP
@@ -22,11 +21,64 @@ Pyjo.Transaction.HTTP - HTTP transaction
 :rfc:`7230` and
 :rfc:`7231`.
 
+Events
+------
+
+:mod:`Pyjo.Transaction.HTTP` inherits all events from :mod:`Pyjo.Transaction` and
+can emit the following new ones.
+
+request
+~~~~~~~
+::
+
+    @tx.on
+    def request(tx):
+        ...
+
+Emitted when a request is ready and needs to be handled. ::
+
+    @tx.on
+    def request(tx):
+        tx.res.headers.header('X-Bender', 'Bite my shiny metal ass!')
+
+unexpected
+~~~~~~~~~~
+::
+
+    @tx.on
+    def unexpected(tx, res):
+        ...
+
+Emitted for unexpected ``1xx`` responses that will be ignored. ::
+
+    @tx.on
+    def unexpected(tx, res):
+        @tx.res.on
+        def finish():
+            print('Follow-up response is finished.')
+
+upgrade
+~~~~~~~
+::
+
+    @tx.on
+    def upgrade(tx, ws):
+        ...
+
+Emitted when transaction gets upgraded to a :mod:`Pyjo.Transaction.WebSocket`
+object. ::
+
+    @tx.on
+    def upgrade(tx, ws):
+        ws.res.headers.header('X-Bender', 'Bite my shiny metal ass!')
+
 Classes
 -------
 """
 
 import Pyjo.Transaction
+
+from Pyjo.Util import notnone
 
 
 class Pyjo_Transaction_HTTP(Pyjo.Transaction.object):
@@ -36,6 +88,18 @@ class Pyjo_Transaction_HTTP(Pyjo.Transaction.object):
     """
 
     previous = None
+    """::
+
+        previous = tx.previous
+        tx.previous = Pyjo.Transaction.HTTP.new()
+
+    Previous transaction that triggered this follow-up transaction, usually a
+    :mod:`Pyjo.Transaction.HTTP` object. ::
+
+        # Paths of previous requests
+        print(tx.previous.previous.req.url.path)
+        print(tx.previous.req.url.path)
+    """
 
     _delay = False
     _http_state = None
@@ -44,6 +108,12 @@ class Pyjo_Transaction_HTTP(Pyjo.Transaction.object):
     _towrite = None
 
     def client_read(self, chunk):
+        """::
+
+            tx.client_read(chunk)
+
+        Read data client-side, used to implement user agents.
+        """
         # Skip body for HEAD request
         res = self.res
         if self.req.method.upper() == 'HEAD':
@@ -63,15 +133,62 @@ class Pyjo_Transaction_HTTP(Pyjo.Transaction.object):
         self.client_read(leftovers)
 
     def client_write(self):
+        """::
+
+            chunk = tx.client_write
+
+        Write data client-side, used to implement user agents.
+        """
         return self._write(False)
 
     @property
+    def is_empty(self):
+        """::
+
+            boolean = tx.is_empty
+
+        Check transaction for ``HEAD`` request and ``1xx``, ``204`` or ``304`` response.
+        """
+        return bool(self.req.method.upper() == 'HEAD' or self.res.is_empty)
+
+    @property
     def keep_alive(self):
-        # TODO
-        return False
+        """::
+
+            boolean = tx.keep_alive
+
+        Check if connection can be kept alive.
+        """
+        # Close
+        req = self.req
+        res = self.res
+        req_conn = notnone(req.headers.connection, '').lower()
+        res_conn = notnone(res.headers.connection, '').lower()
+        if req_conn == 'close' or res_conn == 'close':
+            return False
+
+        # Keep-alive is optional for 1.0
+        if res.version == '1.0':
+            return res_conn == 'keep-alive'
+        if req.version == '1.0':
+            return req_conn == 'keep-alive'
+
+        # Keep-alive is the default for 1.1
+        return True
 
     @property
     def redirects(self):
+        """::
+
+            redirects = tx.redirects
+
+        Return a list of all previous transactions that preceded this follow-up
+        transaction. ::
+
+            # Paths of all previous requests
+            for redir in tx.redirects:
+                print(redir.req.url.path)
+        """
         redirects = []
         previous = self
         while True:
