@@ -102,6 +102,7 @@ class Pyjo_Transaction_HTTP(Pyjo.Transaction.object):
     """
 
     _delay = False
+    _handled = False
     _http_state = None
     _offset = None
     _state = None
@@ -197,6 +198,41 @@ class Pyjo_Transaction_HTTP(Pyjo.Transaction.object):
                 break
             redirects.insert(0, previous)
         return redirects
+
+    def server_read(self, chunk):
+        """::
+
+            tx.server_read(chunk)
+
+        Read data server-side, used to implement web servers.
+        """
+        # Parse request
+        req = self.req
+        if not req.error:
+            req.parse(chunk)
+        if self._state is None:
+            self._state = 'read'
+
+        # Generate response
+        if not req.is_finished or self._handled:
+            return
+
+        return
+
+        # TODO Pyjo.Transaction.WebSocket
+        # if req.is_handshake:
+        #     self.emit('upgrade', Pyjo.Transaction.WebSocket.new(handshake=self))
+        #
+        # self.emit('request')
+
+    def server_write(self):
+        """::
+
+            chunk = tx.server_write()
+
+        Write data server-side, used to implement web servers.
+        """
+        return self._write(True)
 
     def _body(self, msg, finish):
         # Prepare body chunk

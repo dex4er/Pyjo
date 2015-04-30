@@ -3,7 +3,6 @@
 """
 Pyjo.UserAgent - Non-blocking I/O HTTP and WebSocket user agent
 ===============================================================
-
 ::
 
     import Pyjo.UserAgent
@@ -55,6 +54,7 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
     ioloop = Pyjo.IOLoop.new()
     key = lazy(lambda self: getenv('PYJO_KEY_FILE'))
     local_address = None
+    max_connections = 5
     max_redirects = lazy(lambda self: getenv('PYJO_MAX_REDIRECTS', 0))
     request_timeout = lazy(lambda self: getenv('PYJO_REQUEST_TIMEOUT', 0))
     transactor = lazy(lambda self: Pyjo.UserAgent.Transactor.new())
@@ -250,7 +250,24 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
 
         return found
 
+    def _enqueue(self, nb, name, cid):
+        # Enforce connection limit
+        if nb:
+            queue = self._nb_queue
+        else:
+            queue = self._queue
+
+        max_connections = self.max_connections
+        while queue and len(queue) >= max_connections:
+            self._remove(queue.pop(0)[1])
+
+        if max_connections:
+            queue.append([name, cid])
+        else:
+            self._loop(nb).stream(cid).close()
+
     def _error(self, cid, err):
+        # TODO error
         raise Exception(self, cid, err);
 
     def _finish(self, cid, close):
@@ -333,7 +350,7 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
 
         # Keep connection alive (CONNECT requests get upgraded)
         if tx.req.method.upper() != 'CONNECT':
-            self._enqueue(c['nb'], ':'.join(self.transactor.endpoint(tx)), cid)
+            self._enqueue(c['nb'], '{0}:{1}:{2}'.format(*self.transactor.endpoint(tx)), cid)
 
     def _start(self, nb, tx, cb):
         # TODO Application server

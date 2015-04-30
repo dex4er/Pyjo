@@ -293,7 +293,7 @@ class Pyjo_Transaction(Pyjo.EventEmitter.object):
 
         Resume transaction.
         """
-        return self._state('write', 'resume')
+        return self._set_state('write', 'resume')
 
     def server_close(self):
         """::
@@ -302,7 +302,7 @@ class Pyjo_Transaction(Pyjo.EventEmitter.object):
 
         Transaction closed server-side, used to implement web servers.
         """
-        return self._state('finished', 'finish')
+        return self._set_state('finished', 'finish')
 
     @not_implemented
     def server_read(self, chunk):
@@ -352,7 +352,7 @@ class Pyjo_Transaction(Pyjo.EventEmitter.object):
         else:
             return self.res
 
-    def _state(self, state, event):
+    def _set_state(self, state, event):
         self._state = state
         return self.emit(event)
 
