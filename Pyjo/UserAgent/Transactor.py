@@ -194,7 +194,7 @@ class Pyjo_UserAgent_Transactor(Pyjo.Base.object):
         new.previous = old
         return new
 
-    def tx(self, method, url, headers={}, **kwargs):
+    def tx(self, method, url, headers={}, body=None, **kwargs):
         # Method and URL
         tx = Pyjo.Transaction.HTTP.new()
         req = tx.req
@@ -217,13 +217,23 @@ class Pyjo_UserAgent_Transactor(Pyjo.Base.object):
 
         # Generator
         generators = list(set(self.generators) & set(kwargs))
-        if len(generators) == 1:
+        if generators:
             g = generators[0]
             self.generators[g](tx, **kwargs)
 
-        # TODO Body
+        # Body
+        elif body is not None:
+            req.body = body
 
         return tx
+
+    def upgrade(self, tx):
+        # TODO websocket
+        pass
+
+    def websocket(self, url, headers={}, **kwargs):
+        # TODO websocket
+        pass
 
     def _data(self, tx, data, **kwargs):
         tx.req.body = b(data)

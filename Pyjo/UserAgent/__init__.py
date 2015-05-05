@@ -288,8 +288,10 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
             self._loop(nb).stream(cid).close()
 
     def _error(self, cid, err):
-        # TODO error
-        raise Exception(self, cid, err);
+        tx = self._connections[cid]['tx']
+        if tx:
+            tx.res.set_error(message=err)
+        self._finish(cid, True)
 
     def _finish(self, cid, close):
         # Remove request timeout
@@ -309,6 +311,10 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
             return self._remove(cid, close)
 
         # TODO Finish WebSocket
+
+        jar = self.cookie_jar
+        if jar:
+            jar.collect(old)
 
         # TODO cookie_jar
 
