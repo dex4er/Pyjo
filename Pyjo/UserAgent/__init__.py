@@ -30,6 +30,7 @@ Classes
 
 import Pyjo.EventEmitter
 import Pyjo.IOLoop
+import Pyjo.UserAgent.CookieJar
 import Pyjo.UserAgent.Proxy
 import Pyjo.UserAgent.Transactor
 
@@ -51,6 +52,7 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
     ca = lazy(lambda self: getenv('PYJO_CA_FILE'))
     cert = lazy(lambda self: getenv('PYJO_CERT_FILE'))
     connect_timeout = lazy(lambda self: getenv('PYJO_CONNECT_TIMEOUT', 10))
+    cookie_jar = lazy(lambda self: Pyjo.UserAgent.CookieJar.new())
     inactivity_timeout = lazy(lambda self: getenv('PYJO_INACTIVITY_TIMEOUT', 30))
     ioloop = Pyjo.IOLoop.new()
     key = lazy(lambda self: getenv('PYJO_KEY_FILE'))
@@ -189,6 +191,12 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
         connect.cid = cid
         return cid
 
+    def _connect_proxy(self, nb, old, cb):
+        # Start CONNECT request
+        new = self.transactor.proxy_connect(old)
+        if not new:
+            return
+
     def _connected(self, cid):
         # Inactivity timeout
         c = self._connections[cid]
@@ -207,11 +215,22 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
         self._write(cid)
 
     def _connection(self, nb, tx, cb):
-        # TODO Reuse connection
         # Reuse connection
-        cid = tx.connection
         proto, host, port = self.transactor.endpoint(tx)
-        # TODO CONNECT request to proxy required
+        cid = tx.connection or self._dequeue(nb, "{0}:{1}:{2}".format(proto, host, port), True)
+        if cid:
+            if DEBUG:
+                warn("-- Reusing connection {0} ({1}://{2}:{3})\n".format(cid, proto, host, port))
+            self._connections[cid] = {'cb': cb, 'nb': nb, 'tx': tx}
+            if not tx.connection:
+                tx.kept_alive
+            self._connected(cid)
+            return cid
+
+        # CONNECT request to proxy required
+        cid = self._connect_proxy(nb, tx, cb)
+        if cid:
+            return cid
 
         # Connect
         if DEBUG:
@@ -355,8 +374,17 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
             self._enqueue(c['nb'], '{0}:{1}:{2}'.format(*self.transactor.endpoint(tx)), cid)
 
     def _start(self, nb, tx, cb):
-        # TODO Application server
-        # TODO proxy, cookiejar
+        # Application server
+        url = tx.req.url
+        if not url.is_abs:
+            base = self.server.db_url if nb else self.server.url
+            url.scheme = base.scheme
+            url.authority = base.authority
+
+        if self.proxy:
+            self.proxy.prepare(tx)
+        if self.cookie_jar:
+            self.cookie_jar.prepare(tx)
 
         # Connect and add request timeout if necessary
         cid = self.emit('start', tx)._connection(nb, tx, cb)

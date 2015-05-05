@@ -129,8 +129,29 @@ class Pyjo_UserAgent_Transactor(Pyjo.Base.object):
         return self._proxy(tx, proto, host, port)
 
     def proxy_connect(self, old):
-        # TODO ...
-        pass
+        # Already a CONNECT request
+        req = old.req
+        if req.method.upper() == 'CONNECT':
+            return
+
+        # No proxy
+        proxy = req.proxy
+        if not proxy:
+            return
+        if proxy.protocol == 'socks':
+            return
+
+        # WebSocket and/or HTTPS
+        url = req.url
+        if not req.is_handshake and url.protocol != 'https':
+            return
+
+        # CONNECT request (expect a bad response)
+        new = self.tx('CONNECT', url.clone().set(userinfo=None))
+        new.req.proxy = proxy
+        new.res.connect.set(auto_relax=False).headers.connection = 'keep-alive'
+
+        return new
 
     def redirect(self, old):
         # Commonly used codes
