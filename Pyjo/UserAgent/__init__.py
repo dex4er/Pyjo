@@ -30,6 +30,7 @@ Classes
 
 import Pyjo.EventEmitter
 import Pyjo.IOLoop
+import Pyjo.UserAgent.Proxy
 import Pyjo.UserAgent.Transactor
 
 from Pyjo.Base import lazy
@@ -57,6 +58,7 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
     max_connections = 5
     max_redirects = lazy(lambda self: getenv('PYJO_MAX_REDIRECTS', 0))
     request_timeout = lazy(lambda self: getenv('PYJO_REQUEST_TIMEOUT', 0))
+    proxy = lazy(lambda self: Pyjo.UserAgent.Proxy.new())
     transactor = lazy(lambda self: Pyjo.UserAgent.Transactor.new())
 
     _connections = lazy(lambda self: {})

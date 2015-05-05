@@ -3,7 +3,6 @@
 """
 Pyjo.UserAgent.Transactor - User agent transactor
 =================================================
-
 ::
 
     import Pyjo.UserAgent.Transactor
@@ -24,11 +23,34 @@ Pyjo.UserAgent.Transactor - User agent transactor
 :mod:`Pyjo.UserAgent.Transactor` is the transaction building and manipulation
 framework used by :mod:`Pyjo.UserAgent`.
 
+Generators
+----------
+
+These content generators are available by default.
+
+form
+~~~~
+::
+
+    t.tx('POST', 'http://example.com', form={'a': 'b'})
+
+Generate query string, ``application/x-www-form-urlencoded`` or
+``multipart/form-data`` content.
+
+json
+~~~~
+::
+
+    t.tx('PATCH', 'http://example.com', json={'a': 'b'})
+
+Generate JSON content with :mod:`Pyjo.JSON`.
+
 Classes
 -------
 """
 
 import Pyjo.Base
+import Pyjo.Content.MultiPart
 import Pyjo.Parameters
 import Pyjo.Transaction.HTTP
 import Pyjo.URL
@@ -49,9 +71,42 @@ class Pyjo_UserAgent_Transactor(Pyjo.Base.object):
     """
 
     generators = lazy(lambda self: {'data': self._data, 'form': self._form, 'json': self._json})
-    name = 'Pyjo (Python)'
+    """::
+
+        generators = t.generators
+        t.generators = {'foo': lambda t, tx, form, **kwargs: ...}
+
+    Registered content generators, by default only ``form`` and ``json`` are already
+    defined.
+    """
+
+    name = 'Pyjoyment (Python)'
+    """::
+
+        name = t.name
+        t.name = 'Pyjoyment'
+
+    Value for ``User-Agent`` request header of generated transactions, defaults to
+    ``Pyjoyment (Python)``.
+    """
+
+    def add_generator(self, name, generator):
+        """::
+
+            t = t.add_generator('foo', lambda t, tx, form, **kwargs: ...)
+
+        Register a new content generator.
+        """
+        self.generators[name] = generator
+        return self
 
     def endpoint(self, tx):
+        """::
+
+            proto, host, port = t.endpoint(Pyjo.Transaction.HTTP.new())
+
+        Actual endpoint for transaction.
+        """
         # Basic endpoint
         req = tx.req
         url = req.url
@@ -59,13 +114,23 @@ class Pyjo_UserAgent_Transactor(Pyjo.Base.object):
         host = url.ihost
         port = url.port or (443 if proto == 'https' else 80)
 
-        # TODO Proxy for normal HTTP requests
+        # Proxy for normal HTTP requests
+        socks = False
+        proxy = req.proxy
+        if proxy:
+            socks = proxy.protocol == 'socks'
+        if proto == 'http' and not req.is_handshake and not socks:
+            return self._proxy(tx, proto, host, port)
 
         return proto, host, port
 
     def peer(self, tx):
         proto, host, port = self.endpoint(tx)
         return self._proxy(tx, proto, host, port)
+
+    def proxy_connect(self, old):
+        # TODO ...
+        pass
 
     def redirect(self, old):
         # Commonly used codes
@@ -181,7 +246,13 @@ class Pyjo_UserAgent_Transactor(Pyjo.Base.object):
         raise Exception(self, charset, form)
 
     def _proxy(self, tx, proto, host, port):
-        # TODO Update with proxy information
+        # Update with proxy information
+        proxy = tx.req.proxy
+        if proxy:
+            proto = proxy.protocol
+            host = proxy.ihost
+            port = proxy.port or (443 if proto == 'https' else 80)
+
         return proto, host, port
 
     def _type(self, headers, content_type):
