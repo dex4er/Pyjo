@@ -279,17 +279,14 @@ def url_escape(bstring, pattern=None):
     else:
         re_pattern = re_url_allow_chars
 
-    replacement = lambda m: b'%' + format(ord(m.group(1)), 'X').encode('ascii')
-
-    return re_pattern.sub(replacement, bstring)
+    return re_pattern.sub(lambda m: b'%' + format(ord(m.group(1)), 'X').encode('ascii'), bstring)
 
 
 re_percent_chars = r(br'%([0-9a-fA-F]{2})')
 
 
 def url_unescape(bstring):
-    replacement = lambda m: b(chr(int(m.group(1), 16)), 'iso-8859-1')
-    return re_percent_chars.sub(replacement, bstring)
+    return re_percent_chars.sub(lambda m: b(chr(int(m.group(1), 16)), 'iso-8859-1'), bstring)
 
 
 def warn(*args):
