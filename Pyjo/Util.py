@@ -289,8 +289,10 @@ def url_unescape(bstring):
     return re_percent_chars.sub(lambda m: b(chr(int(m.group(1), 16)), 'iso-8859-1'), bstring)
 
 
-def warn(*args):
-    print(*args, file=sys.stderr)
+def warn(msg, *args):
+    if not msg.endswith("\n"):
+        msg += "\n"
+    print(msg, end='', file=sys.stderr)
 
 
 # Characters that should be escaped in XML
