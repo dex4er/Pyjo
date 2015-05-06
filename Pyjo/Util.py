@@ -312,10 +312,8 @@ def xml_escape(string):
     return re_xml_allow_chars.sub(lambda m: XML[m.group(1)], string)
 
 
-def xor_encode(data, key):
-    if len(key) > 0 and len(data) > len(key):
-        key *= int(len(data) / len(key)) + 1
-    return bytearray(a ^ b for a, b in zip(*map(bytearray, [data, key])))
+def xor_encode(data, mask):
+    return bytearray(a ^ b for a, b in zip(*map(bytearray, [data, mask])))
 
 
 ENTITIES = {
