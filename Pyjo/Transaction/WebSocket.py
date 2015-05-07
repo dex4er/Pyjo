@@ -123,7 +123,23 @@ Classes
 
 import Pyjo.Transaction
 
-from Pyjo.Util import notnone
+import struct
+import zlib
+
+from Pyjo.Base import lazy
+from Pyjo.JSON import encode_json
+from Pyjo.Util import b, getenv, rand, warn, xor_encode
+
+
+DEBUG = getenv('PYJO_WEBSOCKET_DEBUG', 0)
+
+# Opcodes
+CONTINUATION = 0x0
+TEXT = 0x1
+BINARY = 0x2
+CLOSE = 0x8
+PING = 0x9
+PONG = 0xa
 
 
 class Pyjo_Transaction_WebSocket(Pyjo.Transaction.object):
@@ -131,6 +147,241 @@ class Pyjo_Transaction_WebSocket(Pyjo.Transaction.object):
     :mod:`Pyjo.Transaction.WebSocket` inherits all attributes and methods from
     :mod:`Pyjo.Transaction` and implements the following new ones.
     """
+
+    compressed = False
+    """::
+
+        boolean = ws.compressed
+        ws.compressed = boolean
+
+    Compress messages with ``permessage-deflate`` extension.
+    """
+
+    masked = False
+    """::
+
+        boolean = ws.masked
+        ws.masked = boolean
+
+    Mask outgoing frames with XOR cipher and a random 32-bit key.
+    """
+
+    max_websocket_size = lazy(lambda self: getenv('PYJO_MAX_WEBSOCKET_SIZE', 0) or 262144)
+    """::
+
+        size = ws.max_websocket_size
+        ws.max_websocket_size = 1024
+
+    Maximum WebSocket message size in bytes, defaults to the value of the
+    ``PYJO_MAX_WEBSOCKET_SIZE`` environment variable or ``262144`` (256KB).
+    """
+
+    _close = None
+    _deflate = None
+    _finished = False
+
+    def build_frame(self, fin, rsv1, rsv2, rsv3, op, payload):
+        """::
+
+            chunk = ws.build_frame(fin, rsv1, rsv2, rsv3, op, payload)
+
+        Build WebSocket frame. ::
+
+            # Binary frame with FIN bit and payload
+            print(ws.build_frame(1, 0, 0, 0, 2, b'Hello World!'))
+
+            # Text frame with payload but without FIN bit
+            print(ws.build_frame(0, 0, 0, 0, 1, b'Hello '))
+
+            # Continuation frame with FIN bit and payload
+            print(ws.build_frame(1, 0, 0, 0, 0, b'World!'))
+
+            # Close frame with FIN bit and without payload
+            print(ws.build_frame(1, 0, 0, 0, 8, b''))
+
+            # Ping frame with FIN bit and payload
+            print(ws.build_frame(1, 0, 0, 0, 9, b'Test 123'))
+
+            # Pong frame with FIN bit and payload
+            print(ws.build_frame(1, 0, 0, 0, 10, b'Test 123'))
+        """
+
+        if DEBUG:
+            warn("-- Building frame ({0}, {1}, {2}, {3}, {4})\n".format(fin, rsv1, rsv2, rsv3, op))
+
+        frame = bytearray()
+
+        # Head
+        head = op + (128 if fin else 0)
+        if rsv1:
+            head |= 0b01000000
+        if rsv2:
+            head |= 0b00100000
+        if rsv3:
+            head |= 0b00010000
+        frame += struct.pack('B', head)
+
+        # Small payload
+        length = len(payload)
+        masked = self.masked
+        if length < 126:
+            if DEBUG:
+                warn("-- Small payload ({0})\n-- {1}".format(length, repr(payload)))
+            frame += struct.pack('B', length | 128 if masked else length)
+
+        # Extended payload (16-bit)
+        elif length < 65536:
+            if DEBUG:
+                warn("-- Extended 16-bit payload ({0})\n-- {1}".format(length, repr(payload)))
+            frame += struct.pack('B', 126 | 128 if masked else 126) + struct.pack('!H', length)
+
+        # Extended payload (64-bit with 32-bit fallback)
+        else:
+            if DEBUG:
+                warn("-- Extended 64-bit payload ({0})\n-- {1}".format(length, repr(payload)))
+            frame += struct.pack('B', 127 | 128 if masked else 127)
+            frame += struct.pack('!Q', length)
+
+        # Mask payload
+        if masked:
+            mask = struct.pack('!L', int(rand(9999999)))
+            payload = mask + xor_encode(payload, mask * 128)
+
+        return frame + payload
+
+    def build_message(self, **kwargs):
+        """::
+
+            chunk = ws.build_message(binary=string)
+            chunk = ws.build_message(text=string)
+            chunk = ws.build_message(json={'test': [1, 2, 3]})
+
+        Build WebSocket message.
+        """
+        # JSON
+        if 'json' in kwargs:
+            text = encode_json(kwargs['json'])
+        elif 'text' in kwargs:
+            text = b(kwargs['text'])
+        else:
+            text = None
+
+        if text is not None:
+            frame = [1, 0, 0, 0, TEXT, text]
+        elif 'binary' in kwargs:
+            frame = [1, 0, 0, 0, BINARY, kwargs['binary']]
+        else:
+            return
+
+        # "permessage-deflate" extension
+        if not self.compressed:
+            return self.build_frame(*frame)
+
+        if self._deflate is None:
+            self._deflate = zlib.compressobj(zlib.Z_DEFAULT_COMPRESSION,
+                                             zlib.DEFLATED,
+                                             -zlib.MAX_WBITS,
+                                             zlib.DEF_MEM_LEVEL)
+        deflate = self._deflate
+        out = deflate.compress(frame[5])
+        out += deflate.flush(zlib.Z_FULL_FLUSH)
+        frame[1] = 1
+        frame[5] = out[:len(out) - 4]
+        return self.build_frame(*frame)
+
+    def finish(self, code=None, reason=None):
+        close = self._close = [code, reason]
+        payload = struct.pack('!H', close[0]) if close[0] else b''
+        if close[1] is not None:
+            payload += b(close[1])
+        if close[0] is None:
+            close[0] = 1005
+        self.send([1, 0, 0, 0, CLOSE, payload])
+        self._finished = True
+        return self
+
+    def parse_frame(self, chunk):
+        if not isinstance(chunk, bytearray):
+            chunk = bytearray(chunk)
+
+        # Head
+        if len(chunk) < 2:
+            return
+
+        first, second = struct.unpack('BB', chunk[:2])
+
+        # FIN
+        fin = 1 if first & 0b10000000 == 0b10000000 else 0
+
+        # RSV1-3
+        rsv1 = 1 if first & 0b01000000 == 0b01000000 else 0
+        rsv2 = 1 if first & 0b00100000 == 0b00100000 else 0
+        rsv3 = 1 if first & 0b00010000 == 0b00010000 else 0
+
+        # Opcode
+        op = first & 0b00001111
+        if DEBUG:
+            warn("-- Parsing frame ({0}, {1}, {2}, {3}, {4})\n".format(fin, rsv1, rsv2, rsv3, op))
+
+        # Small payload
+        hlength, length = 2, second & 0b01111111
+        if length < 126:
+            if DEBUG:
+                warn("-- Small payload ({0})\n".format(length))
+
+        # Extended payload (16-bit)
+        elif length == 126:
+            if len(chunk) <= 4:
+                return
+
+            hlength = 4
+            length, = struct.unpack('!H', chunk[2:4])
+            if DEBUG:
+                warn("-- Extended 16-bit payload ({0})\n".format(length))
+
+        # Extended payload (64-bit with 32-bit fallback)
+        elif length == 127:
+            if len(chunk) <= 10:
+                return
+
+            hlength = 10
+            ext = chunk[2:10]
+            length, = struct.unpack('!Q', ext)
+            if DEBUG:
+                warn("-- Extended 64-bit payload ({0})\n".format(length))
+
+        # Check message size
+        if length > self.max_websocket_size:
+            self.finish(1009)
+            return
+
+        # Check if whole packet has arrived
+        masked = bool(second & 0b10000000)
+        if masked:
+            length += 4
+        if len(chunk) < (hlength + length):
+            return
+        del chunk[:hlength]
+
+        # Payload
+        if length > 0:
+            payload = chunk[:length]
+            del chunk[:length]
+            if masked:
+                mask = payload[:4]
+                del payload[:4]
+                payload = xor_encode(payload, mask * 128)
+        else:
+            payload = bytearray()
+
+        if DEBUG:
+            warn("-- {0}\n".format(repr(payload)))
+
+        return fin, rsv1, rsv2, rsv3, op, payload
+
+    def send(self, msg, cb):
+        # TODO send
+        raise Exception(self, msg, cb);
 
 
 new = Pyjo_Transaction_WebSocket.new
