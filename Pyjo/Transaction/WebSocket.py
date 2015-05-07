@@ -179,6 +179,12 @@ class Pyjo_Transaction_WebSocket(Pyjo.Transaction.object):
     _close = None
     _deflate = None
     _finished = False
+    _state = None
+    _write = lazy(lambda self: bytearray())
+
+    def __init__(self, **kwargs):
+        super(Pyjo_Transaction_WebSocket, self).__init__(kwargs)
+        self.on('frame', lambda ws, frame: ws._message(*frame))
 
     def build_frame(self, fin, rsv1, rsv2, rsv3, op, payload):
         """::
@@ -252,8 +258,8 @@ class Pyjo_Transaction_WebSocket(Pyjo.Transaction.object):
     def build_message(self, **kwargs):
         """::
 
-            chunk = ws.build_message(binary=string)
-            chunk = ws.build_message(text=string)
+            chunk = ws.build_message(binary=message)
+            chunk = ws.build_message(text=message)
             chunk = ws.build_message(json={'test': [1, 2, 3]})
 
         Build WebSocket message.
@@ -290,6 +296,14 @@ class Pyjo_Transaction_WebSocket(Pyjo.Transaction.object):
         return self.build_frame(*frame)
 
     def finish(self, code=None, reason=None):
+        """::
+
+            ws = ws->finish()
+            ws = ws->finish(1000)
+            ws = ws->finish(1003, 'Cannot accept data!')
+
+        Close WebSocket connection gracefully.
+        """
         close = self._close = [code, reason]
         payload = struct.pack('!H', close[0]) if close[0] else b''
         if close[1] is not None:
@@ -301,6 +315,21 @@ class Pyjo_Transaction_WebSocket(Pyjo.Transaction.object):
         return self
 
     def parse_frame(self, chunk):
+        """::
+
+            frame = ws.parse_frame(chunk)
+
+        Parse WebSocket frame. ::
+
+            # Parse single frame and remove it from buffer
+            frame = ws.parse_frame(chunk)
+            print("FIN: {0}".format(frame))
+            print("RSV1: {1}".format(frame))
+            print("RSV2: {2}".format(frame))
+            print("RSV3: {3}".format(frame))
+            print("Opcode: {4}".format(frame))
+            print("Payload: {5}".format(frame))
+        """
         if not isinstance(chunk, bytearray):
             chunk = bytearray(chunk)
 
@@ -379,9 +408,31 @@ class Pyjo_Transaction_WebSocket(Pyjo.Transaction.object):
 
         return fin, rsv1, rsv2, rsv3, op, payload
 
-    def send(self, msg, cb):
-        # TODO send
-        raise Exception(self, msg, cb);
+    def send(self, cb=None, **kwargs):
+        """::
+
+            ws = ws.send(binary=message)
+            ws = ws.send(text=message)
+            ws = ws.send(json={'test': [1, 2, 3]})
+            ws = ws.send(frame=[fin, rsv1, rsv2, rsv3, op, payload])
+            ws = ws.send(cb, ...)
+
+        Send message or frame non-blocking via WebSocket, the optional drain callback
+        will be invoked once all data has been written.
+
+            # Send "Ping" frame
+            ws.send(frame=[1, 0, 0, 0, 9, b'Hello World!'])
+        """
+        if cb:
+            self.once('drain', cb)
+
+        if 'frame' in kwargs:
+            self._write += self.build_frame(*kwargs['frame'])
+        else:
+            self._write += self.build_message(**kwargs)
+        self._state = 'write'
+
+        return self.emit('resume')
 
 
 new = Pyjo_Transaction_WebSocket.new
