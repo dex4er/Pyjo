@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 Pyjo.EventEmitter - Event emitter base class
 ============================================

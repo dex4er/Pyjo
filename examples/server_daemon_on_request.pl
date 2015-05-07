@@ -1,6 +1,6 @@
 use Mojo::Server::Daemon;
 
-my $daemon = Mojo::Server::Daemon->new(listen => ['http://*:8080']);
+my $daemon = Mojo::Server::Daemon->new(listen => ['http://*:3000']);
 $daemon->unsubscribe('request');
 $daemon->on(request => sub {
     my ($daemon, $tx) = @_;
@@ -12,7 +12,7 @@ $daemon->on(request => sub {
     # Response
     $tx->res->code(200);
     $tx->res->headers->content_type('text/plain');
-    $tx->res->body("Hello, world!\n");
+    $tx->res->body("$method request for $path\n");
 
     # Resume transaction
     $tx->resume;
