@@ -72,12 +72,12 @@ Emitted when a WebSocket frame has been received. ::
 
     @ws.on
     def frame(ws, frame):
-        print("FIN: {0}.format(frame))
-        print("RSV1: {1}.format(frame))
-        print("RSV2: {2}.format(frame))
-        print("RSV3: {3}.format(frame))
-        print("Opcode: {4}.format(frame))
-        print("Payload: {5}.format(frame))
+        print("FIN: {0}".format(frame))
+        print("RSV1: {1}".format(frame))
+        print("RSV2: {2}".format(frame))
+        print("RSV3: {3}".format(frame))
+        print("Opcode: {4}".format(frame))
+        print("Payload: {5}".format(frame))
 
 json
 ~~~~
