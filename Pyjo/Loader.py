@@ -48,6 +48,7 @@ Functions
 """
 
 import importlib
+import types
 
 from Pyjo.Regexp import r
 from Pyjo.Util import b64_decode
@@ -61,22 +62,23 @@ re_files = r(r'^@@\s*(.+?)\s*\r?\n', 'm')
 re_base64 = r(r'\s*\(\s*base64\s*\)$')
 
 
-def embedded_file(modname, filename=None):
+def embedded_file(module, filename=None):
     """::
 
         all_files = embedded_file('Foo.Bar')
         index = embedded_file('Foo.Bar', 'index.html')
+        main_module_files = embedded_file(sys.modules[__name__])
 
-    Extract embedded file from the ``DATA`` section of a class, all files will be
+    Extract embedded file from the ``DATA`` variable of a module, all files will be
     cached once they have been accessed for the first time. ::
 
         for content in data_section('Foo.Bar'):
             print(content)
     """
     if filename:
-        return _all(modname)[filename]
+        return _all(module)[filename]
     else:
-        return _all(modname)
+        return _all(module)
 
 
 def load_module(name):
@@ -102,11 +104,16 @@ def load_module(name):
         return
 
 
-def _all(modname):
+def _all(module):
+    if isinstance(module, types.ModuleType):
+        modname = module.__name__
+    else:
+        modname = module
+        module = load_module(modname)
+
     if modname in CACHE:
         return CACHE[modname]
 
-    module = load_module(modname)
     if not module or not hasattr(module, 'DATA'):
         return {}
 
