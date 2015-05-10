@@ -1,12 +1,14 @@
-import Pyjo.Server.Daemon
+import Pyjo.Server.WSGI
 from Pyjo.Util import b
 
-daemon = Pyjo.Server.Daemon.new(listen=['http://*:3000'])
-daemon.unsubscribe('request')
+from wsgiref.simple_server import make_server
+
+wsgi = Pyjo.Server.WSGI.new(listen=['http://*:3000'])
+wsgi.unsubscribe('request')
 
 
-@daemon.on
-def request(daemon, tx):
+@wsgi.on
+def request(wsgi, tx):
     # Request
     method = tx.req.method
     path = tx.req.url.path
@@ -20,4 +22,7 @@ def request(daemon, tx):
     tx.resume()
 
 
-daemon.run()
+app = wsgi.to_wsgi_app()
+
+httpd = make_server('', 3000, app)
+httpd.serve_forever()

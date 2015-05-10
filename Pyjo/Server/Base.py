@@ -51,12 +51,102 @@ Classes
 
 import Pyjo.EventEmitter
 
+import os
+import sys
+
+from Pyjo.Base import lazy
+from Pyjo.Loader import load_module
+from Pyjo.Util import getenv
+
 
 class Pyjo_Server_Base(Pyjo.EventEmitter.object):
     """
     :mod:`Pyjo.Server.Base` inherits all attributes and methods from
     :mod:`Pyjo.EventEmitter` and implements the following new ones.
     """
+
+    app = lazy(lambda self: self.build_app('Pyjo.HelloWorld'))
+    """::
+
+        app = server.app
+        server.app = MyApp.new()
+
+    Application this server handles, defaults to a :mod:`Pyjo.HelloWorld` object.
+    """
+
+    reverse_proxy = lazy(lambda self: getenv('PYJO_REVERSE_PROXY'))
+    """::
+
+        boolean = server.reverse_proxy
+        server.reverse_proxy = boolean
+
+    This server operates behind a reverse proxy, defaults to the value of the
+    ``PYJO_REVERSE_PROXY`` environment variable.
+    """
+
+    def __init__(self, *args, **kwargs):
+        """::
+
+            server = Pyjo.Server.Base.new()
+            server = Pyjo.Server.Base.new(reverse_proxy=True)
+
+        Construct a new ``Pyjo.Server`` object and subscribe to ``request`` event
+        with default request handling.
+        """
+        super(Pyjo_Server_Base, self).__init__(*args, **kwargs)
+        self.on(lambda server, tx: server.app.handler(tx), 'request')
+
+    def build_app(self, app):
+        """::
+
+            app = server.build_app('MyApp')
+
+        Build application from class.
+        """
+        module = load_module(app)
+        if module:
+            return module.new()
+        else:
+            raise ImportError("No application module named '{0}'".format(app))
+
+    def build_tx(self):
+        """::
+
+            tx = server.build_tx()
+
+        Let application build a transaction.
+        """
+        tx = self.app.build_tx()
+        if self.reverse_proxy:
+            tx.req.reverse_proxy = True
+        return tx
+
+    def daemonize(self):
+        """::
+
+            server->daemonize;
+
+        Daemonize server process.
+        """
+        # Fork and kill parent
+        pid = os.fork()
+        if pid > 0:
+            os._exit(0)
+        os.setsid()
+
+        # Close filehandles
+        null = os.open(os.devnull, os.O_RDWR)
+        os.dup2(null, sys.stdin.fileno())
+        os.dup2(null, sys.stdout.fileno())
+        os.dup2(null, sys.stderr.fileno())
+
+    def run(self):
+        """::
+
+            server.run()
+
+        Run server. Meant to be overloaded in a subclass.
+        """
 
 
 new = Pyjo_Server_Base.new
