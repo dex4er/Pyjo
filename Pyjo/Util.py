@@ -238,7 +238,10 @@ else:
         if isinstance(string, unicode) or hasattr(string, '__unicode__'):
             return unicode(string)
         else:
-            return str(string).decode(charset)
+            if charset.lower() in ['ascii', '646', 'us-ascii']:
+                return str(str(string).decode(charset))
+            else:
+                return str(string).decode(charset)
 
 
 if sys.version_info >= (3, 0):
