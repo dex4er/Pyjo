@@ -154,10 +154,12 @@ class Pyjo_Log(Pyjo.EventEmitter.object):
         if not handle:
             return
 
-        fcntl.flock(handle, fcntl.LOCK_EX)
+        if handle != sys.stderr:
+            fcntl.flock(handle, fcntl.LOCK_EX)
         handle.write(msg)
         handle.flush()
-        fcntl.flock(handle, fcntl.LOCK_UN)
+        if handle != sys.stderr:
+            fcntl.flock(handle, fcntl.LOCK_UN)
 
     def debug(self, *lines):
         """::
