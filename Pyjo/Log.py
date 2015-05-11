@@ -254,15 +254,16 @@ class Pyjo_Log(Pyjo.EventEmitter.object):
     def _build_handle(self):
         if self.path:
             return codecs.open(self.path, mode='a', encoding='utf-8', errors='replace')
-        elif notnone(getattr(sys.stderr, 'encoding', ''), '').lower() == 'utf-8':
+        elif (getattr(sys.stderr, 'encoding', '') or '').lower() == 'utf-8':
             return sys.stderr
         elif not hasattr(sys.stderr, 'encoding'):
             return sys.stderr
         else:
+            encoding = sys.stderr.encoding or 'ascii'
             if hasattr(sys.stderr, 'detach'):
-                sys.stderr = codecs.getwriter(sys.stderr.encoding)(sys.stderr.detach(), 'backslashreplace')
+                sys.stderr = codecs.getwriter(encoding)(sys.stderr.detach(), 'backslashreplace')
             else:
-                sys.stderr = codecs.getwriter(sys.stderr.encoding)(sys.stderr, 'backslashreplace')
+                sys.stderr = codecs.getwriter(encoding)(sys.stderr, 'backslashreplace')
             return sys.stderr
 
     def _format(self, t, level, *lines):
