@@ -56,7 +56,7 @@ import sys
 import time
 
 from Pyjo.Base import lazy
-from Pyjo.Util import getenv, notnone, u
+from Pyjo.Util import getenv, u
 
 
 LEVEL = {'debug': 1, 'info': 2, 'warn': 3, 'error': 4, 'fatal': 5}
