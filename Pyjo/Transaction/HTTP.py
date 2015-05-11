@@ -76,7 +76,7 @@ Classes
 -------
 """
 
-import Pyjo.Transaction
+import Pyjo.Transaction.WebSocket
 
 from Pyjo.Util import notnone
 
@@ -217,13 +217,11 @@ class Pyjo_Transaction_HTTP(Pyjo.Transaction.object):
         if not req.is_finished or self._handled:
             return
 
-        return
+        # Pyjo.Transaction.WebSocket
+        if req.is_handshake:
+            self.emit('upgrade', Pyjo.Transaction.WebSocket.new(handshake=self))
 
-        # TODO Pyjo.Transaction.WebSocket
-        # if req.is_handshake:
-        #     self.emit('upgrade', Pyjo.Transaction.WebSocket.new(handshake=self))
-        #
-        # self.emit('request')
+        self.emit('request')
 
     def server_write(self):
         """::

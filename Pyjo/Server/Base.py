@@ -56,7 +56,7 @@ import sys
 
 from Pyjo.Base import lazy
 from Pyjo.Loader import load_module
-from Pyjo.Util import getenv
+from Pyjo.Util import getenv, not_implemented
 
 
 class Pyjo_Server_Base(Pyjo.EventEmitter.object):
@@ -140,6 +140,7 @@ class Pyjo_Server_Base(Pyjo.EventEmitter.object):
         os.dup2(null, sys.stdout.fileno())
         os.dup2(null, sys.stderr.fileno())
 
+    @not_implemented
     def run(self):
         """::
 
