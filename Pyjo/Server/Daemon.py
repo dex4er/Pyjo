@@ -45,13 +45,13 @@ Shut down server immediately.
 Events
 ------
 
-:mod:`Pyjo.Server.Daemon` inherits all events from :mod:`Pyjo.Server`.
+:mod:`Pyjo.Server.Daemon` inherits all events from :mod:`Pyjo.Server.Base`.
 
 Debugging
 ---------
 
 You can set the ``PYJO_DAEMON_DEBUG`` environment variable to get some advanced
-diagnostics information printed to :attr:`sys.stderr``. ::
+diagnostics information printed to :attr:`sys.stderr`. ::
 
     MOJO_DAEMON_DEBUG=1
 
@@ -111,7 +111,7 @@ class Pyjo_Server_Daemon(Pyjo.Server.Base.object):
     """
 
     ioloop = lazy(lambda self: Pyjo.IOLoop.singleton)
-    """:
+    """::
 
         loop = daemon.ioloop
         daemon.ioloop = Pyjo.IOLoop.new()
