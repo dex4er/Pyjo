@@ -14,6 +14,7 @@ Contents:
 
     intro
     status
+    installation
     examples
     api/index
     authors

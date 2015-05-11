@@ -8,6 +8,8 @@ A next generation web framework for the Python programming language.
 
 Based on Mojolicious.
 
+See http://www.pyjoyment.net/
+
 
 Mojolicious
 ===========
@@ -22,17 +24,21 @@ Status
 
 Early developement stage. Implemented already:
 
-  * HTTP user agent with TLS support
+  * WSGI adapter
+  * HTTP standalone async-io server
+  * WebSockets client and server
+  * HTTP user agent with TLS/SSL support
+  * Embedded files loader
   * HTML/XML DOM parser with CSS selectors
   * URL parser with container classes for URL, path and querystring
   * Non-blocking TCP client and server
+  * Simple logging object
   * Synchronizer and sequentializer of multiple events
   * Main event loop which handle IO and timer events
   * Event emitter with subscriptions
   * Low level event reactor based on select(2) and poll(2)
   * Lazy properties for objects
   * Test units with API based on Perl's Test::More and TAP protocol
-  * Regexp objects with overloaded operators
 
 
 Examples
