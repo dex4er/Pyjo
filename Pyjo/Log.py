@@ -56,7 +56,7 @@ import sys
 import time
 
 from Pyjo.Base import lazy
-from Pyjo.Util import getenv, u
+from Pyjo.Util import getenv, notnone, u
 
 
 LEVEL = {'debug': 1, 'info': 2, 'warn': 3, 'error': 4, 'fatal': 5}
@@ -252,7 +252,7 @@ class Pyjo_Log(Pyjo.EventEmitter.object):
     def _build_handle(self):
         if self.path:
             return codecs.open(self.path, mode='a', encoding='utf-8', errors='replace')
-        elif hasattr(sys.stderr, 'encoding') and sys.stderr.encoding.lower() == 'utf-8':
+        elif notnone(getattr(sys.stderr, 'encoding', ''), '').lower() == 'utf-8':
             return sys.stderr
         elif not hasattr(sys.stderr, 'encoding'):
             return sys.stderr
