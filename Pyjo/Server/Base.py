@@ -16,14 +16,14 @@ Pyjo.Server.Base - HTTP/WebSocket server base class
             # Emit "request" event
             self.emit('request', tx)
 
-:mod:`Pyjo.Server` is an abstract base class for HTTP/WebSocket servers and server
+:mod:`Pyjo.Server.Base` is an abstract base class for HTTP/WebSocket servers and server
 interfaces, like :mod:`Pyjo.Server.CGI`, :mod:`Pyjo.Server.Daemon`
 and :mod:`Pyjo.Server.WSGI`.
 
 Events
 ------
 
-:mod:`Pyjo.Server` inherits all events from :mod:`Pyjo.EventEmitter` and can emit the
+:mod:`Pyjo.Server.Base` inherits all events from :mod:`Pyjo.EventEmitter` and can emit the
 following new ones.
 
 request
