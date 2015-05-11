@@ -42,6 +42,8 @@ import Pyjo.Cookie.Request
 import Pyjo.Message
 import Pyjo.URL
 
+import os
+
 from Pyjo.Base import lazy
 from Pyjo.Regexp import r
 from Pyjo.Util import b, b64_decode, b64_encode, convert, notnone, u
@@ -351,7 +353,7 @@ class Pyjo_Message_Request(Pyjo.Message.object):
         Parse HTTP request chunks or environment dict.
         """
         # Parse CGI environment
-        if isinstance(request, dict):
+        if isinstance(request, (dict, type(os.environ))):
             chunk = b''
             self.environ = request
             self._parse_environ(request)

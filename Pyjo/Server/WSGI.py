@@ -46,6 +46,8 @@ Classes
 
 import Pyjo.Server.Base
 
+from Pyjo.Util import convert
+
 
 class Pyjo_Server_WSGI(Pyjo.Server.Base.object):
     """
@@ -66,17 +68,18 @@ class Pyjo_Server_WSGI(Pyjo.Server.Base.object):
         tx.remote_address = environ.get('REMOTE_ADDR', None)
 
         # Request body (may block if we try to read too much)
-        length = environ.get('CONTENT_LENGTH', None)
+        length = convert(environ.get('CONTENT_LENGTH', 0), int, 0)
         while not req.is_finished:
-            body_size = length if length and length < 131072 else 131072
+            buf_size = length if length and length < 131072 else 131072
+            buf = bytearray(buf_size)
             wsgi_input = environ.get('wsgi.input', None)
             if not wsgi_input:
                 break
-            chunk = wsgi_input.read(body_size)
-            if not chunk:
+            read = wsgi_input.readinto(buf)
+            if not read:
                 break
-            req.parse(chunk)
-            length -= len(chunk)
+            req.parse(buf[:read])
+            length -= read
             if length <= 0:
                 break
 
