@@ -9,7 +9,7 @@ Pyjo.IOLoop.Stream - Non-blocking I/O stream
     stream = Pyjo.IOLoop.Stream.new(handle)
 
     @stream.on
-    def read(stream, bstring):
+    def read(stream, chunk):
         ...
 
     @stream.on
@@ -52,7 +52,7 @@ drain
 ::
 
     @stream.on
-    def close(stream):
+    def drain(stream):
         ...
 
 Emitted once all data has been written.
@@ -72,7 +72,7 @@ read
 ::
 
     @stream.on
-    def read(stream, bstring):
+    def read(stream, chunk):
         ...
 
 Emitted if new data arrives on the stream.
@@ -93,7 +93,7 @@ write
 ::
 
     @stream.on
-    def read(stream, bstring):
+    def write(stream, chunk):
         ...
 
 Emitted if new data has been written to the stream.

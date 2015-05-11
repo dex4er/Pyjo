@@ -250,9 +250,9 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
 
             TLS verification mode, defaults to ``0x03``.
         """
-        address = kwargs.get('address', '127.0.0.1')
+        address = kwargs.get('address', None) or '127.0.0.1'
         port = kwargs.get('port', 0)
-        backlog = kwargs.get('backlog', socket.SOMAXCONN)
+        backlog = kwargs.get('backlog', None) or socket.SOMAXCONN
 
         address_port = '{0}:{1}'.format(address, port)
         m = r(r'(?:^|\,){0}:(\d+)'.format(re.escape(address_port))).match(getenv('PYJO_REUSE', ''))
