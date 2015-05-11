@@ -5,19 +5,19 @@ Pyjo.Loader - Loader
 ====================
 ::
 
-    from Pyjo.Loader import module_data, find_modules, load_module
+    from Pyjo.Loader import embedded_file, load_module
 
     # Find modules in a namespace
     for module in find_modules('Some.Namespace'):
 
         # Load them safely
         try:
-            load_class(module)
+            load_module(module)
         except ImportError as e:
             print('Loading "{0}" failed: {1}'.format(module, e))
 
         # And extract files from the DATA section
-        print(data_section(module, 'some_file.txt'))
+        print(embedded_file(module, 'some_file.txt'))
 
 :mod:`Pyjo.Loader` is a module loader and plugin framework. Aside from finding
 modules and loading classes, it allows multiple files to be stored in the
@@ -26,7 +26,6 @@ modules and loading classes, it allows multiple files to be stored in the
     # Some/Namespace/Module.py
 
     DATA = r'''
-
     @@ test.txt
     This is the first file.
 
