@@ -159,35 +159,35 @@ class Pyjo_Server_Daemon(Pyjo.Server.Base.object):
     ``ca``
         ::
 
-            ca=/etc/tls/ca.crt
+            ca='/etc/tls/ca.crt'
 
         Path to TLS certificate authority file.
 
     ``cert``
         ::
 
-            cert=/etc/tls/server.crt
+            cert='/etc/tls/server.crt'
 
         Path to the TLS cert file, defaults to a built-in test certificate.
 
     ``ciphers``
         ::
 
-            ciphers=AES128-GCM-SHA256:RC4:HIGH:!MD5:!aNULL:!EDH
+            ciphers='AES128-GCM-SHA256:RC4:HIGH:!MD5:!aNULL:!EDH'
 
         Cipher specification string.
 
     ``key``
         ::
 
-            key=/etc/tls/server.key
+            key='/etc/tls/server.key'
 
         Path to the TLS key file, defaults to a built-in test key.
 
     ``reuse``
         ::
 
-            reuse=1
+            reuse=True
 
         Allow multiple servers to use the same port with the ``SO_REUSEPORT`` socket
         option.
