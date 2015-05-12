@@ -142,6 +142,23 @@ def decorator(func):
 
 
 def decoratormethod(func):
+    """::
+
+        class MyClass(object):
+            @decoratormethod
+            def method(self, cb, param):
+                print("method cb='{0}' param='{1}'".format(cb(), param))
+
+        obj = MyClass()
+
+        obj.method(lambda: 'callback 1', 'as method')
+
+        @obj.method('as decorator')
+        def cb():
+            return 'callback 2'
+
+    Make decorator from method with callback as a first argument.
+    """
     @functools.wraps(func)
     def wrap(self, *args):
         if not callable(args[0]):
@@ -152,60 +169,152 @@ def decoratormethod(func):
     return wrap
 
 
-def dictget(d, *k):
-    return [d[i] for i in k]
+def die(e):
+    """::
 
+        die(Exception('Something went wrong'))
+        die('Exit immediately')
 
-def die(msg):
-    if isinstance(msg, Exception):
-        raise msg
+    Raise an exception. :class:`SystemExit` exception is raised
+    if parameter is not an exception already. ::
+
+        os.environ.get('HOME') or die('HOME is not defined')
+    """
+    if isinstance(e, BaseException):
+        raise e
     else:
-        print(msg, file=sys.stderr)
-        sys.exit(1)
+        raise SystemExit(e)
 
 
 def getenv(name, default=None):
+    """::
+
+        envvar = getenv(name)
+        envvar = getenv(name, default)
+
+    Get the environment variable. Returns default value or ``None``
+    if variable is not defined.
+    """
     return os.environ.get(name, default)
 
 
 re_entity = r(r'&(?:\#((?:\d{1,7}|x[0-9a-fA-F]{1,6}));|(\w+;?))')
 
 
-def html_unescape(ustring):
-    return re_entity.sub(lambda m: _decode(m.group(1), m.group(2)), ustring)
+def html_unescape(unicodestring):
+    """::
+
+        unicodestring = html_unescape(unicodestring)
+
+    Unescape all HTML entities in string. ::
+
+        # "<div>"
+        html_unescape('&lt;div&gt;')
+    """
+    return re_entity.sub(lambda m: _decode(m.group(1), m.group(2)), unicodestring)
 
 
 if sys.version_info >= (3, 0):
     def isbytes(obj):
+        """::
+
+            boolean = isbytes(obj)
+
+        Check if object is ``bytearray`` or ``bytes`` (Python 3.x)
+        or ``str`` (Python 2.x).
+        """
         return isinstance(obj, (bytearray, bytes))
 else:
     def isbytes(obj):
+        """::
+
+            boolean = isbytes(obj)
+
+        Check if object is ``bytearray`` or ``bytes`` (Python 3.x)
+        or ``str`` (Python 2.x).
+        """
         return isinstance(obj, (bytearray, str))
 
 
 def isiterable(obj):
+    """::
+
+        boolean = isiterable(obj)
+
+    Check if object is iterable and not simple string.
+    """
     return hasattr(obj, '__iter__') and not isstring(obj)
 
 
 if sys.version_info >= (3, 0):
     def isstring(obj):
+        """::
+
+            boolean = isstring(obj)
+
+        Check if object is string (``bytes``, ``str`` or ``unicode``).
+        """
         return isinstance(obj, (bytes, str))
 else:
     def isstring(obj):
+        """::
+
+            boolean = isstring(obj)
+
+        Check if object is string (``bytes``, ``str`` or ``unicode``).
+        """
         return isinstance(obj, (bytes, str, unicode))
 
 
 if sys.version_info >= (3, 0):
     def isunicode(obj):
+        """::
+
+            boolean = isunicode(obj)
+
+        Check if object is ``str`` (Python 3.x)
+        or ``unicode`` (Python 2.x).
+        """
         return isinstance(obj, str)
 else:
     def isunicode(obj):
+        """::
+
+            boolean = isunicode(obj)
+
+        Check if object is ``str`` (Python 3.x)
+        or ``unicode`` (Python 2.x).
+        """
         return isinstance(obj, unicode)
 
 
-def md5_sum(bstring):
+def md5_bytes(bytestring):
+    """::
+
+        md5 = md5_bytes(bytestring)
+
+    Generate binary MD5 checksum for bytes. ::
+
+        # b'\xac\xbd\x18\xdbL\xc2\xf8\\\xed\xefeO\xcc\xc4\xa4\xd8'
+        md5_bytes(b'foo')
+    """
     m = hashlib.md5()
-    m.update(bstring)
+    m.update(bytestring)
+    return m.hexdigest()
+
+
+def md5_sum(bytestring):
+    """::
+
+        md5 = md5_sum(bytestring)
+
+    Generate MD5 checksum for bytes. ::
+
+        # "acbd18db4cc2f85cedef654fccc4a4d8"
+        md5_sum(b'foo')
+    """
+    m = hashlib.md5()
+    m.update(bytestring)
     return m.hexdigest()
 
 
