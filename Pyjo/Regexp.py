@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 Pyjo.Regexp - Compile regexp pattern into object
 ================================================

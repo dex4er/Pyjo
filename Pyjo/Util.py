@@ -1,5 +1,21 @@
+# -*- coding: utf-8 -*-
+
 """
-Pyjo.Util
+Pyjo.Util - Portable utility functions
+======================================
+::
+
+    from Pyjo.Util import b, b64_encode, u, url_escape, url_unescape
+
+    string = 'test=23'
+    escaped = url_escape(b(string))
+    print(u(url_unescape(escaped)))
+    print(b64_encode(escaped, ''))
+
+:mod:`Pyjo.Util` provides portable utility functions for :mod:`Pyjo`.
+
+Functions
+---------
 """
 
 from __future__ import print_function
@@ -25,25 +41,47 @@ DEFAULT_CHARSET = 'utf-8'
 
 
 if sys.version_info >= (3, 0):
-    def b(string, charset=DEFAULT_CHARSET):
-        if isbytes(string):
-            return bytes(string)
+    def b(unicodestring, charset=DEFAULT_CHARSET, errors='strict'):
+        """::
+
+            bytestring = b(unicodestring)
+            bytestring = b(unicodestring, 'utf-8')
+            bytestring = b(unicodestring, 'utf-8', 'strict')
+
+        Encode unicodestring into bytestring.
+        """
+        if isbytes(unicodestring):
+            return bytes(unicodestring)
         else:
-            return bytes(str(string), charset)
+            return bytes(str(unicodestring), charset, errors)
 else:
-    def b(string, charset=DEFAULT_CHARSET):
-        if isinstance(string, unicode):
-            return unicode(string).encode(charset)
+    def b(unicodestring, charset=DEFAULT_CHARSET, errors='strict'):
+        """::
+
+            bytestring = b(unicodestring)
+            bytestring = b(unicodestring, 'utf-8')
+            bytestring = b(unicodestring, 'utf-8', 'strict')
+
+        Encode unicodestring into bytestring.
+        """
+        if isinstance(unicodestring, unicode):
+            return unicode(unicodestring).encode(charset, errors)
         else:
-            return str(string)
+            return str(unicodestring)
 
 
-def b64_decode(ustring):
+def b64_decode(unicodestring):
+    """::
+
+        bytestring = b64_decode(unicodestring)
+
+    Base64 decode bytes. Ignores errors.
+    """
     for _ in range(6):
         try:
-            return base64.b64decode(ustring)
+            return base64.b64decode(unicodestring)
         except binascii.Error:
-            ustring = ustring[:-1]
+            unicodestring = unicodestring[:-1]
     return b''
 
 
@@ -51,10 +89,27 @@ re_chars_76 = r('(.{76})')
 
 
 def b64_encode(bstring, sep="\n"):
+    """::
+
+        asciistring = b64_encode(bytestring)
+        asciistring = b64_encode(bytestring, "\n")
+
+    Base64 encode bytes, the line ending defaults to a newline.
+    """
     return re_chars_76.sub(lambda m: m.group(1) + sep, u(base64.b64encode(bstring), 'ascii'))
 
 
 def convert(value, newtype, default=None):
+    """::
+
+        converted = convert(value, newtype)
+        converted = convert(value, newtype, default)
+
+    Convert value to new type, ignoring errors. Return default value (or None) if
+    error occurred. ::
+
+        port = convert(os.environ.get('HTTP_PORT', ''), int, 80)
+    """
     try:
         return newtype(value)
     except (TypeError, ValueError):
