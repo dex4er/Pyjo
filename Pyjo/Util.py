@@ -89,7 +89,7 @@ re_chars_76 = r('(.{76})')
 
 
 def b64_encode(bstring, sep="\n"):
-    """::
+    r"""::
 
         asciistring = b64_encode(bytestring)
         asciistring = b64_encode(bytestring, "\n")
@@ -117,6 +117,20 @@ def convert(value, newtype, default=None):
 
 
 def decorator(func):
+    """::
+
+        @decorator
+        def function(cb, param):
+            print("function cb='{0}' param='{1}'".format(cb(), param))
+
+        function(lambda: 'callback 1', 'as function')
+
+        @function('as decorator')
+        def cb():
+            return 'callback 2'
+
+    Make decorator from function with callback as a first argument.
+    """
     @functools.wraps(func)
     def wrap(*args):
         if not callable(args[0]):
