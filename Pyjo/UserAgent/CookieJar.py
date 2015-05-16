@@ -147,23 +147,24 @@ class Pyjo_UserAgent_CookieJar(Pyjo.Base.object):
             return
 
         url = tx.req.url
-        for cookie in tx.res.cookies:
-            # Validate domain
-            host = url.ihost
-            domain = notnone(cookie.domain, lambda: cookie.set(origin=host).origin).lower()
-            if domain.startswith('.'):
-                domain = domain[1:]
-            if host != domain and (not host.endswith('.' + domain) or re_endswith_numeric_domain.search(host)):
-                continue
+        if tx.res.cookies:
+            for cookie in tx.res.cookies:
+                # Validate domain
+                host = url.ihost
+                domain = notnone(cookie.domain, lambda: cookie.set(origin=host).origin).lower()
+                if domain.startswith('.'):
+                    domain = domain[1:]
+                if host != domain and (not host.endswith('.' + domain) or re_endswith_numeric_domain.search(host)):
+                    continue
 
-            # Validate path
-            path = notnone(cookie.path, url.path.to_dir().to_abs_str())
-            path = Pyjo.Path.new(path).set(trailing_slash=False).to_abs_str()
-            if not self._path(path, url.path.to_abs_str()):
-                continue
+                # Validate path
+                path = notnone(cookie.path, url.path.to_dir().to_abs_str())
+                path = Pyjo.Path.new(path).set(trailing_slash=False).to_abs_str()
+                if not self._path(path, url.path.to_abs_str()):
+                    continue
 
-            cookie.path = path
-            self.add(cookie)
+                cookie.path = path
+                self.add(cookie)
 
     def empty(self):
         """::
