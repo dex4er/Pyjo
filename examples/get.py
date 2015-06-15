@@ -1,6 +1,7 @@
 import Pyjo.UserAgent
 
-import sys, codecs
+import codecs
+import sys
 
 if sys.stdout.isatty():
     sys.stdout = codecs.getwriter(sys.stdout.encoding)(sys.stdout.detach() if hasattr(sys.stdout, 'detach') else sys.stdout, 'xmlcharrefreplace')

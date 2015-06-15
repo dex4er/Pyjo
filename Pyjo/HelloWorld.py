@@ -21,7 +21,7 @@ import Pyjo.Base
 import Pyjo.Log
 import Pyjo.Transaction.HTTP
 
-from Pyjo.Base import lazy
+from Pyjo.Util import notnone
 
 
 class Pyjo_HelloWorld(Pyjo.Base.object):
@@ -30,7 +30,8 @@ class Pyjo_HelloWorld(Pyjo.Base.object):
     :mod:`Pyjo.Base` and implements the following new ones.
     """
 
-    log = lazy(lambda self: Pyjo.Log.new())
+    def __init__(self, **kwargs):
+        self.log = notnone(kwargs.get('log'), lambda: Pyjo.Log.new())
 
     def app(self):
         return self

@@ -83,8 +83,7 @@ import Pyjo.IOLoop.Server
 import Pyjo.IOLoop.Stream
 import Pyjo.Reactor.Base
 
-from Pyjo.Base import lazy
-from Pyjo.Util import decorator, decoratormethod, getenv, md5_sum, steady_time, rand, warn
+from Pyjo.Util import decorator, decoratormethod, getenv, md5_sum, notnone, steady_time, rand, warn
 
 import importlib
 import os
@@ -107,83 +106,80 @@ class Pyjo_IOLoop(Pyjo.EventEmitter.object):
     :mod:`Pyjo.EventEmitter` and implements the following new ones.
     """
 
-    max_accepts = 0
-    """::
-
-        max_accepts = loop.max_accepts
-        loop.max_accepts = 1000
-
-    The maximum number of connections this event loop is allowed to accept before
-    shutting down gracefully without interrupting existing connections, defaults
-    to ``0``. Setting the value to ``0`` will allow this event loop to accept new
-    connections indefinitely. Note that up to half of this value can be subtracted
-    randomly to improve load balancing between multiple server processes.
-    """
-
-    max_connections = 1000
-    """::
-
-        max_connections = loop.max_connections
-        loop.max_connections = 1000
-
-    The maximum number of concurrent connections this event loop is allowed to
-    handle before stopping to accept new incoming connections, defaults to ``1000``.
-    """
-
-    multi_accept = lazy(lambda self: 50 if self.max_connections > 50 else 1)
-    """::
-
-        multi = loop.multi_accept
-        loop.multi_accept = 100
-
-    Number of connections to accept at once, defaults to ``50`` or ``1``, depending
-    on if the value of :attr:`max_connections` is smaller than ``50``.
-    """
-
-    reactor = None
-    """::
-
-        reactor = loop.reactor
-        loop.reactor = Pyjo.Reactor.new()
-
-    Low-level event reactor, usually a :mod:`Pyjo.Reactor.Poll` or
-    :mod:`Pyjo.Reactor.Select` object with a default subscriber to the event
-    ``error``. ::
-
-        # Watch if handle becomes readable or writable
-        def io_cb(reactor, writable):
-            if writable:
-                print('Handle is writable')
-            else:
-                print('Handle is readable')
-
-        loop.reactor.io(io_cb, handle)
-
-        # Change to watching only if handle becomes writable
-        loop.reactor.watch(handle, read=False, write=True)
-
-        # Remove handle again
-        loop.reactor.remove(handle)
-    """
-
-    _accepting_timer = False
-    _acceptors = lazy(lambda self: {})
-    _accepts = None
-    _connections = lazy(lambda self: {})
-    _stop_timer = None
-
     def __init__(self, **kwargs):
         super(Pyjo_IOLoop, self).__init__(**kwargs)
 
+        self.max_accepts = kwargs.get('max_accepts', 0)
+        """::
+
+            max_accepts = loop.max_accepts
+            loop.max_accepts = 1000
+
+        The maximum number of connections this event loop is allowed to accept before
+        shutting down gracefully without interrupting existing connections, defaults
+        to ``0``. Setting the value to ``0`` will allow this event loop to accept new
+        connections indefinitely. Note that up to half of this value can be subtracted
+        randomly to improve load balancing between multiple server processes.
+        """
+
+        self.max_connections = kwargs.get('max_connections', 1000)
+        """::
+
+            max_connections = loop.max_connections
+            loop.max_connections = 1000
+
+        The maximum number of concurrent connections this event loop is allowed to
+        handle before stopping to accept new incoming connections, defaults to ``1000``.
+        """
+
+        self.multi_accept = notnone(kwargs.get('multi_accept'), lambda: 50 if self.max_connections > 50 else 1)
+        """::
+
+            multi = loop.multi_accept
+            loop.multi_accept = 100
+
+        Number of connections to accept at once, defaults to ``50`` or ``1``, depending
+        on if the value of :attr:`max_connections` is smaller than ``50``.
+        """
+
         module = importlib.import_module(Pyjo.Reactor.Base.detect())
-        self.reactor = module.new()
+
+        self.reactor = notnone(kwargs.get('reactor'), module.new())
+        """::
+
+            reactor = loop.reactor
+            loop.reactor = Pyjo.Reactor.new()
+
+        Low-level event reactor, usually a :mod:`Pyjo.Reactor.Poll` or
+        :mod:`Pyjo.Reactor.Select` object with a default subscriber to the event
+        ``error``. ::
+
+            # Watch if handle becomes readable or writable
+            def io_cb(reactor, writable):
+                if writable:
+                    print('Handle is writable')
+                else:
+                    print('Handle is readable')
+
+            loop.reactor.io(io_cb, handle)
+
+            # Change to watching only if handle becomes writable
+            loop.reactor.watch(handle, read=False, write=True)
+
+            # Remove handle again
+            loop.reactor.remove(handle)
+        """
+
+        self._accepting_timer = False
+        self._acceptors = {}
+        self._accepts = None
+        self._connections = {}
+        self._stop_timer = None
 
         if DEBUG:
             warn("-- Reactor initialized ({0})".format(self.reactor))
 
         self.reactor.catch(lambda reactor, *args: warn("{0}: {1}".format(reactor, ": ".join(args))))
-
-        return None
 
     def acceptor(self, acceptor):
         """::

@@ -1029,10 +1029,10 @@ if __name__ == '__main__':
     is_ok(res.dom().at('p > a').text, 'bar', 'right value')
     is_ok(res.dom('p').first().text, 'foo', 'right value')
     is_deeply_ok(res.dom('p > a').map('text').to_list(), ['bar', 'baz'], 'right values')
-    text = res.dom('a').map('set', ('content', 'yada')).first().root.find('p > a').map('text').to_list()
+    text = res.dom('a').map('set', content='yada').first().root.find('p > a').map('text').to_list()
     is_deeply_ok(text, ['yada', 'yada'], 'right values')
     is_deeply_ok(res.dom('p > a').map('text').to_list(), ['yada', 'yada'], 'right values')
-    text = res.dom().find('a').map('set', ('content', 'test')).first().root.find('p > a').map('text').to_list()
+    text = res.dom().find('a').map('set', content='test').first().root.find('p > a').map('text').to_list()
     is_deeply_ok(text, ['test', 'test'], 'right values')
     is_deeply_ok(res.dom().find('p > a').map('text').to_list(), ['test', 'test'], 'right values')
 

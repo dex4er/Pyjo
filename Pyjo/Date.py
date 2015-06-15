@@ -30,8 +30,8 @@ import Pyjo.String.Mixin
 import calendar
 import time
 
-from Pyjo.Base import lazy
 from Pyjo.Regexp import r
+from Pyjo.Util import notnone
 
 
 DAYS = ('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun')
@@ -56,16 +56,7 @@ class Pyjo_Date(Pyjo.Base.object, Pyjo.String.Mixin.object):
     :mod:`Pyjo.Base` and :mod:`Pyjo.String.Mixin` and implements the following new ones.
     """
 
-    epoch = lazy(lambda self: time.time())
-    """::
-
-        epoch = date.epoch
-        date.epoch = 784111777
-
-    Epoch seconds, defaults to the current time.
-    """
-
-    def __init__(self, *args, **kwargs):
+    def __init__(self, date=None, **kwargs):
         """::
 
             date = Pyjo.Date.new()
@@ -73,9 +64,20 @@ class Pyjo_Date(Pyjo.Base.object, Pyjo.String.Mixin.object):
 
         Construct a new :mod:`Pyjo.Date` object and :meth:`parse` date if necessary.
         """
-        super(Pyjo_Date, self).__init__()
-        if args or kwargs:
-            self.parse(*args, **kwargs)
+
+        self.epoch = None
+        """::
+
+            epoch = date.epoch
+            date.epoch = 784111777
+
+        Epoch seconds, defaults to the current time.
+        """
+
+        if date is not None:
+            self.parse(date)
+        else:
+            self.epoch = notnone(kwargs.get('epoch'), lambda: time.time())
 
     def __bool__(self):
         """::

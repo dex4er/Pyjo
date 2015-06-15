@@ -34,8 +34,7 @@ import Pyjo.UserAgent.CookieJar
 import Pyjo.UserAgent.Proxy
 import Pyjo.UserAgent.Transactor
 
-from Pyjo.Base import lazy
-from Pyjo.Util import getenv, nonlocals, warn
+from Pyjo.Util import getenv, nonlocals, notnone, warn
 
 import weakref
 
@@ -49,23 +48,26 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
     :mod:`Pyjo.EventEmitter` and implements the following new ones.
     """
 
-    ca = lazy(lambda self: getenv('PYJO_CA_FILE'))
-    cert = lazy(lambda self: getenv('PYJO_CERT_FILE'))
-    connect_timeout = lazy(lambda self: getenv('PYJO_CONNECT_TIMEOUT', 10))
-    cookie_jar = lazy(lambda self: Pyjo.UserAgent.CookieJar.new())
-    inactivity_timeout = lazy(lambda self: getenv('PYJO_INACTIVITY_TIMEOUT', 30))
-    ioloop = Pyjo.IOLoop.new()
-    key = lazy(lambda self: getenv('PYJO_KEY_FILE'))
-    local_address = None
-    max_connections = 5
-    max_redirects = lazy(lambda self: getenv('PYJO_MAX_REDIRECTS', 0))
-    request_timeout = lazy(lambda self: getenv('PYJO_REQUEST_TIMEOUT', 0))
-    proxy = lazy(lambda self: Pyjo.UserAgent.Proxy.new())
-    transactor = lazy(lambda self: Pyjo.UserAgent.Transactor.new())
+    def __init__(self, **kwargs):
+        super(Pyjo_UserAgent, self).__init__(**kwargs)
 
-    _connections = lazy(lambda self: {})
-    _nb_queue = []
-    _queue = []
+        self.ca = notnone(kwargs.get('ca'), lambda: getenv('PYJO_CA_FILE'))
+        self.cert = notnone(kwargs.get('cert'), lambda: getenv('PYJO_CERT_FILE'))
+        self.connect_timeout = notnone(kwargs.get('connect_timeout'), lambda: getenv('PYJO_CONNECT_TIMEOUT', 10))
+        self.cookie_jar = notnone(kwargs.get('cookie_jar'), lambda: Pyjo.UserAgent.CookieJar.new())
+        self.inactivity_timeout = notnone(kwargs.get('inactivity_timeout'), lambda: getenv('PYJO_INACTIVITY_TIMEOUT', 30))
+        self.ioloop = notnone(kwargs.get('ioloop'), lambda: Pyjo.IOLoop.new())
+        self.key = notnone(kwargs.get('key'), lambda: getenv('PYJO_KEY_FILE'))
+        self.local_address = kwargs.get('local_address')
+        self.max_connections = kwargs.get('max_connections', 5)
+        self.max_redirects = notnone(kwargs.get('max_redirects'), lambda: getenv('PYJO_MAX_REDIRECTS', 0))
+        self.request_timeout = notnone(kwargs.get('request_timeout'), lambda: getenv('PYJO_REQUEST_TIMEOUT', 0))
+        self.proxy = notnone(kwargs.get('proxy'), lambda: Pyjo.UserAgent.Proxy.new())
+        self.transactor = notnone(kwargs.get('transactor'), lambda: Pyjo.UserAgent.Transactor.new())
+
+        self._connections = {}
+        self._nb_queue = []
+        self._queue = []
 
     def build_tx(self, method, url, **kwargs):
         return self.transactor.tx(method, url, **kwargs)

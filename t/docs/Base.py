@@ -17,16 +17,20 @@ if __name__ == '__main__':
     from Pyjo.Test import *  # @UnusedWildImport
 
     import Pyjo.Base
-    from Pyjo.Base import lazy
+
+    from Pyjo.Util import notnone
 
     class Cat(Pyjo.Base.object):
-        name = 'Nyan'
-        birds = 2
-        mice = 2
+        def __init__(self, **kwargs):
+            self.name = kwargs.get('name', 'Nyan')
+            self.birds = kwargs.get('birds', 2)
+            self.mice = kwargs.get('mice', 2)
 
     class Tiger(Cat):
-        friend = lazy(lambda self: Cat())
-        stripes = 42
+        def __init__(self, **kwargs):
+            super(Tiger, self).__init__(**kwargs)
+            self.friend = notnone(kwargs.get('friend'), lambda: Cat())
+            self.stripes = kwargs.get('stripes', 42)
 
     mew = Cat.new(name='Longcat')
     is_ok(mew.mice, 2, "mew.mice")
@@ -36,24 +40,18 @@ if __name__ == '__main__':
     is_ok(rawr.tap(lambda rawr: rawr.friend.set(name='Tacgnol')).mice, 0, "rawr.tap(...).mice")
 
     class SubClass(Pyjo.Base.object):
-        name = None
+        def __init__(self, **kwargs):
+            self.name = kwargs.get('name')
 
     # new
     obj = SubClass.new()
     isa_ok(obj, SubClass, "obj")
     none_ok(obj.name, "obj.name")
 
-    obj = SubClass.new(('name', 'value'),)
-    is_ok(obj.name, 'value', "obj.name")
     obj = SubClass.new(name='value')
     is_ok(obj.name, 'value', "obj.name")
 
     # set
-    obj = SubClass.new()
-    obj = obj.set(('name', 'value'),)
-    isa_ok(obj, SubClass, "obj")
-    is_ok(obj.name, 'value', "obj.name")
-
     obj = SubClass.new()
     obj = obj.set(name='value')
     isa_ok(obj, SubClass, "obj")
@@ -66,25 +64,8 @@ if __name__ == '__main__':
     is_ok(obj.name, 'value', "obj.name")
 
     obj = SubClass.new()
-    obj = obj.tap('set', ('name', 'value'),)
-    isa_ok(obj, SubClass, "obj")
-    is_ok(obj.name, 'value', "obj.name")
-
-    obj = SubClass.new()
     obj = obj.tap('set', name='value')
     isa_ok(obj, SubClass, "obj")
     is_ok(obj.name, 'value', "obj.name")
-
-    # lazy
-    class SubClass(Pyjo.Base.object):
-        simple = lazy(42)
-        complex = lazy(lambda self: [1, 2, 3])
-
-    obj = SubClass.new()
-    isa_ok(obj, SubClass, "obj")
-
-    ok('simple' not in vars(obj), "'simple' in vars(obj)")
-    is_ok(obj.simple, 42, "obj.simple")
-    ok('simple' in vars(obj), "'simple' in vars(obj)")
 
     done_testing()

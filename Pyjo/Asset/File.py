@@ -32,7 +32,6 @@ Classes
 
 import Pyjo.Asset
 
-from Pyjo.Base import lazy
 from Pyjo.Util import b, getenv, md5_sum, notnone, slurp, steady_time, rand
 
 import errno
@@ -46,43 +45,39 @@ class Pyjo_Asset_File(Pyjo.Asset.object):
     :mod:`Pyjo.Asset` and implements the following new ones.
     """
 
-    cleanup = None
-    """::
+    def __init__(self, **kwargs):
+        super(Pyjo_Asset_File, self).__init__(**kwargs)
 
-        boolean = asset_file.cleanup
-        asset_file.cleanup = boolean
+        self.cleanup = kwargs.get('cleanup')
+        """::
 
-    Delete :attr:`path` automatically once the file is not used anymore.
-    """
+            boolean = asset_file.cleanup
+            asset_file.cleanup = boolean
 
-    handle = lazy(lambda self: self._init_handle())
-    """::
+        Delete :attr:`path` automatically once the file is not used anymore.
+        """
 
-        handle = asset_file.handle
-        asset_file.handle = open('/home/pyjo/foo.txt', 'rb')
+        self.path = kwargs.get('path')
+        """::
 
-    Filehandle, created on demand.
-    """
+            path = asset_file.path
+            asset_file.path = '/home/pyjo/foo.txt'
 
-    path = None
-    """::
+        File path used to create :attr:`handle`, can also be automatically generated if
+        necessary.
+        """
 
-        path = asset_file.path
-        asset_file.path = '/home/pyjo/foo.txt'
+        self.tmpdir = notnone(kwargs.get('tmpdir'), lambda: getenv('PYJO_TMPDIR') or tempfile.gettempdir())
+        """::
 
-    File path used to create :attr:`handle`, can also be automatically generated if
-    necessary.
-    """
+            tmpdir = asset_file.tmpdir
+            asset_file.tmpdir = '/tmp'
 
-    tmpdir = lazy(lambda self: getenv('PYJO_TMPDIR') or tempfile.gettempdir())
-    """::
+        Temporary directory used to generate :attr:`path`, defaults to the value of the
+        ``PYJO_TMPDIR`` environment variable or auto detection.
+        """
 
-        tmpdir = asset_file.tmpdir
-        asset_file.tmpdir = '/tmp'
-
-    Temporary directory used to generate :attr:`path`, defaults to the value of the
-    ``PYJO_TMPDIR`` environment variable or auto detection.
-    """
+        self._handle = kwargs.get('handle')
 
     def __repr__(self):
         """::
@@ -202,7 +197,7 @@ class Pyjo_Asset_File(Pyjo.Asset.object):
         """
         # Windows requires that the handle is closed
         self.handle.close()
-        self.handle = None
+        self._handle = None
 
         # Move file and prevent clean up
         src = self.path
@@ -244,7 +239,18 @@ class Pyjo_Asset_File(Pyjo.Asset.object):
         else:
             return slurp(self.path)
 
-    def _init_handle(self):
+    @property
+    def handle(self):
+        """::
+
+            handle = asset_file.handle
+            asset_file.handle = open('/home/pyjo/foo.txt', 'rb')
+
+        Filehandle, created on demand.
+        """
+        if self._handle is not None:
+            return self._handle
+
         # Open existing file
         path = self.path
         if path is not None and os.path.isfile(path):
@@ -275,7 +281,8 @@ class Pyjo_Asset_File(Pyjo.Asset.object):
         if self.cleanup is None:
             self.cleanup = True
 
-        return os.fdopen(fd, 'a+b', 0)
+        self._handle = os.fdopen(fd, 'a+b', 0)
+        return self._handle
 
 
 new = Pyjo_Asset_File.new

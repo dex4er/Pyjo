@@ -33,7 +33,6 @@ Classes
 import Pyjo.Base
 import Pyjo.Cookie.Request
 
-from Pyjo.Base import lazy
 from Pyjo.Regexp import r
 from Pyjo.Util import notnone
 
@@ -51,26 +50,27 @@ class Pyjo_UserAgent_CookieJar(Pyjo.Base.object):
     :mod:`Pyjo.Base` and implements the following new ones.
     """
 
-    collecting = True
-    """::
+    def __init__(self, **kwargs):
+        self.collecting = kwargs.get('collecting', True)
+        """::
 
-        boolean = jar.collecting
-        jar.collecting = boolean
+            boolean = jar.collecting
+            jar.collecting = boolean
 
-    Allow :meth:`collect` to :meth:`add` new cookies to the jar, defaults to a ``True``
-    value.
-    """
+        Allow :meth:`collect` to :meth:`add` new cookies to the jar, defaults to a ``True``
+        value.
+        """
 
-    max_cookie_size = 4096
-    """::
+        self.max_cookie_size = kwargs.get('max_cookie_size', 4096)
+        """::
 
-        size = jar.max_cookie_size
-        jar.max_cookie_size = 4096
+            size = jar.max_cookie_size
+            jar.max_cookie_size = 4096
 
-    Maximum cookie size in bytes, defaults to ``4096`` (4KB).
-    """
+        Maximum cookie size in bytes, defaults to ``4096`` (4KB).
+        """
 
-    _jar = lazy(lambda self: {})
+        self._jar = {}
 
     def add(self, *cookies):
         """::

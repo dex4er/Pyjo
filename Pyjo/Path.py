@@ -35,24 +35,7 @@ class Pyjo_Path(Pyjo.Base.object, Pyjo.String.Mixin.object):
     :mod:`Pyjo.Base` and :mod:`Pyjo.String.Mixin` and implements the following new ones.
     """
 
-    charset = 'utf-8'
-    """::
-
-        charset = path.charset
-        path.charset = 'utf-8'
-
-    Charset used for encoding and decoding, defaults to ``utf-8``. ::
-
-        # Disable encoding and decoding
-        path.charset = None
-    """
-
-    _leading_slash = False
-    _path = None
-    _parts = None
-    _trailing_slash = False
-
-    def __init__(self, path=None):
+    def __init__(self, path=None, **kwargs):
         """::
 
             path = Pyjo.Path.new()
@@ -60,7 +43,24 @@ class Pyjo_Path(Pyjo.Base.object, Pyjo.String.Mixin.object):
 
         Construct a new :mod`Pyjo.Path` object and :meth:`parse` path if necessary.
         """
-        super(Pyjo_Path, self).__init__()
+
+        self.charset = kwargs.get('charset', 'utf-8')
+        """::
+
+            charset = path.charset
+            path.charset = 'utf-8'
+
+        Charset used for encoding and decoding, defaults to ``utf-8``. ::
+
+            # Disable encoding and decoding
+            path.charset = None
+        """
+
+        self._leading_slash = False
+        self._path = None
+        self._parts = None
+        self._trailing_slash = False
+
         if path is not None:
             self.parse(path)
 

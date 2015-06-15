@@ -20,13 +20,6 @@ if __name__ == '__main__':
     import Pyjo.Content.MultiPart
     import Pyjo.Content.Single
 
-    import os
-    import tempfile
-
-    from Pyjo.Util import getenv, setenv, steady_time
-
-    from t.lib.Value import Value
-
     # Single
     content = Pyjo.Content.Single.new()
     content.asset.add_chunk(b'foo')

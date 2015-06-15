@@ -19,7 +19,6 @@ Classes
 import Pyjo.Base
 import Pyjo.DOM
 
-from Pyjo.Base import lazy
 from Pyjo.Regexp import r
 from Pyjo.Util import html_unescape, xml_escape
 
@@ -160,25 +159,26 @@ class Pyjo_DOM_HTML(Pyjo.Base.object):
     :mod:`Pyjo.Base` and implements the following new ones.
     """
 
-    tree = lazy(lambda self: ['root'])
-    """::
+    def __init__(self, **kwargs):
+        self.tree = kwargs.get('tree', ['root'])
+        """::
 
-        tree = html.tree
-        html.tree = ['root']
+            tree = html.tree
+            html.tree = ['root']
 
-    Document Object Model. Note that this structure should only be used very
-    carefully since it is very dynamic.
-    """
+        Document Object Model. Note that this structure should only be used very
+        carefully since it is very dynamic.
+        """
 
-    xml = None
-    """::
+        self.xml = kwargs.get('xml')
+        """::
 
-        bool = html.xml
-        html.xml = bool
+            bool = html.xml
+            html.xml = bool
 
-    Disable HTML semantics in parser and activate case sensitivity, defaults to
-    auto detection based on processing instructions.
-    """
+        Disable HTML semantics in parser and activate case sensitivity, defaults to
+        auto detection based on processing instructions.
+        """
 
     def parse(self, html):
         """::

@@ -56,23 +56,26 @@ class Pyjo_Asset(Pyjo.EventEmitter.object):
     :mod:`Pyjo.EventEmitter` and implements the following new ones.
     """
 
-    end_range = None
-    """::
+    def __init__(self, **kwargs):
+        super(Pyjo_Asset, self).__init__(**kwargs)
 
-        end = asset.end_range
-        asset.end_range = 8
+        self.end_range = kwargs.get('end_range')
+        """::
 
-    Pretend file ends earlier.
-    """
+            end = asset.end_range
+            asset.end_range = 8
 
-    start_range = 0
-    """::
+        Pretend file ends earlier.
+        """
 
-        start = asset.start_range
-        asset.start_range = 3
+        self.start_range = kwargs.get('start_range', 0)
+        """::
 
-    Pretend file starts later.
-    """
+            start = asset.start_range
+            asset.start_range = 3
+
+        Pretend file starts later.
+        """
 
     def __del__(self):
         try:

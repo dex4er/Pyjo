@@ -104,7 +104,7 @@ import Pyjo.EventEmitter
 import Pyjo.IOLoop
 import Pyjo.Util
 
-from Pyjo.Base import lazy
+from Pyjo.Util import notnone
 
 
 REMAINING = {}
@@ -116,23 +116,26 @@ class Pyjo_IOLoop_Delay(Pyjo.EventEmitter.object):
     :mod:`Pyjo.EventEmitter` and implements the following new ones.
     """
 
-    ioloop = lazy(lambda self: Pyjo.IOLoop.singleton)
-    """::
+    def __init__(self, *args, **kwargs):
+        super(Pyjo_IOLoop_Delay, self).__init__(*args, **kwargs)
 
-        ioloop = delay.ioloop
-        delay.ioloop = Pyjo.IOLoop.new()
+        self.ioloop = notnone(kwargs.get('ioloop'), lambda: Pyjo.IOLoop.singleton)
+        """::
 
-    Event loop object to control, defaults to the global :mod:`Pyjo.IOLoop`
-    singleton.
-    """
+            ioloop = delay.ioloop
+            delay.ioloop = Pyjo.IOLoop.new()
 
-    _counter = 0
-    _pending = 0
-    _lock = False
-    _fail = False
+        Event loop object to control, defaults to the global :mod:`Pyjo.IOLoop`
+        singleton.
+        """
 
-    _data = lazy(lambda self: {})
-    _args = lazy(lambda self: [])
+        self._counter = 0
+        self._pending = 0
+        self._lock = False
+        self._fail = False
+
+        self._data = {}
+        self._args = []
 
     def begin(self, offset=1, length=0, *args):
         """::

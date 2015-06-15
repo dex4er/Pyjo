@@ -209,14 +209,14 @@ class Pyjo_Collection(list):
         else:
             return
 
-    def map(self, attribute, *args):
+    def map(self, *args, **kwargs):
         """::
 
             new = collection.map(lambda a: ...)
             new = collection.map(attribute)
             new = collection.map(attribute, value)
             new = collection.map(method)
-            new = collection.map(method, *args)
+            new = collection.map(method, *args, **kwargs)
 
         Evaluate callback for, or get/set attribute from,
         or call method on, each element in collection and
@@ -233,12 +233,15 @@ class Pyjo_Collection(list):
             # Append the word "pyjo" to all values
             pyjoified = collection.map(lambda a: a + 'pyjo')
         """
+        assert(args)
+        attribute = args[0]
+        args = args[1:]
         if callable(attribute):
             return self.new(map(attribute, self))
         else:
             return self.new(
                 map(lambda a:
-                    getattr(a, attribute)(*args) if callable(getattr(a, attribute))
+                    getattr(a, attribute)(*args, **kwargs) if callable(getattr(a, attribute))
                     else getattr(a, attribute, setattr(a, attribute, args[0])) if args
                     else getattr(a, attribute),
                     self))

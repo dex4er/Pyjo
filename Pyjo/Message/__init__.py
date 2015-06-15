@@ -82,7 +82,6 @@ import Pyjo.JSON.Pointer
 import Pyjo.Parameters
 import Pyjo.Upload
 
-from Pyjo.Base import lazy
 from Pyjo.JSON import j
 from Pyjo.Regexp import r
 from Pyjo.Util import b, convert, getenv, not_implemented, notnone, u
@@ -98,71 +97,74 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
     :mod:`Pyjo.EventEmitter` and implements the following new ones.
     """
 
-    content = lazy(lambda self: Pyjo.Content.Single.new())
-    """::
+    def __init__(self, **kwargs):
+        super(Pyjo_Message, self).__init__(**kwargs)
 
-        content = msg.content
-        msg.content = Pyjo.Content.Single.new()
+        self.content = notnone(kwargs.get('content'), lambda: Pyjo.Content.Single.new())
+        """::
 
-    Message content, defaults to a :mod:`Pyjo.Content.Single` object.
-    """
+            content = msg.content
+            msg.content = Pyjo.Content.Single.new()
 
-    default_charset = 'utf-8'
-    """::
+        Message content, defaults to a :mod:`Pyjo.Content.Single` object.
+        """
 
-        charset = msg.default_charset
-        msg.default_charset = 'utf-8'
+        self.default_charset = kwargs.get('default_charset', 'utf-8')
+        """::
 
-    Default charset used by :attr:`text` and to extract data from
-    ``application/x-www-form-urlencoded`` or ``multipart/form-data`` message body,
-    defaults to ``utf-8``.
-    """
+            charset = msg.default_charset
+            msg.default_charset = 'utf-8'
 
-    max_line_size = lazy(lambda self: convert(getenv('PYJO_MAX_LINE_SIZE'), int) or 8192)
-    """::
+        Default charset used by :attr:`text` and to extract data from
+        ``application/x-www-form-urlencoded`` or ``multipart/form-data`` message body,
+        defaults to ``utf-8``.
+        """
 
-        size = msg.max_line_size
-        msg.max_line_size = 8192
+        self.max_line_size = notnone(kwargs.get('max_line_size'), lambda: convert(getenv('PYJO_MAX_LINE_SIZE'), int) or 8192)
+        """::
 
-    Maximum start-line size in bytes, defaults to the value of the
-    ``PYJO_MAX_LINE_SIZE`` environment variable or ``8192`` (8KB).
-    """
+            size = msg.max_line_size
+            msg.max_line_size = 8192
 
-    max_message_size = lazy(lambda self: notnone(convert(getenv('PYJO_MAX_MESSAGE_SIZE'), int), 16777216))
-    """::
+        Maximum start-line size in bytes, defaults to the value of the
+        ``PYJO_MAX_LINE_SIZE`` environment variable or ``8192`` (8KB).
+        """
 
-        size = msg.max_message_size
-        msg.max_message_size = 16777216
+        self.max_message_size = notnone(kwargs.get('max_message_size'), lambda: notnone(convert(getenv('PYJO_MAX_MESSAGE_SIZE'), int), 16777216))
+        """::
 
-    Maximum message size in bytes, defaults to the value of the
-    ``PYJO_MAX_MESSAGE_SIZE`` environment variable or ``16777216`` (16MB). Setting
-    the value to ``0`` will allow messages of indefinite size. Note that increasing
-    this value can also drastically increase memory usage, should you for example
-    attempt to parse an excessively large message body with the :attr:`body_params`,
-    :meth:`dom` or :meth:`json` methods.
-    """
+            size = msg.max_message_size
+            msg.max_message_size = 16777216
 
-    version = '1.1'
-    """::
+        Maximum message size in bytes, defaults to the value of the
+        ``PYJO_MAX_MESSAGE_SIZE`` environment variable or ``16777216`` (16MB). Setting
+        the value to ``0`` will allow messages of indefinite size. Note that increasing
+        this value can also drastically increase memory usage, should you for example
+        attempt to parse an excessively large message body with the :attr:`body_params`,
+        :meth:`dom` or :meth:`json` methods.
+        """
 
-        version = msg.version
-        msg.version = '1.1'
+        self.version = kwargs.get('version', '1.1')
+        """::
 
-    HTTP version of message, defaults to ``1.1``.
-    """
+            version = msg.version
+            msg.version = '1.1'
 
-    _body_params = None
-    _buffer = lazy(lambda self: bytearray())
-    _cookies = lazy(lambda self: {})
-    _dom = None
-    _error = lazy(lambda self: {})
-    _finished = False
-    _fixed = False
-    _json = None
-    _limited = False
-    _raw_size = 0
-    _state = None
-    _uploads = lazy(lambda self: {})
+        HTTP version of message, defaults to ``1.1``.
+        """
+
+        self._body_params = None
+        self._buffer = bytearray()
+        self._cookies = {}
+        self._dom = None
+        self._error = {}
+        self._finished = False
+        self._fixed = False
+        self._json = None
+        self._limited = False
+        self._raw_size = 0
+        self._state = None
+        self._uploads = {}
 
     @property
     def body(self):

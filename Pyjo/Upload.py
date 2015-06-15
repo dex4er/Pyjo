@@ -21,7 +21,7 @@ import Pyjo.Asset.File
 import Pyjo.Base
 import Pyjo.Headers
 
-from Pyjo.Base import lazy
+from Pyjo.Util import notnone
 
 
 class Pyjo_Upload(Pyjo.Base.object):
@@ -30,42 +30,43 @@ class Pyjo_Upload(Pyjo.Base.object):
     :mod:`Pyjo.Base` and implements the following new ones.
     """
 
-    asset = lazy(lambda self: Pyjo.Asset.File.new())
-    """::
+    def __init__(self, **kwargs):
+        self.asset = notnone(kwargs.get('asset'), lambda: Pyjo.Asset.File.new())
+        """::
 
-        asset = upload.asset
-        upload.asset = Pyjo.Asset.File.new()
+            asset = upload.asset
+            upload.asset = Pyjo.Asset.File.new()
 
-    Asset containing the uploaded data, usually a :mod:`Pyjo.Asset.File` or
-    :mod:`Pyjo.Asset.Memory` object.
-    """
+        Asset containing the uploaded data, usually a :mod:`Pyjo.Asset.File` or
+        :mod:`Pyjo.Asset.Memory` object.
+        """
 
-    filename = None
-    """::
+        self.filename = kwargs.get('filename')
+        """::
 
-        filename = upload.filename
-        upload.filename = 'foo.txt'
+            filename = upload.filename
+            upload.filename = 'foo.txt'
 
-    Name of the uploaded file.
-    """
+        Name of the uploaded file.
+        """
 
-    name = None
-    """::
+        self.name = kwargs.get('name')
+        """::
 
-        name = upload.name
-        upload.name = 'foo'
+            name = upload.name
+            upload.name = 'foo'
 
-    Name of the upload.
-    """
+        Name of the upload.
+        """
 
-    headers = lazy(lambda self: Pyjo.Headers.new())
-    """::
+        self.headers = notnone(kwargs.get('headers'), lambda: Pyjo.Headers.new())
+        """::
 
-        headers = upload.headers
-        upload.headers = Pyjo.Headers.new()
+            headers = upload.headers
+            upload.headers = Pyjo.Headers.new()
 
-    Headers for upload, defaults to a :mod:`Pyjo.Headers` object.
-    """
+        Headers for upload, defaults to a :mod:`Pyjo.Headers` object.
+        """
 
     def move_to(self, path):
         """::

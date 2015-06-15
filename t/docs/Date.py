@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     from Pyjo.Test import *  # @UnusedWildImport
 
-    from Pyjo.Util import steady_time
+    import time
 
     import Pyjo.Date
 
@@ -25,13 +25,13 @@ if __name__ == '__main__':
     is_ok(date.epoch, 784111777, 'date')
 
     # Build
-    before = steady_time()
+    before = time.time()
     date = Pyjo.Date.new(before + 60)
     ok(date.epoch > before, 'date.epoch > before')
 
     # new
     date = Pyjo.Date.new()
-    ok(date.epoch >= before, 'date.epoch > before')
+    ok(date.epoch >= before, 'date.epoch >= before')
     date = Pyjo.Date.new('Sun Nov  6 08:49:37 1994')
     is_ok(date.epoch, 784111777, 'date')
 

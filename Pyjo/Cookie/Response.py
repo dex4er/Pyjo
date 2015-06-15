@@ -37,70 +37,73 @@ class Pyjo_Cookie_Response(Pyjo.Cookie.object):
     :mod:`Pyjo.Cookie` and implements the following new ones.
     """
 
-    domain = None
-    """::
+    def __init__(self, **kwargs):
+        super(Pyjo_Cookie_Response, self).__init__(**kwargs)
 
-        domain = cookie.domain
-        cookie.domain = 'localhost'
+        self.domain = kwargs.get('domain')
+        """::
 
-    Cookie domain.
-    """
+            domain = cookie.domain
+            cookie.domain = 'localhost'
 
-    expires = None
-    """::
+        Cookie domain.
+        """
 
-        expires = cookie.expires
-        cookie.expires = steady_time() + 60
+        self.expires = kwargs.get('expires')
+        """::
 
-    Expiration for cookie.
-    """
+            expires = cookie.expires
+            cookie.expires = steady_time() + 60
 
-    httponly = False
-    """::
+        Expiration for cookie.
+        """
 
-        boolean = cookie.httponly
-        cookie.httponly = boolean
+        self.httponly = kwargs.get('httponly', False)
+        """::
 
-    HttpOnly flag, which can prevent client-side scripts from accessing this
-    cookie.
-    """
+            boolean = cookie.httponly
+            cookie.httponly = boolean
 
-    max_age = None
-    """::
+        HttpOnly flag, which can prevent client-side scripts from accessing this
+        cookie.
+        """
 
-        max_age = cookie.max_age
-        cookie.max_age = 60
+        self.max_age = kwargs.get('max_age')
+        """::
 
-    Max age for cookie.
-    """
+            max_age = cookie.max_age
+            cookie.max_age = 60
 
-    origin = None
-    """::
+        Max age for cookie.
+        """
 
-        origin = cookie.origin
-        cookie.origin = 'mojolicio.us'
+        self.origin = kwargs.get('origin')
+        """::
 
-    Origin of the cookie.
-    """
+            origin = cookie.origin
+            cookie.origin = 'mojolicio.us'
 
-    path = None
-    """::
+        Origin of the cookie.
+        """
 
-        path = cookie.path
-        cookie.path = '/test'
+        self.path = kwargs.get('path')
+        """::
 
-    Cookie path.
-    """
+            path = cookie.path
+            cookie.path = '/test'
 
-    secure = False
-    """::
+        Cookie path.
+        """
 
-        boolean = cookie.secure
-        cookie.secure = boolean
+        self.secure = kwargs.get('secure', False)
+        """::
 
-    Secure flag, which instructs browsers to only send this cookie over HTTPS
-    connections.
-    """
+            boolean = cookie.secure
+            cookie.secure = boolean
+
+        Secure flag, which instructs browsers to only send this cookie over HTTPS
+        connections.
+        """
 
     @classmethod
     def parse(self, string=''):

@@ -26,7 +26,6 @@ Classes
 import Pyjo.Base
 import Pyjo.String.Mixin
 
-from Pyjo.Base import lazy
 from Pyjo.Regexp import r
 from Pyjo.Util import b, u, isiterable, notnone, url_escape, url_unescape
 
@@ -40,21 +39,6 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.String.Mixin.object):
     :mod:`Pyjo.Base` and :mod:`Pyjo.String.Mixin` and implements the following new ones.
     """
 
-    charset = 'utf-8'
-    """::
-
-        charset = params.charset
-        params.charset = 'utf-8'
-
-    Charset used for encoding and decoding parameters, defaults to ``utf-8``. ::
-
-        # Disable encoding and decoding
-        params.charset = None
-    """
-
-    _pairs = lazy(lambda self: [])
-    _string = None
-
     def __init__(self, *args, **kwargs):
         """::
 
@@ -67,7 +51,22 @@ class Pyjo_Parameters(Pyjo.Base.object, Pyjo.String.Mixin.object):
         Construct a new :mod:`Pyjo.Parameters` object and :meth:`parse` parameters if
         necessary.
         """
-        super(Pyjo_Parameters, self).__init__()
+
+        self.charset = 'utf-8'
+        """::
+
+            charset = params.charset
+            params.charset = 'utf-8'
+
+        Charset used for encoding and decoding parameters, defaults to ``utf-8``. ::
+
+            # Disable encoding and decoding
+            params.charset = None
+        """
+
+        self._pairs = []
+        self._string = None
+
         self.parse(*args, **kwargs)
 
     def __bool__(self):

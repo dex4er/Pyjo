@@ -81,7 +81,6 @@ Classess
 import Pyjo.EventEmitter
 import Pyjo.Headers
 
-from Pyjo.Base import lazy
 from Pyjo.Regexp import r
 from Pyjo.Util import b, convert, getenv, not_implemented, notnone, u
 
@@ -99,101 +98,104 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
     the following new ones.
     """
 
-    auto_decompress = None
-    """::
+    def __init__(self, **kwargs):
+        super(Pyjo_Content, self).__init__(**kwargs)
 
-        boolean = content.auto_decompress
-        content.auto_decompress = boolean
+        self.auto_decompress = kwargs.get('auto_decompress')
+        """::
 
-    Decompress content automatically if :attr:`is_compressed` is true.
-    """
+            boolean = content.auto_decompress
+            content.auto_decompress = boolean
 
-    auto_relax = None
-    """::
+        Decompress content automatically if :attr:`is_compressed` is true.
+        """
 
-        boolean = content.auto_relax
-        content.auto_relax = boolean
+        self.auto_relax = kwargs.get('auto_relax')
+        """::
 
-    Try to detect when relaxed parsing is necessary.
-    """
+            boolean = content.auto_relax
+            content.auto_relax = boolean
 
-    expect_close = False
-    """::
+        Try to detect when relaxed parsing is necessary.
+        """
 
-        boolean = content.expect_close
-        content.expect_close = boolean
+        self.expect_close = kwargs.get('expect_close', False)
+        """::
 
-    Expect a response that is terminated with a connection close.
-    """
+            boolean = content.expect_close
+            content.expect_close = boolean
 
-    headers = lazy(lambda self: Pyjo.Headers.new())
-    """::
+        Expect a response that is terminated with a connection close.
+        """
 
-        headers = content.headers
-        content.headers = Pyjo.Headers.new()
+        self.headers = notnone(kwargs.get('headers'), lambda: Pyjo.Headers.new())
+        """::
 
-    Content headers, defaults to a :mod:`Pyjo.Headers` object.
-    """
+            headers = content.headers
+            content.headers = Pyjo.Headers.new()
 
-    max_buffer_size = lazy(lambda self: convert(getenv('PYJO_MAX_BUFFER_SIZE', '0'), int, 0) or 262144)
-    """::
+        Content headers, defaults to a :mod:`Pyjo.Headers` object.
+        """
 
-        size = content.max_buffer_size
-        content.max_buffer_size = 1024
+        self.max_buffer_size = notnone(kwargs.get('max_buffer_size'), lambda: convert(getenv('PYJO_MAX_BUFFER_SIZE', '0'), int, 0) or 262144)
+        """::
 
-    Maximum size in bytes of buffer for content parser, defaults to the value of
-    the ``PYJO_MAX_BUFFER_SIZE` environment variable or ``262144`` (256KB).
-    """
+            size = content.max_buffer_size
+            content.max_buffer_size = 1024
 
-    max_leftover_size = lazy(lambda self: convert(getenv('PYJO_MAX_LEFTOVER_SIZE', '0'), int, 0) or 262144)
-    """::
+        Maximum size in bytes of buffer for content parser, defaults to the value of
+        the ``PYJO_MAX_BUFFER_SIZE` environment variable or ``262144`` (256KB).
+        """
 
-        size = content.max_leftover_size
-        content.max_leftover_size = 1024
+        self.max_leftover_size = notnone(kwargs.get('max_leftover_size'), lambda: convert(getenv('PYJO_MAX_LEFTOVER_SIZE', '0'), int, 0) or 262144)
+        """::
 
-    Maximum size in bytes of buffer for pipelined HTTP requests, defaults to the
-    value of the ``PYJO_MAX_LEFTOVER_SIZE` environment variable or ``262144``
-    (256KB).
-    """
+            size = content.max_leftover_size
+            content.max_leftover_size = 1024
 
-    relaxed = False
-    """::
+        Maximum size in bytes of buffer for pipelined HTTP requests, defaults to the
+        value of the ``PYJO_MAX_LEFTOVER_SIZE` environment variable or ``262144``
+        (256KB).
+        """
 
-        boolean = content.relaxed
-        content.relaxed = boolean
+        self.relaxed = kwargs.get('relaxed', False)
+        """::
 
-    Activate relaxed parsing for responses that are terminated with a connection
-    close.
-    """
+            boolean = content.relaxed
+            content.relaxed = boolean
 
-    skip_body = False
-    """::
+        Activate relaxed parsing for responses that are terminated with a connection
+        close.
+        """
 
-        boolean = content.skip_body
-        content.skip_body = boolean
+        self.skip_body = kwargs.get('skip_body', False)
+        """::
 
-    Skip body parsing and finish after headers.
-    """
+            boolean = content.skip_body
+            content.skip_body = boolean
 
-    _body = False
-    _body_buffer = lazy(lambda self: bytearray())
-    _buffer = lazy(lambda self: bytearray())
-    _chunk_len = 0
-    _chunk_state = None
-    _chunks = 0
-    _delay = False
-    _dynamic = False
-    _eof = False
-    _gz = None
-    _gz_size = 0
-    _header_buffer = None
-    _header_size = 0
-    _limit = False
-    _pre_buffer = lazy(lambda self: bytearray())
-    _raw_size = 0
-    _real_size = 0
-    _size = 0
-    _state = None
+        Skip body parsing and finish after headers.
+        """
+
+        self._body = kwargs.get('_body', False)
+        self._body_buffer = kwargs.get('_body_buffer', bytearray())
+        self._buffer = kwargs.get('_buffer', bytearray())
+        self._chunk_len = kwargs.get('_chunk_len', 0)
+        self._chunk_state = kwargs.get('_chunk_state', None)
+        self._chunks = kwargs.get('_chunks', 0)
+        self._delay = kwargs.get('_delay', False)
+        self._dynamic = kwargs.get('_dynamic', False)
+        self._eof = kwargs.get('_eof', False)
+        self._gz = kwargs.get('_gz', None)
+        self._gz_size = kwargs.get('_gz_size', 0)
+        self._header_buffer = kwargs.get('_header_buffer', None)
+        self._header_size = kwargs.get('_header_size', 0)
+        self._limit = kwargs.get('_limit', False)
+        self._pre_buffer = kwargs.get('_pre_buffer', bytearray())
+        self._raw_size = kwargs.get('_raw_size', 0)
+        self._real_size = kwargs.get('_real_size', 0)
+        self._size = kwargs.get('_size', 0)
+        self._state = kwargs.get('_state', None)
 
     @not_implemented
     def body_contains(self, chunk):

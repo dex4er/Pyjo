@@ -47,8 +47,7 @@ import Pyjo.Asset.Memory
 import Pyjo.Content.MultiPart
 import Pyjo.String.Mixin
 
-from Pyjo.Base import lazy
-from Pyjo.Util import convert
+from Pyjo.Util import convert, notnone
 
 
 class Pyjo_Content_Single(Pyjo.Content.object, Pyjo.String.Mixin.object):
@@ -57,29 +56,7 @@ class Pyjo_Content_Single(Pyjo.Content.object, Pyjo.String.Mixin.object):
     :mod:`Pyjo.Content` and implements the following new ones.
     """
 
-    asset = lazy(lambda self: Pyjo.Asset.Memory.new(auto_upgrade=True))
-    """::
-
-        asset = single.asset
-        single.asset = Pyjo.Asset.Memory.new()
-
-    The actual content, defaults to a :mod:`Pyjo.Asset.Memory` object with
-    :attr:`Pyjo.Asset.Memory.auto_upgrade` enabled.
-    """
-
-    auto_upgrade = True
-    """::
-
-        boolean = single.auto_upgrade
-        single.auto_upgrade = boolean
-
-    Try to detect multipart content and automatically upgrade to a
-    :mod:`Pyjo.Content.MultiPart` object, defaults to a true value.
-    """
-
-    _on_read = None
-
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         """::
 
             single = Pyjo.Content.Single.new()
@@ -88,7 +65,28 @@ class Pyjo_Content_Single(Pyjo.Content.object, Pyjo.String.Mixin.object):
         Construct a new :mod:`Pyjo.Content.Single` object and subscribe to ``read``
         event with default content parser.
         """
-        super(Pyjo_Content_Single, self).__init__(*args, **kwargs)
+        super(Pyjo_Content_Single, self).__init__(**kwargs)
+
+        self.asset = notnone(kwargs.get('asset'), lambda: Pyjo.Asset.Memory.new(auto_upgrade=True))
+        """::
+
+            asset = single.asset
+            single.asset = Pyjo.Asset.Memory.new()
+
+        The actual content, defaults to a :mod:`Pyjo.Asset.Memory` object with
+        :attr:`Pyjo.Asset.Memory.auto_upgrade` enabled.
+        """
+
+        self.auto_upgrade = kwargs.get('auto_upgrade', True)
+        """::
+
+            boolean = single.auto_upgrade
+            single.auto_upgrade = boolean
+
+        Try to detect multipart content and automatically upgrade to a
+        :mod:`Pyjo.Content.MultiPart` object, defaults to a true value.
+        """
+
         self._on_read = self.on(lambda content, chunk: content.set(asset=content.asset.add_chunk(chunk)), 'read')
 
     def body_contains(self, chunk):

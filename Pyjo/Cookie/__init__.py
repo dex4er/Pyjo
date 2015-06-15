@@ -34,23 +34,24 @@ class Pyjo_Cookie(Pyjo.Base.object, Pyjo.String.Mixin.object):
     and implements the following new ones.
     """
 
-    name = None
-    """::
+    def __init__(self, **kwargs):
+        self.name = kwargs.get('name')
+        """::
 
-        name = cookie.name
-        cookie.name = 'foo'
+            name = cookie.name
+            cookie.name = 'foo'
 
-    Cookie name.
-    """
+        Cookie name.
+        """
 
-    value = None
-    """::
+        self.value = kwargs.get('value')
+        """::
 
-        value = cookie.value
-        cookie.value = '/test'
+            value = cookie.value
+            cookie.value = '/test'
 
-    Cookie value.
-    """
+        Cookie value.
+        """
 
     def __bool__(self):
         """::

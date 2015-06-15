@@ -56,7 +56,6 @@ Classes
 
 import Pyjo.Reactor.Base
 
-from Pyjo.Base import lazy
 from Pyjo.Util import getenv, md5_sum, rand, steady_time, warn
 
 import select
@@ -74,13 +73,16 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.Base.object):
     :mod:`Pyjo.Reactor.Base` and implements the following new ones.
     """
 
-    _running = False
-    _select_select = None
-    _timers = lazy(lambda self: {})
-    _ios = lazy(lambda self: {})
+    def __init__(self, **kwargs):
+        super(Pyjo_Reactor_Select, self).__init__(**kwargs)
 
-    _inputs = lazy(lambda self: [])
-    _outputs = lazy(lambda self: [])
+        self._running = False
+        self._select_select = None
+        self._timers = {}
+        self._ios = {}
+
+        self._inputs = []
+        self._outputs = []
 
     def again(self, tid):
         """::

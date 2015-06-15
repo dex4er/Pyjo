@@ -55,8 +55,7 @@ import fcntl
 import sys
 import time
 
-from Pyjo.Base import lazy
-from Pyjo.Util import getenv, u
+from Pyjo.Util import getenv, notnone, u
 
 
 LEVEL = {'debug': 1, 'info': 2, 'warn': 3, 'error': 4, 'fatal': 5}
@@ -68,71 +67,9 @@ class Pyjo_Log(Pyjo.EventEmitter.object):
     :mod:`Pyjo.EventEmitter` and implements the following new ones.
     """
 
-    format = lazy(lambda self: self._format)
-    r"""::
+    def __init__(self, **kwargs):
+        super(Pyjo_Log, self).__init__(**kwargs)
 
-        cb = log.format
-        log.format = lambda t, level, *lines: ...
-
-    A callback for formatting log messages. ::
-
-        def my_format(t, level, *lines):
-            return u"[Thu May 15 17:47:04 2014] [info] I ♥ Mojolicious\n"
-
-        log.format = my_format
-    """
-
-    handle = lazy(lambda self: self._build_handle())
-    """::
-
-        handle = log.handle
-        log.handle = open('file.log', 'a')
-
-    Log filehandle used by default ``message`` event, defaults to opening
-    :attr:`path` or :attr:`sys.stderr`. Filehandle should accept unicode.
-    If :attr:`sys.stderr` is not in ``utf-8`` mode, then this stream is
-    re-attached to accept unicode.
-    """
-
-    history = lazy(lambda self: [])
-    """::
-
-        history = log.history
-        log.history = [[time.time(), 'debug', 'That went wrong']]
-
-    The last few logged messages.
-    """
-
-    level = 'debug'
-    """::
-
-        level = log.level
-        log.level = 'debug'
-
-    Active log level, defaults to ``debug``. Available log levels are ``debug``,
-    ``info``, ``warn``, ``error`` and ``fatal``, in that order. Note that the
-    ``PYJO_LOG_LEVEL`` environment variable can override this value.
-    """
-
-    max_history_size = 10
-    """::
-
-        size = log.max_history_size
-        log.max_history_size = 5
-
-    Maximum number of logged messages to store in :attr:`history`, defaults to ``10``.
-    """
-
-    path = None
-    """::
-
-        path = log.path
-        log.path = '/var/log/pyjo.log'
-
-    Log file path used by :attr:`handle`.
-    """
-
-    def __init__(self, *args, **kwargs):
         """::
 
             log = Pyjo.Log.new()
@@ -140,7 +77,71 @@ class Pyjo_Log(Pyjo.EventEmitter.object):
         Construct a new :mod:`Pyjo.Log` object and subscribe to ``message`` event with
         default logger.
         """
-        super(Pyjo_Log, self).__init__(*args, **kwargs)
+
+        self.format = notnone(kwargs.get('format'), lambda: self._format)
+        r"""::
+
+            cb = log.format
+            log.format = lambda t, level, *lines: ...
+
+        A callback for formatting log messages. ::
+
+            def my_format(t, level, *lines):
+                return u"[Thu May 15 17:47:04 2014] [info] I ♥ Mojolicious\n"
+
+            log.format = my_format
+        """
+
+        self.history = kwargs.get('history', [])
+        """::
+
+            history = log.history
+            log.history = [[time.time(), 'debug', 'That went wrong']]
+
+        The last few logged messages.
+        """
+
+        self.level = kwargs.get('level', 'debug')
+        """::
+
+            level = log.level
+            log.level = 'debug'
+
+        Active log level, defaults to ``debug``. Available log levels are ``debug``,
+        ``info``, ``warn``, ``error`` and ``fatal``, in that order. Note that the
+        ``PYJO_LOG_LEVEL`` environment variable can override this value.
+        """
+
+        self.max_history_size = kwargs.get('max_history_size', 10)
+        """::
+
+            size = log.max_history_size
+            log.max_history_size = 5
+
+        Maximum number of logged messages to store in :attr:`history`, defaults to ``10``.
+        """
+
+        self.path = kwargs.get('path')
+        """::
+
+            path = log.path
+            log.path = '/var/log/pyjo.log'
+
+        Log file path used by :attr:`handle`.
+        """
+
+        self.handle = notnone(kwargs.get('handle'), lambda: self._build_handle())
+        """::
+
+            handle = log.handle
+            log.handle = open('file.log', 'a')
+
+        Log filehandle used by default ``message`` event, defaults to opening
+        :attr:`path` or :attr:`sys.stderr`. Filehandle should accept unicode.
+        If :attr:`sys.stderr` is not in ``utf-8`` mode, then this stream is
+        re-attached to accept unicode.
+        """
+
         self.on(lambda self, level, lines: self._message(level, lines), 'message')
 
     def append(self, msg):

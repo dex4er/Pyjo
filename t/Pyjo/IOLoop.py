@@ -26,6 +26,7 @@ if __name__ == '__main__':
     import Pyjo.IOLoop.Server
     import Pyjo.IOLoop.Stream
 
+    import platform
     import socket
 
     from t.lib.Value import Value
@@ -265,22 +266,25 @@ if __name__ == '__main__':
     is_ok(client.get(), client_after.get(), 'stream was writable while paused')
     is_ok(client.get(), b'works!', 'full message has been written')
 
-    # Graceful shutdown
-    err = Value('')
-    loop = Pyjo.IOLoop.new()
-    finish = Value(0)
-    loop.on(lambda loop: finish.inc(), 'finish')
-    loop.stop_gracefully()
-    loop.remove(loop.client(port=Pyjo.IOLoop.Server.generate_port(), cb=lambda *args: True))
+    if platform.python_implementation() != 'PyPy':
+        # Graceful shutdown
+        err = Value('')
+        loop = Pyjo.IOLoop.new()
+        finish = Value(0)
+        loop.on(lambda loop: finish.inc(), 'finish')
+        loop.stop_gracefully()
+        loop.remove(loop.client(port=Pyjo.IOLoop.Server.generate_port(), cb=lambda *args: True))
 
-    @loop.timer(5)
-    def timer(loop):
-        loop.stop()
-        err.set('failed')
+        @loop.timer(5)
+        def timer(loop):
+            loop.stop()
+            err.set('failed')
 
-    loop.start()
-    ok(not err.get(), 'no error')
-    is_ok(finish.get(), 1, 'finish event has been emitted once')
+        loop.start()
+        ok(not err.get(), 'no error')
+        is_ok(finish.get(), 1, 'finish event has been emitted once')
+    else:
+        skip('PyPy error', 2)
 
     # Graceful shutdown (max_accepts)
     err = Value('')

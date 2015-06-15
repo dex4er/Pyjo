@@ -67,8 +67,7 @@ import platform
 import signal
 import weakref
 
-from Pyjo.Base import lazy
-from Pyjo.Util import convert, getenv, warn
+from Pyjo.Util import convert, getenv, notnone, warn
 
 
 DEBUG = getenv('PYJO_DAEMON_DEBUG', False)
@@ -80,157 +79,160 @@ class Pyjo_Server_Daemon(Pyjo.Server.Base.object):
     :mod:`Pyjo.Server.Base` and implements the following new ones.
     """
 
-    acceptors = lazy(lambda self: [])
-    """::
+    def __init__(self, **kwargs):
+        super(Pyjo_Server_Daemon, self).__init__(**kwargs)
 
-        acceptors = daemon.acceptors
-        daemon.acceptors = []
+        self.acceptors = kwargs.get('acceptors', [])
+        """::
 
-    Active acceptors.
-    """
+            acceptors = daemon.acceptors
+            daemon.acceptors = []
 
-    backlog = None
-    """::
+        Active acceptors.
+        """
 
-        backlog = daemon.backlog
-        daemon.backlog = 128
+        self.backlog = kwargs.get('backlog')
+        """::
 
-    Listen backlog size, defaults to ``SOMAXCONN``.
-    """
+            backlog = daemon.backlog
+            daemon.backlog = 128
 
-    inactivity_timeout = lazy(lambda self: convert(getenv('PYJO_INACTIVITY_TIMEOUT'), int, 15))
-    """::
+        Listen backlog size, defaults to ``SOMAXCONN``.
+        """
 
-        timeout = daemon.inactivity_timeout
-        daemon.inactivity_timeout = 5
+        self.inactivity_timeout = notnone(kwargs.get('inactivity_timeout'), lambda: convert(getenv('PYJO_INACTIVITY_TIMEOUT'), int, 15))
+        """::
 
-    Maximum amount of time in seconds a connection can be inactive before getting
-    closed, defaults to the value of the ``PYJO_INACTIVITY_TIMEOUT`` environment
-    variable or ``15``. Setting the value to ``0`` will allow connections to be
-    inactive indefinitely.
-    """
+            timeout = daemon.inactivity_timeout
+            daemon.inactivity_timeout = 5
 
-    ioloop = lazy(lambda self: Pyjo.IOLoop.singleton)
-    """::
+        Maximum amount of time in seconds a connection can be inactive before getting
+        closed, defaults to the value of the ``PYJO_INACTIVITY_TIMEOUT`` environment
+        variable or ``15``. Setting the value to ``0`` will allow connections to be
+        inactive indefinitely.
+        """
 
-        loop = daemon.ioloop
-        daemon.ioloop = Pyjo.IOLoop.new()
+        self.ioloop = notnone(kwargs.get('ioloop'), lambda: Pyjo.IOLoop.singleton)
+        """::
 
-    Event loop object to use for I/O operations, defaults to the global
-    :mod:`Pyjo.IOLoop` singleton.
-    """
+            loop = daemon.ioloop
+            daemon.ioloop = Pyjo.IOLoop.new()
 
-    listen = lazy(lambda self: (getenv('PYJO_LISTEN') or 'http://*:3000').split(','))
-    """::
+        Event loop object to use for I/O operations, defaults to the global
+        :mod:`Pyjo.IOLoop` singleton.
+        """
 
-        listen = daemon.listen
-        daemon.listen = ['https://127.0.0.1:8080']
+        self.listen = notnone(kwargs.get('listen'), lambda: (getenv('PYJO_LISTEN') or 'http://*:3000').split(','))
+        """::
 
-    List of one or more locations to listen on, defaults to the value of the
-    ``PYJO_LISTEN`` environment variable or ``http://*:3000`` (shortcut for
-    ``http://0.0.0.0:3000``). ::
+            listen = daemon.listen
+            daemon.listen = ['https://127.0.0.1:8080']
 
-        # Listen on all IPv4 interfaces
-        daemon.listen = ['http://*:3000']
+        List of one or more locations to listen on, defaults to the value of the
+        ``PYJO_LISTEN`` environment variable or ``http://*:3000`` (shortcut for
+        ``http://0.0.0.0:3000``). ::
 
-        # Listen on all IPv4 and IPv6 interfaces
-        daemon.listen = ['http://[::]:3000']);
+            # Listen on all IPv4 interfaces
+            daemon.listen = ['http://*:3000']
 
-        # Listen on IPv6 interface
-        daemon.listen = ['http://[::1]:4000']
+            # Listen on all IPv4 and IPv6 interfaces
+            daemon.listen = ['http://[::]:3000']
 
-        # Listen on IPv4 and IPv6 interfaces
-        daemon.listen = ['http://127.0.0.1:3000', 'http://[::1]:3000']
+            # Listen on IPv6 interface
+            daemon.listen = ['http://[::1]:4000']
 
-        # Allow multiple servers to use the same port (SO_REUSEPORT)
-        daemon.listen = ['http://*:8080?reuse=1']
+            # Listen on IPv4 and IPv6 interfaces
+            daemon.listen = ['http://127.0.0.1:3000', 'http://[::1]:3000']
 
-        # Listen on two ports with HTTP and HTTPS at the same time
-        daemon.listen = ['http://*:3000', 'https://*:4000']
+            # Allow multiple servers to use the same port (SO_REUSEPORT)
+            daemon.listen = ['http://*:8080?reuse=1']
 
-        # Use a custom certificate and key
-        daemon.listen = ['https://*:3000?cert=/x/server.crt&key=/y/server.key']
+            # Listen on two ports with HTTP and HTTPS at the same time
+            daemon.listen = ['http://*:3000', 'https://*:4000']
 
-        # Or even a custom certificate authority
-        daemon.listen = ['https://*:3000?cert=/x/server.crt&key=/y/server.key&ca=/z/ca.crt']
+            # Use a custom certificate and key
+            daemon.listen = ['https://*:3000?cert=/x/server.crt&key=/y/server.key']
 
-    These parameters are currently available:
+            # Or even a custom certificate authority
+            daemon.listen = ['https://*:3000?cert=/x/server.crt&key=/y/server.key&ca=/z/ca.crt']
 
-    ``ca``
-        ::
+        These parameters are currently available:
 
-            ca='/etc/tls/ca.crt'
+        ``ca``
+            ::
 
-        Path to TLS certificate authority file.
+                ca='/etc/tls/ca.crt'
 
-    ``cert``
-        ::
+            Path to TLS certificate authority file.
 
-            cert='/etc/tls/server.crt'
+        ``cert``
+            ::
 
-        Path to the TLS cert file, defaults to a built-in test certificate.
+                cert='/etc/tls/server.crt'
 
-    ``ciphers``
-        ::
+            Path to the TLS cert file, defaults to a built-in test certificate.
 
-            ciphers='AES128-GCM-SHA256:RC4:HIGH:!MD5:!aNULL:!EDH'
+        ``ciphers``
+            ::
 
-        Cipher specification string.
+                ciphers='AES128-GCM-SHA256:RC4:HIGH:!MD5:!aNULL:!EDH'
 
-    ``key``
-        ::
+            Cipher specification string.
 
-            key='/etc/tls/server.key'
+        ``key``
+            ::
 
-        Path to the TLS key file, defaults to a built-in test key.
+                key='/etc/tls/server.key'
 
-    ``reuse``
-        ::
+            Path to the TLS key file, defaults to a built-in test key.
 
-            reuse=True
+        ``reuse``
+            ::
 
-        Allow multiple servers to use the same port with the ``SO_REUSEPORT`` socket
-        option.
+                reuse=True
 
-    ``verify``
-        ::
+            Allow multiple servers to use the same port with the ``SO_REUSEPORT`` socket
+            option.
 
-            verify=0x00
+        ``verify``
+            ::
 
-        TLS verification mode, defaults to ``0x03``.
-    """
+                verify=0x00
 
-    max_clients = None
-    """::
+            TLS verification mode, defaults to ``0x03``.
+        """
 
-      max_clients = daemon.max_clients
-      daemon.max_clients = 1000
+        self.max_clients = None
+        """::
 
-    Maximum number of concurrent connections this server is allowed to handle
-    before stopping to accept new incoming connections, passed along to
-    :attr:`Pyjo.IOLoop.max_connections`.
-    """
+          max_clients = daemon.max_clients
+          daemon.max_clients = 1000
 
-    max_requests = 25
-    """::
+        Maximum number of concurrent connections this server is allowed to handle
+        before stopping to accept new incoming connections, passed along to
+        :attr:`Pyjo.IOLoop.max_connections`.
+        """
 
-        max_requests = daemon.max_requests
-        daemon.max_requests = 100
+        self.max_requests = 25
+        """::
 
-    Maximum number of keep-alive requests per connection, defaults to ``25``.
-    """
+            max_requests = daemon.max_requests
+            daemon.max_requests = 100
 
-    silent = None
-    """::
+        Maximum number of keep-alive requests per connection, defaults to ``25``.
+        """
 
-        boolean = daemon.silent
-        daemon.silent = boolean
+        self.silent = None
+        """::
 
-    Disable console messages.
-    """
+            boolean = daemon.silent
+            daemon.silent = boolean
 
-    _connections = lazy(lambda self: {})
-    _servers = lazy(lambda self: {})
+        Disable console messages.
+        """
+
+        self._connections = {}
+        self._servers = {}
 
     def __del__(self):
         if DEBUG:

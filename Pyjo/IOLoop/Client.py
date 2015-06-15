@@ -57,8 +57,7 @@ Classes
 import Pyjo.EventEmitter
 import Pyjo.IOLoop
 
-from Pyjo.Base import lazy
-from Pyjo.Util import getenv, warn
+from Pyjo.Util import getenv, notnone, warn
 
 import socket
 import weakref
@@ -105,25 +104,28 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
     :mod:`Pyjo.EventEmitter` and implements the following new ones.
     """
 
-    handle = None
-    """::
+    def __init__(self, *args, **kwargs):
+        super(Pyjo_IOLoop_Client, self).__init__(*args, **kwargs)
 
-        handle = stream.handle
+        self.handle = kwargs.get('handle')
+        """::
 
-    Handle for stream.
-    """
+            handle = stream.handle
 
-    reactor = lazy(lambda self: Pyjo.IOLoop.singleton.reactor)
-    """::
+        Handle for stream.
+        """
 
-        reactor = client.reactor
-        client.reactor = Pyjo.Reactor.Poll.new()
+        self.reactor = notnone(kwargs.get('reactor'), lambda: Pyjo.IOLoop.singleton.reactor)
+        """::
 
-    Low-level event reactor, defaults to the :attr:`reactor` attribute value of the
-    global :mod:`Pyjo.IOLoop` singleton.
-    """
+            reactor = client.reactor
+            client.reactor = Pyjo.Reactor.Poll.new()
 
-    _timer = None
+        Low-level event reactor, defaults to the :attr:`reactor` attribute value of the
+        global :mod:`Pyjo.IOLoop` singleton.
+        """
+
+        self._timer = None
 
     def __del__(self):
         if DEBUG:

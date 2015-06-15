@@ -43,7 +43,6 @@ Classes
 
 import Pyjo.Reactor.Select
 
-from Pyjo.Base import lazy
 from Pyjo.Util import getenv, steady_time, warn
 
 import select
@@ -60,10 +59,13 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.Select.object):
     :mod:`Pyjo.Reactor.Select` and implements the following new ones.
     """
 
-    _running = False
-    _select_poll = None
-    _timers = lazy(lambda self: {})
-    _ios = lazy(lambda self: {})
+    def __init__(self, **kwargs):
+        super(Pyjo_Reactor_Poll, self).__init__(**kwargs)
+
+        self._running = False
+        self._select_poll = None
+        self._timers = {}
+        self._ios = {}
 
     def one_tick(self):
         """::

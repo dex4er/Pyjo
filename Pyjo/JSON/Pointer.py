@@ -28,15 +28,6 @@ class Pyjo_JSON_Pointer(Pyjo.Base.object):
     :mod:`Pyjo.Base` and implements the following new ones.
     """
 
-    data = None
-    """::
-
-        data = pointer.data
-        pointer.data = {'foo': 'bar'}
-
-    Data structure to be processed.
-    """
-
     def __init__(self, data=None):
         """::
 
@@ -45,7 +36,15 @@ class Pyjo_JSON_Pointer(Pyjo.Base.object):
 
         Build new :mod:`Pyjo.JSON.Pointer` object.
         """
-        super(Pyjo_JSON_Pointer, self).__init__(data=data)
+
+        self.data = data
+        """::
+
+            data = pointer.data
+            pointer.data = {'foo': 'bar'}
+
+        Data structure to be processed.
+        """
 
     def contains(self, pointer):
         """::

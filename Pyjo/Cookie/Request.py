@@ -38,7 +38,7 @@ class Pyjo_Cookie_Request(Pyjo.Cookie.object):
     def parse(self, string=''):
         """::
 
-            cookies = Pyjo.Cookie.Request.parse('f=b; g=a');
+            cookies = Pyjo.Cookie.Request.parse('f=b; g=a')
 
         Parse cookies.
         """

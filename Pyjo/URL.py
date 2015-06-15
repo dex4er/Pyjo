@@ -60,69 +60,67 @@ class Pyjo_URL(Pyjo.Base.object, Pyjo.String.Mixin.object):
     :mod:`Pyjo.Base` and :mod:`Pyjo.String.Mixin` and implements the following new ones.
     """
 
-    fragment = None
-    """::
-
-        fragment = url.fragment
-        url.fragment = u'♥pyjo♥'
-
-    Fragment part of this URL.
-    """
-
-    host = None
-    """::
-
-        host = url.host
-        url.host = '127.0.0.1'
-
-    Host part of this URL.
-    """
-
-    port = None
-    """::
-
-        port = url.port
-        url.port = 8080
-
-    Port part of this URL.
-    """
-
-    scheme = None
-    """::
-
-        scheme = url.scheme
-        url.scheme = 'http'
-
-    Scheme part of this URL.
-
-    """
-
-    userinfo = None
-    """::
-
-        info = url.userinfo
-        url.userinfo = u'root:♥'
-
-    Userinfo part of this URL.
-    """
-
-    _base = None
-    _path = None
-    _query = None
-
-    def __init__(self, *args, **kwargs):
+    def __init__(self, url=None, **kwargs):
         """::
 
             url = Pyjo.URL.new()
-            url = Pyjo.URL.new('http://127.0.0.1:3000/foo?f=b&baz=2#foo');
+            url = Pyjo.URL.new('http://127.0.0.1:3000/foo?f=b&baz=2#foo')
 
         Construct a new :mod:`Pyjo.URL` object and :meth:`parse` URL if necessary.
         """
-        super(Pyjo_URL, self).__init__()
-        if len(args) == 1:
-            self.parse(args[0])
-        elif args:
-            self.set(*args)
+
+        self.fragment = kwargs.get('fragment')
+        """::
+
+            fragment = url.fragment
+            url.fragment = u'♥pyjo♥'
+
+        Fragment part of this URL.
+        """
+
+        self.host = kwargs.get('host')
+        """::
+
+            host = url.host
+            url.host = '127.0.0.1'
+
+        Host part of this URL.
+        """
+
+        self.port = kwargs.get('port')
+        """::
+
+            port = url.port
+            url.port = 8080
+
+        Port part of this URL.
+        """
+
+        self.scheme = kwargs.get('scheme')
+        """::
+
+            scheme = url.scheme
+            url.scheme = 'http'
+
+        Scheme part of this URL.
+
+        """
+
+        self.userinfo = kwargs.get('userinfo')
+        """::
+
+            info = url.userinfo
+            url.userinfo = u'root:♥'
+
+        Userinfo part of this URL.
+        """
+
+        self._base = None
+        self._path = None
+        self._query = None
+
+        if url is not None:
+            self.parse(url)
         elif kwargs:
             self.set(**kwargs)
 

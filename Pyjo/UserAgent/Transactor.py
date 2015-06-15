@@ -55,7 +55,6 @@ import Pyjo.Parameters
 import Pyjo.Transaction.HTTP
 import Pyjo.URL
 
-from Pyjo.Base import lazy
 from Pyjo.JSON import encode_json
 from Pyjo.Regexp import r
 from Pyjo.Util import b, notnone
@@ -70,25 +69,26 @@ class Pyjo_UserAgent_Transactor(Pyjo.Base.object):
     :mod:`Pyjo.Base` and implements the following new ones.
     """
 
-    generators = lazy(lambda self: {'data': self._data, 'form': self._form, 'json': self._json})
-    """::
+    def __init__(self, **kwargs):
+        self.generators = kwargs.get('generators', {'data': self._data, 'form': self._form, 'json': self._json})
+        """::
 
-        generators = t.generators
-        t.generators = {'foo': lambda t, tx, form, **kwargs: ...}
+            generators = t.generators
+            t.generators = {'foo': lambda t, tx, form, **kwargs: ...}
 
-    Registered content generators, by default only ``form`` and ``json`` are already
-    defined.
-    """
+        Registered content generators, by default only ``form`` and ``json`` are already
+        defined.
+        """
 
-    name = 'Pyjoyment (Python)'
-    """::
+        self.name = kwargs.get('name', 'Pyjoyment (Python)')
+        """::
 
-        name = t.name
-        t.name = 'Pyjoyment'
+            name = t.name
+            t.name = 'Pyjoyment'
 
-    Value for ``User-Agent`` request header of generated transactions, defaults to
-    ``Pyjoyment (Python)``.
-    """
+        Value for ``User-Agent`` request header of generated transactions, defaults to
+        ``Pyjoyment (Python)``.
+        """
 
     def add_generator(self, name, generator):
         """::

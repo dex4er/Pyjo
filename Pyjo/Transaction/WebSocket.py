@@ -126,9 +126,8 @@ import Pyjo.Transaction
 import struct
 import zlib
 
-from Pyjo.Base import lazy
 from Pyjo.JSON import encode_json
-from Pyjo.Util import b, getenv, rand, warn, xor_encode
+from Pyjo.Util import b, getenv, notnone, rand, warn, xor_encode
 
 
 DEBUG = getenv('PYJO_WEBSOCKET_DEBUG', 0)
@@ -148,42 +147,43 @@ class Pyjo_Transaction_WebSocket(Pyjo.Transaction.object):
     :mod:`Pyjo.Transaction` and implements the following new ones.
     """
 
-    compressed = False
-    """::
+    def __init__(self, **kwargs):
+        super(Pyjo_Transaction_WebSocket, self).__init__(**kwargs)
 
-        boolean = ws.compressed
-        ws.compressed = boolean
+        self.compressed = kwargs.get('compressed', False)
+        """::
 
-    Compress messages with ``permessage-deflate`` extension.
-    """
+            boolean = ws.compressed
+            ws.compressed = boolean
 
-    masked = False
-    """::
+        Compress messages with ``permessage-deflate`` extension.
+        """
 
-        boolean = ws.masked
-        ws.masked = boolean
+        self.masked = kwargs.get('masked', False)
+        """::
 
-    Mask outgoing frames with XOR cipher and a random 32-bit key.
-    """
+            boolean = ws.masked
+            ws.masked = boolean
 
-    max_websocket_size = lazy(lambda self: getenv('PYJO_MAX_WEBSOCKET_SIZE', 0) or 262144)
-    """::
+        Mask outgoing frames with XOR cipher and a random 32-bit key.
+        """
 
-        size = ws.max_websocket_size
-        ws.max_websocket_size = 1024
+        self.max_websocket_size = notnone(kwargs.get('max_websocket_size'), lambda: getenv('PYJO_MAX_WEBSOCKET_SIZE', 0) or 262144)
+        """::
 
-    Maximum WebSocket message size in bytes, defaults to the value of the
-    ``PYJO_MAX_WEBSOCKET_SIZE`` environment variable or ``262144`` (256KB).
-    """
+            size = ws.max_websocket_size
+            ws.max_websocket_size = 1024
 
-    _close = None
-    _deflate = None
-    _finished = False
-    _state = None
-    _write = lazy(lambda self: bytearray())
+        Maximum WebSocket message size in bytes, defaults to the value of the
+        ``PYJO_MAX_WEBSOCKET_SIZE`` environment variable or ``262144`` (256KB).
+        """
 
-    def __init__(self, *args, **kwargs):
-        super(Pyjo_Transaction_WebSocket, self).__init__(*args, **kwargs)
+        self._close = None
+        self._deflate = None
+        self._finished = False
+        self._state = None
+        self._write = bytearray()
+
         self.on(lambda ws, frame: ws._message(*frame), 'frame')
 
     def build_frame(self, fin, rsv1, rsv2, rsv3, op, payload):

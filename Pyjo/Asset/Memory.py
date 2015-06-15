@@ -39,7 +39,6 @@ Classes
 
 import Pyjo.Asset.File
 
-from Pyjo.Base import lazy
 from Pyjo.Util import convert, getenv, notnone, spurt, steady_time
 
 
@@ -52,37 +51,42 @@ class Pyjo_Asset_Memory(Pyjo.Asset.object):
     :mod:`Pyjo.Asset` and implements the following new ones.
     """
 
-    auto_upgrade = False
-    """::
+    mtime = None
 
-        boolean = asset_mem.auto_upgrade
-        asset_mem.auto_upgrade = boolean
+    def __init__(self, **kwargs):
+        super(Pyjo_Asset_Memory, self).__init__(**kwargs)
 
-    Try to detect if content size exceeds :attr:`max_memory_size` limit and
-    automatically upgrade to a :mod:`Pyjo.Asset.File` object.
-    """
+        self.auto_upgrade = kwargs.get('auto_upgrade', False)
+        """::
 
-    max_memory_size = lazy(lambda self: convert(getenv('PYJO_MAX_MEMORY_SIZE'), int, 262144))
-    """::
+            boolean = asset_mem.auto_upgrade
+            asset_mem.auto_upgrade = boolean
 
-        size = asset_mem.max_memory_size
-        asset_mem.max_memory_size = 1024
+        Try to detect if content size exceeds :attr:`max_memory_size` limit and
+        automatically upgrade to a :mod:`Pyjo.Asset.File` object.
+        """
 
-    Maximum size in bytes of data to keep in memory before automatically upgrading
-    to a :mod:`Pyjo.Asset.File` object, defaults to the value of the
-    ``MOJO_MAX_MEMORY_SIZE`` environment variable or ``262144`` (256KB).
-    """
+        self.max_memory_size = notnone(kwargs.get('max_memory_size'), lambda: convert(getenv('PYJO_MAX_MEMORY_SIZE'), int, 262144))
+        """::
 
-    mtime = lazy(lambda self: MTIME)
-    """::
+            size = asset_mem.max_memory_size
+            asset_mem.max_memory_size = 1024
 
-        mtime = asset_mem.mtime
-        asset_mem.mtime = 1408567500
+        Maximum size in bytes of data to keep in memory before automatically upgrading
+        to a :mod:`Pyjo.Asset.File` object, defaults to the value of the
+        ``MOJO_MAX_MEMORY_SIZE`` environment variable or ``262144`` (256KB).
+        """
 
-    Modification time of asset, defaults to the time this class was loaded.
-    """
+        self.mtime = kwargs.get('mtime', MTIME)
+        """::
 
-    _content = lazy(lambda self: bytearray())
+            mtime = asset_mem.mtime
+            asset_mem.mtime = 1408567500
+
+        Modification time of asset, defaults to the time this class was loaded.
+        """
+
+        self._content = bytearray()
 
     def __repr__(self):
         """::

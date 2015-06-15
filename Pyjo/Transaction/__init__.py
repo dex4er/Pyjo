@@ -67,7 +67,6 @@ import Pyjo.EventEmitter
 import Pyjo.Message.Request
 import Pyjo.Message.Response
 
-from Pyjo.Base import lazy
 from Pyjo.Regexp import r
 from Pyjo.Util import not_implemented, notnone
 
@@ -81,71 +80,74 @@ class Pyjo_Transaction(Pyjo.EventEmitter.object):
     :mod:`Pyjo.EventEmitter` and implements the following new ones.
     """
 
-    kept_alive = None
-    """::
+    def __init__(self, **kwargs):
+        super(Pyjo_Transaction, self).__init__(**kwargs)
 
-        kept_alive = tx.kept_alive
-        tx.kept_alive = True
+        self.kept_alive = kwargs.get('kept_alive')
+        """::
 
-    Connection has been kept alive.
-    """
+            kept_alive = tx.kept_alive
+            tx.kept_alive = True
 
-    local_address = None
-    """::
+        Connection has been kept alive.
+        """
 
-        address = tx.local_address
-        tx.local_address = '127.0.0.1'
+        self.local_address = kwargs.get('local_address')
+        """::
 
-    Local interface address.
-    """
+            address = tx.local_address
+            tx.local_address = '127.0.0.1'
 
-    local_port = None
-    """::
+        Local interface address.
+        """
 
-        port = tx.local_port
-        tx.local_port = 8080
+        self.local_port = kwargs.get('local_port')
+        """::
 
-    Local interface port.
-    """
+            port = tx.local_port
+            tx.local_port = 8080
 
-    original_remote_address = None
-    """::
+        Local interface port.
+        """
 
-        address = tx.original_remote_address
-        tx.original_remote_address = '127.0.0.1'
+        self.original_remote_address = kwargs.get('original_remote_address')
+        """::
 
-    Remote interface address.
-    """
+            address = tx.original_remote_address
+            tx.original_remote_address = '127.0.0.1'
 
-    remote_port = None
-    """::
+        Remote interface address.
+        """
 
-        port = tx.remote_port
-        tx.remote_port = 8081
+        self.remote_port = kwargs.get('remote_port')
+        """::
 
-    Remote interface port.
-    """
+            port = tx.remote_port
+            tx.remote_port = 8081
 
-    req = lazy(lambda self: Pyjo.Message.Request.new())
-    """::
+        Remote interface port.
+        """
 
-        req = tx.req
-        tx.req = Pyjo.Message.Request.new()
+        self.req = notnone(kwargs.get('req'), lambda: Pyjo.Message.Request.new())
+        """::
 
-    HTTP request, defaults to a :mod:`Pyjo.Message.Request` object.
-    """
+            req = tx.req
+            tx.req = Pyjo.Message.Request.new()
 
-    res = lazy(lambda self: Pyjo.Message.Response.new())
-    """::
+        HTTP request, defaults to a :mod:`Pyjo.Message.Request` object.
+        """
 
-        res = tx.res
-        tx.res = Pyjo.Message.Response.new()
+        self.res = notnone(kwargs.get('res'), lambda: Pyjo.Message.Response.new())
+        """::
 
-    HTTP response, defaults to a :mod:`Pyjo.Message.Response` object.
-    """
+            res = tx.res
+            tx.res = Pyjo.Message.Response.new()
 
-    _connection = None
-    _state = None
+        HTTP response, defaults to a :mod:`Pyjo.Message.Response` object.
+        """
+
+        self._connection = None
+        self._state = None
 
     def client_close(self, close=False):
         """::

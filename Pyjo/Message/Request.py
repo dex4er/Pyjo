@@ -12,14 +12,14 @@ Pyjo.Message.Request - HTTP request
     req.parse(b"GET /foo HTTP/1.0\x0d\x0a")
     req.parse(b"Content-Length: 12\x0d\x0a")
     req.parse(b"Content-Type: text/plain\x0d\x0a\x0d\x0a")
-    req.parse(b'Hello World!');
+    req.parse(b'Hello World!')
     print(req.method)
     print(req.headers.content_type)
     print(req.body)
 
     # Build
     req = Pyjo.Message.Request.new()
-    req.url.parse('http://127.0.0.1/foo/bar');
+    req.url.parse('http://127.0.0.1/foo/bar')
     req.method = 'GET'
     print(req)
 
@@ -44,7 +44,6 @@ import Pyjo.URL
 
 import os
 
-from Pyjo.Base import lazy
 from Pyjo.Regexp import r
 from Pyjo.Util import b, b64_decode, b64_encode, convert, notnone, u
 
@@ -61,56 +60,59 @@ class Pyjo_Message_Request(Pyjo.Message.object):
     :mod:`Pyjo.Message` and implements the following new ones.
     """
 
-    environ = lazy(lambda self: {})
-    """::
+    def __init__(self, **kwargs):
+        super(Pyjo_Message_Request, self).__init__(**kwargs)
 
-        environ = req.environ
-        req.environ = {}
+        self.environ = kwargs.get('environ', {})
+        """::
 
-    Direct access to the ``CGI`` or ``WSGI`` environment hash if available. ::
+            environ = req.environ
+            req.environ = {}
 
-        # Check CGI version
-        version = req.environ['GATEWAY_INTERFACE']
+        Direct access to the ``CGI`` or ``WSGI`` environment hash if available. ::
 
-        # Check WSGI version
-        version = req.environ['wsgi.version']
-    """
+            # Check CGI version
+            version = req.environ['GATEWAY_INTERFACE']
 
-    method = 'GET'
-    """::
+            # Check WSGI version
+            version = req.environ['wsgi.version']
+        """
 
-        method = req.method
-        req.method = 'POST'
+        self.method = kwargs.get('method', 'GET')
+        """::
 
-    HTTP request method, defaults to ``GET``.
-    """
+            method = req.method
+            req.method = 'POST'
 
-    url = lazy(lambda self: Pyjo.URL.new())
-    """::
+        HTTP request method, defaults to ``GET``.
+        """
 
-        url = req.url
-        req.url = Pyjo.URL.new()
+        self.url = notnone(kwargs.get('url'), lambda: Pyjo.URL.new())
+        """::
 
-    HTTP request URL, defaults to a `Pyjo.URL` object. ::
+            url = req.url
+            req.url = Pyjo.URL.new()
 
-        # Get request information
-        info = req.url.to_abs().userinfo
-        host = req.url.to_abs().host
-        path = req.url.to_abs().path
-    """
+        HTTP request URL, defaults to a `Pyjo.URL` object. ::
 
-    reverse_proxy = None
-    """::
+            # Get request information
+            info = req.url.to_abs().userinfo
+            host = req.url.to_abs().host
+            path = req.url.to_abs().path
+        """
 
-        boolean = req.reverse_proxy
-        req.reverse_proxy = boleean
+        self.reverse_proxy = kwargs.get('reverse_proxy')
+        """::
 
-    Request has been performed through a reverse proxy.
-    """
+            boolean = req.reverse_proxy
+            req.reverse_proxy = boleean
 
-    _params = None
-    _proxy = None
-    _start_buffer = None
+        Request has been performed through a reverse proxy.
+        """
+
+        self._params = None
+        self._proxy = None
+        self._start_buffer = None
 
     def __repr__(self):
         """::

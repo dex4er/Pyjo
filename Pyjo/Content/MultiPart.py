@@ -48,7 +48,6 @@ Classes
 import Pyjo.Content
 import Pyjo.String.Mixin
 
-from Pyjo.Base import lazy
 from Pyjo.Regexp import r
 from Pyjo.Util import b, b64_encode, convert, notnone, rand
 
@@ -63,20 +62,7 @@ class Pyjo_Content_MultiPart(Pyjo.Content.object, Pyjo.String.Mixin.object):
     :mod:`Pyjo.Content` and implements the following new ones.
     """
 
-    parts = lazy(lambda self: [])
-    """::
-
-        parts = multi.parts
-        multi.parts = []
-
-    Content parts embedded in this multipart content, usually
-    :mod:`Pyjo.Content.Single` objects.
-    """
-
-    _multi_state = None
-    _multipart = bytearray()
-
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         """::
 
             multi = Pyjo.Content.MultiPart.new()
@@ -85,7 +71,21 @@ class Pyjo_Content_MultiPart(Pyjo.Content.object, Pyjo.String.Mixin.object):
         Construct a new :mod:`Pyjo.Content.MultiPart` object and subscribe to ``read``
         event with default content parser.
         """
-        super(Pyjo_Content_MultiPart, self).__init__(*args, **kwargs)
+        super(Pyjo_Content_MultiPart, self).__init__(**kwargs)
+
+        self.parts = kwargs.get('parts', [])
+        """::
+
+            parts = multi.parts
+            multi.parts = []
+
+        Content parts embedded in this multipart content, usually
+        :mod:`Pyjo.Content.Single` objects.
+        """
+
+        self._multi_state = None
+        self._multipart = bytearray()
+
         self.on(lambda content, chunk: content._read(chunk), 'read')
 
     def body_contains(self, chunk):

@@ -19,7 +19,6 @@ Classes
 
 import Pyjo.Base
 
-from Pyjo.Base import lazy
 from Pyjo.Util import getenv
 
 
@@ -29,32 +28,33 @@ class Pyjo_UserAgent_Proxy(Pyjo.Base.object):
     :mod:`Pyjo.Base` and implements the following new ones.
     """
 
-    http = None
-    """::
+    def __init__(self, **kwargs):
+        self.http = kwargs.get('http')
+        """::
 
-        http = proxy.http
-        proxy.http = 'socks://pyjo:secret@127.0.0.1:8080'
+            http = proxy.http
+            proxy.http = 'socks://pyjo:secret@127.0.0.1:8080'
 
-    Proxy server to use for HTTP and WebSocket requests.
-    """
+        Proxy server to use for HTTP and WebSocket requests.
+        """
 
-    https = None
-    """::
+        self.https = kwargs.get('https')
+        """::
 
-        https = proxy.https
-        proxy.https = 'http://pyjo:secret@127.0.0.1:8080'
+            https = proxy.https
+            proxy.https = 'http://pyjo:secret@127.0.0.1:8080'
 
-    Proxy server to use for HTTPS and WebSocket requests.
-    """
+        Proxy server to use for HTTPS and WebSocket requests.
+        """
 
-    no = lazy(lambda self: [])
-    """::
+        self.no = kwargs.get('no', [])
+        """::
 
-        no = proxy.no
-        proxy.no = ['localhost', 'intranet.pyjoyment.net']
+            no = proxy.no
+            proxy.no = ['localhost', 'intranet.pyjoyment.net']
 
-    Domains that don't require a proxy server to be used.
-    """
+        Domains that don't require a proxy server to be used.
+        """
 
     def detect(self):
         """::

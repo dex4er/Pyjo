@@ -12,7 +12,7 @@ Pyjo.Message.Response - HTTP Response
     res.parse(b"HTTP/1.0 200 OK\x0d\x0a")
     res.parse(b"Content-Length: 12\x0d\x0a")
     res.parse(b"Content-Type: text/plain\x0d\x0a\x0d\x0a")
-    res.parse(b'Hello World!');
+    res.parse(b'Hello World!')
     print(res.code)
     print(res.headers.content_type)
     print(res.body)
@@ -119,25 +119,28 @@ class Pyjo_Message_Response(Pyjo.Message.object):
     :mod:`Pyjo.Message` and implements the following new ones.
     """
 
-    code = None
-    """::
+    def __init__(self, **kwargs):
+        super(Pyjo_Message_Response, self).__init__(**kwargs)
 
-        code = res.code
-        res.code = 200
+        self.code = kwargs.get('code')
+        """::
 
-    HTTP response status code.
-    """
+            code = res.code
+            res.code = 200
 
-    message = None
-    """::
+        HTTP response status code.
+        """
 
-        msg = res.message
-        res.message = 'OK'
+        self.message = kwargs.get('message')
+        """::
 
-    HTTP response status message.
-    """
+            msg = res.message
+            res.message = 'OK'
 
-    _start_buffer = None
+        HTTP response status message.
+        """
+
+        self._start_buffer = None
 
     def __repr__(self):
         """::

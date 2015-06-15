@@ -16,10 +16,10 @@ if __name__ == '__main__':
 
     import Pyjo.Base
 
-    from Pyjo.Base import lazy
-
     class A(Pyjo.Base.object):
-        pass
+        def __init__(self, **kwargs):
+            self.a = kwargs.get('a')
+            self.b = kwargs.get('b')
 
     obj = A()
     isa_ok(obj, A, 'obj')
@@ -28,19 +28,20 @@ if __name__ == '__main__':
     is_ok(obj.a, 1, 'obj.a')
     is_ok(obj.b, 2, 'obj.b')
 
-    obj = A(c=1, d=2)
+    obj = A.new(c=1, d=2)
     isa_ok(obj, A, 'obj')
-    is_ok(obj.c, 1, 'obj.c')
-    is_ok(obj.d, 2, 'obj.d')
+    none_ok(obj.a, 'obj.c')
+    none_ok(obj.b, 'obj.d')
 
     class B(Pyjo.Base.object):
-        a = 1
-        b = 2
-        c = lazy(3)
-        d = 45
-        e = 45
+        def __init__(self, **kwargs):
+            self.a = kwargs.get('a', 1)
+            self.b = kwargs.get('b', 2)
+            self.c = kwargs.get('c', 3)
+            self.d = kwargs.get('d', 45)
+            self.e = kwargs.get('e', 45)
 
-    obj = B()
+    obj = B.new()
 
     isa_ok(obj, B, 'obj')
 
@@ -51,13 +52,14 @@ if __name__ == '__main__':
     is_ok(obj.e, 45, 'obj.e')
 
     class C(Pyjo.Base.object):
-        a = 1
+        def __init__(self, **kwargs):
+            self.a = kwargs.get('a', 1)
 
-    obj1 = C()
+    obj1 = C.new()
 
     isa_ok(obj1, C, 'obj1')
 
-    obj2 = C()
+    obj2 = C.new()
 
     isa_ok(obj2, C, 'obj2')
 
@@ -68,7 +70,7 @@ if __name__ == '__main__':
     is_ok(obj1.a, 11, 'obj1.a')
     is_ok(obj2.a, 1, 'obj2.a')
 
-    obj3 = C()
+    obj3 = C.new()
 
     isa_ok(obj3, C, 'obj3')
 
@@ -82,31 +84,17 @@ if __name__ == '__main__':
     is_ok(obj2.a, 2, 'obj2.a')
     is_ok(obj1.a, 11, 'obj1.a')
 
-    obj4 = C(a=4)
+    obj4 = C.new(a=4)
 
     is_ok(obj4.a, 4, 'obj4.a')
     is_ok(obj3.a, 1, 'obj3.a')
     is_ok(obj2.a, 2, 'obj2.a')
     is_ok(obj1.a, 11, 'obj1.a')
 
-    obj5 = C()
+    obj5 = C.new()
 
     isa_ok(obj5, C, 'obj5')
 
     is_ok(obj5.a, 1, 'obj5.a')
-
-    class D(Pyjo.Base.object):
-        a = None
-        b = 2
-        c = lazy(3)
-        d = lazy(lambda self: 4)
-
-    obj = D()
-
-    isa_ok(obj, D, 'obj')
-    none_ok(obj.a, 'obj.a')
-    is_ok(obj.b, 2, 'obj.b')
-    is_ok(obj.c, 3, 'obj.c')
-    is_ok(obj.d, 4, 'obj.d')
 
     done_testing()

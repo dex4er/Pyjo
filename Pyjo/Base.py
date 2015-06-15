@@ -6,16 +6,19 @@ Pyjo.Base - Minimal base class
 ::
 
     import Pyjo.Base
-    from Pyjo.Base import lazy
+    from Pyjo.Util import notnone
 
     class Cat(Pyjo.Base.object):
-        name = 'Nyan'
-        birds = 2
-        mice = 2
+        def __init__(self, **kwargs):
+            self.name = kwargs.get('name', 'Nyan')
+            self.birds = kwargs.get('birds', 2)
+            self.mice = kwargs.get('mice', 2)
 
     class Tiger(Cat):
-        friends = lazy(lambda self: Cat())
-        stripes = 42
+        def __init__(self, **kwargs):
+            super(Tiger, self).__init__(**kwargs)
+            self.friend = notnone(kwargs.get('friend'), lambda: Cat())
+            self.stripes = kwargs.get('stripes', 42)
 
     mew = Cat.new(name='Longcat')
     print(mew.mice)
@@ -32,22 +35,11 @@ class Pyjo_Base(object):
     """::
 
         obj = SubClass.new()
-        obj = SubClass.new(('name', 'value'),)
         obj = SubClass.new(name='value')
 
     This base class provides a standard constructor for :mod:`Pyjo` objects. You can
-    pass it either a list of pairs of tuples or a dict with attribute values.
+    pass it a dict with attribute values.
     """
-    def __new__(cls, *args, **kwargs):
-        obj = super(Pyjo_Base, cls).__new__(cls)
-        for name in dir(obj):
-            attr = getattr(cls, name)
-            if attr.__class__.__name__ == 'lazy':
-                setattr(cls, name, lazy(attr.default, name))
-        return obj
-
-    def __init__(self, *args, **kwargs):
-        self.set(*args, **kwargs)
 
     @classmethod
     def new(cls, *args, **kwargs):
@@ -56,15 +48,14 @@ class Pyjo_Base(object):
         """
         return cls(*args, **kwargs)
 
-    def set(self, *args, **kwargs):
+    def set(self, **kwargs):
         """::
 
-            obj = obj.set(('name', 'value'),)
             obj = obj.set(name='value')
 
-        Sets each attribute from either a list of pairs of tuples or a dict.
+        Sets each attribute from a dict.
         """
-        for k, v in list(args) + sorted(kwargs.items()):
+        for k, v in sorted(kwargs.items()):
             setattr(self, k, v)
         return self
 
@@ -90,47 +81,6 @@ class Pyjo_Base(object):
         else:
             getattr(self, method)(*args[1:], **kwargs)
         return self
-
-
-class lazy(object):
-    """::
-
-        import Pyjo.Base
-        from Pyjo.Base import lazy
-
-        class SubClass(Pyjo.Base.object):
-            simple = lazy(42)
-            complex = lazy(lambda self: [1, 2, 3])
-
-        obj = SubClass.new()
-
-        # False
-        print('simple' in vars(obj))
-
-        # 42
-        print(obj.simple)
-
-        # True
-        print('simple' in vars(obj))
-
-    Implementation of lazy attribute. The value is evaluated on first access
-    to the attribute.
-    """
-    def __init__(self, default=None, name=None):
-        self.default = default
-        self.name = name
-
-    def __get__(self, obj, objtype):
-        if obj is None:
-            return self
-        if callable(self.default):
-            default = self.default(obj if obj is not None else objtype)
-        else:
-            default = self.default
-        if self.name is None:
-            return default
-        setattr(obj, self.name, default)
-        return getattr(obj, self.name)
 
 
 new = Pyjo_Base.new

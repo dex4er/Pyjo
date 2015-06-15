@@ -47,9 +47,8 @@ Classes
 import Pyjo.EventEmitter
 import Pyjo.IOLoop
 
-from Pyjo.Base import lazy
 from Pyjo.Regexp import r
-from Pyjo.Util import getenv, setenv, warn
+from Pyjo.Util import getenv, notnone, setenv, warn
 
 import os
 import re
@@ -95,36 +94,39 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
     :mod:`Pyjo.EventEmitter` and implements the following new ones.
     """
 
-    handle = None
-    """::
+    def __init__(self, *args, **kwargs):
+        super(Pyjo_IOLoop_Server, self).__init__(*args, **kwargs)
 
-        handle = stream.handle
+        self.handle = kwargs.get('handle')
+        """::
 
-    Handle for stream.
-    """
+            handle = stream.handle
 
-    multi_accept = 50
-    """::
+        Handle for stream.
+        """
 
-        multi = server.multi_accept
-        server.multi_accept = 100
+        self.multi_accept = kwargs.get('multi_accept', 50)
+        """::
 
-    Number of connections to accept at once, defaults to ``50``.
-    """
+            multi = server.multi_accept
+            server.multi_accept = 100
 
-    reactor = lazy(lambda self: Pyjo.IOLoop.singleton.reactor)
-    """::
+        Number of connections to accept at once, defaults to ``50``.
+        """
 
-        reactor = server.reactor
-        server.reactor = Pyjo.Reactor.Poll.new()
+        self.reactor = notnone(kwargs.get('reactor'), lambda: Pyjo.IOLoop.singleton.reactor)
+        """::
 
-    Low-level event reactor, defaults to the :attr:`reactor` attribute value of the
-    global :mod:`Pyjo.IOLoop` singleton.
-    """
+            reactor = server.reactor
+            server.reactor = Pyjo.Reactor.Poll.new()
 
-    _handles = lazy(lambda self: {})
-    _reuse = None
-    _tls_kwargs = lazy(lambda self: {})
+        Low-level event reactor, defaults to the :attr:`reactor` attribute value of the
+        global :mod:`Pyjo.IOLoop` singleton.
+        """
+
+        self._handles = {}
+        self._reuse = None
+        self._tls_kwargs = {}
 
     def __del__(self):
         if DEBUG:

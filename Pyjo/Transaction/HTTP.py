@@ -87,26 +87,29 @@ class Pyjo_Transaction_HTTP(Pyjo.Transaction.object):
     :mod:`Pyjo.Transaction` and implements the following new ones.
     """
 
-    previous = None
-    """::
+    def __init__(self, **kwargs):
+        super(Pyjo_Transaction_HTTP, self).__init__(**kwargs)
 
-        previous = tx.previous
-        tx.previous = Pyjo.Transaction.HTTP.new()
+        self.previous = kwargs.get('previous')
+        """::
 
-    Previous transaction that triggered this follow-up transaction, usually a
-    :mod:`Pyjo.Transaction.HTTP` object. ::
+            previous = tx.previous
+            tx.previous = Pyjo.Transaction.HTTP.new()
 
-        # Paths of previous requests
-        print(tx.previous.previous.req.url.path)
-        print(tx.previous.req.url.path)
-    """
+        Previous transaction that triggered this follow-up transaction, usually a
+        :mod:`Pyjo.Transaction.HTTP` object. ::
 
-    _delay = False
-    _handled = False
-    _http_state = None
-    _offset = None
-    _state = None
-    _towrite = None
+            # Paths of previous requests
+            print(tx.previous.previous.req.url.path)
+            print(tx.previous.req.url.path)
+        """
+
+        self._delay = False
+        self._handled = False
+        self._http_state = None
+        self._offset = None
+        self._state = None
+        self._towrite = None
 
     def client_read(self, chunk):
         """::

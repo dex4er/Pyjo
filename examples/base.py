@@ -2,17 +2,19 @@ from __future__ import print_function
 
 import Pyjo.Base
 
-from Pyjo.Base import lazy
+from Pyjo.Util import notnone
 
 
 class Point(Pyjo.Base.object):
-    x = 0
-    y = 0
+    def __init__(self, **kwargs):
+        self.x = kwargs.get('x', 0)
+        self.y = kwargs.get('y', 0)
 
 
 class Line(Pyjo.Base.object):
-    p1 = lazy(lambda self: Point())
-    p2 = lazy(lambda self: Point())
+    def __init__(self, **kwargs):
+        self.p1 = notnone(kwargs.get('p1'), lambda: Point())
+        self.p2 = notnone(kwargs.get('p2'), lambda: Point())
 
 
 p = Point(x=1, y=2)

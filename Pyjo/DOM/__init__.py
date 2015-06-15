@@ -45,9 +45,8 @@ import Pyjo.DOM.HTML
 import Pyjo.String.Mixin
 import Pyjo.String.Unicode
 
-from Pyjo.Base import lazy
 from Pyjo.Regexp import r
-from Pyjo.Util import squish, u
+from Pyjo.Util import notnone, squish, u
 
 
 re_namespace_prefix = r(r'^(.*?):')
@@ -62,8 +61,6 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
     :mod:`Pyjo.Base` and :mod:`Pyjo.String.Mixin` and implements the following new ones.
     """
 
-    html = lazy(lambda self: Pyjo.DOM.HTML.new())
-
     def __init__(self, html=None):
         """::
 
@@ -71,6 +68,9 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
 
         Construct a new :mod:`Pyjo.DOM` object.
         """
+
+        self.html = Pyjo.DOM.HTML.new()
+
         if html is not None:
             self.parse(html)
 

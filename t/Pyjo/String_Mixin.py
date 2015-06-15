@@ -23,7 +23,8 @@ if __name__ == '__main__':
     import Pyjo.String.Mixin
 
     class C(Pyjo.Base.object, Pyjo.String.Mixin.object):
-        value = None
+        def __init__(self, **kwargs):
+            self.value = kwargs.get('value')
 
         def to_str(self):
             return self.value
@@ -153,7 +154,8 @@ if __name__ == '__main__':
         skip('test for Python 2.x', 2)
 
     class C2(Pyjo.Base.object, Pyjo.String.Mixin.object):
-        value = None
+        def __init__(self, **kwargs):
+            self.value = kwargs.get('value')
 
         def to_bytes(self):
             return self.value
@@ -286,7 +288,8 @@ if __name__ == '__main__':
         skip('test for Python 2.x', 2)
 
     class C3(Pyjo.Base.object, Pyjo.String.Mixin.object):
-        value = None
+        def __init__(self, **kwargs):
+            self.value = kwargs.get('value')
 
         def to_bytes(self):
             if sys.version_info < (3, 0):

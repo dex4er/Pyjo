@@ -58,7 +58,6 @@ Classes
 
 import Pyjo.Base
 
-from Pyjo.Base import lazy
 from Pyjo.Util import getenv, warn
 
 import weakref
@@ -80,7 +79,8 @@ class Pyjo_EventEmitter(Pyjo.Base.object):
     :mod:`Pyjo.Base` and implements the following new ones.
     """
 
-    _events = lazy(lambda self: {})
+    def __init__(self, **kwargs):
+        self._events = {}
 
     def catch(self, cb):
         """::

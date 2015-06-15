@@ -31,9 +31,8 @@ Classes
 import Pyjo.Base
 import Pyjo.String.Mixin
 
-from Pyjo.Base import lazy
 from Pyjo.Regexp import r
-from Pyjo.Util import b, convert, getenv, u
+from Pyjo.Util import b, convert, getenv, notnone, u
 
 import collections
 import sys
@@ -64,53 +63,53 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.String.Mixin.object):
     :mod:`Pyjo.Base` and :mod:`Pyjo.String.Mixin` and implements the following new ones.
     """
 
-    charset = 'utf-8'
-    """::
-
-        charset = headers.charset
-        headers.charset = 'ascii'
-
-    Charset used for encoding and decoding, defaults to ``ascii``.
-    """
-
-    max_line_size = lazy(lambda self: convert(getenv('PYJO_MAX_LINE_SIZE'), int) or 8192)
-    """::
-
-        size = headers.max_line_size
-        headers.max_line_size = 1024
-
-    Maximum header line size in bytes, defaults to the value of the
-    ``PYJO_MAX_LINE_SIZE`` environment variable or ``8192`` (8KB).
-    """
-
-    max_lines = lazy(lambda self: convert(getenv('PYJO_MAX_LINES'), int) or 100)
-    """::
-
-        num = headers.max_lines
-        headers.max_lines = 200
-
-    Maximum number of header lines, defaults to the value of the ``PYJO_MAX_LINES``
-    environment variable or ``100``.
-    """
-
-    _buffer = lazy(lambda self: bytearray())
-    _cache = lazy(lambda self: [])
-    _headers = lazy(lambda self: collections.OrderedDict())
-    _limit = False
-    _normalcase = lazy(lambda self: {})
-    _state = None
-
-    def __init__(self, path=None):
+    def __init__(self, chunk=None, **kwargs):
         r"""::
 
             headers = Pyjo.Headers.new()
-            headers = Pyjo.Headers.new(b"Content-Type: text/plain\x0d\x0a\x0d\x0a")
+            headers = Pyjo.Headers.new("Content-Type: text/html\x0d\x0a\x0d\x0a")
 
-        Construct a new :mod`Pyjo.Headers` object and :meth:`parse` headers if necessary.
+        Construct a new :mod`Pyjo.Headers` object.
         """
-        super(Pyjo_Headers, self).__init__()
-        if path is not None:
-            self.parse(path)
+
+        self.charset = kwargs.get('charset', 'utf-8')
+        """::
+
+            charset = headers.charset
+            headers.charset = 'ascii'
+
+        Charset used for encoding and decoding, defaults to ``ascii``.
+        """
+
+        self.max_line_size = notnone(kwargs.get('max_line_size'), lambda: convert(getenv('PYJO_MAX_LINE_SIZE'), int) or 8192)
+        """::
+
+            size = headers.max_line_size
+            headers.max_line_size = 1024
+
+        Maximum header line size in bytes, defaults to the value of the
+        ``PYJO_MAX_LINE_SIZE`` environment variable or ``8192`` (8KB).
+        """
+
+        self.max_lines = notnone(kwargs.get('max_lines'), lambda: convert(getenv('PYJO_MAX_LINES'), int) or 100)
+        """::
+
+            num = headers.max_lines
+            headers.max_lines = 200
+
+        Maximum number of header lines, defaults to the value of the ``PYJO_MAX_LINES``
+        environment variable or ``100``.
+        """
+
+        self._buffer = bytearray()
+        self._cache = []
+        self._headers = collections.OrderedDict()
+        self._limit = False
+        self._normalcase = {}
+        self._state = None
+
+        if chunk is not None:
+            self.parse(chunk)
 
     def __repr__(self):
         """::
@@ -119,7 +118,7 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.String.Mixin.object):
 
         String representation of an object shown in console.
         """
-        return "{0}.new({1})".format(self.__module__, repr(self.to_str() + '\x0d\x0a\x0d\x0a'))
+        return "{0}.new().parse({1})".format(self.__module__, repr(self.to_str() + '\x0d\x0a\x0d\x0a'))
 
     @property
     def accept(self):

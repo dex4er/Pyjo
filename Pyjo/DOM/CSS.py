@@ -317,15 +317,16 @@ class Pyjo_DOM_CSS(Pyjo.Base.object):
     :mod:`Pyjo.Base` and implements the following new ones.
     """
 
-    tree = None
-    """::
+    def __init__(self, **kwargs):
+        self.tree = kwargs.get('tree')
+        """::
 
-        tree = html.tree
-        html.tree = ['root']
+            tree = html.tree
+            html.tree = ['root']
 
-    Document Object Model. Note that this structure should only be used very
-    carefully since it is very dynamic.
-    """
+        Document Object Model. Note that this structure should only be used very
+        carefully since it is very dynamic.
+        """
 
     def matches(self, pattern):
         """::

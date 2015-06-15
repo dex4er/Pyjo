@@ -54,9 +54,8 @@ import Pyjo.EventEmitter
 import os
 import sys
 
-from Pyjo.Base import lazy
 from Pyjo.Loader import load_module
-from Pyjo.Util import getenv, not_implemented
+from Pyjo.Util import getenv, not_implemented, notnone
 
 
 class Pyjo_Server_Base(Pyjo.EventEmitter.object):
@@ -65,26 +64,7 @@ class Pyjo_Server_Base(Pyjo.EventEmitter.object):
     :mod:`Pyjo.EventEmitter` and implements the following new ones.
     """
 
-    app = lazy(lambda self: self.build_app('Pyjo.HelloWorld'))
-    """::
-
-        app = server.app
-        server.app = MyApp.new()
-
-    Application this server handles, defaults to a :mod:`Pyjo.HelloWorld` object.
-    """
-
-    reverse_proxy = lazy(lambda self: getenv('PYJO_REVERSE_PROXY'))
-    """::
-
-        boolean = server.reverse_proxy
-        server.reverse_proxy = boolean
-
-    This server operates behind a reverse proxy, defaults to the value of the
-    ``PYJO_REVERSE_PROXY`` environment variable.
-    """
-
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         """::
 
             server = Pyjo.Server.Base.new()
@@ -93,7 +73,27 @@ class Pyjo_Server_Base(Pyjo.EventEmitter.object):
         Construct a new ``Pyjo.Server`` object and subscribe to ``request`` event
         with default request handling.
         """
-        super(Pyjo_Server_Base, self).__init__(*args, **kwargs)
+        super(Pyjo_Server_Base, self).__init__(**kwargs)
+
+        self.app = notnone(kwargs.get('app'), lambda: self.build_app('Pyjo.HelloWorld'))
+        """::
+
+            app = server.app
+            server.app = MyApp.new()
+
+        Application this server handles, defaults to a :mod:`Pyjo.HelloWorld` object.
+        """
+
+        self.reverse_proxy = notnone(kwargs.get('reverse_proxy'), lambda: getenv('PYJO_REVERSE_PROXY'))
+        """::
+
+            boolean = server.reverse_proxy
+            server.reverse_proxy = boolean
+
+        This server operates behind a reverse proxy, defaults to the value of the
+        ``PYJO_REVERSE_PROXY`` environment variable.
+        """
+
         self.on(lambda server, tx: server.app.handler(tx), 'request')
 
     def build_app(self, app):
