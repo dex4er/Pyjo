@@ -10,12 +10,12 @@ Pyjo.UserAgent.CookieJar - Cookie jar for HTTP user agents
     # Add response cookies
     jar = Pyjo.UserAgent.CookieJar.new()
     jar.add(
-        Pyjo.UserAgent.CookieJar.new([
+        Pyjo.UserAgent.CookieJar.new({
             'name': 'foo',
             'value': 'bar',
             'domain': 'localhost',
             'path': '/test'
-        ])
+        })
     )
 
     # Find request cookies
@@ -139,7 +139,7 @@ class Pyjo_UserAgent_CookieJar(Pyjo.Base.object):
     def collect(self, tx):
         """::
 
-            jar.collect(Pyjo.Transaction.HTTP.new()))
+            jar.collect(Pyjo.Transaction.HTTP.new())
 
         Collect response cookies from transaction.
         """
@@ -183,7 +183,7 @@ class Pyjo_UserAgent_CookieJar(Pyjo.Base.object):
         Find :mod:`Pyjo.Cookie.Request` objects in the jar for :mod:`Pyjo.URL` object. ::
 
             # Names of all cookies found
-            for cookie in jar.find(Pyjo.URL.new('http://example.com/foo'):
+            for cookie in jar.find(Pyjo.URL.new('http://example.com/foo')):
                 print(cookie.name)
         """
         found = []
