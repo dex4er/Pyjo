@@ -289,7 +289,7 @@ else:
 
 
 def md5_bytes(bytestring):
-    """::
+    r"""::
 
         md5 = md5_bytes(bytestring)
 
