@@ -173,10 +173,13 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.Base.object):
 
             # Timers (time should not change in between timers)
             now = steady_time()
-            for tid in list(self._timers):
-                t = self._timers.get(tid)
+            for tid in self._timers.keys():
+                if tid not in self._timers:
+                    continue
 
-                if not t or t['time'] > now:
+                t = self._timers[tid]
+
+                if t['time'] > now:
                     continue
 
                 # Recurring timer
