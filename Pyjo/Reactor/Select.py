@@ -173,7 +173,7 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.Base.object):
 
             # Timers (time should not change in between timers)
             now = steady_time()
-            for tid in self._timers.keys():
+            for tid in list(self._timers):
                 if tid not in self._timers:
                     continue
 
