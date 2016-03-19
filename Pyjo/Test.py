@@ -183,8 +183,18 @@ def pass_ok(test_name=None):
 
 
 def plan(**kwargs):
-    global tests
-    if 'tests' in kwargs:
+    global done, failed, test
+    if 'skip_all' in kwargs:
+        if tests:
+            print('# You tried to plan twice', file=sys.stderr)
+            exit()
+        else:
+            skip_all = kwargs['skip_all']
+            _print('1..0 # SKIP {0}'.format(skip_all))
+            done = True
+            test = 255
+            exit()
+    elif 'tests' in kwargs:
         tests = kwargs['tests']
         _print('1..{0}'.format(tests))
 
