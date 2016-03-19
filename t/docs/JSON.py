@@ -14,7 +14,7 @@ class UnitTest(Pyjo.Test.UnitTest):
 
 if __name__ == '__main__':
 
-    from Pyjo.Test import *  # @UnusedWildImport
+    from Pyjo.Test import *  # noqa
 
     from Pyjo.JSON import decode_json, encode_json, from_json, j, to_json
 

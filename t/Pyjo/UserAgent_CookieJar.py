@@ -14,7 +14,7 @@ class UnitTest(Pyjo.Test.UnitTest):
 
 if __name__ == '__main__':
 
-    from Pyjo.Test import *  # @UnusedWildImport
+    from Pyjo.Test import *  # noqa
 
     import Pyjo.Cookie.Response
     import Pyjo.URL

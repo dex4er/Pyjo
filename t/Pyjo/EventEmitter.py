@@ -15,7 +15,7 @@ class TestException(Exception):
 
 
 if __name__ == '__main__':
-    from Pyjo.Test import *  # @UnusedWildImport
+    from Pyjo.Test import *  # noqa
 
     import Pyjo.EventEmitter
 
