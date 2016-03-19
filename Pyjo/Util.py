@@ -401,8 +401,7 @@ def trim(string):
     return re_whitespaces_starts.sub('', re_whitespaces_ends.sub('', string, 1), 1)
 
 
-def steady_time():
-    return time.time()
+steady_time = time.time
 
 
 if sys.version_info >= (3, 0):
