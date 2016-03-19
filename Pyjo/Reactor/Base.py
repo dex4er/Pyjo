@@ -69,6 +69,7 @@ from Pyjo.Util import getenv, not_implemented
 
 import importlib
 import os
+import select
 
 
 class Error(Exception):
@@ -102,7 +103,7 @@ class Pyjo_Reactor_Base(Pyjo.EventEmitter.object):
 
         Detect and load the best reactor implementation available, will try the value
         of the ``MOJO_REACTOR`` environment variable, then
-        :mod:`Pyjo.Reactor.Select` on Windows or :mod:`Pyjo.Reactor.Poll` otherwise. ::
+        :mod:`Pyjo.Reactor.Poll` if available or :mod:`Pyjo.Reactor.Select` otherwise. ::
 
             # Instantiate best reactor implementation available
             reactor = Pyjo.Reactor.detect().new()
@@ -115,10 +116,10 @@ class Pyjo_Reactor_Base(Pyjo.EventEmitter.object):
         except ImportError:
             pass
 
-        if os.name == "nt":
-            return 'Pyjo.Reactor.Select'
-        else:
+        if hasattr(select, 'poll'):
             return 'Pyjo.Reactor.Poll'
+        else:
+            return 'Pyjo.Reactor.Select'
 
     @not_implemented
     def io(self, cb, handle):
