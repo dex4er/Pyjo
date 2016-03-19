@@ -1,7 +1,7 @@
-import Pyjo.Reactor.Poll
+import Pyjo.Reactor.Select
 
 # Dummy reactor
-class TestReactor(Pyjo.Reactor.Poll.object):
+class TestReactor(Pyjo.Reactor.Select.object):
     pass
 
 
