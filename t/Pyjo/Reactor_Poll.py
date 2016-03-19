@@ -16,6 +16,11 @@ if __name__ == '__main__':
 
     from Pyjo.Test import *  # noqa
 
+    import select
+
+    if not hasattr(select, 'poll'):
+        plan(skip_all='select.poll is required for this test!')
+
     import Pyjo.Reactor.Poll
 
     from Pyjo.Util import setenv, steady_time
