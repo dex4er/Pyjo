@@ -3,7 +3,7 @@ class C(object):
         v = 42
 
         def s():
-            v = 666
+            v = 666  # noqa
 
         s()
 

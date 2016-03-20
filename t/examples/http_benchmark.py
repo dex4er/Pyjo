@@ -17,8 +17,6 @@ if __name__ == '__main__':
     import Pyjo.IOLoop
     import Pyjo.URL
 
-    from Pyjo.Util import nonlocals
-
     plan(tests=10)
 
     # Listen on random port
@@ -50,18 +48,18 @@ if __name__ == '__main__':
 
         @Pyjo.IOLoop.client(address=url.host, port=(url.port or 80))
         def client(loop, err, stream):
-            client = nonlocals()
-            client.size = 0
+            class context:
+                size = 0
 
             @stream.on
             def read(stream, chunk):
-                client.size += len(chunk)
+                context.size += len(chunk)
 
             @stream.on
             def close(stream):
-                sizes.append(client.size)
+                sizes.append(context.size)
 
-                is_ok(client.size, 19 + 1000 * 1000, 'client.size')
+                is_ok(context.size, 19 + 1000 * 1000, 'context.size')
 
                 if len(sizes) == n:
                     Pyjo.IOLoop.remove(server)

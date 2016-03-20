@@ -34,7 +34,7 @@ import Pyjo.UserAgent.CookieJar
 import Pyjo.UserAgent.Proxy
 import Pyjo.UserAgent.Transactor
 
-from Pyjo.Util import getenv, nonlocals, notnone, warn
+from Pyjo.Util import getenv, notnone, warn
 
 import weakref
 
@@ -136,16 +136,16 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
             if DEBUG:
                 warn("-- Blocking request ({0})\n".format(self._url(tx)))
 
-            start = nonlocals()
-            start.tx = tx
+            class context:
+                tx = tx
 
             def blocking_cb(ua, tx):
                 ua.ioloop.stop()
-                start.tx = tx
+                context.tx = tx
 
             self._start(False, tx, blocking_cb)
             self.ioloop.start()
-            return start.tx
+            return context.tx
 
     def _connect(self, nb, peer, tx, handle, cb):
         t = self.transactor
@@ -166,14 +166,14 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
             options['tls_cert'] = self.cert
             options['tls_key'] = self.key
 
-        connect = nonlocals()
-        connect.cb = cb
-        connect.ua = weakref.proxy(self)
+        class context:
+            cb = cb
+            ua = weakref.proxy(self)
 
         def client_cb(loop, err, stream):
-            cb = connect.cb
-            cid = connect.cid
-            ua = connect.ua
+            cb = context.cb
+            cid = context.cid
+            ua = context.ua
 
             # Connection error
             if not ua:
@@ -190,7 +190,7 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
             cb(cid)
 
         cid = self._loop(nb).client(client_cb, **options)
-        connect.cid = cid
+        context.cid = cid
         return cid
 
     def _connect_proxy(self, nb, old, cb):

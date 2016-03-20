@@ -318,11 +318,6 @@ def md5_sum(bytestring):
     return m.hexdigest()
 
 
-class nonlocals(object):
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
-
-
 def not_implemented(method):
     @functools.wraps(method)
     def stub(*args, **kwargs):

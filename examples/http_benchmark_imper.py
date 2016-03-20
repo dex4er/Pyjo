@@ -6,7 +6,7 @@ import Pyjo.IOLoop
 import Pyjo.URL
 
 from Pyjo.Regexp import r
-from Pyjo.Util import nonlocals, steady_time
+from Pyjo.Util import steady_time
 
 
 argv = sys.argv[1:]
@@ -39,25 +39,28 @@ print(url)
 for i in range(n):
 
     def on_connect_cb(loop, err, stream):
-        on_connect_cb = nonlocals()
-        on_connect_cb.size = 0
+        class context:
+            size = 0
+
+        if err:
+            return
 
         def on_read_cb(stream, chunk):
-            on_connect_cb.size += len(chunk)
+            context.size += len(chunk)
             if verbose:
-                print("{0}\r".format(on_connect_cb.size), end='')
+                print("{0}\r".format(context.size), end='')
 
-        stream.on('read', on_read_cb)
+        stream.on(on_read_cb, 'read')
 
         def on_close_cb(stream):
             t1 = steady_time()
             delta = t1 - t0
-            speeds.append(int(on_connect_cb.size * 8 / 1024 / delta / 1000))
+            speeds.append(int(context.size * 8 / 1024 / delta / 1000))
 
             if verbose:
-                print(on_connect_cb.size)
+                print(context.size)
 
-        stream.on('close', on_close_cb)
+        stream.on(on_close_cb, 'close')
 
         # Write request
         stream.write("GET {0} HTTP/1.1\x0d\x0aHost: {1}:{2}\x0d\x0a\x0d\x0a".format(url.path, url.host, url.port or 80).encode('ascii'))
