@@ -1023,7 +1023,7 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.String.Mixin.object):
 
             single = headers.to_dict()
 
-        Turn headers into :class:`dict`. ::
+        Turn headers into :class:`dict`.
         """
         return dict(map(lambda i: (i, self.header(i)), self.names))
 
@@ -1032,7 +1032,7 @@ class Pyjo_Headers(Pyjo.Base.object, Pyjo.String.Mixin.object):
 
             multi = headers.to_dict_list()
 
-        Turn headers into :class:`dict` with :class:`list` as its values. ::
+        Turn headers into :class:`dict` with :class:`list` as its values.
         """
         return dict(map(lambda i: (i, list(map(lambda i: u(i, 'ascii'), self._headers[b(i.lower(), 'ascii')]))),
                         self.names))
