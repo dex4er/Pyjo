@@ -808,9 +808,6 @@ class Error(Exception):
 
 
 class Guard(object):
-    """
-    Class for guard object which checks if the test script matches its plan.
-    """
     def __del__(self):
         global failed, done, tests
         if test and not tests and not done:
