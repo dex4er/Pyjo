@@ -48,7 +48,12 @@ prove
 
 The test scripts can be started with ``prove`` command: ::
 
-    $ PYTHONPATH=. prove --ext=py --exec python
+    $ PYTHONPATH=. prove --ext=py --exec=python t
+
+You can also put the arguments in the configuration file ``.proverc``: ::
+
+    --ext=py
+    --exec=python
 
 ``prove`` requires that ``__init__.py`` files have to be also runnable scripts.
 For example: ::
@@ -63,7 +68,14 @@ nosetests
 
 The test scripts can be started with ``nosetests`` command: ::
 
-    $ PYTHONPATH=`pwd` nosetests
+    $ PYTHONPATH=`pwd` nosetests --where=t --match=. --attr=test_nose
+
+You can also put the arguments in the configuration file ``setup.cfg``: ::
+
+    [nosetests]
+    where=t
+    match=.
+    attr=test_nose
 
 ``nosetests`` command requires additional boilerplate code in test script: ::
 
@@ -103,8 +115,47 @@ to be used for each subdirectory separately: ::
         ok('main test script')
         ...
 
-Functions
----------
+setuptools
+----------
+
+The test scripts can be started with ``python setup.py test`` command. ::
+
+    $ python setup.py test
+
+Additional helper script ``test.py`` is required in the source directory of
+the package: ::
+
+    #!/usr/bin/env python
+
+    import unittest
+
+    dirs = ['t']
+
+    class TestSuite(unittest.TestSuite):
+        def __init__(self, *args, **kwargs):
+            super(TestSuite, self).__init__(*args, **kwargs)
+            test_loader = unittest.defaultTestLoader
+            for d in dirs:
+                test_suite = test_loader.discover(d, pattern='*.py', top_level_dir='.')
+                for t in test_suite:
+                    self.addTest(t)
+
+        def __iter__(self):
+            return iter(self._tests)
+
+    if __name__ == '__main__':
+        unittest.main(defaultTest='TestSuite')
+
+The ``setup.py`` script should set additional options: ::
+
+    setup(
+        packages=find_packages(exclude=['t', 't.*']),
+        test_suite='test.TestSuite',
+        ...
+    )
+
+Classes and functions
+---------------------
 """
 
 from __future__ import print_function, unicode_literals
