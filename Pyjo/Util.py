@@ -208,7 +208,7 @@ def html_unescape(unicodestring):
 
     Unescape all HTML entities in string. ::
 
-        # "<div>"
+        # '<div>'
         html_unescape('&lt;div&gt;')
     """
     return re_entity.sub(lambda m: _decode(m.group(1), m.group(2)), unicodestring)
@@ -310,7 +310,7 @@ def md5_sum(bytestring):
 
     Generate MD5 checksum for bytes. ::
 
-        # "acbd18db4cc2f85cedef654fccc4a4d8"
+        # 'acbd18db4cc2f85cedef654fccc4a4d8'
         md5_sum(b'foo')
     """
     m = hashlib.md5()
@@ -407,7 +407,7 @@ def slurp(path, charset=DEFAULT_CHARSET):
     """::
 
         string = slurp('/etc/passwd')
-        string = slurp('/etc/passwd', 'iso-8859-1')
+        string = slurp('/etc/passwd', 'utf-8')
 
     Read all data at once from file as unicode string.
     """
@@ -418,7 +418,7 @@ def slurp(path, charset=DEFAULT_CHARSET):
 def slurpb(path):
     """::
 
-        bstring = slurpb('/etc/passwd')
+        bytestring = slurpb('/etc/passwd')
 
     Read all data at once from file as binary string.
     """
@@ -431,8 +431,8 @@ def split_cookie_header(string):
 
         tree = split_cookie_header('a=b; expires=Thu, 07 Aug 2008 07:07:59 GMT')
 
-        Same as :func:`split_header`, but handles ``expires`` values from
-        :rfc:`6265`.
+    Same as :func:`split_header`, but handles ``expires`` values from
+    :rfc:`6265`.
     """
     return _header(string, True)
 
@@ -467,7 +467,7 @@ def spurt(content, path, charset=DEFAULT_CHARSET):
     """::
 
         written = spurt(string, '/etc/passwd')
-        written = spurt(string, '/etc/passwd', 'iso-8859-1')
+        written = spurt(string, '/etc/passwd', 'utf-8')
 
     Write all data from unicode string at once to file.
     """
@@ -478,7 +478,7 @@ def spurt(content, path, charset=DEFAULT_CHARSET):
 def spurtb(content, path):
     """::
 
-        written = spurt(bstring, '/etc/passwd')
+        written = spurt(bytestring, '/etc/passwd')
 
     Write all data from binary string at once to file.
     """
@@ -490,7 +490,20 @@ re_whitespaces = r(r'\s+')
 
 
 def squish(string):
+    """::
+
+        squished = squish(string)
+
+    Trim whitespace characters from both ends of string and then change all
+    consecutive groups of whitespace into one space each. ::
+
+        # 'foo bar'
+        squish('  foo  bar  ')
+    """
     return re_whitespaces.sub(' ', trim(string))
+
+
+steady_time = time.time
 
 
 re_whitespaces_starts = r(r'^\s+')
@@ -498,20 +511,40 @@ re_whitespaces_ends = r(r'\s+$')
 
 
 def trim(string):
+    """::
+
+        trimmed = trim(string)
+
+    Trim whitespace characters from both ends of string. ::
+
+        # 'foo bar'
+        trim('  foo bar  ')
+    """
     return re_whitespaces_starts.sub('', re_whitespaces_ends.sub('', string, 1), 1)
-
-
-steady_time = time.time
 
 
 if sys.version_info >= (3, 0):
     def u(string, charset=DEFAULT_CHARSET):
+        """::
+
+            unicodestring = u(bytestring)
+            unicodestring = u(bytestring, 'utf-8')
+
+        Decode bytestring into unicodestring.
+        """
         if isbytes(string):
             return bytes(string).decode(charset)
         else:
             return str(string)
 else:
     def u(string, charset=DEFAULT_CHARSET):
+        """::
+
+            unicodestring = u(bytestring)
+            unicodestring = u(bytestring, 'utf-8')
+
+        Decode bytestring into unicodestring.
+        """
         if isinstance(string, unicode) or hasattr(string, '__unicode__'):
             return unicode(string)
         else:
@@ -536,6 +569,12 @@ re_u_unquote3 = r(r'\\"')
 
 
 def unquote(string):
+    """::
+
+        string = unquote(quoted)
+
+    Unquote string.
+    """
     if isbytes(string):
         string, n = re_b_unquote.subn(lambda m: m.group(1), bytes(string))
         if n:
@@ -553,6 +592,18 @@ re_url_allow_chars = r(br'([^A-Za-z0-9\-._~])')
 
 
 def url_escape(bstring, pattern=None):
+    """::
+
+        escaped = url_escape(string)
+        escaped = url_escape(string, r'^A-Za-z0-9\-._~')
+
+    Percent encode unsafe characters in string as described in
+    :rfc:`3986`, the pattern used defaults to
+    ``^A-Za-z0-9\-._~``. ::
+
+        # 'foo%3Bbar'
+        url_escape('foo;bar')
+    """
     if pattern is not None:
         pattern = b'([' + pattern + b'])'
         re_pattern = r(pattern)
@@ -566,10 +617,26 @@ re_percent_chars = r(br'%([0-9a-fA-F]{2})')
 
 
 def url_unescape(bstring):
+    """::
+
+        str = url_unescape $escaped;
+
+    Decode percent encoded characters in string as described in
+    :rfc:`3986`. ::
+
+        # 'foo;bar'
+        url_unescape('foo%3Bbar')
+    """
     return re_percent_chars.sub(lambda m: b(chr(int(m.group(1), 16)), 'iso-8859-1'), bstring)
 
 
 def warn(msg, *args):
+    """::
+
+        warn(string)
+
+    Output message to ``sys.stderr``.
+    """
     if not msg.endswith("\n"):
         msg += "\n"
     print(msg, end='', file=sys.stderr)
@@ -589,10 +656,30 @@ re_xml_allow_chars = r(r'([&<>"\'])')
 
 
 def xml_escape(string):
+    """::
+
+        escaped = xml_escape(string)
+
+    Escape unsafe characters ``&``, ``<``, ``>``, ``"`` and ``'`` in string, but
+    do not escape :class:`Pyjo.ByteStream` objects. ::
+
+        # '&lt;div&gt;'
+        xml_escape('<div>')
+
+        # '<div>'
+        from Pyjo.Util import b
+        xml_escape(b('<div>'))
+    """
     return re_xml_allow_chars.sub(lambda m: XML[m.group(1)], string)
 
 
 def xor_encode(data, mask):
+    """::
+
+        encoded = xor_encode(string, key)
+
+    XOR encode string with variable length key.
+    """
     return bytearray(a ^ b for a, b in zip(*map(bytearray, [data, mask])))
 
 
