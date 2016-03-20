@@ -39,7 +39,7 @@ Classes
 
 import Pyjo.Asset.File
 
-from Pyjo.Util import convert, getenv, notnone, spurt, steady_time
+from Pyjo.Util import convert, getenv, notnone, spurtb, steady_time
 
 
 MTIME = steady_time()
@@ -164,7 +164,7 @@ class Pyjo_Asset_Memory(Pyjo.Asset.object):
 
         Move asset data into a specific file.
         """
-        spurt(self._content, dst)
+        spurtb(self._content, dst)
         return self
 
     @property

@@ -32,7 +32,7 @@ Classes
 
 import Pyjo.Asset
 
-from Pyjo.Util import b, getenv, md5_sum, notnone, slurp, steady_time, rand
+from Pyjo.Util import b, getenv, md5_sum, notnone, slurpb, steady_time, rand
 
 import errno
 import os
@@ -237,7 +237,7 @@ class Pyjo_Asset_File(Pyjo.Asset.object):
         if self.path is None:
             return b''
         else:
-            return slurp(self.path)
+            return slurpb(self.path)
 
     @property
     def handle(self):

@@ -319,6 +319,16 @@ def md5_sum(bytestring):
 
 
 def not_implemented(method):
+    """::
+
+        class BaseClass(object):
+            @not_implemented
+            def method(self):
+                pass
+
+    Raise the exception with "Method ``name`` not implemented by subclass"
+    message.
+    """
     @functools.wraps(method)
     def stub(*args, **kwargs):
         raise Error('Method "{0}" not implemented by subclass'.format(method.__name__))
@@ -326,6 +336,22 @@ def not_implemented(method):
 
 
 def notnone(*args):
+    """::
+
+        value = notnone(value, another_value, default_value)
+        value = notnone(callable, callable_default)
+
+    Return the first not ``None`` value from arguments list. If the argument
+    is callable, then check the value which this callable returns (lazy
+    evaluation). ::
+
+        from Pyjo.Util import convert, getenv
+
+        def print_log(msg, **kwargs):
+            level = notnone(kwargs.get('log_level'),
+                            lambda: convert(getenv('LOG_LEVEL'), int, 3))
+            ...
+    """
     for a in args:
         if a is not None:
             if callable(a):
@@ -339,6 +365,12 @@ re_u_quote = r(r'(["\\])')
 
 
 def quote(string):
+    """::
+
+        quoted = quote(string)
+
+    Quote string.
+    """
     if isbytes(string):
         string = re_b_quote.sub(br'\\\1', bytes(string))
         return b'"' + string + b'"'
@@ -348,10 +380,22 @@ def quote(string):
 
 
 def rand(value=1):
+    """::
+
+        value = rand(range)
+
+    Return random value from ``0`` to ``range``.
+    """
     return random.random() * value
 
 
 def setenv(name, value):
+    """::
+
+        setenv(name, value)
+
+    Set the environment variable or remove it if value is ``None``.
+    """
     if value is None:
         if name in os.environ:
             del os.environ[name]
@@ -359,12 +403,87 @@ def setenv(name, value):
         os.environ.update({name: value})
 
 
+def slurp(path, charset=DEFAULT_CHARSET):
+    """::
+
+        string = slurp('/etc/passwd')
+        string = slurp('/etc/passwd', 'iso-8859-1')
+
+    Read all data at once from file as unicode string.
+    """
+    with open(path, 'rb') as f:
+        return u(f.read(), charset)
+
+
+def slurpb(path):
+    """::
+
+        bstring = slurpb('/etc/passwd')
+
+    Read all data at once from file as binary string.
+    """
+    with open(path, 'rb') as f:
+        return b(f.read())
+
+
 def split_cookie_header(string):
+    """::
+
+        tree = split_cookie_header('a=b; expires=Thu, 07 Aug 2008 07:07:59 GMT')
+
+        Same as :func:`split_header`, but handles ``expires`` values from
+        :rfc:`6265`.
+    """
     return _header(string, True)
 
 
 def split_header(string):
+    """::
+
+        tree = split_header('foo="bar baz"; test=123, yada')
+
+    Split HTTP header value into key/value pairs, each comma separated part gets
+    its own list, and keys without a value get ``None`` assigned. ::
+
+        # 'one'
+        split_header('one; two="three four", five=six')[0][0][0]
+
+        # 'two'
+        split_header('one; two="three four", five=six')[0][1][0]
+
+        # 'three four'
+        split_header('one; two="three four", five=six')[0][1][1]
+
+        # 'five'
+        split_header('one; two="three four", five=six')[1][0][0]
+
+        # 'six'
+        split_header('one; two="three four", five=six')[1][0][1]
+    """
     return _header(string, False)
+
+
+def spurt(content, path, charset=DEFAULT_CHARSET):
+    """::
+
+        written = spurt(string, '/etc/passwd')
+        written = spurt(string, '/etc/passwd', 'iso-8859-1')
+
+    Write all data from unicode string at once to file.
+    """
+    with open(path, 'wb') as f:
+        return f.write(b(content, charset))
+
+
+def spurtb(content, path):
+    """::
+
+        written = spurt(bstring, '/etc/passwd')
+
+    Write all data from binary string at once to file.
+    """
+    with open(path, 'wb') as f:
+        return f.write(content)
 
 
 re_whitespaces = r(r'\s+')
@@ -372,20 +491,6 @@ re_whitespaces = r(r'\s+')
 
 def squish(string):
     return re_whitespaces.sub(' ', trim(string))
-
-
-def slurp(path):
-    with open(path, "rb") as f:
-        return b(f.read())
-
-
-def spurt(content, path):
-    if isbytes(content):
-        with open(path, "wb") as f:
-            return f.write(b(content))
-    else:
-        with open(path, "w") as f:
-            return f.write(u(content))
 
 
 re_whitespaces_starts = r(r'^\s+')
