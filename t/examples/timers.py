@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     import Pyjo.IOLoop
 
-    plan(tests=3)
+    plan_tests(3)
 
     @Pyjo.IOLoop.recurring(0.4)
     def writer(loop):

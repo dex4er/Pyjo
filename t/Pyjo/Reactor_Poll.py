@@ -19,7 +19,7 @@ if __name__ == '__main__':
     import select
 
     if not hasattr(select, 'poll'):
-        plan(skip_all='select.poll is required for this test!')
+        plan_skip_all('select.poll is required for this test!')
 
     import Pyjo.Reactor.Poll
 

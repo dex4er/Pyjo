@@ -1,5 +1,41 @@
 """
-Pyjo.Test
+Pyjo.Test - Simple writing of test scripts
+==========================================
+::
+
+    from Pyjo.Test import *  # noqa
+
+    if not have_some_feature:
+        plan_skip_all(why)
+    else:
+        plan_tests(number_of_tests_run)
+
+    ok(got eq expected, test_name)
+
+    is_ok(got, expected, test_name)
+    isnt_ok(got, expected, test_name)
+
+    diag("here's what went wrong")
+
+    like_ok(got, r'expected', r_flags, test_name)
+    unlike_ok(got, r'expected', r_flags, test_name)
+
+    cmp_ok(got, '==', expected, test_name)
+
+    is_deeply_ok(got_complex_structure, expected_complex_structure, test_name)
+
+    if not have_some_feature:
+        skip(why, how_many)
+    else:
+        ok(foo(), test_name)
+        is_ok(foo(42), 23, test_name)
+
+    isa_ok(obj, cls)
+
+    pass_ok(test_name)
+    fail_ok(test_name)
+
+    done_testing()
 """
 
 from __future__ import print_function, unicode_literals
@@ -14,8 +50,8 @@ import unittest
 
 __all__ = ['cmp_ok', 'done_testing', 'diag', 'fail_ok', 'in_ok', 'is_ok',
            'isa_ok', 'is_deeply_ok', 'isnt_ok', 'like_ok', 'none_ok',
-           'not_in_ok', 'ok', 'pass_ok', 'plan', 'skip', 'throws_ok',
-           'unlike_ok']
+           'not_in_ok', 'ok', 'pass_ok', 'plan_tests', 'plan_skip_all',
+           'skip', 'throws_ok', 'unlike_ok']
 
 
 done = False
@@ -182,21 +218,22 @@ def pass_ok(test_name=None):
     _ok(True, test_name)
 
 
-def plan(**kwargs):
+def plan_tests(how_many):
     global done, failed, test, tests
-    if 'skip_all' in kwargs:
-        if tests:
-            print('# You tried to plan twice', file=sys.stderr)
-            exit()
-        else:
-            skip_all = kwargs['skip_all']
-            _print('1..0 # SKIP {0}'.format(skip_all))
-            done = True
-            test = 255
-            exit()
-    elif 'tests' in kwargs:
-        tests = kwargs['tests']
-        _print('1..{0}'.format(tests))
+    tests = how_many
+    _print('1..{0}'.format(tests))
+
+
+def plan_skip_all(why):
+    global done, failed, test, tests
+    if tests:
+        print('# You tried to plan twice', file=sys.stderr)
+        exit()
+    else:
+        _print('1..0 # SKIP {0}'.format(why))
+        done = True
+        test = 255
+        exit()
 
 
 def run(script=__file__, srcdir='.'):

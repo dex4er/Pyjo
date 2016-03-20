@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     import Pyjo.IOLoop
 
-    plan(tests=3)
+    plan_tests(3)
 
     loop = Pyjo.IOLoop.singleton
 

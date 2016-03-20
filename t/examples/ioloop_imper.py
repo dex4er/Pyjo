@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     import Pyjo.IOLoop
 
-    plan(tests=4)
+    plan_tests(4)
 
     # Listen on random port
     def server_cb(loop, stream, cid):

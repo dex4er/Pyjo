@@ -17,7 +17,7 @@ if __name__ == '__main__':
     import Pyjo.IOLoop
     import Pyjo.URL
 
-    plan(tests=10)
+    plan_tests(10)
 
     # Listen on random port
     @Pyjo.IOLoop.server

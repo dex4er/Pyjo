@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     import Pyjo.EventEmitter
 
-    plan(tests=5)
+    plan_tests(5)
 
     class Cat(Pyjo.EventEmitter.object):
         def poke(self, times):

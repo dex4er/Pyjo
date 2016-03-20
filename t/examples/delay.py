@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     import Pyjo.IOLoop
 
-    plan(tests=9)
+    plan_tests(9)
 
     def step1(delay):
         pass_ok("Step 1")
