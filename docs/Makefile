@@ -6,7 +6,6 @@ SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 PAPER         = a4
 BUILDDIR      = _build
-STATICDIR     = _static
 
 PYTHONPATH    = ..
 export PYTHONPATH
@@ -57,11 +56,9 @@ help:
 .PHONY: clean
 clean:
 	rm -rf $(BUILDDIR)/*
-	rm -rf $(STATICDIR)/*
 
 .PHONY: html
 html:
-	mkdir -p $(STATICDIR)
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
