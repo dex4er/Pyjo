@@ -52,7 +52,7 @@ error
 ::
 
     @reactor.on
-    def error(reactor, err):
+    def error(reactor, e, event):
         ...
 
 Emitted for exceptions caught in callbacks, fatal if unhandled. Note that if
@@ -68,7 +68,6 @@ import Pyjo.EventEmitter
 from Pyjo.Util import getenv, not_implemented
 
 import importlib
-import os
 import select
 
 

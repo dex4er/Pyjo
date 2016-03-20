@@ -266,7 +266,7 @@ if __name__ == '__main__':
     # Error
     err = Value('')
 
-    def error_cb(reactor, e):
+    def error_cb(reactor, e, event):
         reactor.stop()
         err.set(e)
 
@@ -278,7 +278,7 @@ if __name__ == '__main__':
     reactor.timer(die_cb, 0)
     reactor.start()
 
-    in_ok(err.get(), 'works!', 'right error')
+    in_ok(err.get().args[0], 'works!', 'right error')
 
     # Recursion
     timer = Value(0)

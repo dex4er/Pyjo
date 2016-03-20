@@ -160,12 +160,12 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.Base.object):
                         if fd in readable or fd in exceptional:
                             io = self._ios[fd]
                             last = True
-                            self._sandbox(io['cb'], 'Read', False)
+                            self._sandbox(io['cb'], "Read fd {0}".format(fd), False)
                     if fd in self._ios:
                         if fd in writable:
                             io = self._ios[fd]
                             last = True
-                            self._sandbox(io['cb'], 'Write', True)
+                            self._sandbox(io['cb'], "Write fd {0}".format(fd), True)
 
             # Wait for timeout if poll can't be used
             elif timeout:
@@ -331,7 +331,7 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.Base.object):
             try:
                 cb(self, *args)
             except Exception as e:
-                self.emit('error', e)
+                self.emit('error', e, event)
 
     def _timer(self, cb, recurring, after):
         tid = None

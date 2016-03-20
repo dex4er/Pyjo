@@ -180,7 +180,7 @@ class Pyjo_IOLoop(Pyjo.EventEmitter.object):
         if DEBUG:
             warn("-- Reactor initialized ({0})".format(self.reactor))
 
-        self.reactor.catch(lambda reactor, *args: warn("{0}: {1}".format(reactor, traceback.format_exc())))
+        self.reactor.catch(lambda reactor, e, event: warn("{0}: {1}\n{2}".format(reactor, event, traceback.format_exc())))
 
     def acceptor(self, acceptor):
         """::
