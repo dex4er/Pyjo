@@ -661,7 +661,7 @@ def xml_escape(string):
         escaped = xml_escape(string)
 
     Escape unsafe characters ``&``, ``<``, ``>``, ``"`` and ``'`` in string, but
-    do not escape :class:`Pyjo.ByteStream` objects. ::
+    do not escape :mod:`Pyjo.ByteStream` objects. ::
 
         # '&lt;div&gt;'
         xml_escape('<div>')
