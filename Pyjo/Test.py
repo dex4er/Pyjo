@@ -10,7 +10,7 @@ Pyjo.Test - Simple writing of test scripts
     else:
         plan_tests(number_of_tests_run)
 
-    ok(got eq expected, test_name)
+    ok(got == expected, test_name)
 
     is_ok(got, expected, test_name)
     isnt_ok(got, expected, test_name)
@@ -36,6 +36,75 @@ Pyjo.Test - Simple writing of test scripts
     fail_ok(test_name)
 
     done_testing()
+
+This is a module for writing a test scripts which return theirs results as
+a `Test Anything Protocol <http://testanything.org/>`_ (TAP) output.
+
+Each test script is a separate Python program which usually is placed in `t`
+subdirectory.
+
+prove
+-----
+
+The test scripts can be started with ``prove`` command: ::
+
+    $ PYTHONPATH=. prove --ext=py --exec python
+
+``prove`` requires that ``__init__.py`` files have to be also runnable scripts.
+For example: ::
+
+    if __name__ == '__main__':
+        from Pyjo.Test import *  # noqa
+        pass_ok('__init__')
+        done_testing()
+
+nosetests
+---------
+
+The test scripts can be started with ``nosetests`` command: ::
+
+    $ PYTHONPATH=`pwd` nosetests
+
+``nosetests`` command requires additional boilerplate code in test script: ::
+
+    import Pyjo.Test
+
+    class NoseTest(Pyjo.Test.NoseTest):
+        script = __file__
+        srcdir = '../..'
+
+    if __name__ == '__main__':
+        from Pyjo.Test import *  # noqa
+        ok('main test script')
+        ...
+
+unittest
+--------
+
+The test scripts can be started with ``python -m unittest`` command: ::
+
+    $ PYTHONPATH=. python -m unittest discover -s t -p '*.py'
+
+``unittest`` module does not discover test script in subdirectories so it have
+to be used for each subdirectory separately: ::
+
+    $ PYTHONPATH=. python -m unittest discover -s t/subdir1 -p '*.py'
+    $ PYTHONPATH=. python -m unittest discover -s t/subdir2 -p '*.py'
+
+``unittest`` module requires additional boilerplate code in test script: ::
+
+    import Pyjo.Test
+
+    class UnitTest(Pyjo.Test.UnitTest):
+        script = __file__
+
+    if __name__ == '__main__':
+        from Pyjo.Test import *  # noqa
+        ok('main test script')
+        ...
+
+Functions
+---------
 """
 
 from __future__ import print_function, unicode_literals
@@ -61,6 +130,15 @@ tests = 0
 
 
 def cmp_ok(got, operator, expected, test_name=None):
+    """::
+
+        # ok(got == expected)
+        cmp_ok(got, '==', expected, 'this == that')
+
+    Compare two arguments using binary Python operator (``==``, ``>=``,
+    ``>``, ``<=``, ``<`` or ``!=``). The test passes if the comparison
+    is true and fails otherwise.
+    """
     if test_name is None:
         test_name = 'An object {0}'.format(type(got))
     test_name = "{0} {1} {2}".format(test_name, operator, repr(expected))
@@ -76,17 +154,43 @@ def cmp_ok(got, operator, expected, test_name=None):
     _ok(check, test_name)
     if not check:
         diag("    {0}\n        {1}\n    {2}\n".format(repr(got), operator, repr(expected)))
+    return check
 
 
 def diag(*args):
+    """::
+
+        if not in_ok(users, 'foo', "There's a foo user"):
+            diag("Since there's no foo, check that /etc/bar is set up right")
+
+    Print a diagnostic message which is guaranteed not to interfere with test
+    output.
+
+    Returns false, so as to preserve failure.
+    """
     _print('# ' + "\n# ".join(''.join(args).split("\n")), file=sys.stderr)
+    return False
 
 
-def done_testing():
+def done_testing(how_many=None):
+    """::
+
+        plan(1)
+        ok(True)
+        done_testing(1)
+
+    Issue the plan when it's done running tests. It fails when plan doesn't
+    match this one in :func:`plan`. The plan is optional and any number of
+    tests is accepted if plan is ``None``.
+    """
     global done, failed, test, tests
 
     if done:
-        fail_ok('done_testing() was already called')
+        fail_ok("done_testing() was already called")
+        return
+
+    if tests and how_many:
+        fail_ok("planned to run {0} but done_testing() expects {1}".format(tests, how_many))
         return
 
     if not tests:
@@ -101,13 +205,27 @@ def done_testing():
         sys.exit(failed)
 
     done = True
+    return True
 
 
 def fail_ok(test_name=None):
-    _ok(False, test_name)
+    """::
+
+        fail_ok("This should not happen")
+
+    The synonym for ``ok(False)``.
+    """
+    return _ok(False, test_name)
 
 
 def in_ok(got, elem, test_name=None):
+    """::
+
+        in_ok(['foo', 'bar'], 'foo', "foo is in list")
+
+    Check if element exists in given object. The same as ``ok(elem in got)``,
+    but with more meaningful diagnostic message.
+    """
     if test_name is None:
         test_name = "an object {0}".format(type(got))
     test_name = "{0} is in {1}".format(repr(elem), test_name)
@@ -118,9 +236,18 @@ def in_ok(got, elem, test_name=None):
     _ok(check, test_name)
     if not check:
         diag("         got: {0}".format(repr(got)))
+    return check
 
 
 def is_deeply_ok(got, expected, test_name=None):
+    """::
+
+        is_deeply_ok([[1,2], [3, [4,5]]], [[1,2], [3]], "deep structure")
+
+    Do a deep comparison walking each data structure to see if they are
+    equivalent. If the two structures are different, it will display the place
+    where they start differing.
+    """
     test_name = "{0} is {1}".format(test_name, repr(expected))
     if isinstance(got, (list, tuple, set, dict)) and isinstance(expected, (list, tuple, set, dict)):
         stack = []
@@ -133,9 +260,16 @@ def is_deeply_ok(got, expected, test_name=None):
         _ok(check, test_name)
         if not check:
             diag("         got: {0}\n    expected: {1}".format(repr(got), repr(expected)))
+    return check
 
 
 def is_ok(got, expected, test_name=None):
+    """::
+
+        is_ok(ultimate_answer(), 42, "Meaning of Life")
+
+    Compare two arguments with '==' operator.
+    """
     if test_name is None:
         test_name = 'An object {0}'.format(type(got))
     test_name = "{0} is {1}".format(test_name, repr(expected))
@@ -143,17 +277,33 @@ def is_ok(got, expected, test_name=None):
     _ok(check, test_name)
     if not check:
         diag("         got: {0}\n    expected: {1}\n".format(repr(got), repr(expected)))
+    return check
 
 
 def isa_ok(got, cls, test_name=None):
+    """::
+
+        obj = SomeClass()
+        isa_ok(obj, SomeClass)
+        isa_ok(123, (int, float,))
+
+    Check if object is an instance of class or one of the classes.
+    """
     if test_name is None:
         test_name = "An object {0}".format(type(got))
     test_name = "{0} is object {1}".format(test_name, cls)
     check = isinstance(got, cls)
     _ok(check, test_name)
+    return check
 
 
 def isnt_ok(got, expected, test_name=None):
+    """::
+
+        isnt(foo, '', "Got some foo")
+
+    Compare two arguments with '!=' operator.
+    """
     if test_name is None:
         test_name = 'An object {0}'.format(type(got))
     test_name = "{0} is {1}".format(test_name, repr(expected))
@@ -161,9 +311,25 @@ def isnt_ok(got, expected, test_name=None):
     _ok(check, test_name)
     if not check:
         diag("         got: {0}\n    expected: anything else\n".format(repr(got)))
+    return check
 
 
-def like_ok(got, expected, flags='', test_name=None):
+_type_regex = type(re.compile(''))
+
+
+def like_ok(got, expected, test_name=None):
+    """::
+
+        like_ok(got, 'expected', test_name)
+        like_ok(got, ('expected', 'i'), test_name)
+        like_ok(got, re.compile('expected'), test_name)
+
+    Check if value matches against the regex. The regex can be already
+    compiled as a :mod:re object.
+
+    The regex can compiled with additional flags: ``d``, ``i``,
+    ``m``, ``s``, ``u`` and ``x`` as a second element of list or tuple.
+    """
     FLAGS = {
         'd': re.DEBUG,
         'i': re.IGNORECASE,
@@ -173,31 +339,53 @@ def like_ok(got, expected, flags='', test_name=None):
         'u': re.UNICODE,
         'x': re.VERBOSE,
     }
-    re_flags = 0
-    for c in flags:
-        re_flags |= FLAGS[c]
+    if isinstance(expected, _type_regex):
+        regex = expected
+    else:
+        re_flags = 0
+        if isinstance(expected, (list, tuple)) and len(expected) > 1:
+            for c in expected[1]:
+                re_flags |= FLAGS[c]
+            expected = expected[0]
+        regex = re.compile(expected, re_flags)
     if test_name is None:
         test_name = "An object {0}".format(type(got))
-    test_name = "{0} matches {1}".format(test_name, repr(expected))
+    test_name = "{0} matches {1}".format(test_name, regex)
     try:
-        check = re.search(expected, got, re_flags)
+        check = bool(regex.search(got))
     except:
         check = False
     _ok(check, test_name)
     if not check:
-        diag("                {0}\n  doesn't match {1}\n".format(repr(got), repr(expected)))
+        diag("                {0}\n  doesn't match {1}\n".format(repr(got), regex))
+    return check
 
 
 def none_ok(got, test_name=None):
+    """::
+
+        none_ok(req.headers.transfer_encoding, "no Transfer-Encoding value")
+
+    Check if value is ``None``.
+    """
     if test_name is None:
         test_name = "An object {0} is None".format(type(got))
     else:
         test_name = "{0} is None".format(test_name)
     check = got is None
     _ok(check, test_name)
+    return check
 
 
 def not_in_ok(got, elem, test_name=None):
+    """::
+
+        import os
+        not_in_ok(os.environ, 'DISPLAY', "DISPLAY is not set")
+
+    The same as :func:`in_ok`, only it checks if element does not exists in
+    given object.
+    """
     if test_name is None:
         test_name = "an object {0}".format(type(got))
     test_name = "{0} is not in {1}".format(repr(elem), test_name)
@@ -208,23 +396,62 @@ def not_in_ok(got, elem, test_name=None):
     _ok(check, test_name)
     if not check:
         diag("         got: {0}".format(repr(got)))
+    return check
 
 
 def ok(check, test_name=None):
-    _ok(check, test_name)
+    """::
+
+        ok(exp(9) == 81, "simple exponential")
+        ok(isinstance('db_Main', Film), "set_db()")
+        ok(p.tests == 4, "saw tests")
+        ok(None not in items, "all items defined")
+
+    This simply evaluates any expression and uses that to determine if the
+    test succeeded or failed. A true expression passes, a false one fails.
+    """
+    return _ok(check, test_name)
 
 
 def pass_ok(test_name=None):
-    _ok(True, test_name)
+    """::
+
+        pass_ok("Step 1")
+
+    The synonym for ``ok(True)``.
+    """
+    return _ok(True, test_name)
 
 
 def plan_tests(how_many):
+    """::
+
+        hosts = ['pyjoyment.net', 'pypi.python.org']
+        plan_tests(len(hosts))
+        for host in hosts:
+            ok(check_if_available(host))
+
+    Declare how many tests script is going to run to protect against
+    premature failure.
+
+    The plan can be also issued when it's done running tests.
+    Then :func:`done_testing` function should be used instead.
+    """
     global done, failed, test, tests
     tests = how_many
     _print('1..{0}'.format(tests))
+    return True
 
 
 def plan_skip_all(why):
+    """::
+
+        import sys
+        if sys.version_info < (3, 0):
+            plan_skip_all("Python 3.x is required")
+
+    Completely skip an entire testing script.
+    """
     global done, failed, test, tests
     if tests:
         print('# You tried to plan twice', file=sys.stderr)
@@ -236,20 +463,18 @@ def plan_skip_all(why):
         exit()
 
 
-def run(script=__file__, srcdir='.'):
-    python_path = os.getenv('PYTHONPATH', '')
-    if python_path and python_path != '.':
-        python_path = srcdir + ':' + python_path
-    else:
-        python_path = srcdir
-    os.putenv('PYTHONPATH', python_path)
-    p = subprocess.Popen([sys.executable, script], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    _, stderr = p.communicate()
-    if p.returncode:
-        raise Error(stderr)
-
-
 def skip(why=None, how_many=1):
+    """::
+
+        plan_tests(1)
+        if sys.version_info < (3, 0):
+            isa_ok(u'string', unicode, "string is unicode")
+        else:
+            skip("Requires Python 2.x", 1)
+
+    Declare how many tests might be skipped so tests run will match up with
+    the plan.
+    """
     global test
     if why is not None:
         message = "skip " + why
@@ -258,9 +483,17 @@ def skip(why=None, how_many=1):
     for _ in range(how_many):
         test += 1
         _print("ok {0} # {1}".format(test, message))
+    return True
 
 
 def throws_ok(cb, expected, test_name=None):
+    """::
+
+        elements = [1, 2, 3]
+        throws_ok(lambda: elements[3], IndexError, 'no more elements')
+
+    Check if callback (function or lambda) throws a proper exception.
+    """
     got = None
     check = False
 
@@ -294,9 +527,19 @@ def throws_ok(cb, expected, test_name=None):
     _ok(check, test_name)
     if not check:
         diag("         got: {0}\n    expected: {1}\n".format(got if got is not None else None, expected))
+    return check
 
 
-def unlike_ok(got, expected, flags='', test_name=None):
+def unlike_ok(got, expected, test_name=None):
+    """::
+
+        unlike_ok(got, 'expected', test_name)
+        unlike_ok(got, ('expected', 'i'), test_name)
+        unlike_ok(got, re.compile('expected'), test_name)
+
+    The same as :func:`like_ok`, only it checks if value does not match the
+    given pattern.
+    """
     FLAGS = {
         'd': re.DEBUG,
         'i': re.IGNORECASE,
@@ -306,19 +549,26 @@ def unlike_ok(got, expected, flags='', test_name=None):
         'u': re.UNICODE,
         'x': re.VERBOSE,
     }
-    re_flags = 0
-    for c in flags:
-        re_flags |= FLAGS[c]
+    if isinstance(expected, _type_regex):
+        regex = expected
+    else:
+        re_flags = 0
+        if isinstance(expected, (list, tuple)) and len(expected) > 1:
+            for c in expected[1]:
+                re_flags |= FLAGS[c]
+            expected = expected[0]
+        regex = re.compile(expected, re_flags)
     if test_name is None:
         test_name = "An object {0}".format(type(got))
-    test_name = "{0} doesn't match {1}".format(test_name, repr(expected))
+    test_name = "{0} matches {1}".format(test_name, regex)
     try:
-        check = not re.search(expected, got, re_flags)
+        check = not regex.search(got)
     except:
         check = True
     _ok(check, test_name)
     if not check:
         diag("                {0}\n        matches {1}\n".format(repr(got), repr(expected)))
+    return check
 
 
 def _deep_check(stack, e1, e2):
@@ -469,6 +719,8 @@ def _ok(check, test_name=None):
             diag("  Failed test")
         diag(''.join(traceback.format_stack()[:-2]))
 
+    return check
+
 
 def _print(*args, **kwargs):
     output = kwargs.get('file', sys.stdout)
@@ -480,15 +732,34 @@ def _print(*args, **kwargs):
     output.flush()
 
 
+def _run(script=__file__, srcdir='.'):
+    python_path = os.getenv('PYTHONPATH', '')
+    if python_path and python_path != '.':
+        python_path = srcdir + ':' + python_path
+    else:
+        python_path = srcdir
+    os.putenv('PYTHONPATH', python_path)
+    p = subprocess.Popen([sys.executable, script], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    _, stderr = p.communicate()
+    if p.returncode:
+        raise Error(stderr)
+
+
 class DoesNotExist(object):
     pass
 
 
 class Error(Exception):
+    """
+    Exception raised if test script could not be started.
+    """
     pass
 
 
 class Guard(object):
+    """
+    Class for guard object which checks if the test script matches its plan.
+    """
     def __del__(self):
         global failed, done, tests
         if test and not tests and not done:
@@ -506,16 +777,22 @@ _guard = Guard()
 
 
 class NoseTest(object):
+    """
+    :mod:`Pyjo.Test` wrapper for ``nosetests`` command.
+    """
     script = __file__
     srcdir = '.'
 
     def test_nose(self):
-        run(self.script, self.srcdir)
+        _run(self.script, self.srcdir)
 
 
 class UnitTest(unittest.TestCase):
+    """
+    :mod:`Pyjo.Test` wrapper for ``python -m unittest`` command.
+    """
     script = __file__
     srcdir = '.'
 
     def test_unit(self):
-        run(self.script, self.srcdir)
+        _run(self.script, self.srcdir)

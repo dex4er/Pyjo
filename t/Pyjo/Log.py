@@ -34,9 +34,9 @@ if __name__ == '__main__':
         log.debug('Does not work')
         log = None
         content = u(slurp(path))
-        like_ok(content, r'\[.*\] \[error\] Just works', '', 'right error message')
-        like_ok(content, u'\\[.*\\] \\[fatal\\] I ♥ Mojolicious', '', 'right fatal message')
-        unlike_ok(content, r'\[.*\] \[debug\] Does not work', '', 'no debug message')
+        like_ok(content, r'\[.*\] \[error\] Just works', 'right error message')
+        like_ok(content, u'\\[.*\\] \\[fatal\\] I ♥ Mojolicious', 'right fatal message')
+        unlike_ok(content, r'\[.*\] \[debug\] Does not work', 'no debug message')
 
     with TemporaryDirectory() as tmpdir:
         # Logging to handle
@@ -47,17 +47,17 @@ if __name__ == '__main__':
         log.fatal(u'I ♥ Mojolicious')
         log.debug('Works too')
         content = u(slurp(path))
-        like_ok(content, r'\[.*\] \[error\] Just works', '', 'right error message')
-        like_ok(content, u'\\[.*\\] \\[fatal\\] I ♥ Mojolicious', '', 'right fatal message')
-        like_ok(content, r'\[.*\] \[debug\] Works too', '', 'no debug message')
+        like_ok(content, r'\[.*\] \[error\] Just works', 'right error message')
+        like_ok(content, u'\\[.*\\] \\[fatal\\] I ♥ Mojolicious', 'right fatal message')
+        like_ok(content, r'\[.*\] \[debug\] Works too', 'no debug message')
 
     # Formatting
     log = Pyjo.Log.new()
-    like_ok(log.format(time.time(), 'debug', 'Test 123'), r'^\[.*\] \[debug\] Test 123\n$', '', 'right format')
-    like_ok(log.format(time.time(), 'debug', 'Test', '1', '2', '3'), r'^\[.*\] \[debug\] Test\n1\n2\n3\n$', '', 'right format')
-    like_ok(log.format(time.time(), 'error', u'I ♥ Mojolicious'), u'^\\[.*\\] \\[error\\] I ♥ Mojolicious\\n$', '', 'right format')
+    like_ok(log.format(time.time(), 'debug', 'Test 123'), r'^\[.*\] \[debug\] Test 123\n$', 'right format')
+    like_ok(log.format(time.time(), 'debug', 'Test', '1', '2', '3'), r'^\[.*\] \[debug\] Test\n1\n2\n3\n$', 'right format')
+    like_ok(log.format(time.time(), 'error', u'I ♥ Mojolicious'), u'^\\[.*\\] \\[error\\] I ♥ Mojolicious\\n$', 'right format')
     log.format = lambda t, level, *lines: ':'.join(map(str, [level, int(t)] + list(lines)))
-    like_ok(log.format(time.time(), 'debug', 'Test', '1', '2', '3'), r'^debug:\d+:Test:1:2:3$', '', 'right format')
+    like_ok(log.format(time.time(), 'debug', 'Test', '1', '2', '3'), r'^debug:\d+:Test:1:2:3$', 'right format')
 
     # Events
     log = Pyjo.Log.new()
@@ -94,10 +94,10 @@ if __name__ == '__main__':
         log.info('Fourth', 'Fifth')
         history = log.history
         content = u(slurp(path))
-        like_ok(content, r'\[.*\] \[error\] First\n', '', 'right error message')
-        like_ok(content, r'\[.*\] \[info\] Fourth\nFifth\n', '', 'right info message')
-        unlike_ok(content, r'debug', '', 'no debug message')
-        like_ok(str(history[0][0]), r'^[0-9.]+$', '', 'right epoch time')
+        like_ok(content, r'\[.*\] \[error\] First\n', 'right error message')
+        like_ok(content, r'\[.*\] \[info\] Fourth\nFifth\n', 'right info message')
+        unlike_ok(content, r'debug', 'no debug message')
+        like_ok(str(history[0][0]), r'^[0-9.]+$', 'right epoch time')
         is_ok(history[0][1], 'fatal', 'right level')
         is_ok(history[0][2], 'Second', 'right message')
         is_ok(history[1][1], 'info', 'right level')
