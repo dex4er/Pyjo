@@ -331,7 +331,7 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.Base.object):
             try:
                 cb(self, *args)
             except Exception as e:
-                self.emit('error', "{0} failed: {1} for {2}".format(event, e, cb.__code__))
+                self.emit('error', e)
 
     def _timer(self, cb, recurring, after):
         tid = None

@@ -87,6 +87,7 @@ from Pyjo.Util import decorator, decoratormethod, getenv, md5_sum, notnone, stea
 
 import importlib
 import os
+import traceback
 import weakref
 
 
@@ -179,7 +180,7 @@ class Pyjo_IOLoop(Pyjo.EventEmitter.object):
         if DEBUG:
             warn("-- Reactor initialized ({0})".format(self.reactor))
 
-        self.reactor.catch(lambda reactor, *args: warn("{0}: {1}".format(reactor, ": ".join(args))))
+        self.reactor.catch(lambda reactor, *args: warn("{0}: {1}".format(reactor, traceback.format_exc())))
 
     def acceptor(self, acceptor):
         """::
