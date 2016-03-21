@@ -6,17 +6,22 @@ Pyjoyment
 
 An asynchronous, event driver web framework for the Python programming language.
 
-Based on Mojolicious.
+Pyjoyment provides own reactor which handles I/O and timer events in its own
+main event loop but it supports other loops, ie. EV.
+
+Pyjoyment uses intensively own event emmiter which should be familiar for NodeJS
+programmers.
+
+It provides tool set for parsing and creating HTTP messages and HTML documents.
+It also supports WSGI interface.
+
+Pyjoyment is compatible with Python 2.7+ and 3.3+. It doesn't require any
+external libraries or compilers.
 
 See http://www.pyjoyment.net/
 
-
-Mojolicious
-===========
-
-A next generation web framework for the Perl programming language.
-
-See http://mojolicio.us/
+Pyjoyment is based on [Mojolicious](http://mojolicio.us): a next generation
+web framework for the Perl programming language.
 
 
 Status
@@ -38,6 +43,7 @@ Early developement stage. Implemented already:
   * Main event loop which handle IO and timer events
   * Event emitter with subscriptions
   * Low level event reactor based on select(2) and poll(2)
+  * Convenient functions and classed for unicode and byte strings and lists
   * Lazy properties for objects
   * Test units with API based on Perl's Test::More and TAP protocol
 

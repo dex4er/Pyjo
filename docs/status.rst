@@ -17,5 +17,6 @@ Early developement stage. Implemented already:
 * Main event loop which handle IO and timer events
 * Event emitter with subscriptions
 * Low level event reactor based on :manpage:`select(2)` and :manpage:`poll(2)`
+* Convenient functions and classed for unicode and byte strings and lists
 * Lazy properties for objects
 * Test units with API based on Perl's Test::More and `TAP <http://testanything.org/>`_ protocol
