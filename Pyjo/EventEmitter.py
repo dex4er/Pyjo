@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# flake8: ignore=E731
 
 """
 Pyjo.EventEmitter - Event emitter base class
@@ -176,14 +177,15 @@ class Pyjo_EventEmitter(Pyjo.Base.object):
 
         self = weakref.proxy(self)
 
-        def wrap_cb(self, cb, name, wrap_lambda, *args):
-            self.unsubscribe(name, wrap_lambda)
+        def wrap_cb(*args):
+            self.unsubscribe(name, wrap_cb)
             cb(*args)
 
-        wrap_lambda = lambda *args: wrap_cb(self, cb, name, wrap_lambda, *args)
-        self.on(wrap_lambda, name)
+        wrap_cb.__name__ = name
 
-        return wrap_lambda
+        self.on(wrap_cb, name)
+
+        return wrap_cb
 
     def subscribers(self, name):
         """::
