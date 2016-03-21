@@ -159,15 +159,20 @@ latexpdfja:
 
 .PHONY: pdf
 pdf: latex
+	@echo "Check if texlive-xetex fonts-liberation fonts-freefont-ttf are installed"
 	cd $(BUILDDIR)/latex && for f in *.tex; do xelatex $(LATEXOPTS) $$f && xelatex $(LATEXOPTS) $$f; done
 	@echo "xelatex finished; the PDF files are in $(BUILDDIR)/latex."
 
 .PHONY: latexmono
 latexmono: latex
-	sed -i~ 's/\[rgb\]{[0-9.]*,[0-9.]*,[0-9.]*}/[rgb]{0,0,0}/g' $(BUILDDIR)/latex/*
+	sed -i~ -e 's/\[rgb\]{0\.[0-9]*,0\.[0-9]*,0\.[0-9]*}/[rgb]{0,0,0}/g' -e 's/{rgb}{0\.[0-9]*,0\.[0-9]*,0\.[0-9]*}/{rgb}{0,0,0}/g' $(BUILDDIR)/latex/*
+	rm -f $(BUILDDIR)/latex/*~
 
 .PHONY: pdfmono
-pdfmono: latexmono latexpdf
+pdfmono: latexmono
+	@echo "Check if texlive-xetex fonts-liberation fonts-freefont-ttf are installed"
+	cd $(BUILDDIR)/latex && for f in *.tex; do xelatex $(LATEXOPTS) $$f && xelatex $(LATEXOPTS) $$f; done
+	@echo "xelatex finished; the PDF files are in $(BUILDDIR)/latex."
 
 .PHONY: text
 text:
