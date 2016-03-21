@@ -1,7 +1,7 @@
 License
 =======
 
-Copyright (C) 2014-2015, Piotr Roszatycki.
+Copyright (C) 2014-2016, Piotr Roszatycki.
 
 based on Mojolicious:
 
