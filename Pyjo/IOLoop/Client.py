@@ -70,26 +70,12 @@ DIE = getenv('PYJO_IOLOOP_DIE', False)
 NoneType = type(None)
 
 if getenv('PYJO_NO_TLS', False):
-    TLS = False
-    TLS_WANT_ERROR = None
+    ssl = None
 else:
     try:
         import ssl
-        from ssl import SSLError
-        TLS = True
-        try:
-            from ssl import SSLWantReadError, SSLWantWriteError
-            TLS_WANT_ERROR = True
-        except ImportError:
-            TLS_WANT_ERROR = False
     except ImportError:
-        TLS = None
-        TLS_WANT_ERROR = None
-
-if not TLS:
-    SSLError = NoneType
-if not TLS_WANT_ERROR:
-    SSLWantReadError = SSLWantWriteError = NoneType
+        ssl = None
 
 
 SOCK = {
@@ -315,11 +301,11 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
             handle.do_handshake()
             # Connected
             return self._cleanup().emit('connect', handle)
-        except SSLWantReadError:
+        except getattr(ssl, 'SSLWantReadError', NoneType):
             return self.reactor.watch(handle, True, False)
-        except SSLWantWriteError:
+        except getattr(ssl, 'SSLWantWriteError', NoneType):
             return self.reactor.watch(handle, True, True)
-        except SSLError as ex:
+        except getattr(ssl, 'SSLError', NoneType) as ex:
             if ex.strerror == 'The operation did not complete (read)':
                 return self.reactor.watch(handle, True, False)
             elif ex.strerror == 'The operation did not complete (write)':
@@ -331,9 +317,9 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
 
     def _try_tls(self, **kwargs):
         handle = self.handle
-        if not kwargs.get('tls', False) or (TLS and isinstance(handle, ssl.SSLSocket)):
+        if not kwargs.get('tls', False) or (ssl and isinstance(handle, ssl.SSLSocket)):
             return self._cleanup().emit('connect', handle)
-        if not TLS:
+        if not ssl:
             return self.emit('error', 'ssl required for TLS support')
 
         tls_kwargs = {
@@ -353,7 +339,7 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
         try:
             ssl_handle = ssl.wrap_socket(handle, **tls_kwargs)
             self.handle = ssl_handle
-        except SSLError as ex:
+        except getattr(ssl, 'SSLError', NoneType) as ex:
             if DIE:
                 raise ex
             else:

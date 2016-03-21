@@ -117,26 +117,13 @@ DEBUG = getenv('PYJO_IOLOOP_DEBUG', False)
 
 NoneType = type(None)
 
-if getenv('PYJO_NO_TLS', 0):
-    TLS = False
-    TLS_WANT_ERROR = None
+if getenv('PYJO_NO_TLS', False):
+    ssl = None
 else:
     try:
-        from ssl import SSLError
-        TLS = True
-        try:
-            from ssl import SSLWantReadError, SSLWantWriteError
-            TLS_WANT_ERROR = True
-        except ImportError:
-            TLS_WANT_ERROR = False
+        import ssl
     except ImportError:
-        TLS = None
-        TLS_WANT_ERROR = None
-
-if not TLS:
-    SSLError = NoneType
-if not TLS_WANT_ERROR:
-    SSLWantReadError = SSLWantWriteError = NoneType
+        ssl = None
 
 
 class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
@@ -352,10 +339,10 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
         if e.errno == errno.EAGAIN or e.errno == errno.EINTR or e.errno == errno.EWOULDBLOCK:
             return
 
-        if isinstance(e, (SSLWantReadError, SSLWantReadError)):
+        if ssl and isinstance(e, (ssl.SSLWantReadError, ssl.SSLWantReadError)):
             return
 
-        if isinstance(e, (SSLError,)) and e.strerror.startswith('The operation did not complete'):
+        if ssl and isinstance(e, (ssl.SSLError,)) and e.strerror.startswith('The operation did not complete'):
             return
 
         # Closed

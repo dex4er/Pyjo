@@ -66,26 +66,12 @@ KEY = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'certs', 'server.
 NoneType = type(None)
 
 if getenv('PYJO_NO_TLS', False):
-    TLS = False
-    TLS_WANT_ERROR = None
+    ssl = None
 else:
     try:
         import ssl
-        from ssl import SSLError
-        TLS = True
-        try:
-            from ssl import SSLWantReadError, SSLWantWriteError
-            TLS_WANT_ERROR = True
-        except ImportError:
-            TLS_WANT_ERROR = False
     except ImportError:
-        TLS = None
-        TLS_WANT_ERROR = None
-
-if not TLS:
-    SSLError = NoneType
-if not TLS_WANT_ERROR:
-    SSLWantReadError = SSLWantWriteError = NoneType
+        ssl = None
 
 
 class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
@@ -361,7 +347,7 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
                     ssl_handle = ssl.wrap_socket(handle, **self._tls_kwargs)
                     self._handles[ssl_handle] = ssl_handle
                     self._handshake(ssl_handle)
-                except SSLError as ex:
+                except getattr(ssl, 'SSLError', NoneType) as ex:
                     if DIE:
                         raise ex
                     else:
@@ -380,11 +366,11 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
             self.reactor.remove(handle)
             del self._handles[handle]
             return self.emit('accept', handle)
-        except SSLWantReadError:
+        except getattr(ssl, 'SSLWantReadError', NoneType):
             return self.reactor.watch(handle, True, False)
-        except SSLWantWriteError:
+        except getattr(ssl, 'SSLWantWriteError', NoneType):
             return self.reactor.watch(handle, True, True)
-        except SSLError as ex:
+        except getattr(ssl, 'SSLError', NoneType) as ex:
             self.reactor.remove(handle)  # TODO remove here?
             raise ex
 
