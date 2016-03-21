@@ -81,58 +81,58 @@ if __name__ == '__main__':
 
     # One-time event
     once = Value(0)
-    e.once(lambda e: once.inc(), 'one_time')
-    is_ok(len(e.subscribers('one_time')), 1, 'one subscriber')
-    e.unsubscribe('one_time', lambda e: None)
-    is_ok(len(e.subscribers('one_time')), 1, 'one subscriber')
-    e.emit('one_time')
+    e.once(lambda e: once.inc(), 'one_time1')
+    is_ok(len(e.subscribers('one_time1')), 1, 'one subscriber')
+    e.unsubscribe('one_time1', lambda e: None)
+    is_ok(len(e.subscribers('one_time1')), 1, 'one subscriber')
+    e.emit('one_time1')
     is_ok(once.get(), 1, 'event was emitted once')
-    is_ok(len(e.subscribers('one_time')), 0, 'no subscribers')
-    e.emit('one_time')
+    is_ok(len(e.subscribers('one_time1')), 0, 'no subscribers')
+    e.emit('one_time1')
     is_ok(once.get(), 1, 'event was not emitted again')
-    e.emit('one_time')
+    e.emit('one_time1')
     is_ok(once.get(), 1, 'event was not emitted again')
-    e.emit('one_time')
+    e.emit('one_time1')
     is_ok(once.get(), 1, 'event was not emitted again')
 
     @e.once
-    def one_time(e):
-        e.once(lambda e: once.inc(), 'one_time')
+    def one_time2(e):
+        e.once(lambda e: once.inc(), 'one_time2')
 
-    e.emit('one_time')
+    e.emit('one_time2')
     is_ok(once.get(), 1, 'event was emitted once')
-    e.emit('one_time')
+    e.emit('one_time2')
     is_ok(once.get(), 2, 'event was emitted again')
-    e.emit('one_time')
+    e.emit('one_time2')
     is_ok(once.get(), 2, 'event was not emitted again')
-    e.once(lambda e: once.set(e.has_subscribers('one_time')), 'one_time')
-    e.emit('one_time')
+    e.once(lambda e: once.set(e.has_subscribers('one_time2')), 'one_time2')
+    e.emit('one_time2')
     ok(not once.get(), 'no subscribers')
 
     # Nested one-time events
     once = Value(0)
 
     @e.once
-    def one_time(e):
+    def one_time3(e):
         @e.once
-        def one_time(e):
-            e.once(lambda e: once.inc(), 'one_time')
+        def one_time3(e):
+            e.once(lambda e: once.inc(), 'one_time3')
 
-    is_ok(len(e.subscribers('one_time')), 1, 'one subscriber')
-    e.emit('one_time')
+    is_ok(len(e.subscribers('one_time3')), 1, 'one subscriber')
+    e.emit('one_time3')
     is_ok(once.get(), 0, 'only first event was emitted')
-    is_ok(len(e.subscribers('one_time')), 1, 'one subscriber')
-    e.emit('one_time')
+    is_ok(len(e.subscribers('one_time3')), 1, 'one subscriber')
+    e.emit('one_time3')
     is_ok(once.get(), 0, 'only second event was emitted')
-    is_ok(len(e.subscribers('one_time')), 1, 'one subscriber')
-    e.emit('one_time')
+    is_ok(len(e.subscribers('one_time3')), 1, 'one subscriber')
+    e.emit('one_time3')
     is_ok(once.get(), 1, 'third event was emitted')
-    is_ok(len(e.subscribers('one_time')), 0, 'no subscribers')
-    e.emit('one_time')
+    is_ok(len(e.subscribers('one_time3')), 0, 'no subscribers')
+    e.emit('one_time3')
     is_ok(once.get(), 1, 'event was not emitted again')
-    e.emit('one_time')
+    e.emit('one_time3')
     is_ok(once.get(), 1, 'event was not emitted again')
-    e.emit('one_time')
+    e.emit('one_time3')
     is_ok(once.get(), 1, 'event was not emitted again')
 
     # Unsubscribe

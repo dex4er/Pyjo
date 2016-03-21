@@ -82,7 +82,7 @@ import Pyjo.EventEmitter
 import Pyjo.Headers
 
 from Pyjo.Regexp import r
-from Pyjo.Util import b, convert, getenv, not_implemented, notnone, u
+from Pyjo.Util import b, convert, getenv, not_implemented, notnone
 
 import zlib
 

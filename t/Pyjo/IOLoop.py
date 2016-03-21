@@ -57,7 +57,7 @@ if __name__ == '__main__':
     err = Value('')
 
     @Pyjo.IOLoop.next_tick
-    def cb(loop):
+    def cb1(loop):
         try:
             loop.start()
         except Exception as ex:
@@ -74,7 +74,7 @@ if __name__ == '__main__':
     tid = loop.recurring(lambda loop: ticks.inc(), 0)
 
     @loop.timer(1)
-    def cb(loop):
+    def cb2(loop):
         loop.timer(lambda loop: loop.stop(), 0)
         timer.inc()
 
@@ -256,7 +256,8 @@ if __name__ == '__main__':
 
     @Pyjo.IOLoop.client(port=port)
     def cid2(loop, err, stream):
-        drain = lambda stream: stream.write(b'1', drain)
+        def drain(stream):
+            return stream.write(b'1', drain)
         drain(stream)
         stream.on(lambda stream, chunk: client.set(client.get() + chunk), 'read')
 
@@ -294,7 +295,7 @@ if __name__ == '__main__':
     loop.client(port=port, cb=lambda loop, err, stream: True)
 
     @loop.timer(5)
-    def cb(loop):
+    def cb3(loop):
         loop.stop()
         err.set('failed')
 
@@ -306,7 +307,7 @@ if __name__ == '__main__':
     loop = Pyjo.IOLoop.new()
 
     @loop.timer(0)
-    def cb(loop):
+    def cb4(loop):
         raise Exception('Bye!')
 
     err = ''

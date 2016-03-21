@@ -573,11 +573,12 @@ if __name__ == '__main__':
     buf = Value(b'')
     buffinish = Value(b'')
 
-    @req.on
-    def progress(req, state, offset):
+    def on_progress_cb1(req, state, offset):
         if req.content.is_parsing_body:
             if not bufprogress.get():
                 bufprogress.set(req.url.path.to_bytes())
+
+    req.on(on_progress_cb1, 'progress')
 
     req.content.unsubscribe('read').on(lambda req, chunk: buf.set(buf.get() + chunk), 'read')
     req.on(lambda req: buffinish.set(buffinish.get() + b(req.url.fragment)), 'finish')
@@ -1084,10 +1085,11 @@ if __name__ == '__main__':
     offprogress = Value(0)
     req.on(lambda req: finished.set(req.is_finished), 'finish')
 
-    @req.on
-    def progress(req, part, offset):
+    def on_progress_cb2(req, part, offset):
         state.set(part)
         offprogress.set(offprogress.get() + offset)
+
+    req.on(on_progress_cb2, 'progress')
 
     req.method = 'get'
     req.url.parse(b'http://127.0.0.1/foo/bar')

@@ -84,7 +84,7 @@ import Pyjo.Upload
 
 from Pyjo.JSON import j
 from Pyjo.Regexp import r
-from Pyjo.Util import b, convert, getenv, not_implemented, notnone, u
+from Pyjo.Util import convert, getenv, not_implemented, notnone, u
 
 
 re_filename = r(r'[; ]filename="((?:\\"|[^"])*)"')

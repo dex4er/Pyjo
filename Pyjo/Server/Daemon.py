@@ -480,10 +480,16 @@ class Pyjo_Server_Daemon(Pyjo.Server.Base.object):
 
         # Finish or continue writing
         self = weakref.proxy(self)
-        cb = lambda stream: self._write(cid)  # @IgnorePep8
+
+        def write_cb(stream):
+            return self._write(cid)
+        cb = write_cb
+
         if tx.is_finished:
             if tx.has_subscribers('finish'):
-                cb = lambda stream: self._finish(cid)  # @IgnorePep8
+                def finish_cb(stream):
+                    return self._finish(cid)
+                cb = finish_cb
             else:
                 self._finish(cid)
                 if not c.get('tx', None):

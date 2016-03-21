@@ -179,7 +179,7 @@ class Pyjo_EventEmitter(Pyjo.Base.object):
 
         def wrap_cb(*args):
             self.unsubscribe(name, wrap_cb)
-            cb(*args)
+            return cb(*args)
 
         wrap_cb.__name__ = name
 

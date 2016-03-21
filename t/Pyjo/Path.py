@@ -92,7 +92,7 @@ if __name__ == '__main__':
     ok(not path.trailing_slash, 'no trailing slash')
 
     # Canonicalize (triple dot)
-    path = Pyjo.Path.new('/foo/.../.../windows/win.ini');
+    path = Pyjo.Path.new('/foo/.../.../windows/win.ini')
     is_ok(str(path), '/foo/.../.../windows/win.ini', 'same path')
     is_deeply_ok(path.parts, ['foo', '...', '...', 'windows', 'win.ini'], 'right structure')
     is_ok(path.canonicalize(), '/foo/windows/win.ini', 'canonicalized path')

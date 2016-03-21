@@ -46,7 +46,7 @@ import Pyjo.String.Mixin
 import Pyjo.String.Unicode
 
 from Pyjo.Regexp import r
-from Pyjo.Util import notnone, squish, u
+from Pyjo.Util import squish, u
 
 
 re_namespace_prefix = r(r'^(.*?):')
