@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+
+# flake8: noqa
 # -*- coding: utf-8 -*-
 #
 # Pyjoyment documentation build configuration file, created by
