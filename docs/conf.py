@@ -299,7 +299,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'Pyjoyment', u'Pyjoyment Documentation',
-     author, 'Pyjoyment', 'A next generation web framework.',
+     author, 'Pyjoyment', 'An asynchronous, event driven web framework.',
      'Miscellaneous'),
 ]
 

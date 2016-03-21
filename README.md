@@ -4,7 +4,7 @@
 Pyjoyment
 =========
 
-A next generation web framework for the Python programming language.
+An asynchronous, event driver web framework for the Python programming language.
 
 Based on Mojolicious.
 
@@ -28,6 +28,7 @@ Early developement stage. Implemented already:
   * HTTP standalone async-io server
   * WebSockets client and server
   * HTTP user agent with TLS/SSL support
+  * JSON pointers implementation based on RFC6901
   * Embedded files loader
   * HTML/XML DOM parser with CSS selectors
   * URL parser with container classes for URL, path and querystring
