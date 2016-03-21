@@ -16,5 +16,5 @@ my $p = Point->new(x => 1, y => 2);
 
 my $line = Line->new(p1 => $p);
 
-say sprintf "[%s,%s]", $line->p1->x, $line->p1->y; 
-say sprintf "[%s,%s]", $line->p2->x, $line->p2->y; 
+say sprintf "[%s,%s]", $line->p1->x, $line->p1->y;
+say sprintf "[%s,%s]", $line->p2->x, $line->p2->y;

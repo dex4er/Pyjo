@@ -4,6 +4,7 @@ import Pyjo.IOLoop
 # Synchronize multiple events
 delay = Pyjo.IOLoop.delay()
 
+
 @delay.step
 def step(delay):
     print('BOOM!')
