@@ -123,7 +123,7 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
         return self.start(self.build_tx('POST', url, **kwargs), kwargs.get('cb'))
 
     def start(self, tx, cb=None):
-        # TODO Pyjo.UserAgent.Server nad fork safety
+        # TODO Pyjo.UserAgent.Server and fork safety
 
         # Non-blocking
         if cb:
@@ -137,7 +137,9 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
                 warn("-- Blocking request ({0})\n".format(self._url(tx)))
 
             class context:
-                tx = tx
+                pass
+
+            context.tx = tx
 
             def blocking_cb(ua, tx):
                 ua.ioloop.stop()
@@ -167,8 +169,10 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
             options['tls_key'] = self.key
 
         class context:
-            cb = cb
-            ua = weakref.proxy(self)
+            pass
+
+        context.cb = cb
+        context.ua = weakref.proxy(self)
 
         def client_cb(loop, err, stream):
             cb = context.cb
