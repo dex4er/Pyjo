@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-# flake8: noqa
 # -*- coding: utf-8 -*-
+# flake8: noqa
 #
 # Pyjoyment documentation build configuration file, created by
 # sphinx-quickstart on Sun Mar 20 22:34:57 2016.
@@ -169,15 +169,7 @@ html_static_path = ['_static']
 #html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
-html_sidebars = {
-    '**': [
-        'about.html',
-        'navigation.html',
-        'relations.html',
-        'searchbox.html',
-        'donate.html',
-    ]
-}
+#html_sidebars = {
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
@@ -266,7 +258,7 @@ latex_documents = [
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
-latex_use_parts = True
+latex_use_parts = False
 
 # If true, show page references after internal links.
 #latex_show_pagerefs = False
