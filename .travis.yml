@@ -1,9 +1,4 @@
-sudo: required
-dist: trusty
-addons:
-  apt:
-    packages:
-    - libev-dev
+sudo: false
 language: python
 matrix:
   include:
