@@ -113,4 +113,4 @@ def b(value=b'', charset=DEFAULT_CHARSET):
 
 
 new = Pyjo_String_Bytes.new
-object = Pyjo_String_Bytes  # @ReservedAssignment
+object = Pyjo_String_Bytes

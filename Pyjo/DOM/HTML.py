@@ -449,4 +449,4 @@ class Pyjo_DOM_HTML(Pyjo.Base.object):
 
 
 new = Pyjo_DOM_HTML.new
-object = Pyjo_DOM_HTML  # @ReservedAssignment
+object = Pyjo_DOM_HTML

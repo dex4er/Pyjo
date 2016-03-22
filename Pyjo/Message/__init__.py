@@ -766,4 +766,4 @@ class Pyjo_Message(Pyjo.EventEmitter.object):
 
 
 new = Pyjo_Message.new
-object = Pyjo_Message  # @ReservedAssignment
+object = Pyjo_Message

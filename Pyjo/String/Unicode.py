@@ -175,4 +175,4 @@ def u(value=u'', charset=DEFAULT_CHARSET):
 
 
 new = Pyjo_String_Unicode.new
-object = Pyjo_String_Unicode  # @ReservedAssignment
+object = Pyjo_String_Unicode

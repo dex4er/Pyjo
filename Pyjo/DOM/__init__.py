@@ -1040,4 +1040,4 @@ class Pyjo_DOM(Pyjo.Base.object, Pyjo.String.Mixin.object):
 
 
 new = Pyjo_DOM.new
-object = Pyjo_DOM  # @ReservedAssignment
+object = Pyjo_DOM

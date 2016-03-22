@@ -292,4 +292,4 @@ class Pyjo_Log(Pyjo.EventEmitter.object):
 
 
 new = Pyjo_Log.new
-object = Pyjo_Log  # @ReservedAssignment
+object = Pyjo_Log

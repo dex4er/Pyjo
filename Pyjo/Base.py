@@ -84,4 +84,4 @@ class Pyjo_Base(object):
 
 
 new = Pyjo_Base.new
-object = Pyjo_Base  # @ReservedAssignment
+object = Pyjo_Base

@@ -727,4 +727,4 @@ class Pyjo_Content(Pyjo.EventEmitter.object):
 
 
 new = Pyjo_Content.new
-object = Pyjo_Content  # @ReservedAssignment
+object = Pyjo_Content

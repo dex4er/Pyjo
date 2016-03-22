@@ -130,4 +130,4 @@ class Pyjo_Server_WSGI(Pyjo.Server.Base.object):
 
 
 new = Pyjo_Server_WSGI.new
-object = Pyjo_Server_WSGI  # @ReservedAssignment
+object = Pyjo_Server_WSGI

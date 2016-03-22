@@ -188,4 +188,4 @@ class Pyjo_Asset_Memory(Pyjo.Asset.object):
 
 
 new = Pyjo_Asset_Memory.new
-object = Pyjo_Asset_Memory  # @ReservedAssignment
+object = Pyjo_Asset_Memory

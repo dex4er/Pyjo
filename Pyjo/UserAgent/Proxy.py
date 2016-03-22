@@ -110,4 +110,4 @@ class Pyjo_UserAgent_Proxy(Pyjo.Base.object):
 
 
 new = Pyjo_UserAgent_Proxy.new
-object = Pyjo_UserAgent_Proxy  # @ReservedAssignment
+object = Pyjo_UserAgent_Proxy

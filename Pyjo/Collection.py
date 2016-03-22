@@ -372,4 +372,4 @@ def _flatten(array):
 
 
 new = Pyjo_Collection.new
-object = Pyjo_Collection  # @ReservedAssignment
+object = Pyjo_Collection

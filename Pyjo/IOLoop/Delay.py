@@ -339,4 +339,4 @@ class Pyjo_IOLoop_Delay(Pyjo.EventEmitter.object):
 
 
 new = Pyjo_IOLoop_Delay.new
-object = Pyjo_IOLoop_Delay  # @ReservedAssignment
+object = Pyjo_IOLoop_Delay

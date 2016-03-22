@@ -41,7 +41,7 @@ Mojo::IOLoop->timer(3 => sub {
 
     say "Timeout";
 
-    # Shutdown server    
+    # Shutdown server
     $loop->remove($id);
 });
 

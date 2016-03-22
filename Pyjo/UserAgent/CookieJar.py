@@ -252,4 +252,4 @@ class Pyjo_UserAgent_CookieJar(Pyjo.Base.object):
 
 
 new = Pyjo_UserAgent_CookieJar.new
-object = Pyjo_UserAgent_CookieJar  # @ReservedAssignment
+object = Pyjo_UserAgent_CookieJar

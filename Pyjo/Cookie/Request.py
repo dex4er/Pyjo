@@ -72,4 +72,4 @@ parse = Pyjo_Cookie_Request.parse
 
 
 new = Pyjo_Cookie_Request.new
-object = Pyjo_Cookie_Request  # @ReservedAssignment
+object = Pyjo_Cookie_Request

@@ -381,4 +381,4 @@ generate_port = Pyjo_IOLoop_Server.generate_port
 
 
 new = Pyjo_IOLoop_Server.new
-object = Pyjo_IOLoop_Server  # @ReservedAssignment
+object = Pyjo_IOLoop_Server

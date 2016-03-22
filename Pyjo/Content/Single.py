@@ -161,4 +161,4 @@ class Pyjo_Content_Single(Pyjo.Content.object, Pyjo.String.Mixin.object):
 
 
 new = Pyjo_Content_Single.new
-object = Pyjo_Content_Single  # @ReservedAssignment
+object = Pyjo_Content_Single

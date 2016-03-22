@@ -342,4 +342,4 @@ class Pyjo_String_Mixin(object):
             raise Error('Method "to_bytes" or "to_str" not implemented by subclass')
 
 
-object = Pyjo_String_Mixin  # @ReservedAssignment
+object = Pyjo_String_Mixin

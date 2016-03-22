@@ -312,4 +312,4 @@ class Pyjo_Message_Response(Pyjo.Message.object):
 
 
 new = Pyjo_Message_Response.new
-object = Pyjo_Message_Response  # @ReservedAssignment
+object = Pyjo_Message_Response

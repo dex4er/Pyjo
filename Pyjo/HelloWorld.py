@@ -51,4 +51,4 @@ class Pyjo_HelloWorld(Pyjo.Base.object):
 
 
 new = Pyjo_HelloWorld.new
-object = Pyjo_HelloWorld  # @ReservedAssignment
+object = Pyjo_HelloWorld

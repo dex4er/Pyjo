@@ -349,4 +349,4 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
 
 
 new = Pyjo_IOLoop_Client.new
-object = Pyjo_IOLoop_Client  # @ReservedAssignment
+object = Pyjo_IOLoop_Client

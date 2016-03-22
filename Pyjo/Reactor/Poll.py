@@ -232,4 +232,4 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.Select.object):
 
 
 new = Pyjo_Reactor_Poll.new
-object = Pyjo_Reactor_Poll  # @ReservedAssignment
+object = Pyjo_Reactor_Poll

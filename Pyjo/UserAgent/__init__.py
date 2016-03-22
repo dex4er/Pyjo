@@ -450,4 +450,4 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
 
 
 new = Pyjo_UserAgent.new
-object = Pyjo_UserAgent  # @ReservedAssignment
+object = Pyjo_UserAgent

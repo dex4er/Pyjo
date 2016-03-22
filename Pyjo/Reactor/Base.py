@@ -272,4 +272,4 @@ class Pyjo_Reactor_Base(Pyjo.EventEmitter.object):
 detect = Pyjo_Reactor_Base.detect
 
 new = Pyjo_Reactor_Base.new
-object = Pyjo_Reactor_Base  # @ReservedAssignment
+object = Pyjo_Reactor_Base

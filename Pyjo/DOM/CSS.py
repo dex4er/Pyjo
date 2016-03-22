@@ -715,4 +715,4 @@ class Pyjo_DOM_CSS(Pyjo.Base.object):
 
 
 new = Pyjo_DOM_CSS.new
-object = Pyjo_DOM_CSS  # @ReservedAssignment
+object = Pyjo_DOM_CSS

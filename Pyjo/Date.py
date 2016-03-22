@@ -227,4 +227,4 @@ class Pyjo_Date(Pyjo.Base.object, Pyjo.String.Mixin.object):
 
 
 new = Pyjo_Date.new
-object = Pyjo_Date  # @ReservedAssignment
+object = Pyjo_Date

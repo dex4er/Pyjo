@@ -352,4 +352,4 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.Base.object):
 
 
 new = Pyjo_Reactor_Select.new
-object = Pyjo_Reactor_Select  # @ReservedAssignment
+object = Pyjo_Reactor_Select

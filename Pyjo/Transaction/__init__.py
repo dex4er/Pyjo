@@ -360,4 +360,4 @@ class Pyjo_Transaction(Pyjo.EventEmitter.object):
 
 
 new = Pyjo_Transaction.new
-object = Pyjo_Transaction  # @ReservedAssignment
+object = Pyjo_Transaction

@@ -195,4 +195,4 @@ class Pyjo_Asset(Pyjo.EventEmitter.object):
 
 
 new = Pyjo_Asset.new
-object = Pyjo_Asset  # @ReservedAssignment
+object = Pyjo_Asset

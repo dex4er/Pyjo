@@ -21,4 +21,4 @@ class Pyjoyment_Base(Pyjo.Base.object):
 
 
 new = Pyjoyment_Base.new
-object = Pyjoyment_Base  # @ReservedAssignment
+object = Pyjoyment_Base

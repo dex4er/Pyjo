@@ -765,4 +765,4 @@ def timer(cb, after=None):
     return singleton.timer(cb, after)
 
 
-object = Pyjo_IOLoop  # @ReservedAssignment
+object = Pyjo_IOLoop

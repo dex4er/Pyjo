@@ -93,4 +93,4 @@ class Pyjo_Cookie(Pyjo.Base.object, Pyjo.String.Mixin.object):
 
 
 new = Pyjo_Cookie.new
-object = Pyjo_Cookie  # @ReservedAssignment
+object = Pyjo_Cookie

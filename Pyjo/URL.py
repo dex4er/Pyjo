@@ -619,4 +619,4 @@ class Pyjo_URL(Pyjo.Base.object, Pyjo.String.Mixin.object):
 
 
 new = Pyjo_URL.new
-object = Pyjo_URL  # @ReservedAssignment
+object = Pyjo_URL

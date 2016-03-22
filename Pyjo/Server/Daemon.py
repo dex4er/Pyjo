@@ -498,4 +498,4 @@ class Pyjo_Server_Daemon(Pyjo.Server.Base.object):
 
 
 new = Pyjo_Server_Daemon.new
-object = Pyjo_Server_Daemon  # @ReservedAssignment
+object = Pyjo_Server_Daemon

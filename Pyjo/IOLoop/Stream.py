@@ -384,4 +384,4 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
 
 
 new = Pyjo_IOLoop_Stream.new
-object = Pyjo_IOLoop_Stream  # @ReservedAssignment
+object = Pyjo_IOLoop_Stream

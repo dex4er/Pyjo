@@ -151,4 +151,4 @@ class Pyjo_Server_Base(Pyjo.EventEmitter.object):
 
 
 new = Pyjo_Server_Base.new
-object = Pyjo_Server_Base  # @ReservedAssignment
+object = Pyjo_Server_Base

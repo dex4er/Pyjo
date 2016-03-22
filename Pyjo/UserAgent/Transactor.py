@@ -292,4 +292,4 @@ class Pyjo_UserAgent_Transactor(Pyjo.Base.object):
 
 
 new = Pyjo_UserAgent_Transactor.new
-object = Pyjo_UserAgent_Transactor  # @ReservedAssignment
+object = Pyjo_UserAgent_Transactor

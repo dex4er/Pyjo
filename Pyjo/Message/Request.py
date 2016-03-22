@@ -560,4 +560,4 @@ class Pyjo_Message_Request(Pyjo.Message.object):
 
 
 new = Pyjo_Message_Request.new
-object = Pyjo_Message_Request  # @ReservedAssignment
+object = Pyjo_Message_Request

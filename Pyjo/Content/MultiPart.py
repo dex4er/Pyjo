@@ -315,4 +315,4 @@ class Pyjo_Content_MultiPart(Pyjo.Content.object, Pyjo.String.Mixin.object):
 
 
 new = Pyjo_Content_MultiPart.new
-object = Pyjo_Content_MultiPart  # @ReservedAssignment
+object = Pyjo_Content_MultiPart

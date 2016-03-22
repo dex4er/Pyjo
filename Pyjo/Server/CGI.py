@@ -140,4 +140,4 @@ class Pyjo_Server_CGI(Pyjo.Server.Base.object):
 
 
 new = Pyjo_Server_CGI.new
-object = Pyjo_Server_CGI  # @ReservedAssignment
+object = Pyjo_Server_CGI

@@ -99,4 +99,4 @@ class Pyjo_Upload(Pyjo.Base.object):
 
 
 new = Pyjo_Upload.new
-object = Pyjo_Upload  # @ReservedAssignment
+object = Pyjo_Upload

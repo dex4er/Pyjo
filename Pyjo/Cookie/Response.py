@@ -182,4 +182,4 @@ class Pyjo_Cookie_Response(Pyjo.Cookie.object):
 parse = Pyjo_Cookie_Response.parse
 
 new = Pyjo_Cookie_Response.new
-object = Pyjo_Cookie_Response  # @ReservedAssignment
+object = Pyjo_Cookie_Response

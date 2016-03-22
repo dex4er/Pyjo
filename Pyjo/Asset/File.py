@@ -286,4 +286,4 @@ class Pyjo_Asset_File(Pyjo.Asset.object):
 
 
 new = Pyjo_Asset_File.new
-object = Pyjo_Asset_File  # @ReservedAssignment
+object = Pyjo_Asset_File

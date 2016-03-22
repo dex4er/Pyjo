@@ -235,4 +235,4 @@ class Pyjo_EventEmitter(Pyjo.Base.object):
 
 
 new = Pyjo_EventEmitter.new
-object = Pyjo_EventEmitter  # @ReservedAssignment
+object = Pyjo_EventEmitter
