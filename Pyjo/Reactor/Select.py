@@ -272,7 +272,7 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.Base.object):
             reactor.start()
 
         Start watching for I/O and timer events, this will block until :meth:`stop` is
-        called.
+        called or there is no any active I/O or timer event.
         """
         self._running = True
         while self._running:
