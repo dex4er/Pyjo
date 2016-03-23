@@ -95,25 +95,28 @@ class Pyjo_Reactor_Base(Pyjo.EventEmitter.object):
         pass
 
     @classmethod
-    def detect(self):
+    def detect(self, reactor=None):
         """::
 
             cls = Pyjo.Reactor.detect()
+            cls = Pyjo.Reactor.detect('Pyjo.Reactor.EV')
 
         Detect and load the best reactor implementation available, will try the value
-        of the ``MOJO_REACTOR`` environment variable, then
+        of the argument or ``PYJO_REACTOR`` environment variable, then
         :mod:`Pyjo.Reactor.Poll` if available or :mod:`Pyjo.Reactor.Select` otherwise. ::
 
             # Instantiate best reactor implementation available
             reactor = Pyjo.Reactor.detect().new()
         """
-        try:
+        if reactor is None:
             reactor = getenv('PYJO_REACTOR')
-            if reactor:
+
+        if reactor:
+            try:
                 importlib.import_module(reactor)
                 return reactor
-        except ImportError:
-            pass
+            except ImportError:
+                pass
 
         if hasattr(select, 'poll'):
             return 'Pyjo.Reactor.Poll'
