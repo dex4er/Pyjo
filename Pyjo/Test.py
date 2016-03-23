@@ -604,6 +604,7 @@ def unlike_ok(got, expected, test_name=None):
     }
     if isinstance(expected, _type_regex):
         regex = expected
+        regex_repr = "re.compile({0}, {1})".format(repr(regex.pattern), regex.flags)
     else:
         re_flags = 0
         if isinstance(expected, (list, tuple)) and len(expected) > 1:
@@ -611,9 +612,10 @@ def unlike_ok(got, expected, test_name=None):
                 re_flags |= FLAGS[c]
             expected = expected[0]
         regex = re.compile(expected, re_flags)
+        regex_repr = "re.compile({0}, {1})".format(repr(expected), re_flags)
     if test_name is None:
         test_name = "An object {0}".format(type(got))
-    test_name = "{0} matches {1}".format(test_name, regex)
+    test_name = "{0} matches {1}".format(test_name, regex_repr)
     try:
         check = not regex.search(got)
     except:
