@@ -674,7 +674,7 @@ def new(*args, **kwargs):
 singleton = Pyjo_IOLoop()
 """::
 
-    loop = PYJO.IOLoop.singleton
+    loop = Pyjo.IOLoop.singleton
 
 The global :mod:`Pyjo.IOLoop` singleton, used to access a single shared event
 loop object from everywhere inside the process. ::
