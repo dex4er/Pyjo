@@ -234,6 +234,17 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
 
         return reactor.next_tick(lambda reactor: resolved_cb(self))
 
+    @property
+    def fd(self):
+        """::
+
+            fd = stream.fd
+
+        Number of descriptor for handle
+        """
+        if self.handle:
+            return self.handle.fileno()
+
     def _cleanup(self):
         reactor = self.reactor
 

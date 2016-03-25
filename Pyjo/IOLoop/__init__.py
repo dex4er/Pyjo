@@ -611,15 +611,6 @@ class Pyjo_IOLoop(Pyjo.EventEmitter.object):
             return self
 
     def _remove(self, taskid):
-        # Timer
-        reactor = self.reactor
-
-        if not reactor:
-            return
-
-        if reactor.remove(taskid):
-            return
-
         # Acceptor
         if taskid in self._acceptors:
             self._acceptors[taskid].unsubscribe('accept').close()
@@ -633,7 +624,17 @@ class Pyjo_IOLoop(Pyjo.EventEmitter.object):
             del self._connections[taskid]
             self._maybe_accepting()
             if DEBUG:
-                warn("-- {0} <<< {1} ({2})".format(taskid, os.getpid(), len(self._connections)))
+                warn("-- Removed connection {0} ({1} connections)".format(taskid, len(self._connections)))
+            return
+
+        # Timer
+        reactor = self.reactor
+
+        if not reactor:
+            return
+
+        if reactor.remove(taskid):
+            return
 
     def _stop(self):
         if self._connections:
@@ -648,7 +649,7 @@ class Pyjo_IOLoop(Pyjo.EventEmitter.object):
         self._connections[cid] = {'stream': stream}
 
         if DEBUG:
-            warn("-- {0} >>> {1} ({2})".format(cid, os.getpid(), len(self._connections)))
+            warn("-- New connection {0} ({1} connections)".format(cid, len(self._connections)))
 
         stream.reactor = weakref.proxy(self.reactor)
         self = weakref.proxy(self)

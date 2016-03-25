@@ -88,7 +88,7 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
 
             handle = stream.handle
 
-        Handle for stream.
+        Handle for socket.
         """
 
         self.multi_accept = kwargs.get('multi_accept', 50)
@@ -139,11 +139,23 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
 
         for handle in self._handles.values():
             handle.close()
+
         self._handles = {}
 
         if self.handle:
             self.handle.close()
             self.handle = None
+
+    @property
+    def fd(self):
+        """::
+
+            fd = stream.fd
+
+        Number of descriptor for handle
+        """
+        if self.handle:
+            return self.handle.fileno()
 
     @classmethod
     def generate_port(self):
@@ -324,7 +336,8 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
 
         Stop accepting connections.
         """
-        self.reactor.remove(self.handle)
+        if self.handle:
+            self.reactor.remove(self.handle)
 
     def _accept(self):
         # Greedy accept

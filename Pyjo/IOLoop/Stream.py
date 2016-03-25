@@ -188,8 +188,8 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
         if not dir(handle):
             return
 
-        reactor.remove(handle)
         if handle:
+            reactor.remove(handle)
             handle.close()
             self.emit('close')
 
@@ -204,6 +204,17 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
             self._graceful = True
             return self
         return self.close()
+
+    @property
+    def fd(self):
+        """::
+
+            fd = stream.fd
+
+        Number of descriptor for handle
+        """
+        if self.handle:
+            return self.handle.fileno()
 
     # TODO @property
     def is_readable(self):
