@@ -340,7 +340,7 @@ class Pyjo_Transaction_WebSocket(Pyjo.Transaction.object):
         if len(chunk) < 2:
             return
 
-        first, second = struct.unpack('BB', chunk[:2])
+        first, second = struct.unpack('BB', bytes(chunk[:2]))
 
         # FIN
         fin = 1 if first & 0b10000000 == 0b10000000 else 0
@@ -367,7 +367,7 @@ class Pyjo_Transaction_WebSocket(Pyjo.Transaction.object):
                 return
 
             hlength = 4
-            length, = struct.unpack('!H', chunk[2:4])
+            length, = struct.unpack('!H', bytes(chunk[2:4]))
             if DEBUG:
                 warn("-- Extended 16-bit payload ({0})\n".format(length))
 
@@ -378,7 +378,7 @@ class Pyjo_Transaction_WebSocket(Pyjo.Transaction.object):
 
             hlength = 10
             ext = chunk[2:10]
-            length, = struct.unpack('!Q', ext)
+            length, = struct.unpack('!Q', bytes(ext))
             if DEBUG:
                 warn("-- Extended 64-bit payload ({0})\n".format(length))
 
