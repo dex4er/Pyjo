@@ -68,7 +68,7 @@ Debugging
 ---------
 
 You can set the ``PYJO_IOLOOP_DEBUG`` environment variable to get some
-advanced diagnostics information printed to ``stderr``. ::
+advanced diagnostics information printed to :attr:`sys.stderr`. ::
 
     PYJO_IOLOOP_DEBUG=1
 
