@@ -198,7 +198,11 @@ class Pyjo_IOLoop_Delay(Pyjo.EventEmitter.object):
         self._pending += 1
         self._counter += 1
         sid = self._counter
-        return lambda *args: self._step(sid, offset, length, *args)
+
+        def step_cb(*args):
+            return self._step(sid, offset, length, *args)
+
+        return step_cb
 
     def data(self, *args, **kwargs):
         """::
@@ -281,10 +285,20 @@ class Pyjo_IOLoop_Delay(Pyjo.EventEmitter.object):
         gets emitted.
         """
         self.ioloop.next_tick(self.begin())
+
         if self.ioloop.is_running:
             return
-        self.once(lambda self, *args: self._die(*args), 'error')
-        self.once(lambda self, *args: self.ioloop.stop(), 'finish')
+
+        def error_cb(delay, *args):
+            delay._die(*args)
+
+        self.once(error_cb, 'error')
+
+        def finish_cb(delay, *args):
+            delay.ioloop.stop()
+
+        self.once(finish_cb, 'finish')
+
         self.ioloop.start()
 
     def _die(self, err):

@@ -323,11 +323,12 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
 
         Start accepting connections.
         """
-        def ready_cb(self, unused):
+        self = weakref.proxy(self)
+
+        def ready_cb(reactor, write):
             self._accept()
 
-        self = weakref.proxy(self)
-        self.reactor.io(lambda reactor, write: ready_cb(self, reactor), self.handle)
+        self.reactor.io(ready_cb, self.handle)
 
     def stop(self):
         """::
@@ -368,7 +369,11 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
 
     def _handshake(self, handle):
         self = weakref.proxy(self)
-        self.reactor.io(lambda reactor, write: self._tls(handle), handle)
+
+        def tls_cb(reactor, write):
+            self._tls(handle)
+
+        self.reactor.io(tls_cb, handle)
 
     def _tls(self, handle):
         handle = self._handles[handle]

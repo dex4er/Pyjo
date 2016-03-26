@@ -257,14 +257,14 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
 
         self = weakref.proxy(self)
 
-        def cb_read_write(self, is_write):
+        def read_write_cb(reactor, write):
             if dir(self):
-                if is_write:
+                if write:
                     self._write()
                 else:
                     self._read()
 
-        reactor.io(lambda reactor, write: cb_read_write(self, write), self.set(timeout=self._timeout).handle)
+        reactor.io(read_write_cb, self.set(timeout=self._timeout).handle)
 
     def stop(self):
         """::
@@ -316,11 +316,11 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
 
         self = weakref.proxy(self)
 
-        def timeout_cb(self):
+        def timeout_cb(reactor):
             if bool(dir(self)):
                 self.emit('timeout').close()
 
-        self._timer = reactor.timer(lambda reactor: timeout_cb(self), value)
+        self._timer = reactor.timer(timeout_cb, value)
 
     def write(self, chunk, cb=None):
         """::

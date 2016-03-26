@@ -180,7 +180,10 @@ class Pyjo_IOLoop(Pyjo.EventEmitter.object):
         if DEBUG:
             warn("-- Reactor initialized ({0})".format(self.reactor))
 
-        self.reactor.catch(lambda reactor, e, event: warn("{0}: {1}\n{2}".format(reactor, event, traceback.format_exc())))
+        def catch_cb(reactor, e, event):
+            warn("{0}: {1}\n{2}".format(reactor, event, traceback.format_exc()))
+
+        self.reactor.catch(catch_cb)
 
     def acceptor(self, acceptor):
         """::
@@ -239,20 +242,20 @@ class Pyjo_IOLoop(Pyjo.EventEmitter.object):
 
         self = weakref.proxy(self)
 
-        def connect_cb(self, cid, client, handle):
+        def connect_cb(client, handle):
             if dir(self):
                 del self._connections[cid]['client']
                 stream = Pyjo.IOLoop.Stream.new(handle)
                 self._stream(stream, cid)
                 cb(self, None, stream)
 
-        client.on(lambda client, handle: connect_cb(self, cid, client, handle), 'connect')
+        client.on(connect_cb, 'connect')
 
-        def error_cb(self, cid, err):
+        def error_cb(client, err):
             self._remove(cid)
             cb(self, err, None)
 
-        client.on(lambda client, err: error_cb(self, cid, err), 'error')
+        client.on(error_cb, 'error')
 
         client.connect(**kwargs)
         return cid
@@ -366,7 +369,10 @@ class Pyjo_IOLoop(Pyjo.EventEmitter.object):
             def do_something(loop):
                 ...
         """
-        return self.reactor.next_tick(lambda reactor: cb(self))
+        def next_tick_cb(reactor):
+            cb(self)
+
+        return self.reactor.next_tick(next_tick_cb)
 
     def one_tick(self):
         """::
@@ -474,7 +480,7 @@ class Pyjo_IOLoop(Pyjo.EventEmitter.object):
 
         server = Pyjo.IOLoop.Server.new()
 
-        def accept_cb(self, server, handle):
+        def accept_cb(server, handle):
             # Enforce connection limit (randomize to improve load balancing)
             max_accepts = self.max_accepts
             if max_accepts:
@@ -491,7 +497,7 @@ class Pyjo_IOLoop(Pyjo.EventEmitter.object):
             if self._limit():
                 self._not_accepting()
 
-        server.on(lambda server, handle: accept_cb(self, server, handle), 'accept')
+        server.on(accept_cb, 'accept')
         server.listen(**kwargs)
 
         return self.acceptor(server)
@@ -535,7 +541,10 @@ class Pyjo_IOLoop(Pyjo.EventEmitter.object):
         """
         self._not_accepting()
         if self._stop_timer is None:
-            self._stop_timer = self.emit('finish').recurring(lambda self: self._stop(), 1)
+            def finish_cb(loop):
+                loop._stop()
+
+            self._stop_timer = self.emit('finish').recurring(finish_cb, 1)
 
     def stream(self, stream):
         """::
@@ -654,18 +663,22 @@ class Pyjo_IOLoop(Pyjo.EventEmitter.object):
         stream.reactor = weakref.proxy(self.reactor)
         self = weakref.proxy(self)
 
-        def on_close_cb(self, stream):
+        def close_cb(stream):
             if dir(self):
                 self._remove(cid)
 
-        stream.on(lambda stream: on_close_cb(self, stream), 'close')
+        stream.on(close_cb, 'close')
         stream.start()
 
         return cid
 
     def _timer(self, cb, method, after):
         self = weakref.proxy(self)
-        return getattr(self.reactor, method)(lambda reactor: cb(self), after)
+
+        def timer_cb(reactor):
+            cb(self)
+
+        return getattr(self.reactor, method)(timer_cb, after)
 
 
 def new(*args, **kwargs):

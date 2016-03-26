@@ -221,18 +221,18 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
         # Timeout
         self = weakref.proxy(self)
 
-        def timeout_cb(self):
+        def timeout_cb(reactor):
             if dir(self):
                 self.emit('error', 'Connect timeout')
 
-        self._timer = reactor.timer(lambda reactor: timeout_cb(self), timeout)
+        self._timer = reactor.timer(timeout_cb, timeout)
 
         # Blocking name resolution
-        def resolved_cb(self):
+        def resolved_cb(reactor):
             if dir(self):
                 self._connect(**kwargs)
 
-        return reactor.next_tick(lambda reactor: resolved_cb(self))
+        return reactor.next_tick(resolved_cb)
 
     @property
     def fd(self):
@@ -280,11 +280,11 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
         # Wait for handle to become writable
         self = weakref.proxy(self)
 
-        def ready_cb(self, loop, **kwargs):
+        def ready_cb(reactor, write):
             if dir(self):
                 self._ready(**kwargs)
 
-        self.reactor.io(lambda reactor, write: ready_cb(self, reactor, **kwargs), handle).watch(handle, False, True)
+        self.reactor.io(ready_cb, handle).watch(handle, False, True)
 
     def _port(self, **kwargs):
         port = kwargs.get('port')
@@ -356,7 +356,10 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
             else:
                 return self.emit('error', 'TLS upgrade failed')
 
-        reactor.io(lambda reactor, write: self._tls(), ssl_handle).watch(ssl_handle, False, True)
+        def tls_cb(reactor, write):
+            self._tls()
+
+        reactor.io(tls_cb, ssl_handle).watch(ssl_handle, False, True)
 
 
 new = Pyjo_IOLoop_Client.new
