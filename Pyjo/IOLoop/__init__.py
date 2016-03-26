@@ -86,7 +86,6 @@ import Pyjo.Reactor.Base
 from Pyjo.Util import decorator, decoratormethod, getenv, md5_sum, notnone, steady_time, rand, warn
 
 import importlib
-import os
 import traceback
 import weakref
 
