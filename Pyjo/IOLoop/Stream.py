@@ -200,7 +200,7 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
 
         Close stream gracefully.
         """
-        if self.is_writing():
+        if self.is_writing:
             self._graceful = True
             return self
         return self.close()
@@ -216,7 +216,7 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
         if self.handle:
             return self.handle.fileno()
 
-    # TODO @property
+    @property
     def is_readable(self):
         """::
 
@@ -230,7 +230,7 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
             return None
         return self.handle and Pyjo.Util._readable(self.handle.fileno())
 
-    # TODO @property
+    @property
     def is_writing(self):
         """::
 
@@ -253,7 +253,7 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
         reactor = self.reactor
         if self._paused:
             self._paused = False
-            return reactor.watch(self.handle, True, self.is_writing())
+            return reactor.watch(self.handle, True, self.is_writing)
 
         stream = weakref.proxy(self)
 
@@ -274,7 +274,7 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
         Stop watching for new data on the stream.
         """
         if not self._paused:
-            self.reactor.watch(self.handle, False, self.is_writing())
+            self.reactor.watch(self.handle, False, self.is_writing)
         self._paused = True
 
     def steal_handle(self):
@@ -386,7 +386,7 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
                 self.emit('drain')
             self._again()
 
-        if self.is_writing():
+        if self.is_writing:
             return
         if self._graceful:
             return self.close()
