@@ -94,7 +94,10 @@ class Pyjo_Server_Base(Pyjo.EventEmitter.object):
         ``PYJO_REVERSE_PROXY`` environment variable.
         """
 
-        self.on(lambda server, tx: server.app.handler(tx), 'request')
+        def request_cb(server, tx):
+            server.app.handler(tx)
+
+        self.on(request_cb, 'request')
 
     def build_app(self, app):
         """::

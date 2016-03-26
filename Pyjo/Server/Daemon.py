@@ -251,10 +251,20 @@ class Pyjo_Server_Daemon(Pyjo.Server.Base.object):
         Run server.
         """
         # Make sure the event loop can be stopped in regular intervals
-        loop = self.ioloop
-        ticker = loop.recurring(lambda loop: None, 1)
+        loop = weakref.proxy(self.ioloop)
+
+        def ticker_cb(loop):
+            pass
+
+        ticker = loop.recurring(ticker_cb, 1)
+
+        def signal_cb(signal, frame):
+            if dir(loop):
+                loop.stop()
+
         for sig in signal.SIGINT, signal.SIGTERM:
-            signal.signal(sig, lambda signal, frame: loop.stop())
+            signal.signal(sig, signal_cb)
+
         self.start().ioloop.start()
         loop.remove(ticker)
 
@@ -314,17 +324,23 @@ class Pyjo_Server_Daemon(Pyjo.Server.Base.object):
             tx.req.url.base.scheme = 'https'
 
         # Handle upgrades and requests
-        self = weakref.proxy(self)
+        daemon = weakref.proxy(self)
 
         @tx.on
         def upgrade(tx, ws):
-            ws.server_handshake()
-            self._connections[cid]['ws'] = ws
+            if dir(daemon):
+                ws.server_handshake()
+                daemon._connections[cid]['ws'] = ws
 
         @tx.on
         def request(tx):
-            self.emit('request', self._connections[cid].get('ws', tx))
-            tx.on(lambda tx: self._write(cid), 'resume')
+            if dir(daemon):
+                daemon.emit('request', daemon._connections[cid].get('ws', tx))
+
+                def resume_cb(tx):
+                    daemon._write(cid)
+
+                tx.on(resume_cb, 'resume')
 
         # Kept alive if we have more than one request on the connection
         n = c.get('requests', 0)
@@ -362,8 +378,12 @@ class Pyjo_Server_Daemon(Pyjo.Server.Base.object):
         if ws:
             # Successful upgrade
             if ws.res.code == 101:
-                self = weakref.proxy(self)
-                ws.on(lambda ws: self._write(cid), 'resume')
+                daemon = weakref.proxy(self)
+
+                def resume_cb(ws):
+                    daemon._write(cid)
+
+                ws.on(resume_cb, 'resume')
                 ws.server_open()
 
             # Failed upgrade
@@ -406,19 +426,40 @@ class Pyjo_Server_Daemon(Pyjo.Server.Base.object):
             del options['address']
         tls = options['tls'] = url.protocol == 'https'
 
-        self = weakref.proxy(self)
+        daemon = weakref.proxy(self)
 
         @self.ioloop.server(**options)
         def server(loop, stream, cid):
-            c = self._connections[cid] = {'tls': tls}
-            if DEBUG:
-                warn("-- Accept {0} {1}\n".format(cid, stream.handle.getpeername()))
-            stream.timeout = self.inactivity_timeout
+            if dir(daemon):
+                c = daemon._connections[cid] = {'tls': tls}
+                if DEBUG:
+                    warn("-- Accept {0} {1}\n".format(cid, stream.handle.getpeername()))
+                stream.timeout = daemon.inactivity_timeout
 
-            stream.on(lambda stream: self and self._close(cid), 'close')
-            stream.on(lambda stream, err: self and self.app.log.error(err) and self._close(cid), 'error')
-            stream.on(lambda stream, chunk: self._read(cid, chunk), 'read')
-            stream.on(lambda stream: self.app.log.debug('Inactivity timeout') if c['tx'] else None, 'timeout')
+                def close_cb(stream):
+                    if daemon and dir(daemon):
+                        daemon._close(cid)
+
+                stream.on(close_cb, 'close')
+
+                def error_cb(stream, err):
+                    if daemon and dir(daemon):
+                        daemon.app.log.error(err)
+                        daemon._close(cid)
+
+                stream.on(error_cb, 'error')
+
+                def read_cb(stream, chunk):
+                    if dir(daemon):
+                        daemon._read(cid, chunk)
+
+                stream.on(read_cb, 'read')
+
+                def timeout_cb(stream):
+                    if dir(daemon) and c and c['tx']:
+                        self.app.log.debug('Inactivity timeout')
+
+                stream.on(timeout_cb, 'timeout')
 
         self.acceptors.append(server)
 
@@ -479,16 +520,19 @@ class Pyjo_Server_Daemon(Pyjo.Server.Base.object):
         stream = self.ioloop.stream(cid).write(chunk)
 
         # Finish or continue writing
-        self = weakref.proxy(self)
+        daemon = weakref.proxy(self)
 
         def write_cb(stream):
-            return self._write(cid)
+            if dir(daemon):
+                return daemon._write(cid)
+
         cb = write_cb
 
         if tx.is_finished:
             if tx.has_subscribers('finish'):
                 def finish_cb(stream):
-                    return self._finish(cid)
+                    return daemon._finish(cid)
+
                 cb = finish_cb
             else:
                 self._finish(cid)

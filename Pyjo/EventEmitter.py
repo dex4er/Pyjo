@@ -112,15 +112,18 @@ class Pyjo_EventEmitter(Pyjo.Base.object):
         """
         if name in self._events:
             s = self._events[name]
+
             if DEBUG:
                 warn("-- Emit {0} in {1} ({2})".format(name, self, len(s)))
+
             for cb in s:
-                cb(self, *args)
+                cb(self, *args, **kwargs)
         else:
             if DEBUG:
                 warn("-- Emit {0} in {1} (0)".format(name, self))
+
             if name == 'error':
-                raise Error(*args)
+                raise Error(*args, **kwargs)
 
         return self
 
@@ -141,7 +144,7 @@ class Pyjo_EventEmitter(Pyjo.Base.object):
         Subscribe to event. Can be used as decorator. ::
 
             @e.on
-            def foo(e, *args):
+            def foo(e, *args, **kwargs):
                 ...
         """
         if not callable(cb):
@@ -166,7 +169,7 @@ class Pyjo_EventEmitter(Pyjo.Base.object):
         Can be used as decorator. ::
 
             @e.once
-            def foo(e, *args):
+            def foo(e, *args, **kwargs):
                 ...
         """
         if not callable(cb):
@@ -175,11 +178,12 @@ class Pyjo_EventEmitter(Pyjo.Base.object):
         if name is None:
             name = cb.__name__
 
-        self = weakref.proxy(self)
+        emitter = weakref.proxy(self)
 
-        def wrap_cb(*args):
-            self.unsubscribe(name, wrap_cb)
-            return cb(*args)
+        def wrap_cb(*args, **kwargs):
+            if dir(emitter):
+                emitter.unsubscribe(name, wrap_cb)
+                return cb(*args, **kwargs)
 
         wrap_cb.__name__ = name
 
@@ -213,7 +217,7 @@ class Pyjo_EventEmitter(Pyjo.Base.object):
         if name in self._events:
             # One
             if cb:
-                self._events[name] = [a for a in self._events[name] if a != cb]
+                self._events[name] = [c for c in self._events[name] if c != cb]
                 if not len(self._events[name]):
                     del self._events[name]
 

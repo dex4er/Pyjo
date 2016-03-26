@@ -279,7 +279,7 @@ from Pyjo.Util import uchr
 ESCAPE_PAT = r'(?:\\[^0-9a-fA-F]|\\[0-9a-fA-F]{1,6})'
 ATTR_PAT = r'''
     \[
-    ((?:''' + ESCAPE_PAT + '''|[\w\-])+)           # Key
+    ((?:''' + ESCAPE_PAT + r'''|[\w\-])+)         # Key
     (?:
         (\W)?=                                    # Operator
         (?:"((?:\\"|[^"])*?)"|([^\]]+?))          # Value
@@ -289,11 +289,11 @@ ATTR_PAT = r'''
 '''
 PSEUDO_CLASS_PAT = r'(?::([\w\-]+)(?:\(((?:\([^)]+\)|[^)])+)\))?)'
 TOKEN_PAT = r'''
-    (\s*,\s*)?                                    # Separator
-    ((?:[^[\\:\s,>+~]|''' + ESCAPE_PAT + '''\s?)+)?   # Element
-    (''' + PSEUDO_CLASS_PAT + '''*)?               # Pseudoclass
-    ((?:''' + ATTR_PAT + ''')*)?                   # Attributes
-    (?:\s*([>+~]))?                               # Combinator
+    (\s*,\s*)?                                        # Separator
+    ((?:[^[\\:\s,>+~]|''' + ESCAPE_PAT + r'''\s?)+)?  # Element  #]
+    (''' + PSEUDO_CLASS_PAT + r'''*)?                 # Pseudoclass
+    ((?:''' + ATTR_PAT + r''')*)?                     # Attributes
+    (?:\s*([>+~]))?                                   # Combinator
 '''
 
 

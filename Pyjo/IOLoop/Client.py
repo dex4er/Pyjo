@@ -219,18 +219,18 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
         timeout = kwargs.get('timeout', 10)
 
         # Timeout
-        self = weakref.proxy(self)
+        client = weakref.proxy(self)
 
         def timeout_cb(reactor):
-            if dir(self):
-                self.emit('error', 'Connect timeout')
+            if dir(client):
+                client.emit('error', 'Connect timeout')
 
         self._timer = reactor.timer(timeout_cb, timeout)
 
         # Blocking name resolution
         def resolved_cb(reactor):
-            if dir(self):
-                self._connect(**kwargs)
+            if dir(client):
+                client._connect(**kwargs)
 
         return reactor.next_tick(resolved_cb)
 
@@ -278,11 +278,11 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
         handle.setblocking(0)
 
         # Wait for handle to become writable
-        self = weakref.proxy(self)
+        client = weakref.proxy(self)
 
         def ready_cb(reactor, write):
-            if dir(self):
-                self._ready(**kwargs)
+            if dir(client):
+                client._ready(**kwargs)
 
         self.reactor.io(ready_cb, handle).watch(handle, False, True)
 

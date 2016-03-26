@@ -86,7 +86,10 @@ class Pyjo_Content_MultiPart(Pyjo.Content.object, Pyjo.String.Mixin.object):
         self._multi_state = None
         self._multipart = bytearray()
 
-        self.on(lambda content, chunk: content._read(chunk), 'read')
+        def read_cb(content, chunk):
+            content._read(chunk)
+
+        self.on(read_cb, 'read')
 
     def body_contains(self, chunk):
         """::

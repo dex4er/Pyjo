@@ -187,10 +187,27 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
                 return ua._error(cid, err)
 
             # Connection established
-            stream.on(lambda ua: self._error(cid, 'Inactivity timeout'), 'timeout')
-            stream.on(lambda ua: ua and self._finish(cid, True), 'close')
-            stream.on(lambda ua, err: ua and self._error(cid, err), 'error')
-            stream.on(lambda ua, chunk: self._read(cid, chunk), 'read')
+            def timeout_cb(ua):
+                self._error(cid, 'Inactivity timeout')
+
+            stream.on(timeout_cb, 'timeout')
+
+            def close_cb(ua):
+                if ua:
+                    self._finish(cid, True)
+
+            stream.on(close_cb, 'close')
+
+            def error_cb(ua, err):
+                if ua:
+                    self._error(cid, err)
+
+            stream.on(error_cb, 'error')
+
+            def read_cb(ua, chunk):
+                self._read(cid, chunk)
+
+            stream.on(read_cb, 'read')
             cb(cid)
 
         cid = self._loop(nb).client(client_cb, **options)
@@ -216,8 +233,10 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
         tx.remove_address, tx.remote_port = handle.getpeername()
 
         # Start writing
-        self = weakref.proxy(self)
-        tx.on(lambda ua: self._write(cid), 'resume')
+        def resume_cb(ua):
+            ua._write(cid)
+
+        tx.on(resume_cb, 'resume')
         self._write(cid)
 
     def _connection(self, nb, tx, cb):
@@ -402,8 +421,10 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
         cid = self.emit('start', tx)._connection(nb, tx, cb)
         timeout = self.request_timeout
         if timeout:
-            self.connections[id][timeout] = self._loop(nb) \
-                .timer(lambda loop: self._error(cid, 'Request timeout'), timeout)
+            def timeout_cb(loop):
+                self._error(cid, 'Request timeout')
+
+            self.connections[id][timeout] = self._loop(nb).timer(timeout_cb, timeout)
 
         return cid
 
@@ -445,8 +466,10 @@ class Pyjo_UserAgent(Pyjo.EventEmitter.object):
         if not tx.is_writing:
             return
 
-        self = weakref.proxy(self)
-        stream.write(b'', cb=lambda ua: self._write(cid))
+        def write_cb(ua):
+            ua._write(cid)
+
+        stream.write(b'', cb=write_cb)
 
 
 new = Pyjo_UserAgent.new

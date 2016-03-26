@@ -184,7 +184,10 @@ class Pyjo_Transaction_WebSocket(Pyjo.Transaction.object):
         self._state = None
         self._write = bytearray()
 
-        self.on(lambda ws, frame: ws._message(*frame), 'frame')
+        def frame_cb(ws, frame):
+            ws._message(*frame)
+
+        self.on(frame_cb, 'frame')
 
     def build_frame(self, fin, rsv1, rsv2, rsv3, op, payload):
         """::

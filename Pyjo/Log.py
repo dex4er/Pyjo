@@ -142,7 +142,10 @@ class Pyjo_Log(Pyjo.EventEmitter.object):
         re-attached to accept unicode.
         """
 
-        self.on(lambda self, level, lines: self._message(level, lines), 'message')
+        def message_cb(log, level, lines):
+            log._message(level, lines)
+
+        self.on(message_cb, 'message')
 
     def append(self, msg):
         r"""::

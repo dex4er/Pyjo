@@ -323,10 +323,10 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
 
         Start accepting connections.
         """
-        self = weakref.proxy(self)
+        server = weakref.proxy(self)
 
         def ready_cb(reactor, write):
-            self._accept()
+            server._accept()
 
         self.reactor.io(ready_cb, self.handle)
 
@@ -368,10 +368,10 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
                         return self.emit('error', 'TLS upgrade failed')
 
     def _handshake(self, handle):
-        self = weakref.proxy(self)
+        server = weakref.proxy(self)
 
         def tls_cb(reactor, write):
-            self._tls(handle)
+            server._tls(handle)
 
         self.reactor.io(tls_cb, handle)
 

@@ -237,22 +237,23 @@ class Pyjo_IOLoop(Pyjo.EventEmitter.object):
         cid = self._id()
         client = Pyjo.IOLoop.Client.new()
         self._connections[cid] = {'client': client}
-        client.reactor = weakref.proxy(self.reactor)
 
-        self = weakref.proxy(self)
+        client.reactor = weakref.proxy(self.reactor)
+        loop = weakref.proxy(self)
 
         def connect_cb(client, handle):
-            if dir(self):
-                del self._connections[cid]['client']
+            if dir(loop):
+                del loop._connections[cid]['client']
                 stream = Pyjo.IOLoop.Stream.new(handle)
-                self._stream(stream, cid)
-                cb(self, None, stream)
+                loop._stream(stream, cid)
+                cb(loop, None, stream)
 
         client.on(connect_cb, 'connect')
 
         def error_cb(client, err):
-            self._remove(cid)
-            cb(self, err, None)
+            if dir(loop):
+                loop._remove(cid)
+                cb(loop, err, None)
 
         client.on(error_cb, 'error')
 
@@ -368,8 +369,11 @@ class Pyjo_IOLoop(Pyjo.EventEmitter.object):
             def do_something(loop):
                 ...
         """
+        loop = weakref.proxy(self)
+
         def next_tick_cb(reactor):
-            cb(self)
+            if dir(loop):
+                cb(loop)
 
         return self.reactor.next_tick(next_tick_cb)
 
@@ -539,6 +543,7 @@ class Pyjo_IOLoop(Pyjo.EventEmitter.object):
         closed before stopping the event loop.
         """
         self._not_accepting()
+
         if self._stop_timer is None:
             def finish_cb(loop):
                 loop._stop()
@@ -660,11 +665,11 @@ class Pyjo_IOLoop(Pyjo.EventEmitter.object):
             warn("-- New connection {0} ({1} connections)".format(cid, len(self._connections)))
 
         stream.reactor = weakref.proxy(self.reactor)
-        self = weakref.proxy(self)
+        loop = weakref.proxy(self)
 
         def close_cb(stream):
-            if dir(self):
-                self._remove(cid)
+            if dir(loop):
+                loop._remove(cid)
 
         stream.on(close_cb, 'close')
         stream.start()
@@ -672,10 +677,11 @@ class Pyjo_IOLoop(Pyjo.EventEmitter.object):
         return cid
 
     def _timer(self, cb, method, after):
-        self = weakref.proxy(self)
+        loop = weakref.proxy(self)
 
         def timer_cb(reactor):
-            cb(self)
+            if dir(loop):
+                cb(loop)
 
         return getattr(self.reactor, method)(timer_cb, after)
 

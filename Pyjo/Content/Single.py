@@ -87,7 +87,10 @@ class Pyjo_Content_Single(Pyjo.Content.object, Pyjo.String.Mixin.object):
         :mod:`Pyjo.Content.MultiPart` object, defaults to a true value.
         """
 
-        self._on_read = self.on(lambda content, chunk: content.set(asset=content.asset.add_chunk(chunk)), 'read')
+        def read_cb(content, chunk):
+            content.set(asset=content.asset.add_chunk(chunk))
+
+        self._on_read = self.on(read_cb, 'read')
 
     def body_contains(self, chunk):
         """::
