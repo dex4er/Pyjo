@@ -57,11 +57,11 @@ if __name__ == '__main__':
         skip('test for Python 3.x', 3)
 
     # __bytes__
-    if sys.version_info >= (3, 0) and sys.version_info <= (3, 4):
+    if sys.version_info >= (3, 0) and sys.version_info < (3, 3):
         is_ok(bytes(string, 'ascii'), b'string', "bytes(string, 'ascii') == b'string'")
         is_ok(bytes(string, 'ascii'), bytes(string2, 'ascii'), "bytes(string, 'ascii') == bytes(string2, 'ascii')")
     else:
-        skip('test for Python 3.[0-4]', 2)
+        skip('test for Python 3.[0-2]', 2)
 
     # __complex__
     is_ok(repr(complex(zero)), '0j', "complex(zero)")
@@ -188,11 +188,11 @@ if __name__ == '__main__':
         skip('test for Python 3.x', 3)
 
     # __bytes__
-    if sys.version_info >= (3, 0) and sys.version_info <= (3, 4):
+    if sys.version_info >= (3, 0) and sys.version_info < (3, 3):
         is_ok(bytes(string, 'ascii'), b'string', "bytes(string, 'ascii') == b'string'")
         is_ok(bytes(string, 'ascii'), bytes(string2, 'ascii'), "bytes(string, 'ascii') == bytes(string2, 'ascii')")
     else:
-        skip('test for Python 3.[0-4]', 2)
+        skip('test for Python 3.[0-2]', 2)
 
     # __eq__
     ok(string == b'string', "string == b'string'")
@@ -328,11 +328,11 @@ if __name__ == '__main__':
         skip('test for Python 3.x', 3)
 
     # __bytes__
-    if sys.version_info >= (3, 0) and sys.version_info <= (3, 4):
+    if sys.version_info >= (3, 0) and sys.version_info < (3, 3):
         is_ok(bytes(string, 'ascii'), b'string', "bytes(string, 'ascii') == b'string'")
         is_ok(bytes(string, 'ascii'), bytes(string2, 'ascii'), "bytes(string, 'ascii') == bytes(string2, 'ascii')")
     else:
-        skip('test for Python 3.[0-4]', 2)
+        skip('test for Python 3.[0-2]', 2)
 
     # __complex__
     is_ok(repr(complex(zero)), '0j', "complex(zero)")
