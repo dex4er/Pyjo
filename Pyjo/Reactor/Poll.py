@@ -45,6 +45,7 @@ import Pyjo.Reactor.Select
 
 from Pyjo.Util import getenv, steady_time, warn
 
+import errno
 import select
 import socket
 import time
@@ -102,18 +103,23 @@ class Pyjo_Reactor_Poll(Pyjo.Reactor.Select.object):
 
             # I/O
             if self._ios:
-                events = poll.poll(timeout)
-                for fd, flag in events:
-                    if fd in self._ios:
-                        if flag & (select.POLLIN | select.POLLPRI | select.POLLNVAL | select.POLLHUP | select.POLLERR):
-                            io = self._ios[fd]
-                            last = True
-                            self._sandbox(io['cb'], 'Read', False)
-                    if fd in self._ios:
-                        if flag & (select.POLLOUT):
-                            io = self._ios[fd]
-                            last = True
-                            self._sandbox(io['cb'], 'Write', True)
+                try:
+                    events = poll.poll(timeout)
+                    for fd, flag in events:
+                        if fd in self._ios:
+                            if flag & (select.POLLIN | select.POLLPRI | select.POLLNVAL | select.POLLHUP | select.POLLERR):
+                                io = self._ios[fd]
+                                last = True
+                                self._sandbox(io['cb'], 'Read', False)
+                        if fd in self._ios:
+                            if flag & (select.POLLOUT):
+                                io = self._ios[fd]
+                                last = True
+                                self._sandbox(io['cb'], 'Write', True)
+                except select.error as e:
+                    # Ctrl-c generates EINTR on Python 2.x
+                    if e.args[0] != errno.EINTR:
+                        raise Exception(e)
 
             # Wait for timeout if poll can't be used
             elif timeout:

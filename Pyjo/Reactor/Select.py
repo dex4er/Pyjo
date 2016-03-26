@@ -58,6 +58,7 @@ import Pyjo.Reactor.Base
 
 from Pyjo.Util import getenv, md5_sum, rand, steady_time, warn
 
+import errno
 import select
 import socket
 import time
@@ -154,18 +155,23 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.Base.object):
 
             # I/O
             if self._ios:
-                readable, writable, exceptional = select.select(self._inputs, self._outputs, self._inputs, timeout)
-                for fd in list(set([item for sublist in (exceptional, readable, writable) for item in sublist])):
-                    if fd in self._ios:
-                        if fd in readable or fd in exceptional:
-                            io = self._ios[fd]
-                            last = True
-                            self._sandbox(io['cb'], "Read fd {0}".format(fd), False)
-                    if fd in self._ios:
-                        if fd in writable:
-                            io = self._ios[fd]
-                            last = True
-                            self._sandbox(io['cb'], "Write fd {0}".format(fd), True)
+                try:
+                    readable, writable, exceptional = select.select(self._inputs, self._outputs, self._inputs, timeout)
+                    for fd in list(set([item for sublist in (exceptional, readable, writable) for item in sublist])):
+                        if fd in self._ios:
+                            if fd in readable or fd in exceptional:
+                                io = self._ios[fd]
+                                last = True
+                                self._sandbox(io['cb'], "Read fd {0}".format(fd), False)
+                        if fd in self._ios:
+                            if fd in writable:
+                                io = self._ios[fd]
+                                last = True
+                                self._sandbox(io['cb'], "Write fd {0}".format(fd), True)
+                except select.error as e:
+                    # Ctrl-c generates EINTR on Python 2.x
+                    if e.args[0] != errno.EINTR:
+                        raise Exception(e)
 
             # Wait for timeout if poll can't be used
             elif timeout:
