@@ -12,4 +12,8 @@ my $url = shift @ARGV or die 'get.pl url opts';
 my %opts = map { split /=/, $_, 2 } @ARGV;
 
 my $tx = Mojo::UserAgent->new(%opts)->get($url);
+if (my $err = $tx->error) {
+    die "$err->{code} response: $err->{message}" if $err->{code};
+    die "Connection error: $err->{message}";
+}
 say $tx->res->text;
