@@ -271,8 +271,10 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
             proto = kwargs.get('proto', 'tcp')
 
             handle = socket.socket(socket.AF_INET, SOCK[proto])
-            handle.connect((address, port))
-            # TODO return self.emit('error', "Can't connect: " + str(e))
+            try:
+                handle.connect((address, port))
+            except Exception as e:
+                return self.emit('error', e)
             self.handle = handle
 
         handle.setblocking(0)
