@@ -1,4 +1,4 @@
-[![pip install](https://img.shields.io/pypi/v/Pyjoyment.png)](https://pypi.python.org/pypi/Pyjoyment)
+[![PyPI Status](https://img.shields.io/pypi/v/Pyjoyment.png)](https://pypi.python.org/pypi/Pyjoyment)
 [![Build Status](https://travis-ci.org/dex4er/Pyjoyment.png?branch=master)](https://travis-ci.org/dex4er/Pyjoyment)
 [![Documentation Status](https://readthedocs.org/projects/pyjoyment/badge/?version=latest)](http://pyjoyment.readthedocs.org/en/latest/)
 
