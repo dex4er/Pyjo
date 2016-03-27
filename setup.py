@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='Pyjoyment',
-    version='0.0.1',
+    version='0.0.2',
     description='An asynchronous, event driver web framework for the Python programming language.',
     long_description=''.join(open('README.md').readlines()[2:]),
     author='Piotr Roszatycki',
