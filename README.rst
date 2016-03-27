@@ -56,136 +56,140 @@ Examples
 Web scraping
 ------------
 
-::
-  import Pyjo.UserAgent
-  from Pyjo.String.Unicode import u
+.. code-block:: python
 
-  tx = Pyjo.UserAgent.new().get('https://html.spec.whatwg.org')
-  for n in tx.res.dom('#named-character-references-table tbody > tr').each():
-      u(n.at('td > code').text + ' ' + n.children('td')[1].text).trim().say()
+   import Pyjo.UserAgent
+   from Pyjo.String.Unicode import u
+
+   tx = Pyjo.UserAgent.new().get('https://html.spec.whatwg.org')
+   for n in tx.res.dom('#named-character-references-table tbody > tr').each():
+       u(n.at('td > code').text + ' ' + n.children('td')[1].text).trim().say()
 
 
 
 URL manipulation
 ----------------
 
-::
-  import Pyjo.URL
-  from Pyjo.String.Unicode import u
+.. code-block:: python
 
-  # 'ssh+git://git@github.com/dex4er/Pyjoyment.git'
-  url = Pyjo.URL.new('https://github.com/dex4er/Pyjoyment')
-  print(url.set(scheme='ssh+git', userinfo='git', path=u(url.path) + '.git'))
+   import Pyjo.URL
+   from Pyjo.String.Unicode import u
 
-  # 'http://metacpan.org/search?q=Mojo::URL&size=20'
-  print(Pyjo.URL.new('http://metacpan.org/search')
-        .set(query={'q': 'Mojo::URL', 'size': 20}))
+   # 'ssh+git://git@github.com/dex4er/Pyjoyment.git'
+   url = Pyjo.URL.new('https://github.com/dex4er/Pyjoyment')
+   print(url.set(scheme='ssh+git', userinfo='git', path=u(url.path) + '.git'))
+
+   # 'http://metacpan.org/search?q=Mojo::URL&size=20'
+   print(Pyjo.URL.new('http://metacpan.org/search')
+         .set(query={'q': 'Mojo::URL', 'size': 20}))
 
 
 Non-blocking TCP client/server
 ------------------------------
 
-::
-  import Pyjo.IOLoop
+.. code-block:: python
+
+   import Pyjo.IOLoop
 
 
-  # Listen on port 3000
-  @Pyjo.IOLoop.server(port=3000)
-  def server(loop, stream, cid):
+   # Listen on port 3000
+   @Pyjo.IOLoop.server(port=3000)
+   def server(loop, stream, cid):
 
-      @stream.on
-      def read(stream, chunk):
-          # Process input chunk
-          print("Server: {0}".format(chunk.decode('utf-8')))
+       @stream.on
+       def read(stream, chunk):
+           # Process input chunk
+           print("Server: {0}".format(chunk.decode('utf-8')))
 
-          # Write response
-          stream.write(b"HTTP/1.1 200 OK\x0d\x0a\x0d\x0a")
+           # Write response
+           stream.write(b"HTTP/1.1 200 OK\x0d\x0a\x0d\x0a")
 
-          # Disconnect client
-          stream.close_gracefully()
-
-
-  # Connect to port 3000
-  @Pyjo.IOLoop.client(port=3000)
-  def client(loop, err, stream):
-
-      @stream.on
-      def read(stream, chunk):
-          # Process input
-          print("Client: {0}".format(chunk.decode('utf-8')))
-
-      # Write request
-      stream.write(b"GET / HTTP/1.1\x0d\x0a\x0d\x0a")
+           # Disconnect client
+           stream.close_gracefully()
 
 
-  # Add a timer
-  @Pyjo.IOLoop.timer(3)
-  def timeouter(loop):
-      print("Timeout")
-      # Shutdown server
-      loop.remove(server)
+   # Connect to port 3000
+   @Pyjo.IOLoop.client(port=3000)
+   def client(loop, err, stream):
+
+       @stream.on
+       def read(stream, chunk):
+           # Process input
+           print("Client: {0}".format(chunk.decode('utf-8')))
+
+       # Write request
+       stream.write(b"GET / HTTP/1.1\x0d\x0a\x0d\x0a")
 
 
-  # Start event loop
-  Pyjo.IOLoop.start()
+   # Add a timer
+   @Pyjo.IOLoop.timer(3)
+   def timeouter(loop):
+       print("Timeout")
+       # Shutdown server
+       loop.remove(server)
+
+
+   # Start event loop
+   Pyjo.IOLoop.start()
 
 
 Standalone HTTP server serving embedded template file
 ------------------------------------------------------
 
-::
-  # -*- coding: utf-8 -*-
+.. code-block:: python
 
-  import Pyjo.Server.Daemon
-  import Pyjo.URL
+   # -*- coding: utf-8 -*-
 
-  from Pyjo.Loader import embedded_file
-  from Pyjo.Util import b, u
+   import Pyjo.Server.Daemon
+   import Pyjo.URL
 
-  import sys
+   from Pyjo.Loader import embedded_file
+   from Pyjo.Util import b, u
 
-
-  opts = dict([['address', '0.0.0.0'], ['port', 3000]] + list(map(lambda a: a.split('='), sys.argv[1:])))
-  listen = str(Pyjo.URL.new(scheme='http', host=opts['address'], port=opts['port']))
-
-  daemon = Pyjo.Server.Daemon.new(listen=[listen])
-  daemon.unsubscribe('request')
+   import sys
 
 
-  # Embedded template file
-  DATA = u(r'''
-  @@ index.html.tpl
-  <!DOCTYPE html>
-  <html>
-  <head>
-  <meta charset="UTF-8">
-  <title>Pyjoyment</title>
-  </head>
-  <body>
-  <h1>♥ Pyjoyment ♥</h1>
-  <h2>This page is served by Pyjoyment framework.</h2>
-  <p>{method} request for {path}</p>
-  </body>
-  </html>
-  ''')
+   opts = dict([['address', '0.0.0.0'], ['port', 3000]] + list(map(lambda a: a.split('='), sys.argv[1:])))
+   listen = str(Pyjo.URL.new(scheme='http', host=opts['address'], port=opts['port']))
+
+   daemon = Pyjo.Server.Daemon.new(listen=[listen])
+   daemon.unsubscribe('request')
 
 
-  @daemon.on
-  def request(daemon, tx):
-      # Request
-      method = tx.req.method
-      path = tx.req.url.path
+   # Embedded template file
+   DATA = u(r'''
+   @@ index.html.tpl
+   <!DOCTYPE html>
+   <html>
+   <head>
+   <meta charset="UTF-8">
+   <title>Pyjoyment</title>
+   </head>
+   <body>
+   <h1>♥ Pyjoyment ♥</h1>
+   <h2>This page is served by Pyjoyment framework.</h2>
+   <p>{method} request for {path}</p>
+   </body>
+   </html>
+   ''')
 
-      # Template
-      template = embedded_file(sys.modules[__name__], 'index.html.tpl')
 
-      # Response
-      tx.res.code = 200
-      tx.res.headers.content_type = 'text/html; charset=utf-8'
-      tx.res.body = b(template.format(**locals()))
+   @daemon.on
+   def request(daemon, tx):
+       # Request
+       method = tx.req.method
+       path = tx.req.url.path
 
-      # Resume transaction
-      tx.resume()
+       # Template
+       template = embedded_file(sys.modules[__name__], 'index.html.tpl')
+
+       # Response
+       tx.res.code = 200
+       tx.res.headers.content_type = 'text/html; charset=utf-8'
+       tx.res.body = b(template.format(**locals()))
+
+       # Resume transaction
+       tx.resume()
 
 
-  daemon.run()
+   daemon.run()
