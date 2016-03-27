@@ -19,7 +19,7 @@ Node.JS programmers.
 It provides tool set for parsing and creating HTTP messages and HTML documents.
 It also supports WSGI interface.
 
-Pyjoyment is compatible with Python 2.7+, Python 3.4+ and PyPy 2.4+. It doesn't
+Pyjoyment is compatible with Python 2.7+, Python 3.3+ and PyPy 2.4+. It doesn't
 require any external libraries or compilers.
 
 See http://www.pyjoyment.net/
