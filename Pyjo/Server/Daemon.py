@@ -8,24 +8,24 @@ Pyjo.Server.Daemon - Non-blocking I/O HTTP and WebSocket server
     import Pyjo.Server.Daemon
     from Pyjo.Util import b
 
-    daemon = Pyjo.Server.Daemon.new(listen=['http://*:8080'])
-    daemon.unsubscribe('request')
+    with Pyjo.Server.Daemon.new(listen=['http://*:8080']) as daemon:
+        daemon.unsubscribe('request')
 
-    @daemon.on
-    def request(daemon, tx):
-        # Request
-        method = tx.req.method
-        path = tx.req.url.path
+        @daemon.on
+        def request(daemon, tx):
+            # Request
+            method = tx.req.method
+            path = tx.req.url.path
 
-        # Response
-        tx.res.code = 200
-        tx.res.headers.content_type = 'text/plain'
-        tx.res.body = b("{0} request for {1}!".format(method, path))
+            # Response
+            tx.res.code = 200
+            tx.res.headers.content_type = 'text/plain'
+            tx.res.body = b("{0} request for {1}!".format(method, path))
 
-        # Resume transaction
-        tx.resume()
+            # Resume transaction
+            tx.resume()
 
-    daemon.run()
+        daemon.run()
 
 :mod:`Pyjo.Server.Daemon` is a full featured, highly portable non-blocking I/O
 HTTP and WebSocket server, with IPv6, TLS, Comet (long polling), keep-alive and
@@ -243,6 +243,12 @@ class Pyjo_Server_Daemon(Pyjo.Server.Base.object):
         except:
             pass
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.stop()
+
     def run(self):
         """::
 
@@ -301,12 +307,12 @@ class Pyjo_Server_Daemon(Pyjo.Server.Base.object):
 
             daemon = daemon.stop()
 
-        Stop accepting connections.
+        Stop accepting connections. Used by context manager.
         """
         # Suspend accepting connections but keep listen sockets open
         loop = self.ioloop
-        while self._acceptors:
-            cid = self._acceptors.pop(0)
+        while self.acceptors:
+            cid = self.acceptors.pop(0)
             server = self._servers[cid] = loop.acceptor(cid)
             loop.remove(cid)
             server.stop()
