@@ -51,14 +51,44 @@ Classes
 import Pyjo.EventEmitter
 
 import codecs
-import fcntl
+import os
 import sys
 import time
 
 from Pyjo.Util import getenv, notnone, u
 
 
+if os.name == 'posix':
+    import fcntl
+
+
 LEVEL = {'debug': 1, 'info': 2, 'warn': 3, 'error': 4, 'fatal': 5}
+
+
+class LockException(Exception):
+    LOCK_FAILED = 1
+
+
+if os.name == 'posix':
+    def lock(file):
+        try:
+            fcntl.flock(file.fileno(), fcntl.LOCK_EX)
+        except IOError as err:
+            #  IOError: [Errno 11] Resource temporarily unavailable
+            if err[0] == 11:
+                raise LockException(LockException.LOCK_FAILED, err[1])
+            else:
+                raise
+
+    def unlock(file):
+        fcntl.flock(file.fileno(), fcntl.LOCK_UN)
+
+else:
+    def lock(file):
+        pass
+
+    def unlock(file):
+        pass
 
 
 class Pyjo_Log(Pyjo.EventEmitter.object):
@@ -147,6 +177,18 @@ class Pyjo_Log(Pyjo.EventEmitter.object):
 
         self.on(message_cb, 'message')
 
+    def __del__(self):
+        try:
+            self.close()
+        except:
+            pass
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
+
     def append(self, msg):
         r"""::
 
@@ -159,11 +201,16 @@ class Pyjo_Log(Pyjo.EventEmitter.object):
             return
 
         if handle != sys.stderr:
-            fcntl.flock(handle, fcntl.LOCK_EX)
+            lock(handle)
         handle.write(msg)
         handle.flush()
         if handle != sys.stderr:
-            fcntl.flock(handle, fcntl.LOCK_UN)
+            unlock(handle)
+
+    def close(self):
+        handle = self.handle
+        if handle and handle != sys.stderr:
+            handle.close()
 
     def debug(self, *lines):
         """::
