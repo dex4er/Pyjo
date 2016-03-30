@@ -6,21 +6,21 @@ Pyjo.IOLoop.Server - Non-blocking TCP server
     import Pyjo.IOLoop.Server
 
     # Create listen socket
-    server = Pyjo.IOLoop.Server.new()
+    with Pyjo.IOLoop.Server.new() as server:
 
-    @server.on
-    def accept(server, handle):
-        ...
+        @server.on
+        def accept(server, handle):
+            ...
 
-    server.listen(port=3000)
+        server.listen(port=3000)
 
-    # Start and stop accepting connections
-    server.start()
-    server.stop()
+        # Start and stop accepting connections
+        server.start()
+        server.stop()
 
-    # Start reactor if necessary
-    if not server.reactor.is_running:
-        server.reactor.start()
+        # Start reactor if necessary
+        if not server.reactor.is_running:
+            server.reactor.start()
 
 :mod:`Pyjo.IOLoop.Server` accepts TCP connections for :mod:`Pyjo.IOLoop`.
 
@@ -134,7 +134,7 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
 
             server.close()
 
-        Close all server connections and server itself.
+        Close all server connections and server itself. Used by context manager.ś
         """
         if self._reuse:
             reuse = getenv('PYJO_REUSE')
