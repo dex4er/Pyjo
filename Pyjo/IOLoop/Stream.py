@@ -6,27 +6,27 @@ Pyjo.IOLoop.Stream - Non-blocking I/O stream
     import Pyjo.IOLoop.Stream
 
     # Create stream
-    stream = Pyjo.IOLoop.Stream.new(handle)
+    with Pyjo.IOLoop.Stream.new(handle) as stream:
 
-    @stream.on
-    def read(stream, chunk):
-        ...
+        @stream.on
+        def read(stream, chunk):
+            ...
 
-    @stream.on
-    def close(stream):
-        ...
+        @stream.on
+        def close(stream):
+            ...
 
-    @stream.on
-    def error(stream, err):
-        ...
+        @stream.on
+        def error(stream, err):
+            ...
 
-    # Start and stop watching for new data
-    stream.start()
-    stream.stop()
+        # Start and stop watching for new data
+        stream.start()
+        stream.stop()
 
-    # Start reactor if necessary
-    if not stream.reactor.is_running:
-        stream.reactor.start()
+        # Start reactor if necessary
+        if not stream.reactor.is_running:
+            stream.reactor.start()
 
 
 :mod:`Pyjo.IOLoop.Stream` is a container for I/O streams used by :mod:`Pyjo.IOLoop`.
@@ -168,12 +168,18 @@ class Pyjo_IOLoop_Stream(Pyjo.EventEmitter.object):
         except:
             pass
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
+
     def close(self):
         """::
 
             stream.close()
 
-        Close stream immediately.
+        Close stream immediately. Used by context manager.
         """
         if not dir(self):
             return

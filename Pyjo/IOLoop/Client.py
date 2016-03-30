@@ -6,21 +6,21 @@ Pyjo.IOLoop.Client - Non-blocking TCP/UDP client
     import Pyjo.IOLoop.Client
 
     # Create socket connection
-    client = Pyjo.IOLoop.Client.new()
+    with Pyjo.IOLoop.Client.new() as client:
 
-    @client.on
-    def connect(client, handle):
-        ...
+        @client.on
+        def connect(client, handle):
+            ...
 
-    @client.on
-    def error(client, err):
-        ...
+        @client.on
+        def error(client, err):
+            ...
 
-    client.connect(address='example.com', port=80, proto='tcp')
+        client.connect(address='example.com', port=80, proto='tcp')
 
-    # Start reactor if necessary
-    if not client.reactor.is_running:
-        client.reactor.start()
+        # Start reactor if necessary
+        if not client.reactor.is_running:
+            client.reactor.start()
 
 :mod:`Pyjo.IOLoop.Client` opens TCP/UDP connections for :mod:`Pyjo.IOLoop`.
 
@@ -122,12 +122,18 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
         except:
             pass
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
+
     def close(self):
         """::
 
             client.close()
 
-        Close all server connections and server itself.
+        Close all server connections and server itself. Used by context manager.
         """
         if self.handle:
             self.handle.close()
