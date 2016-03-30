@@ -767,6 +767,7 @@ if __name__ == '__main__':
     isa_ok(req.upload('upload').asset, Pyjo.Asset.Memory.object, 'right file')
     is_ok(req.upload('upload').asset.size, 69, 'right size')
     with tempfile.NamedTemporaryFile() as f:
+        f.close()
         isa_ok(req.upload('upload').move_to(f.name), Pyjo.Upload.object, 'moved file')
     is_ok(req.content.boundary, '----------0xKhTmLbOuNdArY', 'right boundary')
 

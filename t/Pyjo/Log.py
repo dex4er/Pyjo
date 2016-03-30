@@ -28,28 +28,28 @@ if __name__ == '__main__':
 
     with TemporaryDirectory() as tmpdir:
         path = os.path.join(tmpdir, 'test_path.log')
-        log = Pyjo.Log.new(level='error', path=path)
-        log.error('Just works')
-        log.fatal(u'I ♥ Mojolicious')
-        log.debug('Does not work')
-        log = None
-        content = u(slurp(path))
-        like_ok(content, r'\[.*\] \[error\] Just works', 'right error message')
-        like_ok(content, u'\\[.*\\] \\[fatal\\] I ♥ Mojolicious', 'right fatal message')
-        unlike_ok(content, r'\[.*\] \[debug\] Does not work', 'no debug message')
+        with Pyjo.Log.new(level='error', path=path) as log:
+            log.error('Just works')
+            log.fatal(u'I ♥ Mojolicious')
+            log.debug('Does not work')
+            log = None
+            content = u(slurp(path))
+            like_ok(content, r'\[.*\] \[error\] Just works', 'right error message')
+            like_ok(content, u'\\[.*\\] \\[fatal\\] I ♥ Mojolicious', 'right fatal message')
+            unlike_ok(content, r'\[.*\] \[debug\] Does not work', 'no debug message')
 
     with TemporaryDirectory() as tmpdir:
         # Logging to handle
         path = os.path.join(tmpdir, 'test_handle.log')
         handle = codecs.open(path, 'w', 'utf-8')
-        log = Pyjo.Log.new(handle=handle)
-        log.error('Just works')
-        log.fatal(u'I ♥ Mojolicious')
-        log.debug('Works too')
-        content = u(slurp(path))
-        like_ok(content, r'\[.*\] \[error\] Just works', 'right error message')
-        like_ok(content, u'\\[.*\\] \\[fatal\\] I ♥ Mojolicious', 'right fatal message')
-        like_ok(content, r'\[.*\] \[debug\] Works too', 'no debug message')
+        with Pyjo.Log.new(handle=handle) as log:
+            log.error('Just works')
+            log.fatal(u'I ♥ Mojolicious')
+            log.debug('Works too')
+            content = u(slurp(path))
+            like_ok(content, r'\[.*\] \[error\] Just works', 'right error message')
+            like_ok(content, u'\\[.*\\] \\[fatal\\] I ♥ Mojolicious', 'right fatal message')
+            like_ok(content, r'\[.*\] \[debug\] Works too', 'no debug message')
 
     # Formatting
     log = Pyjo.Log.new()
@@ -87,23 +87,23 @@ if __name__ == '__main__':
     # History
     with TemporaryDirectory() as tmpdir:
         path = os.path.join(tmpdir, 'test_history.log')
-        log = Pyjo.Log.new(max_history_size=2, level='info', path=path)
-        log.error('First')
-        log.fatal('Second')
-        log.debug('Third')
-        log.info('Fourth', 'Fifth')
-        history = log.history
-        content = u(slurp(path))
-        like_ok(content, r'\[.*\] \[error\] First\n', 'right error message')
-        like_ok(content, r'\[.*\] \[info\] Fourth\nFifth\n', 'right info message')
-        unlike_ok(content, r'debug', 'no debug message')
-        like_ok(str(history[0][0]), r'^[0-9.]+$', 'right epoch time')
-        is_ok(history[0][1], 'fatal', 'right level')
-        is_ok(history[0][2], 'Second', 'right message')
-        is_ok(history[1][1], 'info', 'right level')
-        is_ok(history[1][2], 'Fourth', 'right message')
-        is_ok(history[1][3], 'Fifth', 'right message')
-        throws_ok(lambda: history[2], IndexError, 'no more messages')
+        with Pyjo.Log.new(max_history_size=2, level='info', path=path) as log:
+            log.error('First')
+            log.fatal('Second')
+            log.debug('Third')
+            log.info('Fourth', 'Fifth')
+            history = log.history
+            content = u(slurp(path))
+            like_ok(content, r'\[.*\] \[error\] First\n', 'right error message')
+            like_ok(content, r'\[.*\] \[info\] Fourth\nFifth\n', 'right info message')
+            unlike_ok(content, r'debug', 'no debug message')
+            like_ok(str(history[0][0]), r'^[0-9.]+$', 'right epoch time')
+            is_ok(history[0][1], 'fatal', 'right level')
+            is_ok(history[0][2], 'Second', 'right message')
+            is_ok(history[1][1], 'info', 'right level')
+            is_ok(history[1][2], 'Fourth', 'right message')
+            is_ok(history[1][3], 'Fifth', 'right message')
+            throws_ok(lambda: history[2], IndexError, 'no more messages')
 
     # "debug"
     is_ok(log.set(level='debug').level, 'debug', 'right level')
