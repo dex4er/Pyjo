@@ -134,7 +134,7 @@ class Pyjo_IOLoop_Server(Pyjo.EventEmitter.object):
 
             server.close()
 
-        Close all server connections and server itself. Used by context manager.ś
+        Close all server connections and server itself. Used by context manager.
         """
         if self._reuse:
             reuse = getenv('PYJO_REUSE')
