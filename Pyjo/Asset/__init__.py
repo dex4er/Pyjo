@@ -104,7 +104,7 @@ class Pyjo_Asset(Pyjo.EventEmitter.object):
 
             asset.close()
 
-        Close asset immediately and free resources.
+        Close asset immediately and free resources. Used by context manager.
         """
         pass
 
