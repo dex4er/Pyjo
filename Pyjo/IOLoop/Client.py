@@ -295,7 +295,7 @@ class Pyjo_IOLoop_Client(Pyjo.EventEmitter.object):
         self.reactor.io(ready_cb, handle).watch(handle, False, True)
 
     def _port(self, **kwargs):
-        port = kwargs.get('port')
+        port = int(kwargs.get('port'))
         if not port:
             port = 80
         return port
