@@ -154,7 +154,7 @@ class Pyjo_Reactor_Select(Pyjo.Reactor.Base.object):
                 timeout = 0
 
             # I/O
-            if self._ios:
+            if self._ios and (self._inputs or self._outputs):
                 try:
                     readable, writable, exceptional = select.select(self._inputs, self._outputs, self._inputs, timeout)
                     for fd in list(set([item for sublist in (exceptional, readable, writable) for item in sublist])):
