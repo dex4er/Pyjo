@@ -79,6 +79,18 @@ class Pyjo_Asset_File(Pyjo.Asset.object):
 
         self._handle = kwargs.get('handle')
 
+    def __del__(self):
+        try:
+            self.close()
+        except:
+            pass
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
+
     def __repr__(self):
         """::
 
@@ -105,8 +117,10 @@ class Pyjo_Asset_File(Pyjo.Asset.object):
 
         Close asset immediately and free resources.
         """
-        if self.cleanup and self.path is not None and self.handle:
+        if self.handle:
             self.handle.close()
+
+        if self.cleanup and self.path is not None:
             if os.access(self.path, os.W_OK):
                 os.unlink(self.path)
             self.path = None
